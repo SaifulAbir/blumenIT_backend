@@ -1,8 +1,11 @@
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.db import models
 from django.contrib.auth.models import PermissionsMixin
+from django.core.validators import RegexValidator
+from django.utils.translation import gettext as _
 
 # Create your models here.
+from ecommerce.models import AbstractTimeStamp
 
 
 class UserManager(BaseUserManager):
@@ -70,3 +73,28 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name = 'User'
         verbose_name_plural = 'Users'
         db_table = 'users'
+
+
+phone_regex = RegexValidator(regex='^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$',message='Invalid phone number')
+class CustomerProfile(AbstractTimeStamp):
+    GENDER_CHOICES = (
+        ('M', 'Male'),
+        ('F', 'Female'),
+    )
+    user = models.OneToOneField(
+        User, verbose_name="User", on_delete=models.PROTECT, related_name="user_customer_profile")
+    phone = models.CharField(max_length=255, validators=[phone_regex],null=True, blank=True)
+    address = models.CharField(max_length=255, null=True, blank=True)
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, null=True, blank=True)
+    birth_date = models.DateField(_("Birthday"), null=True, blank=True)
+
+    def __str__(self):
+        return self.phone
+
+    def associated_user(self):
+        return self.user.get_full_name()
+
+    class Meta:
+        verbose_name = "Customer Profile"
+        verbose_name_plural = "Customer Profile"
+        db_table = 'customer_profiles'

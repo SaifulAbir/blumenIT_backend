@@ -1,10 +1,15 @@
+from django.conf import settings
 from rest_framework import viewsets, mixins, status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
+from datetime import datetime, timedelta
+from ecommerce.common.emails import send_email_without_delay
 from user import models as user_models
+import jwt
+from django.template.loader import render_to_string
 from user import serializers as user_serializers
 
 
@@ -26,10 +31,17 @@ class RegisterUser(mixins.CreateModelMixin,
                     email=request.data["email"])
 
                 token = RefreshToken.for_user(user)
+
+                exp = str(datetime.now() + timedelta(hours=1))
+                email_list = request.data["email"]
+                subject = "Verify Your Account"
+                token = jwt.encode({'email': email_list, 'expries': exp, 'scope': subject},
+                                   settings.JWT_SECRET, algorithm='HS256')
+                html_message = render_to_string('verification_email.html', {'token': token, 'domain': 'http://127.0.0.1:8000/'})
+                send_email_without_delay(subject, html_message, email_list)
+
                 data = {
                     "email": user.email,
-                    "access_token": str(token.access_token),
-                    "refresh_token": str(token),
                 }
                 return Response({"status": True, "data": data}, status=status.HTTP_200_OK)
             except (user_models.User.DoesNotExist):

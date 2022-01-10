@@ -49,6 +49,7 @@ class Product(AbstractTimeStamp):
     is_featured = models.BooleanField(null=False, blank=False, default=False)
     product_category = models.ForeignKey(ProductCategory, related_name='category', blank=True, null=True, on_delete=models.CASCADE)
     product_brand = models.ForeignKey(ProductBrand, related_name='brand', blank=True, null=True, on_delete=models.CASCADE)
+    created_by = models.CharField(max_length=255, null=True)
     # vendor                      = models.ForeignKey(Vendor, related_name='vendor', blank=True, null=True, on_delete=models.CASCADE)
 
     class Meta:
@@ -65,6 +66,17 @@ def pre_save_product(sender, instance, *args, **kwargs):
 
 pre_save.connect(pre_save_product, sender=Product)
 
+class Tags(AbstractTimeStamp):
+    name = models.CharField(max_length=255)
+    is_active = models.BooleanField(null=False, blank=False, default=False)
+
+    class Meta:
+        verbose_name = 'Tags'
+        verbose_name_plural = 'Tags'
+        db_table = 'tags'
+
+    def __str__(self):
+        return self.name
 
 
 class ProductTags(AbstractTimeStamp):
@@ -80,6 +92,19 @@ class ProductTags(AbstractTimeStamp):
     def __str__(self):
         return self.name
 
+class Colors(AbstractTimeStamp):
+    name = models.CharField(max_length=255)
+    code = models.CharField(max_length=255)
+    is_active = models.BooleanField(null=False, blank=False, default=False)
+
+    class Meta:
+        verbose_name = 'Colors'
+        verbose_name_plural = 'Colors'
+        db_table = 'colors'
+
+    def __str__(self):
+        return self.name
+
 class ProductColors(AbstractTimeStamp):
     product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name = 'product_color', blank=True, null=True)
     name = models.CharField(max_length=100, null=False, blank=False)
@@ -89,6 +114,18 @@ class ProductColors(AbstractTimeStamp):
         verbose_name = 'ProductColor'
         verbose_name_plural = 'ProductColors'
         db_table = 'productColors'
+
+    def __str__(self):
+        return self.name
+
+class Size(AbstractTimeStamp):
+    name = models.CharField(max_length=255)
+    is_active = models.BooleanField(null=False, blank=False, default=False)
+
+    class Meta:
+        verbose_name = 'Size'
+        verbose_name_plural = 'Size'
+        db_table = 'size'
 
     def __str__(self):
         return self.name

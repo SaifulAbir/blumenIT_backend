@@ -18,22 +18,25 @@ class ProductTagsSerializer(serializers.ModelSerializer):
         model = ProductTags
         fields = ('name')
 
-class TagsSerializer(serializers.ModelSerializer):
-
+class ProductColorsSerializer(serializers.ModelSerializer):
+    title = serializers.CharField(source="Colors.title")
     class Meta:
-        model = Tags
-        fields = ('id', 'name', 'status',)
+        model = ProductColors
+        fields = ('name')
 
-
-class ProductTagsSerializer(serializers.ModelSerializer):
-    title = serializers.CharField(source="tags.title")
+class ProductSizesSerializer(serializers.ModelSerializer):
+    title = serializers.CharField(source="Sizes.title")
     class Meta:
-        model = ProductTags
-        fields = ('tags','title',)
+        model = ProductSizes
+        fields = ('name')
 
 class ProductSerializer(serializers.ModelSerializer):
     tags = serializers.PrimaryKeyRelatedField(queryset=Tags.objects.all(), many=True, write_only=True)
     product_tags = ProductTagsSerializer(many=True, read_only=True)
+    colors = serializers.PrimaryKeyRelatedField(queryset=Colors.objects.all(), many=True, write_only=True)
+    product_colors = ProductColorsSerializer(many=True, read_only=True)
+    sizes = serializers.PrimaryKeyRelatedField(queryset=Sizes.objects.all(), many=True, write_only=True)
+    product_sizes = ProductSizesSerializer(many=True, read_only=True)
 
     class Meta:
         model = Product
@@ -53,31 +56,30 @@ class ProductSerializer(serializers.ModelSerializer):
             'product_category',
             'product_brand',
             'tags',
-            'product_tags'
-            # 'product_colors',
-            # 'product_sizes'
+            'product_tags',
+            'colors',
+            'product_colors',
+            'sizes',
+            'product_sizes'
         ]
 
     def create(self, validated_data):
         print("validated_data")
-        # return validated_data
         tags = validated_data.pop('tags')
-        # product_colors = validated_data.pop('product_colors')
-        # product_sizes = validated_data.pop('product_sizes')
-
+        colors = validated_data.pop('colors')
+        sizes = validated_data.pop('sizes')
         product_instance = Product.objects.create(**validated_data, created_by=self.context['request'].user.id,)
-
         if tags:
             for tag in tags:
                 ProductTags.objects.create(name=tag, product=product_instance)
 
-        # if product_colors:
-        #     for product_color in product_colors:
-        #         ProductColors.objects.create(name=product_color, product=product_instance)
+        if colors:
+            for color in colors:
+                ProductColors.objects.create(name=color, product=product_instance)
 
-        # if product_sizes:
-        #     for product_size in product_sizes:
-        #         ProductSize.objects.create(name=product_size, product=product_instance)
+        if sizes:
+            for size in sizes:
+                ProductSizes.objects.create(name=sizes, product=product_instance)
 
         return product_instance
 

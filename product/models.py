@@ -118,19 +118,19 @@ class ProductColors(AbstractTimeStamp):
     def __str__(self):
         return self.name
 
-class Size(AbstractTimeStamp):
+class Sizes(AbstractTimeStamp):
     name = models.CharField(max_length=255)
     is_active = models.BooleanField(null=False, blank=False, default=False)
 
     class Meta:
         verbose_name = 'Size'
-        verbose_name_plural = 'Size'
-        db_table = 'size'
+        verbose_name_plural = 'Sizes'
+        db_table = 'sizes'
 
     def __str__(self):
         return self.name
 
-class ProductSize(AbstractTimeStamp):
+class ProductSizes(AbstractTimeStamp):
     product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name = 'product_size', blank=True, null=True)
     name = models.CharField(max_length=100, null=False, blank=False)
     is_active = models.BooleanField(null=False, blank=False, default=True)

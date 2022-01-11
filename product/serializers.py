@@ -31,12 +31,13 @@ class ProductSizesSerializer(serializers.ModelSerializer):
         fields = ('name')
 
 class ProductSerializer(serializers.ModelSerializer):
-    tags = serializers.PrimaryKeyRelatedField(queryset=Tags.objects.all(), many=True, write_only=True)
     product_tags = ProductTagsSerializer(many=True, read_only=True)
-    colors = serializers.PrimaryKeyRelatedField(queryset=Colors.objects.all(), many=True, write_only=True)
     product_colors = ProductColorsSerializer(many=True, read_only=True)
-    sizes = serializers.PrimaryKeyRelatedField(queryset=Sizes.objects.all(), many=True, write_only=True)
     product_sizes = ProductSizesSerializer(many=True, read_only=True)
+
+    tags = serializers.PrimaryKeyRelatedField(queryset=Tags.objects.all(), many=True, write_only=True)
+    colors = serializers.PrimaryKeyRelatedField(queryset=Colors.objects.all(), many=True, write_only=True)
+    sizes = serializers.PrimaryKeyRelatedField(queryset=Sizes.objects.all(), many=True, write_only=True)
 
     class Meta:
         model = Product
@@ -82,5 +83,42 @@ class ProductSerializer(serializers.ModelSerializer):
                 ProductSizes.objects.create(name=sizes, product=product_instance)
 
         return product_instance
+
+class ProductUpdateSerializer(serializers.ModelSerializer):
+    # product_tags = ProductTagsSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Product
+        fields = [
+            'id',
+            'title',
+            'price',
+            'full_description',
+            'short_description',
+            'quantity',
+            'thumbnail',
+            'warranty',
+            'variation',
+            'rating',
+            'status',
+            'is_featured',
+            'product_category',
+            'product_brand',
+            # 'tags',
+            # 'product_tags'
+        ]
+
+    def update(self, instance, validated_data):
+        # try:
+        #     tags = validated_data.pop('tags')
+        # except KeyError:
+        #     tags = None
+        # if media:
+        #     for media_file in media:
+        #         file_type = media_file.content_type.split('/')[0]
+        #         Media.objects.create(goal=instance, type=file_type, file=media_file, status="COMPLETE",
+        #                              created_by=self.context['request'].user.id)
+        validated_data.update({"modified_by": self.context['request'].user.id, "modified_at": timezone.now()})
+        return super().update(instance, validated_data)
 
 

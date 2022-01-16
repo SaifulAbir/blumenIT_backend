@@ -69,6 +69,7 @@ pre_save.connect(pre_save_product, sender=Product)
 class Tags(AbstractTimeStamp):
     name = models.CharField(max_length=255)
     is_active = models.BooleanField(null=False, blank=False, default=False)
+    created_by = models.CharField(max_length=255, null=True)
 
     class Meta:
         verbose_name = 'Tags'

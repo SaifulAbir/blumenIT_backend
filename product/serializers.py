@@ -30,7 +30,7 @@ class ProductSizesSerializer(serializers.ModelSerializer):
         model = ProductSizes
         fields = ('name')
 
-class ProductSerializer(serializers.ModelSerializer):
+class ProductCreateSerializer(serializers.ModelSerializer):
     product_tags = ProductTagsSerializer(many=True, read_only=True)
     product_colors = ProductColorsSerializer(many=True, read_only=True)
     product_sizes = ProductSizesSerializer(many=True, read_only=True)
@@ -140,4 +140,8 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
         validated_data.update({"modified_by": self.context['request'].user.id, "modified_at": timezone.now()})
         return super().update(instance, validated_data)
 
-
+class TagCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tags
+        fields = ('id', 'name', 'is_active')
+        read_only_fields = ('id', 'is_active')

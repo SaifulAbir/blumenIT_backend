@@ -42,7 +42,7 @@ class TagCreateAPIView(CreateAPIView):
         else:
             tag_name = self.request.data['name'].upper()
             tags = Tags.objects.filter(name = tag_name)
-            print(tags)
+            # print(tags)
             if not tags.exists():
                 obj = Tags()
                 obj.name = tag_name

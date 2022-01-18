@@ -1,6 +1,6 @@
 from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateAPIView, RetrieveAPIView, DestroyAPIView 
 
-from product.serializers import ProductCreateSerializer, ProductUpdateSerializer, ProductListSerializer, TagCreateSerializer
+from product.serializers import ProductCreateSerializer, ProductUpdateSerializer, ProductListSerializer, TagCreateSerializer,ProductTagsSerializer
 
 from product.models import Product, Tags
 
@@ -59,3 +59,8 @@ class ProductListAPI(ListAPIView):
     queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
     serializer_class = ProductListSerializer
     # pagination_class = CustomPagination
+
+class TagsListAPI(ListAPIView):
+    permission_classes = (AllowAny,)
+    queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
+    serializer_class = ProductTagsSerializer

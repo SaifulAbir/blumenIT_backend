@@ -16,7 +16,7 @@ class ProductTagsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProductTags
-        fields = ('name')
+        fields = ['id', 'name', 'product']
 
 class ProductColorsSerializer(serializers.ModelSerializer):
     title = serializers.CharField(source="Colors.title")
@@ -103,13 +103,15 @@ class ProductCreateSerializer(serializers.ModelSerializer):
 
 
 class ProductUpdateSerializer(serializers.ModelSerializer):
-    product_tags = ProductTagsSerializer(many=True, read_only=True)
-    product_colors = ProductColorsSerializer(many=True, read_only=True)
-    product_sizes = ProductSizesSerializer(many=True, read_only=True)
-
     tags = serializers.PrimaryKeyRelatedField(queryset=Tags.objects.all(), many=True, write_only=True)
     colors = serializers.PrimaryKeyRelatedField(queryset=Colors.objects.all(), many=True, write_only=True)
     sizes = serializers.PrimaryKeyRelatedField(queryset=Sizes.objects.all(), many=True, write_only=True)
+    media = serializers.ListField(child=serializers.FileField(), write_only=True)
+
+    product_tags = ProductTagsSerializer(many=True, read_only=True)
+    product_colors = ProductColorsSerializer(many=True, read_only=True)
+    product_sizes = ProductSizesSerializer(many=True, read_only=True)
+    product_media = ProductMediaSerializer(many=True, read_only=True)
 
     class Meta:
         model = Product
@@ -165,7 +167,7 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 class ProductListSerializer(serializers.ModelSerializer):
-
+    product_media = ProductMediaSerializer(many=True, read_only=True)
     class Meta:
         model = Product
         fields = [
@@ -182,6 +184,7 @@ class ProductListSerializer(serializers.ModelSerializer):
                 'product_category',
                 'product_brand',
                 'thumbnail',
+                'product_media'
                 ]
 
 class TagCreateSerializer(serializers.ModelSerializer):

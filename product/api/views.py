@@ -1,14 +1,15 @@
 from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateAPIView, RetrieveAPIView, DestroyAPIView 
 
-from product.serializers import ProductCreateSerializer, ProductUpdateSerializer, TagCreateSerializer
-# from product.serializers import ProductSerializer, ProductCategoriesSerializer, ProductBrandsSerializer, ProductTagsSerializer
+from product.serializers import ProductCreateSerializer, ProductUpdateSerializer, ProductListSerializer, TagCreateSerializer
 
 from product.models import Product, Tags
 
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import AllowAny
 
+# ProductListAPI
 class ProductCreateAPIView(CreateAPIView):
     serializer_class = ProductCreateSerializer
 
@@ -52,3 +53,9 @@ class TagCreateAPIView(CreateAPIView):
                 return Response({"id":self.request.user.id,"name":tag_name}, status=status.HTTP_200_OK)
             else:
                 raise ValidationError({"name": str(tag_name)+' Tag name already exist.'})
+
+class ProductListAPI(ListAPIView):
+    permission_classes = (AllowAny,)
+    queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
+    serializer_class = ProductListSerializer
+    # pagination_class = CustomPagination

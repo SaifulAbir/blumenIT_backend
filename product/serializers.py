@@ -2,6 +2,8 @@ from django.utils import timezone
 from rest_framework import serializers
 from .models import *
 
+
+# general Serializer start
 class ProductCategoriesSerializer(serializers.ModelSerializer):
     class Meta:
         model =  ProductCategory
@@ -22,19 +24,22 @@ class ProductColorsSerializer(serializers.ModelSerializer):
     title = serializers.CharField(source="Colors.title")
     class Meta:
         model = ProductColors
-        fields = ('name')
+        fields = ['name']
 
 class ProductSizesSerializer(serializers.ModelSerializer):
     title = serializers.CharField(source="Sizes.title")
     class Meta:
         model = ProductSizes
-        fields = ('name')
+        fields = ['name']
 
 class ProductMediaSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductMedia
         fields = ['id', 'type', 'file', 'status']
+# general Serializer end
 
+
+# create Serializer start
 class ProductCreateSerializer(serializers.ModelSerializer):
 
     tags = serializers.PrimaryKeyRelatedField(queryset=Tags.objects.all(), many=True, write_only=True)
@@ -101,7 +106,38 @@ class ProductCreateSerializer(serializers.ModelSerializer):
 
         return product_instance
 
+class TagCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tags
+        fields = ('id', 'name', 'is_active')
+        read_only_fields = ('id', 'is_active')
+# create Serializer end
 
+
+# list Serializer start
+class ProductListSerializer(serializers.ModelSerializer):
+    product_media = ProductMediaSerializer(many=True, read_only=True)
+    class Meta:
+        model = Product
+        fields = [
+                'id',
+                'title',
+                'slug',
+                'price',
+                'old_price',
+                'short_description',
+                'quantity',
+                'rating',
+                'status',
+                'is_featured',
+                'product_category',
+                'product_brand',
+                'thumbnail',
+                'product_media'
+                ]
+# list Serializer end
+
+# update Serializer start
 class ProductUpdateSerializer(serializers.ModelSerializer):
     tags = serializers.PrimaryKeyRelatedField(queryset=Tags.objects.all(), many=True, write_only=True)
     colors = serializers.PrimaryKeyRelatedField(queryset=Colors.objects.all(), many=True, write_only=True)
@@ -165,30 +201,5 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
 
         validated_data.update({"modified_by": self.context['request'].user.id, "modified_at": timezone.now()})
         return super().update(instance, validated_data)
+# update Serializer end
 
-class ProductListSerializer(serializers.ModelSerializer):
-    product_media = ProductMediaSerializer(many=True, read_only=True)
-    class Meta:
-        model = Product
-        fields = [
-                'id',
-                'title',
-                'slug',
-                'price',
-                'old_price',
-                'short_description',
-                'quantity',
-                'rating',
-                'status',
-                'is_featured',
-                'product_category',
-                'product_brand',
-                'thumbnail',
-                'product_media'
-                ]
-
-class TagCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tags
-        fields = ('id', 'name', 'is_active')
-        read_only_fields = ('id', 'is_active')

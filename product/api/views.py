@@ -2,32 +2,22 @@ from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateAP
 
 from product.serializers import ProductCreateSerializer, ProductUpdateSerializer, ProductListSerializer, TagCreateSerializer,ProductTagsSerializer
 
-from product.models import Product, Tags
+from product.models import Product, Tags, ProductTags
 
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 
-# ProductListAPI
+from product.pagination import ProductCustomPagination
+
+
+# create API views start
 class ProductCreateAPIView(CreateAPIView):
     serializer_class = ProductCreateSerializer
 
     def post(self, request, *args, **kwargs):
         return super(ProductCreateAPIView, self).post(request, *args, **kwargs)
-
-class ProductUpdateAPIView(RetrieveUpdateAPIView):
-    serializer_class = ProductUpdateSerializer
-    lookup_field = 'slug'
-    lookup_url_kwarg = "slug"
-
-    def get_queryset(self):
-        slug = self.kwargs['slug']
-        query = Product.objects.filter(slug=slug)
-        return query
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
 
 class TagCreateAPIView(CreateAPIView):
     serializer_class = TagCreateSerializer
@@ -53,14 +43,33 @@ class TagCreateAPIView(CreateAPIView):
                 return Response({"id":self.request.user.id,"name":tag_name}, status=status.HTTP_200_OK)
             else:
                 raise ValidationError({"name": str(tag_name)+' Tag name already exist.'})
+# create API views end
 
+# list API views start
 class ProductListAPI(ListAPIView):
     permission_classes = (AllowAny,)
     queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
     serializer_class = ProductListSerializer
-    # pagination_class = CustomPagination
+    pagination_class = ProductCustomPagination
 
-class TagsListAPI(ListAPIView):
+class ProductTagsListAPI(ListAPIView):
     permission_classes = (AllowAny,)
-    queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
+    queryset = ProductTags.objects.filter(is_active=True).order_by('-created_at')
     serializer_class = ProductTagsSerializer
+# list API views end
+
+
+# update API views start
+class ProductUpdateAPIView(RetrieveUpdateAPIView):
+    serializer_class = ProductUpdateSerializer
+    lookup_field = 'slug'
+    lookup_url_kwarg = "slug"
+
+    def get_queryset(self):
+        slug = self.kwargs['slug']
+        query = Product.objects.filter(slug=slug)
+        return query
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+# update API views end

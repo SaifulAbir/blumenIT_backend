@@ -36,6 +36,44 @@ class ProductMediaSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductMedia
         fields = ['id', 'type', 'file', 'status']
+
+class ProductDetailsSerializer(serializers.ModelSerializer):
+    tags = serializers.PrimaryKeyRelatedField(queryset=Tags.objects.all(), many=True, write_only=True)
+    colors = serializers.PrimaryKeyRelatedField(queryset=Colors.objects.all(), many=True, write_only=True)
+    sizes = serializers.PrimaryKeyRelatedField(queryset=Sizes.objects.all(), many=True, write_only=True)
+    media = serializers.ListField(child=serializers.FileField(), write_only=True)
+
+    product_tags = ProductTagsSerializer(many=True, read_only=True)
+    product_colors = ProductColorsSerializer(many=True, read_only=True)
+    product_sizes = ProductSizesSerializer(many=True, read_only=True)
+    product_media = ProductMediaSerializer(many=True, read_only=True)
+    class Meta:
+        model = Product
+        fields = [
+            'id',
+            'title',
+            'price',
+            'full_description',
+            'short_description',
+            'quantity',
+            'warranty',
+            'variation',
+            'rating',
+            'status',
+            'is_featured',
+            'product_category',
+            'product_brand',
+            'thumbnail',
+            'cover',
+            'tags',
+            'product_tags',
+            'colors',
+            'product_colors',
+            'sizes',
+            'product_sizes',
+            'media',
+            'product_media'
+        ]
 # general Serializer end
 
 
@@ -135,6 +173,26 @@ class ProductListSerializer(serializers.ModelSerializer):
                 'thumbnail',
                 'product_media'
                 ]
+
+class TagListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tags
+        fields = ['id', 'name']
+
+class ProductCategoryListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductCategory
+        fields = ['id', 'name']
+
+class ProductSubCategoryListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductSubCategory
+        fields = ['id', 'name', 'category']
+
+class ProductBrandListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductBrand
+        fields = ['id', 'name']
 # list Serializer end
 
 # update Serializer start

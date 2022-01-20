@@ -28,6 +28,19 @@ class ProductCategory(AbstractTimeStamp):
     def __str__(self):
         return self.name
 
+class ProductSubCategory(AbstractTimeStamp):
+    category = models.ForeignKey(ProductCategory, on_delete=models.PROTECT, related_name='product_category')
+    name = models.CharField(max_length=100, null=False, blank=False)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'ProductSubCategory'
+        verbose_name_plural = 'ProductSubCategories'
+        db_table = 'productSubCategory'
+
+    def __str__(self):
+        return self.name
+
 class Product(AbstractTimeStamp):
     PRODUCT_STATUSES = [
         ('PENDING', 'Pending'),

@@ -28,6 +28,19 @@ class ProductCategory(AbstractTimeStamp):
     def __str__(self):
         return self.name
 
+class ProductSubCategory(AbstractTimeStamp):
+    category = models.ForeignKey(ProductCategory, on_delete=models.PROTECT, related_name='product_category')
+    name = models.CharField(max_length=100, null=False, blank=False)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'ProductSubCategory'
+        verbose_name_plural = 'ProductSubCategories'
+        db_table = 'productSubCategory'
+
+    def __str__(self):
+        return self.name
+
 class Product(AbstractTimeStamp):
     PRODUCT_STATUSES = [
         ('PENDING', 'Pending'),
@@ -41,7 +54,6 @@ class Product(AbstractTimeStamp):
     short_description = models.CharField(max_length=800)
     quantity = models.BigIntegerField(null=True, blank=True, default=0)
     quantity_left = models.BigIntegerField(null=True, blank=True, default=0, help_text="Automatic quantity decreased after order placed. Leave it empty for unlimited/manual quantity of the product.")
-    thumbnail = models.ImageField(upload_to='images/product_thumbnail_images', blank=True)
     warranty  = models.CharField(max_length=255, blank=True, help_text="eg: 1 year or 6 months")
     variation = models.CharField(max_length=255, blank=True)
     rating = models.CharField(max_length=255, blank=True)
@@ -50,6 +62,8 @@ class Product(AbstractTimeStamp):
     product_category = models.ForeignKey(ProductCategory, related_name='category', blank=True, null=True, on_delete=models.CASCADE)
     product_brand = models.ForeignKey(ProductBrand, related_name='brand', blank=True, null=True, on_delete=models.CASCADE)
     created_by = models.CharField(max_length=255, null=True)
+    thumbnail = models.FileField(upload_to='products', blank=True, null=True)
+    cover = models.FileField(upload_to='products', blank=True, null=True)
     # vendor                      = models.ForeignKey(Vendor, related_name='vendor', blank=True, null=True, on_delete=models.CASCADE)
 
     class Meta:
@@ -66,9 +80,37 @@ def pre_save_product(sender, instance, *args, **kwargs):
 
 pre_save.connect(pre_save_product, sender=Product)
 
+class ProductMedia(AbstractTimeStamp):
+    CHOICES = [
+        ('IN_QUEUE', 'In_Queue'),
+        ('IN_PROCESSING', 'In_Processing'),
+        ('COMPLETE', 'Complete'),]
+
+    MEDIA_TYPES = [
+        ('image', 'Image'),
+        ('video', 'Video'),
+    ]
+
+    VIDEO_TYPES = [
+        ('UPDATE', 'Update'),
+        ('THANK_YOU', 'Thank you'),
+    ]
+
+    product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='product_media')
+    type = models.CharField(max_length=10, choices=MEDIA_TYPES)
+    file = models.FileField(upload_to='products')
+    status = models.CharField(max_length=20, choices=CHOICES)
+    video_type = models.CharField(max_length=50, null=True, blank=True, choices=VIDEO_TYPES)
+
+    class Meta:
+        verbose_name = 'ProductMedia'
+        verbose_name_plural = 'ProductMedia'
+        db_table = 'productMedia'
+
 class Tags(AbstractTimeStamp):
     name = models.CharField(max_length=255)
     is_active = models.BooleanField(null=False, blank=False, default=False)
+    created_by = models.CharField(max_length=255, null=True)
 
     class Meta:
         verbose_name = 'Tags'

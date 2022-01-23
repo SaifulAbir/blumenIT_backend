@@ -230,7 +230,9 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
             'colors',
             'product_colors',
             'sizes',
-            'product_sizes'
+            'product_sizes',
+            'media',
+            'product_media'
         ]
 
     def update(self, instance, validated_data):

@@ -14,6 +14,6 @@ urlpatterns = [
     path('product-brand-list/', ProductBrandListAPI.as_view()),
 
     path('update-product/<str:slug>/', ProductUpdateAPIView.as_view()),
-
+    path('product-search/', ProductSearchAPIView.as_view()),
 
 ]

@@ -1,6 +1,11 @@
+from django.db.models.functions import Concat, text, Coalesce
+from django.db.models import Q, Count, Value, F, CharField, Prefetch, Subquery, Max, Min, ExpressionWrapper, \
+    IntegerField, Sum, DecimalField
+from ecommerce.settings import MEDIA_URL
 from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateAPIView, RetrieveAPIView, DestroyAPIView
+from rest_framework.views import APIView
 
-from product.serializers import ProductCreateSerializer, ProductUpdateSerializer, ProductListSerializer, TagCreateSerializer,ProductTagsSerializer,  TagListSerializer, ProductCategoryListSerializer, ProductBrandListSerializer, ProductSubCategoryListSerializer, ProductDetailsSerializer
+from product.serializers import ProductCreateSerializer, ProductUpdateSerializer, ProductListSerializer, TagCreateSerializer,ProductTagsSerializer,  TagListSerializer, ProductCategoryListSerializer, ProductBrandListSerializer, ProductSubCategoryListSerializer, ProductDetailsSerializer, ProductSearchSerializer
 
 from product.models import Product, Tags, ProductTags, ProductCategory, ProductSubCategory, ProductBrand
 
@@ -10,6 +15,7 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny
 
 from product.pagination import ProductCustomPagination
+
 
 
 # create API views start
@@ -95,6 +101,18 @@ class ProductDetailsAPI(ListAPIView):
         query = Product.objects.filter(slug=slug)
         return query
 
+class ProductSearchAPIView(APIView):
+    permission_classes = (AllowAny,)
+    def get(self, request):
+        query = request.GET.get('query')
+        if query:
+            # products = Product.objects.filter(title__icontains=query).annotate(img=Concat(Value(MEDIA_URL), 'thumbnail', output_field=CharField())).values("title", "img", uid=F("slug")).annotate(type = Value("PRODUCT"))
+            products = Product.objects.filter(Q(title__icontains=query) | Q(price__icontains = query) | Q(product_category__name__icontains = query) | Q(product_brand__name__icontains = query) | Q(vendor__organization_name__icontains = query)).annotate(img=Concat(Value(MEDIA_URL), 'thumbnail', output_field=CharField()))
+            search_result = list(products)
+        else:
+            search_result = []
+        serializer = ProductSearchSerializer(search_result, many=True)
+        return Response({"search_result": serializer.data})
 # list API views end
 
 

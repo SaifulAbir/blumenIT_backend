@@ -136,7 +136,7 @@ class ProductCreateSerializer(serializers.ModelSerializer):
 
         if sizes:
             for size in sizes:
-                ProductSizes.objects.create(name=sizes, product=product_instance)
+                ProductSizes.objects.create(name=size, product=product_instance)
         if media:
             for media_file in media:
                 file_type = media_file.content_type.split('/')[0]
@@ -193,6 +193,12 @@ class ProductBrandListSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductBrand
         fields = ['id', 'name']
+
+class ProductSearchSerializer(serializers.Serializer):
+    slug = serializers.CharField()
+    title = serializers.CharField()
+    price = serializers.CharField()
+    img = serializers.CharField(required=False)
 # list Serializer end
 
 # update Serializer start

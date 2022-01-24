@@ -1,5 +1,6 @@
 from django.db import models
 from ecommerce.models import AbstractTimeStamp
+from vendor.models import Vendor
 from .utils import unique_slug_generator
 from django.db.models.signals import pre_save
 
@@ -16,6 +17,10 @@ class ProductBrand(AbstractTimeStamp):
     def __str__(self):
         return self.name
 
+def pre_save_product_brand(sender, instance, *args, **kwargs):
+        instance.name = instance.name.upper()
+pre_save.connect(pre_save_product_brand, sender=ProductBrand)
+
 class ProductCategory(AbstractTimeStamp):
     name = models.CharField(max_length=100, null=False, blank=False)
     is_active = models.BooleanField(null=False, blank=False, default=True)
@@ -27,6 +32,10 @@ class ProductCategory(AbstractTimeStamp):
 
     def __str__(self):
         return self.name
+
+def pre_save_product_category(sender, instance, *args, **kwargs):
+        instance.name = instance.name.upper()
+pre_save.connect(pre_save_product_category, sender=ProductCategory)
 
 class ProductSubCategory(AbstractTimeStamp):
     category = models.ForeignKey(ProductCategory, on_delete=models.PROTECT, related_name='product_category')
@@ -40,6 +49,10 @@ class ProductSubCategory(AbstractTimeStamp):
 
     def __str__(self):
         return self.name
+
+def pre_save_product_sub_category(sender, instance, *args, **kwargs):
+        instance.name = instance.name.upper()
+pre_save.connect(pre_save_product_sub_category, sender=ProductSubCategory)
 
 class Product(AbstractTimeStamp):
     PRODUCT_STATUSES = [
@@ -64,7 +77,7 @@ class Product(AbstractTimeStamp):
     created_by = models.CharField(max_length=255, null=True)
     thumbnail = models.FileField(upload_to='products', blank=True, null=True)
     cover = models.FileField(upload_to='products', blank=True, null=True)
-    # vendor                      = models.ForeignKey(Vendor, related_name='vendor', blank=True, null=True, on_delete=models.CASCADE)
+    vendor = models.ForeignKey(Vendor, related_name='vendor', blank=True, null=True, on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'Product'
@@ -120,6 +133,9 @@ class Tags(AbstractTimeStamp):
     def __str__(self):
         return self.name
 
+def pre_save_tags(sender, instance, *args, **kwargs):
+        instance.name = instance.name.upper()
+pre_save.connect(pre_save_tags, sender=Tags)
 
 class ProductTags(AbstractTimeStamp):
     product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name = 'product_tag', blank=True, null=True)
@@ -147,6 +163,10 @@ class Colors(AbstractTimeStamp):
     def __str__(self):
         return self.name
 
+def pre_save_colors(sender, instance, *args, **kwargs):
+        instance.name = instance.name.upper()
+pre_save.connect(pre_save_colors, sender=Colors)
+
 class ProductColors(AbstractTimeStamp):
     product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name = 'product_color', blank=True, null=True)
     name = models.CharField(max_length=100, null=False, blank=False)
@@ -171,6 +191,10 @@ class Sizes(AbstractTimeStamp):
 
     def __str__(self):
         return self.name
+
+def pre_save_sizes(sender, instance, *args, **kwargs):
+        instance.name = instance.name.upper()
+pre_save.connect(pre_save_sizes, sender=Sizes)
 
 class ProductSizes(AbstractTimeStamp):
     product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name = 'product_size', blank=True, null=True)

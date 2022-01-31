@@ -107,6 +107,7 @@ class OrderItem(AbstractTimeStamp):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
     ordered = models.BooleanField(default=False)
+    user = models.ForeignKey(User, on_delete=models.PROTECT,related_name='order_items_user', blank=True, null=True)
 
     class Meta:
         verbose_name = 'OrderItem'
@@ -148,40 +149,3 @@ class Refund(AbstractTimeStamp):
 
     def __str__(self):
         return f"{self.pk}"
-
-# class Cart(AbstractTimeStamp):
-#     user = models.ForeignKey(User, on_delete=models.PROTECT, blank=False, null=False, related_name="cart_user",verbose_name=_('Cart User'))
-#     slug  = models.SlugField(null=False, blank=False, allow_unicode=True)
-
-#     class Meta:
-#         verbose_name = 'Cart'
-#         verbose_name_plural = 'Carts'
-#         db_table = 'carts'
-
-#     def __str__(self):
-#         return self.id
-
-# def pre_save_product(sender, instance, *args, **kwargs):
-#     if not instance.slug:
-#         instance.slug = unique_slug_generator(instance)
-
-# pre_save.connect(pre_save_product, sender=Product)
-
-# class CartItem(AbstractTimeStamp):
-#     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-#     quantity = models.IntegerField(default=1)
-#     price_ht = models.FloatField(blank=True)
-#     cart = models.ForeignKey('Cart', on_delete=models.CASCADE)
-
-    # TAX_AMOUNT = 19.25
-
-    # def price_ttc(self):
-    #     return self.price_ht * (1 + TAX_AMOUNT/100.0)
-
-    # class Meta:
-    #     verbose_name = 'Cart Item'
-    #     verbose_name_plural = 'Cart Items'
-    #     db_table = 'cart_items'
-
-    # def __str__(self):
-    #     return  self.client + " - " + self.product

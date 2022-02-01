@@ -109,6 +109,10 @@ class OrderItem(AbstractTimeStamp):
     ordered = models.BooleanField(default=False)
     user = models.ForeignKey(User, on_delete=models.PROTECT,related_name='order_items_user', blank=True, null=True)
 
+    @property
+    def subtotal(self):
+        total_item_price = self.quantity * self.product.price
+        return total_item_price
     class Meta:
         verbose_name = 'OrderItem'
         verbose_name_plural = 'OrderItems'

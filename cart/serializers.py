@@ -18,12 +18,14 @@ class ProductSerializer(serializers.ModelSerializer):
 # list Serializer start
 class CartListSerializer(serializers.ModelSerializer):
     product = serializers.SerializerMethodField()
+    subtotal = serializers.ReadOnlyField()
     class Meta:
         model = OrderItem
         fields = [
                 'id',
                 'quantity',
-                'product'
+                'product',
+                'subtotal'
                 ]
 
     def get_product(self, obj):

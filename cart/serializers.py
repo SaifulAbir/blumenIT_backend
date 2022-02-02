@@ -8,6 +8,12 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = ['id','thumbnail','title','price']
 
+class CheckoutSerializer(serializers.Serializer):
+    # addr = serializers.PrimaryKeyRelatedField(queryset=BillingAddress.objects.all(), many=False)
+    class Meta:
+        model = BillingAddress
+        fields = "__all__"
+
 # general Serializer end
 
 # create Serializer start

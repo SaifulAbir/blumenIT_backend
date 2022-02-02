@@ -23,11 +23,15 @@ class BillingAddress(AbstractTimeStamp):
         ('B', 'Billing'),
         ('S', 'Shipping'),
     )
-    street_address = models.CharField(max_length=100)
-    apartment_address = models.CharField(max_length=100)
-    # country = CountryField(multiple=False)
-    country = models.CharField(max_length=100)
-    zip_code = models.CharField(max_length=100)
+    first_name = models.CharField(max_length=100, null=False, blank=False, default='')
+    last_name = models.CharField(max_length=100, null=False, blank=False, default='')
+    country = models.CharField(max_length=100, blank=True, null=True, default='')
+    company_name = models.CharField(max_length=100, null=False, blank=False, default='')
+    street_address = models.CharField(max_length=100, blank=True, null=True, default='')
+    city = models.CharField(max_length=100, blank=True, null=True, default='')
+    zip_code = models.CharField(max_length=100, blank=True, null=True, default='')
+    phone = models.CharField(max_length=255, null=True, blank=True, default='')
+    email = models.CharField(max_length=255, null=True, blank=True, default='')
     address_type = models.CharField(max_length=1, choices=ADDRESS_CHOICES)
     default = models.BooleanField(default=False)
 

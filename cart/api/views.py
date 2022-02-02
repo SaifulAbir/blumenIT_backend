@@ -1,7 +1,7 @@
 
 from rest_framework.generics import ListAPIView, CreateAPIView
 from rest_framework.views import APIView
-from cart.serializers import CartListSerializer
+from cart.serializers import CartListSerializer, CheckoutSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
@@ -10,6 +10,8 @@ from user.models import User
 from product.models import Product
 from cart.models import Order, OrderItem
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
+from drf_yasg.utils import swagger_auto_schema
 
 
 
@@ -101,5 +103,55 @@ class CartList(ListAPIView):
         uid = self.kwargs['uid']
         user = User.objects.get(id = uid)
         query = OrderItem.objects.filter(user=user,ordered=False)
-        # print(query)
         return query
+
+class CheckoutAPIView(APIView):
+    @swagger_auto_schema(request_body=CheckoutSerializer)
+    def post(self, request):
+        check_out_serializer = CheckoutSerializer(data=request.data)
+        print(check_out_serializer)
+        try:
+            # data = {"status": "Try"}
+            # return Response(data)
+            order = Order.objects.get(user=self.request.user, ordered=False)
+            
+            if check_out_serializer.is_valid():
+                # print(check_out_serializer)
+                first_name = request.POST.get("first_name")
+                # first_name = form.cleaned_data.get('street_address')
+                print(first_name)
+                data = {"status": "If"}
+                return Response(data)
+                # street_address = form.cleaned_data.get('street_address')
+                # apartment_address = form.cleaned_data.get('apartment_address')
+                # country = form.cleaned_data.get('country')
+                # zip = form.cleaned_data.get('zip')
+                # payment_option = form.cleaned_data.get('payment_option')
+                # billing_address = BillingAddress(
+                #     user=self.request.user,
+                #     street_address=street_address,
+                #     apartment_address=apartment_address,
+                #     country=country,
+                #     zip=zip,
+                #     address_type='B'
+                # )
+                # billing_address.save()
+                # order.billing_address = billing_address
+                # order.save()
+
+                # if payment_option == 'S':
+                #     return redirect('core:payment', payment_option='stripe')
+                # elif payment_option == 'P':
+                #     return redirect('core:payment', payment_option='paypal')
+                # else:
+                #     messages.warning(
+                #         self.request, "Invalid payment option select")
+                #     return redirect('core:checkout')
+            else:
+                data = {"status": "else"}
+                return Response(data)
+        except ObjectDoesNotExist:
+            data = {"status": "except"}
+            return Response(data)
+            # messages.error(self.request, "You do not have an active order")
+            # return redirect("core:order-summary")

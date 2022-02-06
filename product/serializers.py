@@ -21,13 +21,13 @@ class ProductTagsSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'product']
 
 class ProductColorsSerializer(serializers.ModelSerializer):
-    title = serializers.CharField(source="Colors.title")
+    # title = serializers.CharField(source="Colors.title")
     class Meta:
         model = ProductColors
         fields = ['name']
 
 class ProductSizesSerializer(serializers.ModelSerializer):
-    title = serializers.CharField(source="Sizes.title")
+    # title = serializers.CharField(source="Sizes.title")
     class Meta:
         model = ProductSizes
         fields = ['name']

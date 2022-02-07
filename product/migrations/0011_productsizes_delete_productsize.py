@@ -11,6 +11,9 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.DeleteModel(
+            name='ProductSize',
+        ),
         migrations.CreateModel(
             name='ProductSizes',
             fields=[
@@ -26,8 +29,5 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'ProductSizes',
                 'db_table': 'productSizes',
             },
-        ),
-        migrations.DeleteModel(
-            name='ProductSize',
         ),
     ]

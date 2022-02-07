@@ -8,7 +8,7 @@ from rest_framework.permissions import AllowAny
 from django.shortcuts import get_object_or_404
 from user.models import User
 from product.models import Product
-from cart.models import Order, OrderItem
+from cart.models import Order, OrderItem, BillingAddress
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 from drf_yasg.utils import swagger_auto_schema
@@ -109,35 +109,57 @@ class CheckoutAPIView(APIView):
     @swagger_auto_schema(request_body=CheckoutSerializer)
     def post(self, request):
         check_out_serializer = CheckoutSerializer(data=request.data)
-        print(check_out_serializer)
         try:
-            # data = {"status": "Try"}
-            # return Response(data)
             order = Order.objects.get(user=self.request.user, ordered=False)
-            
             if check_out_serializer.is_valid():
-                # print(check_out_serializer)
                 first_name = request.POST.get("first_name")
-                # first_name = form.cleaned_data.get('street_address')
-                print(first_name)
-                data = {"status": "If"}
-                return Response(data)
-                # street_address = form.cleaned_data.get('street_address')
-                # apartment_address = form.cleaned_data.get('apartment_address')
-                # country = form.cleaned_data.get('country')
-                # zip = form.cleaned_data.get('zip')
-                # payment_option = form.cleaned_data.get('payment_option')
-                # billing_address = BillingAddress(
-                #     user=self.request.user,
-                #     street_address=street_address,
-                #     apartment_address=apartment_address,
-                #     country=country,
-                #     zip=zip,
-                #     address_type='B'
-                # )
-                # billing_address.save()
-                # order.billing_address = billing_address
-                # order.save()
+                last_name = request.POST.get("last_name")
+                country = request.POST.get("country")
+                street_address = request.POST.get("street_address")
+                city = request.POST.get("city")
+                zip_code = request.POST.get("zip_code")
+                phone = request.POST.get("phone")
+                email = request.POST.get("email")
+                address_type = request.POST.get("address_type")
+                default = request.POST.get("default")
+                notes = request.POST.get("notes")
+
+                if address_type == 'Billing':
+                    billing_address = BillingAddress(
+                        first_name=first_name,
+                        last_name=last_name,
+                        country=country,
+                        street_address=street_address,
+                        city=city,
+                        zip_code=zip_code,
+                        phone=phone,
+                        email=email,
+                        address_type='B',
+                        default=default
+                    )
+                    billing_address.save()
+                    order.billing_address = billing_address
+                    if notes:
+                        order.notes = notes
+                    # order.save()
+                if address_type == 'Shipping':
+                    shipping_address = BillingAddress(
+                        first_name=first_name,
+                        last_name=last_name,
+                        country=country,
+                        street_address=street_address,
+                        city=city,
+                        zip_code=zip_code,
+                        phone=phone,
+                        email=email,
+                        address_type='S',
+                        default=default
+                    )
+                    shipping_address.save()
+                    order.shipping_address = shipping_address
+                    if notes:
+                        order.notes = notes
+                    # order.save()
 
                 # if payment_option == 'S':
                 #     return redirect('core:payment', payment_option='stripe')
@@ -147,11 +169,8 @@ class CheckoutAPIView(APIView):
                 #     messages.warning(
                 #         self.request, "Invalid payment option select")
                 #     return redirect('core:checkout')
+                return Response({"status":"Data updated!"})
             else:
-                data = {"status": "else"}
-                return Response(data)
+                return Response({"status": "Something went wrong!"})
         except ObjectDoesNotExist:
-            data = {"status": "except"}
-            return Response(data)
-            # messages.error(self.request, "You do not have an active order")
-            # return redirect("core:order-summary")
+            return Response({"status": "You do not have an active order"})

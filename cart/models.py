@@ -1,6 +1,6 @@
 from django.db import models
 from ecommerce.models import AbstractTimeStamp
-from .utils import unique_slug_generator_cart
+from .utils import unique_slug_generator_cart, unique_slug_generator_payment_type
 from django.db.models.signals import pre_save
 from user.models import User
 from django.utils.translation import gettext as _
@@ -43,6 +43,24 @@ class BillingAddress(AbstractTimeStamp):
     def __str__(self):
         return f"{self.pk}"
 
+class PaymentType(AbstractTimeStamp):
+    type_name = models.CharField(max_length=50)
+    slug  = models.SlugField(null=False, blank=False, allow_unicode=True)
+
+    class Meta:
+        verbose_name = 'PaymentType'
+        verbose_name_plural = 'PaymentTypes'
+        db_table = 'payment_types'
+
+    def __str__(self):
+        return f"{self.pk}"
+
+def pre_save_payment_types(sender, instance, *args, **kwargs):
+    if not instance.slug:
+        instance.slug = unique_slug_generator_payment_type(instance)
+
+pre_save.connect(pre_save_payment_types, sender=PaymentType)
+
 class Payment(AbstractTimeStamp):
     charge_id = models.CharField(max_length=50)
     amount = models.FloatField()
@@ -83,6 +101,7 @@ class Order(AbstractTimeStamp):
     billing_address = models.ForeignKey(BillingAddress, related_name='billing_address', on_delete=models.SET_NULL, blank=True, null=True)
     payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, blank=True, null=True)
     coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, blank=True, null=True)
+    notes = models.TextField(null=True, blank=True, default='')
 
     class Meta:
         verbose_name = 'Order'

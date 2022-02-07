@@ -1,3 +1,4 @@
+from time import time
 from django.conf import settings
 from rest_framework import viewsets, mixins, status
 from rest_framework.permissions import AllowAny
@@ -11,6 +12,8 @@ from user import models as user_models
 import jwt
 from django.template.loader import render_to_string
 from user import serializers as user_serializers
+from user.models import CustomerProfile, User
+from rest_framework.views import APIView
 
 
 class RegisterUser(mixins.CreateModelMixin,
@@ -32,16 +35,18 @@ class RegisterUser(mixins.CreateModelMixin,
 
                 token = RefreshToken.for_user(user)
 
-                exp = str(datetime.now() + timedelta(hours=1))
+                exp = time() + 120
                 email_list = request.data["email"]
                 subject = "Verify Your Account"
-                token = jwt.encode({'email': email_list, 'expries': exp, 'scope': subject},
+                token = jwt.encode({'email': email_list, 'exp': exp, 'scope': subject},
                                    settings.JWT_SECRET, algorithm='HS256')
                 html_message = render_to_string('verification_email.html', {'token': token, 'domain': 'http://127.0.0.1:8000/'})
                 send_email_without_delay(subject, html_message, email_list)
-
+                CustomerProfile.objects.create(user=user)
                 data = {
+                    "user_id": user.id,
                     "email": user.email,
+                    "full_name": user.first_name + " " + user.last_name
                 }
                 return Response({"status": True, "data": data}, status=status.HTTP_200_OK)
             except (user_models.User.DoesNotExist):
@@ -82,3 +87,20 @@ class LoginUser(mixins.CreateModelMixin,
                 return Response({"status": False, "data": {"message": "Invalid credentials"}}, status=status.HTTP_406_NOT_ACCEPTABLE)
         else:
             return Response({"status": False, "data": {"message": "Invalid credentials", "error": serializer.errors}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+
+class VerifyUserAPIView(APIView):
+    permission_classes = [AllowAny]
+    lookup_url_kwarg = "verification_token"
+
+    def get(self,  *args, **kwargs):
+        verification_token = kwargs.get(self.lookup_url_kwarg)
+        try:
+            payload = jwt.decode(jwt=verification_token, key=settings.JWT_SECRET, algorithms=['HS256'])
+            user = User.objects.get(email=payload['email'])
+            if not user.is_active:
+                user.is_active = True
+                user.save()
+            return Response({"message": "Successfully activated"}, status=status.HTTP_200_OK)
+        except jwt.ExpiredSignatureError:
+            return Response({"message": "Token expired. Get new one"}, status=status.HTTP_401_UNAUTHORIZED)

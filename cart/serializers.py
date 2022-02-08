@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import *
 from product.models import Product
+from rest_framework.validators import UniqueTogetherValidator
 
 # general Serializer start
 class ProductSerializer(serializers.ModelSerializer):
@@ -20,7 +21,13 @@ class CheckoutSerializer(serializers.Serializer):
 class PaymentTypeCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = PaymentType
-        fields = "__all__"
+        validators = [
+            UniqueTogetherValidator(
+                queryset=PaymentType.objects.all(),
+                fields=['type_name']
+            )
+        ]
+        fields = ['id', 'type_name', 'note']
 
 # create Serializer end
 

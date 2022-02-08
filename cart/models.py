@@ -45,6 +45,7 @@ class BillingAddress(AbstractTimeStamp):
 
 class PaymentType(AbstractTimeStamp):
     type_name = models.CharField(max_length=50)
+    note = models.TextField(null=True, blank=True, default='')
     slug  = models.SlugField(null=False, blank=False, allow_unicode=True)
 
     class Meta:

@@ -8,7 +8,7 @@ from rest_framework.permissions import AllowAny
 from django.shortcuts import get_object_or_404
 from user.models import User
 from product.models import Product
-from cart.models import Order, OrderItem, BillingAddress
+from cart.models import Order, OrderItem, BillingAddress, PaymentType
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 from drf_yasg.utils import swagger_auto_schema
@@ -110,7 +110,8 @@ class CheckoutAPIView(APIView):
     def post(self, request):
         check_out_serializer = CheckoutSerializer(data=request.data)
         try:
-            order = Order.objects.get(user=self.request.user, ordered=False)
+            order = get_object_or_404(Order, user=self.request.user, ordered=False)
+
             if check_out_serializer.is_valid():
                 first_name = request.POST.get("first_name")
                 last_name = request.POST.get("last_name")
@@ -141,7 +142,7 @@ class CheckoutAPIView(APIView):
                     order.billing_address = billing_address
                     if notes:
                         order.notes = notes
-                    # order.save()
+                    order.save()
                 if address_type == 'Shipping':
                     shipping_address = BillingAddress(
                         first_name=first_name,
@@ -159,7 +160,12 @@ class CheckoutAPIView(APIView):
                     order.shipping_address = shipping_address
                     if notes:
                         order.notes = notes
-                    # order.save()
+                    order.save()
+
+                payment_type_slug = request.POST.get("payment_type_slug")
+                payment_type = PaymentType.objects.get(slug = payment_type_slug)
+                order.payment_type = payment_type
+                order.save()
 
                 # if payment_option == 'S':
                 #     return redirect('core:payment', payment_option='stripe')

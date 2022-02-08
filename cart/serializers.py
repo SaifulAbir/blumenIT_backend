@@ -17,7 +17,10 @@ class CheckoutSerializer(serializers.Serializer):
 # general Serializer end
 
 # create Serializer start
-
+class PaymentTypeCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PaymentType
+        fields = "__all__"
 
 # create Serializer end
 

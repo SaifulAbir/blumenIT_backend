@@ -1,7 +1,7 @@
 
 from rest_framework.generics import ListAPIView, CreateAPIView
 from rest_framework.views import APIView
-from cart.serializers import CartListSerializer, CheckoutSerializer
+from cart.serializers import CartListSerializer, CheckoutSerializer, PaymentTypeCreateSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
@@ -174,3 +174,9 @@ class CheckoutAPIView(APIView):
                 return Response({"status": "Something went wrong!"})
         except ObjectDoesNotExist:
             return Response({"status": "You do not have an active order"})
+
+class PaymentTypeCreateAPIView(CreateAPIView):
+    serializer_class = PaymentTypeCreateSerializer
+
+    def post(self, request, *args, **kwargs):
+        return super(PaymentTypeCreateAPIView, self).post(request, *args, **kwargs)

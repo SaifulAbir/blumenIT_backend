@@ -1,6 +1,7 @@
 from time import time
 from django.conf import settings
 from rest_framework import viewsets, mixins, status
+from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
@@ -14,6 +15,8 @@ from django.template.loader import render_to_string
 from user import serializers as user_serializers
 from user.models import CustomerProfile, User
 from rest_framework.views import APIView
+
+from user.serializers import CustomerProfileUpdateSerializer
 
 
 class RegisterUser(mixins.CreateModelMixin,
@@ -35,7 +38,7 @@ class RegisterUser(mixins.CreateModelMixin,
 
                 token = RefreshToken.for_user(user)
 
-                exp = time() + 120
+                exp = time() + 1200 #20 minutes
                 email_list = request.data["email"]
                 subject = "Verify Your Account"
                 token = jwt.encode({'email': email_list, 'exp': exp, 'scope': subject},
@@ -104,3 +107,14 @@ class VerifyUserAPIView(APIView):
             return Response({"message": "Successfully activated"}, status=status.HTTP_200_OK)
         except jwt.ExpiredSignatureError:
             return Response({"message": "Token expired. Get new one"}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+class CustomerRetrieveUpdateAPIView(RetrieveUpdateAPIView):
+    serializer_class = CustomerProfileUpdateSerializer
+
+    def get_object(self):
+        customer = CustomerProfile.objects.get(user=self.request.user)
+        return customer
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)

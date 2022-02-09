@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from user import models as user_models
+from user.models import CustomerProfile
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
@@ -22,3 +23,14 @@ class LoginSerializer(serializers.Serializer):
     """
     email = serializers.EmailField(required=True)
     password = serializers.CharField(required=True)
+
+
+class CustomerProfileUpdateSerializer(serializers.ModelSerializer):
+    user = UserRegisterSerializer(read_only=True)
+    gender_display_value = serializers.CharField(
+        source='get_gender_display', read_only=True
+    )
+    class Meta:
+        model = CustomerProfile
+        model_fields = ['id', 'user', 'phone', 'address', 'birth_date', 'gender', 'gender_display_value']
+        fields = model_fields

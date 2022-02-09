@@ -5,9 +5,9 @@ from ecommerce.settings import MEDIA_URL
 from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateAPIView, RetrieveAPIView, DestroyAPIView
 from rest_framework.views import APIView
 
-from product.serializers import ProductCreateSerializer, ProductUpdateSerializer, ProductListSerializer, TagCreateSerializer,ProductTagsSerializer,  TagListSerializer, ProductCategoryListSerializer, ProductBrandListSerializer, ProductSubCategoryListSerializer, ProductDetailsSerializer, ProductSearchSerializer
+from product.serializers import ProductCreateSerializer, ProductUpdateSerializer, ProductListSerializer, TagCreateSerializer,ProductTagsSerializer,  TagListSerializer, ProductCategoryListSerializer, ProductBrandListSerializer, ProductSubCategoryListSerializer, ProductDetailsSerializer, ProductSearchSerializer, ProductAllCategoryListSerializer
 
-from product.models import Product, Tags, ProductTags, ProductCategory, ProductSubCategory, ProductBrand
+from product.models import Product, Tags, ProductTags, ProductCategory, ProductSubCategory, ProductChildCategory, ProductBrand
 
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -15,6 +15,7 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny
 
 from product.pagination import ProductCustomPagination
+from itertools import chain
 
 
 
@@ -67,6 +68,13 @@ class TagsListAPI(ListAPIView):
     permission_classes = (AllowAny,)
     queryset = Tags.objects.filter(is_active=True).order_by('-created_at')
     serializer_class = TagListSerializer
+
+class ProductAllCategoryListAPI(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = ProductAllCategoryListSerializer
+    def get_queryset(self):
+        query = ProductCategory.objects.filter(is_active=True).order_by('-created_at')
+        return query
 
 class ProductCategoryListAPI(ListAPIView):
     permission_classes = (AllowAny,)

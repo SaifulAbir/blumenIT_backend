@@ -74,6 +74,19 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             'media',
             'product_media'
         ]
+
+class ChildCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductChildCategory
+        fields = ['id','name']
+class SubCategorySerializer(serializers.ModelSerializer):
+    child_category = serializers.SerializerMethodField()
+    class Meta:
+        model = ProductSubCategory
+        fields = ['id','name','child_category']
+    def get_child_category(self, obj):
+        selected_child_category = ProductChildCategory.objects.filter(sub_category=obj).distinct()
+        return ChildCategorySerializer(selected_child_category, many=True).data
 # general Serializer end
 
 
@@ -183,6 +196,19 @@ class ProductCategoryListSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductCategory
         fields = ['id', 'name']
+
+class ProductAllCategoryListSerializer(serializers.ModelSerializer):
+    sub_category = serializers.SerializerMethodField()
+    class Meta:
+        model = ProductCategory
+        fields = [
+                'id',
+                'name',
+                'sub_category'
+                ]
+    def get_sub_category(self, obj):
+        selected_sub_category = ProductSubCategory.objects.filter(category=obj).distinct()
+        return SubCategorySerializer(selected_sub_category, many=True).data
 
 class ProductSubCategoryListSerializer(serializers.ModelSerializer):
     class Meta:

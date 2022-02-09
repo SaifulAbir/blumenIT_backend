@@ -54,6 +54,23 @@ def pre_save_product_sub_category(sender, instance, *args, **kwargs):
         instance.name = instance.name.upper()
 pre_save.connect(pre_save_product_sub_category, sender=ProductSubCategory)
 
+class ProductChildCategory(AbstractTimeStamp):
+    sub_category = models.ForeignKey(ProductSubCategory, on_delete=models.PROTECT, related_name='product_sub_category')
+    name = models.CharField(max_length=100, null=False, blank=False)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'ProductChildCategory'
+        verbose_name_plural = 'ProductChildCategories'
+        db_table = 'productChildCategory'
+
+    def __str__(self):
+        return self.name
+
+def pre_save_product_child_category(sender, instance, *args, **kwargs):
+        instance.name = instance.name.upper()
+pre_save.connect(pre_save_product_child_category, sender=ProductChildCategory)
+
 class Product(AbstractTimeStamp):
     PRODUCT_STATUSES = [
         ('PENDING', 'Pending'),

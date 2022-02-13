@@ -1,15 +1,17 @@
 
 from rest_framework.generics import ListAPIView, CreateAPIView
 from rest_framework.views import APIView
-from cart.serializers import CartListSerializer
+from cart.serializers import CartListSerializer, CheckoutSerializer, PaymentTypeCreateSerializer, PaymentTypesListSerializer, ShippingTypesListSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from django.shortcuts import get_object_or_404
 from user.models import User
 from product.models import Product
-from cart.models import Order, OrderItem
+from cart.models import Order, OrderItem, BillingAddress, PaymentType, ShippingType
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
+from drf_yasg.utils import swagger_auto_schema
 
 
 
@@ -101,5 +103,100 @@ class CartList(ListAPIView):
         uid = self.kwargs['uid']
         user = User.objects.get(id = uid)
         query = OrderItem.objects.filter(user=user,ordered=False)
-        # print(query)
         return query
+
+class CheckoutAPIView(APIView):
+    def get(self, request):
+        user = self.request.user.id
+        order_item = OrderItem.objects.filter(user=user,ordered=False)
+        cart_serializer = CartListSerializer(order_item, many=True)
+
+        payment_types = PaymentType.objects.filter(status=True)
+        payment_types_serializer = PaymentTypesListSerializer(payment_types, many=True)
+
+        shipping_types = ShippingType.objects.filter(status=True)
+        shipping_types_serializer = ShippingTypesListSerializer(shipping_types, many=True)
+
+        return Response({"cart_data": cart_serializer.data, "payment_types": payment_types_serializer.data, "shipping_types": shipping_types_serializer.data})
+
+
+    @swagger_auto_schema(request_body=CheckoutSerializer)
+    def post(self, request):
+        check_out_serializer = CheckoutSerializer(data=request.data)
+        try:
+            order = get_object_or_404(Order, user=self.request.user, ordered=False)
+
+            if check_out_serializer.is_valid():
+                first_name = request.POST.get("first_name")
+                last_name = request.POST.get("last_name")
+                country = request.POST.get("country")
+                street_address = request.POST.get("street_address")
+                city = request.POST.get("city")
+                zip_code = request.POST.get("zip_code")
+                phone = request.POST.get("phone")
+                email = request.POST.get("email")
+                address_type = request.POST.get("address_type")
+                default = request.POST.get("default")
+                notes = request.POST.get("notes")
+
+                if address_type == 'Billing':
+                    billing_address = BillingAddress(
+                        first_name=first_name,
+                        last_name=last_name,
+                        country=country,
+                        street_address=street_address,
+                        city=city,
+                        zip_code=zip_code,
+                        phone=phone,
+                        email=email,
+                        address_type='B',
+                        default=default
+                    )
+                    billing_address.save()
+                    order.billing_address = billing_address
+                    if notes:
+                        order.notes = notes
+                    order.save()
+                if address_type == 'Shipping':
+                    shipping_address = BillingAddress(
+                        first_name=first_name,
+                        last_name=last_name,
+                        country=country,
+                        street_address=street_address,
+                        city=city,
+                        zip_code=zip_code,
+                        phone=phone,
+                        email=email,
+                        address_type='S',
+                        default=default
+                    )
+                    shipping_address.save()
+                    order.shipping_address = shipping_address
+                    if notes:
+                        order.notes = notes
+                    order.save()
+
+                payment_type_slug = request.POST.get("payment_type_slug")
+                payment_type = PaymentType.objects.get(slug = payment_type_slug)
+                order.payment_type = payment_type
+                order.save()
+
+                # if payment_option == 'S':
+                #     return redirect('core:payment', payment_option='stripe')
+                # elif payment_option == 'P':
+                #     return redirect('core:payment', payment_option='paypal')
+                # else:
+                #     messages.warning(
+                #         self.request, "Invalid payment option select")
+                #     return redirect('core:checkout')
+                return Response({"status":"Data updated!"})
+            else:
+                return Response({"status": "Something went wrong!"})
+        except ObjectDoesNotExist:
+            return Response({"status": "You do not have an active order"})
+
+class PaymentTypeCreateAPIView(CreateAPIView):
+    serializer_class = PaymentTypeCreateSerializer
+
+    def post(self, request, *args, **kwargs):
+        return super(PaymentTypeCreateAPIView, self).post(request, *args, **kwargs)

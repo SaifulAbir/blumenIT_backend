@@ -1,6 +1,6 @@
 from django.db import models
 from ecommerce.models import AbstractTimeStamp
-from .utils import unique_slug_generator_cart, unique_slug_generator_payment_type
+from .utils import unique_slug_generator_cart
 from django.db.models.signals import pre_save
 from user.models import User
 from django.utils.translation import gettext as _
@@ -43,10 +43,24 @@ class BillingAddress(AbstractTimeStamp):
     def __str__(self):
         return f"{self.pk}"
 
+class ShippingType(AbstractTimeStamp):
+    type_name = models.CharField(max_length=50)
+    price = models.FloatField(default=0.00)
+    status = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = 'ShippingType'
+        verbose_name_plural = 'ShippingTypes'
+        db_table = 'shipping_types'
+
+    def __str__(self):
+        return f"{self.type_name}"
+
+
 class PaymentType(AbstractTimeStamp):
     type_name = models.CharField(max_length=50)
     note = models.TextField(null=True, blank=True, default='')
-    slug  = models.SlugField(null=False, blank=False, allow_unicode=True)
+    status = models.BooleanField(default=True)
 
     class Meta:
         verbose_name = 'PaymentType'
@@ -54,13 +68,8 @@ class PaymentType(AbstractTimeStamp):
         db_table = 'payment_types'
 
     def __str__(self):
-        return f"{self.pk}"
+        return f"{self.type_name}"
 
-def pre_save_payment_types(sender, instance, *args, **kwargs):
-    if not instance.slug:
-        instance.slug = unique_slug_generator_payment_type(instance)
-
-pre_save.connect(pre_save_payment_types, sender=PaymentType)
 
 class Payment(AbstractTimeStamp):
     charge_id = models.CharField(max_length=50)
@@ -101,6 +110,7 @@ class Order(AbstractTimeStamp):
     shipping_address = models.ForeignKey(BillingAddress, related_name='shipping_address', on_delete=models.SET_NULL, blank=True, null=True)
     billing_address = models.ForeignKey(BillingAddress, related_name='billing_address', on_delete=models.SET_NULL, blank=True, null=True)
     payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, blank=True, null=True)
+    shipping_type = models.ForeignKey(ShippingType, on_delete=models.SET_NULL, blank=True, null=True)
     payment_type = models.ForeignKey(PaymentType, on_delete=models.SET_NULL, blank=True, null=True)
     coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, blank=True, null=True)
     notes = models.TextField(null=True, blank=True, default='')

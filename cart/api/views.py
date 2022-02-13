@@ -1,14 +1,14 @@
 
 from rest_framework.generics import ListAPIView, CreateAPIView
 from rest_framework.views import APIView
-from cart.serializers import CartListSerializer, CheckoutSerializer, PaymentTypeCreateSerializer
+from cart.serializers import CartListSerializer, CheckoutSerializer, PaymentTypeCreateSerializer, PaymentTypesListSerializer, ShippingTypesListSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from django.shortcuts import get_object_or_404
 from user.models import User
 from product.models import Product
-from cart.models import Order, OrderItem, BillingAddress, PaymentType
+from cart.models import Order, OrderItem, BillingAddress, PaymentType, ShippingType
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 from drf_yasg.utils import swagger_auto_schema
@@ -106,6 +106,20 @@ class CartList(ListAPIView):
         return query
 
 class CheckoutAPIView(APIView):
+    def get(self, request):
+        user = self.request.user.id
+        order_item = OrderItem.objects.filter(user=user,ordered=False)
+        cart_serializer = CartListSerializer(order_item, many=True)
+
+        payment_types = PaymentType.objects.filter(status=True)
+        payment_types_serializer = PaymentTypesListSerializer(payment_types, many=True)
+
+        shipping_types = ShippingType.objects.filter(status=True)
+        shipping_types_serializer = ShippingTypesListSerializer(shipping_types, many=True)
+
+        return Response({"cart_data": cart_serializer.data, "payment_types": payment_types_serializer.data, "shipping_types": shipping_types_serializer.data})
+
+
     @swagger_auto_schema(request_body=CheckoutSerializer)
     def post(self, request):
         check_out_serializer = CheckoutSerializer(data=request.data)

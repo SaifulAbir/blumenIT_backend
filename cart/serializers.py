@@ -48,5 +48,21 @@ class CartListSerializer(serializers.ModelSerializer):
         selected_product = Product.objects.filter(slug=obj.product.slug).distinct()
         return ProductSerializer(selected_product, many=True).data
 
+class PaymentTypesListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PaymentType
+        fields = [
+                'id',
+                'type_name',
+                'note'
+                ]
 
+class ShippingTypesListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ShippingType
+        fields = [
+                'id',
+                'type_name',
+                'price'
+                ]
 # list Serializer end

@@ -1,5 +1,6 @@
 from django.contrib import admin
-from cart.models import PaymentType
+from cart.models import PaymentType, ShippingType
 
 # Register your models here.
-# admin.site.register(PaymentType)
+admin.site.register(ShippingType)
+admin.site.register(PaymentType)

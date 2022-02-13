@@ -95,7 +95,7 @@ class Product(AbstractTimeStamp):
     created_by = models.CharField(max_length=255, null=True)
     thumbnail = models.FileField(upload_to='products', blank=True, null=True)
     cover = models.FileField(upload_to='products', blank=True, null=True)
-    vendor = models.ForeignKey(Vendor, related_name='vendor', blank=True, null=True, on_delete=models.CASCADE)
+    vendor = models.ForeignKey(Vendor, related_name='vendor', blank=False, null=False, on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'Product'

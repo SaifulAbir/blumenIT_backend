@@ -3,6 +3,7 @@ from ecommerce.models import AbstractTimeStamp
 from vendor.models import Vendor
 from .utils import unique_slug_generator
 from django.db.models.signals import pre_save
+from user.models import User
 
 
 class ProductBrand(AbstractTimeStamp):
@@ -94,7 +95,7 @@ class Product(AbstractTimeStamp):
     created_by = models.CharField(max_length=255, null=True)
     thumbnail = models.FileField(upload_to='products', blank=True, null=True)
     cover = models.FileField(upload_to='products', blank=True, null=True)
-    vendor = models.ForeignKey(Vendor, related_name='vendor', blank=True, null=True, on_delete=models.CASCADE)
+    vendor = models.ForeignKey(Vendor, related_name='vendor', blank=False, null=False, on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'Product'
@@ -140,7 +141,7 @@ class ProductMedia(AbstractTimeStamp):
 class Tags(AbstractTimeStamp):
     name = models.CharField(max_length=255)
     is_active = models.BooleanField(null=False, blank=False, default=False)
-    created_by = models.CharField(max_length=255, null=True)
+    created_by = models.ForeignKey(User, on_delete=models.PROTECT,related_name='tag_create_user', blank=True, null=True)
 
     class Meta:
         verbose_name = 'Tags'

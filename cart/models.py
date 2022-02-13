@@ -23,11 +23,15 @@ class BillingAddress(AbstractTimeStamp):
         ('B', 'Billing'),
         ('S', 'Shipping'),
     )
-    street_address = models.CharField(max_length=100)
-    apartment_address = models.CharField(max_length=100)
-    # country = CountryField(multiple=False)
-    country = models.CharField(max_length=100)
-    zip_code = models.CharField(max_length=100)
+    first_name = models.CharField(max_length=100, null=False, blank=False, default='')
+    last_name = models.CharField(max_length=100, null=False, blank=False, default='')
+    country = models.CharField(max_length=100, blank=True, null=True, default='')
+    company_name = models.CharField(max_length=100, null=False, blank=False, default='')
+    street_address = models.CharField(max_length=100, blank=True, null=True, default='')
+    city = models.CharField(max_length=100, blank=True, null=True, default='')
+    zip_code = models.CharField(max_length=100, blank=True, null=True, default='')
+    phone = models.CharField(max_length=255, null=True, blank=True, default='')
+    email = models.CharField(max_length=255, null=True, blank=True, default='')
     address_type = models.CharField(max_length=1, choices=ADDRESS_CHOICES)
     default = models.BooleanField(default=False)
 
@@ -38,6 +42,34 @@ class BillingAddress(AbstractTimeStamp):
 
     def __str__(self):
         return f"{self.pk}"
+
+class ShippingType(AbstractTimeStamp):
+    type_name = models.CharField(max_length=50)
+    price = models.FloatField(default=0.00)
+    status = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = 'ShippingType'
+        verbose_name_plural = 'ShippingTypes'
+        db_table = 'shipping_types'
+
+    def __str__(self):
+        return f"{self.type_name}"
+
+
+class PaymentType(AbstractTimeStamp):
+    type_name = models.CharField(max_length=50)
+    note = models.TextField(null=True, blank=True, default='')
+    status = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = 'PaymentType'
+        verbose_name_plural = 'PaymentTypes'
+        db_table = 'payment_types'
+
+    def __str__(self):
+        return f"{self.type_name}"
+
 
 class Payment(AbstractTimeStamp):
     charge_id = models.CharField(max_length=50)
@@ -78,7 +110,10 @@ class Order(AbstractTimeStamp):
     shipping_address = models.ForeignKey(BillingAddress, related_name='shipping_address', on_delete=models.SET_NULL, blank=True, null=True)
     billing_address = models.ForeignKey(BillingAddress, related_name='billing_address', on_delete=models.SET_NULL, blank=True, null=True)
     payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, blank=True, null=True)
+    shipping_type = models.ForeignKey(ShippingType, on_delete=models.SET_NULL, blank=True, null=True)
+    payment_type = models.ForeignKey(PaymentType, on_delete=models.SET_NULL, blank=True, null=True)
     coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, blank=True, null=True)
+    notes = models.TextField(null=True, blank=True, default='')
 
     class Meta:
         verbose_name = 'Order'

@@ -99,14 +99,15 @@ class ProductBrandListAPI(ListAPIView):
     queryset = ProductBrand.objects.filter(is_active=True).order_by('-created_at')
     serializer_class = ProductBrandListSerializer
 
-class ProductDetailsAPI(ListAPIView):
+
+class ProductDetailsAPI(RetrieveAPIView):
     permission_classes = (AllowAny,)
     serializer_class = ProductDetailsSerializer
     lookup_field = 'slug'
     lookup_url_kwarg = "slug"
-    def get_queryset(self):
+    def get_object(self):
         slug = self.kwargs['slug']
-        query = Product.objects.filter(slug=slug)
+        query = Product.objects.get(slug=slug)
         return query
 
 class ProductSearchAPIView(APIView):

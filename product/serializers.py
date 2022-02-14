@@ -168,6 +168,7 @@ class TagCreateSerializer(serializers.ModelSerializer):
 # list Serializer start
 class ProductListSerializer(serializers.ModelSerializer):
     product_media = ProductMediaSerializer(many=True, read_only=True)
+    product_category_name = serializers.SerializerMethodField()
     class Meta:
         model = Product
         fields = [
@@ -181,11 +182,18 @@ class ProductListSerializer(serializers.ModelSerializer):
                 'rating',
                 'status',
                 'is_featured',
-                'product_category',
+                'product_category_name',
                 'product_brand',
                 'thumbnail',
                 'product_media'
                 ]
+
+    def get_product_category_name(self, obj):
+        if obj.product_category:
+            get_product_category=ProductCategory.objects.get(id= obj.product_category.id)
+            return get_product_category.name
+        else :
+            return obj.get_product_category
 
 class TagListSerializer(serializers.ModelSerializer):
     class Meta:

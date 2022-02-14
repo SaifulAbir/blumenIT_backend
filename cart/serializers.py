@@ -9,11 +9,19 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = ['id','thumbnail','title','price']
 
+class noteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['notes']
+
 class CheckoutSerializer(serializers.Serializer):
     notes = serializers.SerializerMethodField()
     class Meta:
         model = BillingAddress
         fields = "__all__"
+
+    def get_notes(self, obj):
+        return noteSerializer()
 
 # general Serializer end
 

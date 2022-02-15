@@ -200,3 +200,28 @@ class PaymentTypeCreateAPIView(CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         return super(PaymentTypeCreateAPIView, self).post(request, *args, **kwargs)
+
+class TotalPriceAPIView(APIView):
+    # permission_classes = (AllowAny,)
+
+    def get(self, request):
+        # order = Order.objects.filter(user=self.request.user.id, ordered=False)
+        order = Order.objects.get(user=self.request.user, ordered=False)
+        # return Response({"order_total_price": str(order_qs)})
+        amount = int(order.get_total_price())
+        return Response({"order_total_price": amount})
+
+class CheckQuantityAPIView(APIView):
+    permission_classes = (AllowAny,)
+    def post(self, request):
+        slug = request.POST.get("slug")
+        quantity = int(request.POST.get("quantity"))
+        product = get_object_or_404(Product, slug=slug)
+        if product:
+            available_quantity = product.quantity
+            if quantity <= available_quantity:
+                return Response({"status":'Available.'})
+            else:
+                return Response({"status":'Out of stock.'})
+        else:
+            return Response({"status":"Product not found"})

@@ -114,6 +114,7 @@ class Order(AbstractTimeStamp):
     payment_type = models.ForeignKey(PaymentType, on_delete=models.SET_NULL, blank=True, null=True)
     coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, blank=True, null=True)
     notes = models.TextField(null=True, blank=True, default='')
+    total_price = models.FloatField(default=0.00)
 
     class Meta:
         verbose_name = 'Order'
@@ -123,12 +124,15 @@ class Order(AbstractTimeStamp):
     def __str__(self):
         return self.user.username
 
-    def get_total(self):
-        total = 0
-        for order_item in self.items.all():
-            total += order_item.get_final_price()
-        if self.coupon:
-            total -= self.coupon.amount
+    def get_total_price(self):
+        total = 120
+        # for order_item in self.items.all():
+        #     total += order_item.get_final_price()
+
+        # if self.shipping_type:
+        #     total += self.coupon.amount
+        # if self.coupon:
+        #     total -= self.coupon.amount
         return total
 
 def pre_save_order(sender, instance, *args, **kwargs):

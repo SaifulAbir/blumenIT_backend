@@ -25,37 +25,6 @@ class CheckoutSerializer(serializers.Serializer):
 
 # general Serializer end
 
-# create Serializer start
-class PaymentTypeCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PaymentType
-        validators = [
-            UniqueTogetherValidator(
-                queryset=PaymentType.objects.all(),
-                fields=['type_name']
-            )
-        ]
-        fields = ['id', 'type_name', 'note']
-
-# create Serializer end
-
-# list Serializer start
-class CartListSerializer(serializers.ModelSerializer):
-    product = serializers.SerializerMethodField()
-    subtotal = serializers.ReadOnlyField()
-    class Meta:
-        model = OrderItem
-        fields = [
-                'id',
-                'quantity',
-                'product',
-                'subtotal'
-                ]
-
-    def get_product(self, obj):
-        selected_product = Product.objects.filter(slug=obj.product.slug).distinct()
-        return ProductSerializer(selected_product, many=True).data
-
 class PaymentTypesListSerializer(serializers.ModelSerializer):
     class Meta:
         model = PaymentType
@@ -74,3 +43,35 @@ class ShippingTypesListSerializer(serializers.ModelSerializer):
                 'price'
                 ]
 # list Serializer end
+
+
+# create Serializer start
+# class PaymentTypeCreateSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = PaymentType
+#         validators = [
+#             UniqueTogetherValidator(
+#                 queryset=PaymentType.objects.all(),
+#                 fields=['type_name']
+#             )
+#         ]
+#         fields = ['id', 'type_name', 'note']
+
+# create Serializer end
+
+# list Serializer start
+# class CartListSerializer(serializers.ModelSerializer):
+#     product = serializers.SerializerMethodField()
+#     subtotal = serializers.ReadOnlyField()
+#     class Meta:
+#         model = OrderItem
+#         fields = [
+#                 'id',
+#                 'quantity',
+#                 'product',
+#                 'subtotal'
+#                 ]
+
+#     def get_product(self, obj):
+#         selected_product = Product.objects.filter(slug=obj.product.slug).distinct()
+#         return ProductSerializer(selected_product, many=True).data

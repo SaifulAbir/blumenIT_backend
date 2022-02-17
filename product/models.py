@@ -137,6 +137,9 @@ class ProductMedia(AbstractTimeStamp):
         verbose_name_plural = 'ProductMedia'
         db_table = 'productMedia'
 
+    def __str__(self):
+        return self.product.title
+
 class Tags(AbstractTimeStamp):
     name = models.CharField(max_length=255)
     is_active = models.BooleanField(null=False, blank=False, default=False)

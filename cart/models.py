@@ -18,31 +18,6 @@ from product.models import Product
     6. Refunds
 '''
 
-class BillingAddress(AbstractTimeStamp):
-    ADDRESS_CHOICES = (
-        ('B', 'Billing'),
-        ('S', 'Shipping'),
-    )
-    first_name = models.CharField(max_length=100, null=False, blank=False, default='')
-    last_name = models.CharField(max_length=100, null=False, blank=False, default='')
-    country = models.CharField(max_length=100, blank=True, null=True, default='')
-    company_name = models.CharField(max_length=100, null=False, blank=False, default='')
-    street_address = models.CharField(max_length=100, blank=True, null=True, default='')
-    city = models.CharField(max_length=100, blank=True, null=True, default='')
-    zip_code = models.CharField(max_length=100, blank=True, null=True, default='')
-    phone = models.CharField(max_length=255, null=True, blank=True, default='')
-    email = models.CharField(max_length=255, null=True, blank=True, default='')
-    address_type = models.CharField(max_length=1, choices=ADDRESS_CHOICES)
-    default = models.BooleanField(default=False)
-
-    class Meta:
-        verbose_name = 'BillingAddress'
-        verbose_name_plural = 'BillingAddresses'
-        db_table = 'billing_addresses'
-
-    def __str__(self):
-        return f"{self.pk}"
-
 class ShippingType(AbstractTimeStamp):
     type_name = models.CharField(max_length=50)
     price = models.FloatField(default=0.00)
@@ -100,21 +75,19 @@ class Order(AbstractTimeStamp):
     user = models.ForeignKey(User, on_delete=models.PROTECT,related_name='order_user', blank=True, null=True)
     slug  = models.SlugField(null=False, blank=False, allow_unicode=True)
     ref_code = models.CharField(max_length=20)
-    start_date = models.DateTimeField(auto_now_add=True)
-    ordered_date = models.DateTimeField()
-    ordered = models.BooleanField(default=False)
+    ordered_date = models.DateTimeField(auto_now_add=True)
+    ordered = models.BooleanField(default=True)
     being_delivered = models.BooleanField(default=False)
     received = models.BooleanField(default=False)
     refund_requested = models.BooleanField(default=False)
     refund_granted = models.BooleanField(default=False)
-    shipping_address = models.ForeignKey(BillingAddress, related_name='shipping_address', on_delete=models.SET_NULL, blank=True, null=True)
-    billing_address = models.ForeignKey(BillingAddress, related_name='billing_address', on_delete=models.SET_NULL, blank=True, null=True)
     payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, blank=True, null=True)
     shipping_type = models.ForeignKey(ShippingType, on_delete=models.SET_NULL, blank=True, null=True)
     payment_type = models.ForeignKey(PaymentType, on_delete=models.SET_NULL, blank=True, null=True)
     coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, blank=True, null=True)
+    coupon_status = models.BooleanField(default=False)
     notes = models.TextField(null=True, blank=True, default='')
-    total_price = models.FloatField(default=0.00)
+    total_price = models.FloatField(max_length=255, null=False, blank=False, default=0)
 
     class Meta:
         verbose_name = 'Order'
@@ -123,17 +96,6 @@ class Order(AbstractTimeStamp):
 
     def __str__(self):
         return self.user.username
-
-    def get_total_price(self):
-        total = 120
-        # for order_item in self.items.all():
-        #     total += order_item.get_final_price()
-
-        # if self.shipping_type:
-        #     total += self.coupon.amount
-        # if self.coupon:
-        #     total -= self.coupon.amount
-        return total
 
 def pre_save_order(sender, instance, *args, **kwargs):
     if not instance.slug:
@@ -178,6 +140,32 @@ class OrderItem(AbstractTimeStamp):
         # if self.item.discount_price:
         #     return self.get_total_discount_item_price()
         return self.get_total_item_price()
+
+class CustomerAddress(AbstractTimeStamp):
+    ADDRESS_CHOICES = (
+        ('B', 'Billing'),
+        ('S', 'Shipping'),
+    )
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, blank=True, null=True)
+    first_name = models.CharField(max_length=100, null=False, blank=False, default='')
+    last_name = models.CharField(max_length=100, null=False, blank=False, default='')
+    country = models.CharField(max_length=100, blank=True, null=True, default='')
+    company_name = models.CharField(max_length=100, null=False, blank=False, default='')
+    street_address = models.CharField(max_length=100, blank=True, null=True, default='')
+    city = models.CharField(max_length=100, blank=True, null=True, default='')
+    zip_code = models.CharField(max_length=100, blank=True, null=True, default='')
+    phone = models.CharField(max_length=255, null=True, blank=True, default='')
+    email = models.CharField(max_length=255, null=True, blank=True, default='')
+    address_type = models.CharField(max_length=1, choices=ADDRESS_CHOICES)
+    default = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = 'CustomerAddress'
+        verbose_name_plural = 'CustomerAddresses'
+        db_table = 'customer_addresses'
+
+    def __str__(self):
+        return f"{self.pk}"
 
 class Refund(AbstractTimeStamp):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)

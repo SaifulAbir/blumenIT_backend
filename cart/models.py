@@ -142,10 +142,6 @@ class OrderItem(AbstractTimeStamp):
         return self.get_total_item_price()
 
 class CustomerAddress(AbstractTimeStamp):
-    ADDRESS_CHOICES = (
-        ('B', 'Billing'),
-        ('S', 'Shipping'),
-    )
     order = models.ForeignKey(Order, on_delete=models.CASCADE, blank=True, null=True)
     first_name = models.CharField(max_length=100, null=False, blank=False, default='')
     last_name = models.CharField(max_length=100, null=False, blank=False, default='')
@@ -156,7 +152,7 @@ class CustomerAddress(AbstractTimeStamp):
     zip_code = models.CharField(max_length=100, blank=True, null=True, default='')
     phone = models.CharField(max_length=255, null=True, blank=True, default='')
     email = models.CharField(max_length=255, null=True, blank=True, default='')
-    address_type = models.CharField(max_length=1, choices=ADDRESS_CHOICES)
+    address_type = models.CharField(max_length=100, null=False, blank=False, default='')
     default = models.BooleanField(default=False)
 
     class Meta:

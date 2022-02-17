@@ -15,9 +15,13 @@ from django.core.exceptions import ObjectDoesNotExist
 from drf_yasg.utils import swagger_auto_schema
 
 
-# class CheckoutAPIView(APIView):CreateAPIView RetrieveUpdateDestroyAPIView
 class CheckoutAPIView(CreateAPIView):
-# class CheckoutAPIView(RetrieveUpdateDestroyAPIView):
+    serializer_class = CheckoutSerializer
+
+    def post(self, request, *args, **kwargs):
+        return super(CheckoutAPIView, self).post(request, *args, **kwargs)
+
+# class CheckoutAPIView(APIView):
     # def get(self, request):
     #     user = self.request.user.id
     #     # order_item = OrderItem.objects.filter(user=user,ordered=False)
@@ -31,12 +35,6 @@ class CheckoutAPIView(CreateAPIView):
 
     #     return Response({"payment_types": payment_types_serializer.data, "shipping_types": shipping_types_serializer.data})
     #     # return Response({"cart_data": cart_serializer.data, "payment_types": payment_types_serializer.data, "shipping_types": shipping_types_serializer.data})
-
-    serializer_class = CheckoutSerializer
-
-    def post(self, request, *args, **kwargs):
-        return super(CheckoutAPIView, self).post(request, *args, **kwargs)
-
 
     # @swagger_auto_schema(request_body=CheckoutSerializer)
     # def post(self, request):

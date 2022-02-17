@@ -1,7 +1,6 @@
 from django.db import models
 from ecommerce.models import AbstractTimeStamp
 from django.utils.translation import gettext as _
-
 from user.models import User
 
 

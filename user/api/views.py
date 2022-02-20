@@ -1,7 +1,7 @@
 from time import time
 from django.conf import settings
 from rest_framework import viewsets, mixins, status
-from rest_framework.generics import RetrieveUpdateAPIView
+from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
@@ -16,7 +16,7 @@ from user import serializers as user_serializers
 from user.models import CustomerProfile, User
 from rest_framework.views import APIView
 
-from user.serializers import CustomerProfileUpdateSerializer
+from user.serializers import CustomerProfileUpdateSerializer, SubscriptionSerializer
 
 
 class RegisterUser(mixins.CreateModelMixin,
@@ -118,3 +118,10 @@ class CustomerRetrieveUpdateAPIView(RetrieveUpdateAPIView):
 
     def put(self, request, *args, **kwargs):
         return self.update(request, *args, **kwargs)
+
+
+class SubscriptionAPIView(CreateAPIView):
+    serializer_class = SubscriptionSerializer
+
+    def post(self, request, *args, **kwargs):
+        return super(SubscriptionAPIView, self).post(request, *args, **kwargs)

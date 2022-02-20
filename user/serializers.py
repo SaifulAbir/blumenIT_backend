@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from user import models as user_models
-from user.models import CustomerProfile
+from user.models import CustomerProfile, Subscription
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
@@ -33,4 +33,12 @@ class CustomerProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomerProfile
         model_fields = ['id', 'user', 'phone', 'address', 'birth_date', 'gender', 'gender_display_value']
+        fields = model_fields
+
+
+class SubscriptionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Subscription
+        model_fields = ['email',]
         fields = model_fields

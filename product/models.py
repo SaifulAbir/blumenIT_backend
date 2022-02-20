@@ -78,7 +78,7 @@ class Product(AbstractTimeStamp):
         ('ACTIVE', 'Active')]
 
     title = models.CharField(max_length=500, null=False, blank=False)
-    slug  = models.SlugField(null=False, blank=False, allow_unicode=True)
+    slug  = models.SlugField(null=False, allow_unicode=True, blank=True)
     price = models.FloatField(max_length=255, null=False, blank=False, default=0)
     old_price = models.FloatField(max_length=255, null=True, blank=True, default=0)
     full_description = models.TextField(default='')
@@ -92,7 +92,7 @@ class Product(AbstractTimeStamp):
     is_featured = models.BooleanField(null=False, blank=False, default=False)
     product_category = models.ForeignKey(ProductCategory, related_name='category', blank=True, null=True, on_delete=models.CASCADE)
     product_brand = models.ForeignKey(ProductBrand, related_name='brand', blank=True, null=True, on_delete=models.CASCADE)
-    created_by = models.CharField(max_length=255, null=True)
+    created_by = models.CharField(max_length=255, null=True, blank=True)
     thumbnail = models.FileField(upload_to='products', blank=True, null=True)
     vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT,related_name='product_vendor')
 
@@ -126,9 +126,17 @@ class ProductMedia(AbstractTimeStamp):
         ('THANK_YOU', 'Thank you'),
     ]
 
+    def validate_file_extension(value):
+        import os
+        from django.core.exceptions import ValidationError
+        ext = os.path.splitext(value.name)[1]
+        valid_extensions = ['.jpg', '.png', '.jpeg', '.mp4']
+        if not ext.lower() in valid_extensions:
+            raise ValidationError('Unsupported file extension.')
+
     product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='product_media')
     type = models.CharField(max_length=10, choices=MEDIA_TYPES)
-    file = models.FileField(upload_to='products')
+    file = models.FileField(upload_to='products', validators=[validate_file_extension])
     status = models.CharField(max_length=20, choices=CHOICES)
     video_type = models.CharField(max_length=50, null=True, blank=True, choices=VIDEO_TYPES)
 

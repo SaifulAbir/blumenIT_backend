@@ -27,11 +27,12 @@ class DealsOfTheDay(AbstractTimeStamp):
         ('per', 'Percentage'),
         ('flat', 'Flat'),]
 
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    start_date = models.DateTimeField(blank=True, null=True)
-    end_date = models.DateTimeField(blank=True, null=True)
+    product = models.ManyToManyField(Product)
+    start_date = models.DateField(blank=True, null=True)
+    end_date = models.DateField(blank=True, null=True)
     discount_price = models.FloatField(max_length=255, null=False, blank=False, default=0)
     discount_price_type = models.CharField(max_length=20, null=False, blank=False, choices=CHOICES)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
         verbose_name = 'DealsOfTheDay'

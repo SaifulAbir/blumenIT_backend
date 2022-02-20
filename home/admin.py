@@ -5,4 +5,4 @@ admin.site.register(SliderImage)
 
 @admin.register(DealsOfTheDay)
 class QuestionAdmin(admin.ModelAdmin):
-    list_display = ['product','start_date']
+    list_display = ['start_date', 'end_date', 'discount_price', 'discount_price_type', 'is_active']

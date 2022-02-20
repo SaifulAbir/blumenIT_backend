@@ -10,4 +10,14 @@ class SliderImagesListSerializer(serializers.ModelSerializer):
                 'file',
                 'text',
                 ]
+
+class DealsOfTheDayListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DealsOfTheDay
+        fields = [
+                'id',
+                'product',
+                'discount_price',
+                'discount_price_type'
+                ]
 # list Serializer end

@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'vendor',
     'cart',
     'currency',
+    'home',
     # 'django_countries',
 ]
 

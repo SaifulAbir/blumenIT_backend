@@ -121,6 +121,7 @@ class CustomerRetrieveUpdateAPIView(RetrieveUpdateAPIView):
 
 
 class SubscriptionAPIView(CreateAPIView):
+    permission_classes = [AllowAny]
     serializer_class = SubscriptionSerializer
 
     def post(self, request, *args, **kwargs):

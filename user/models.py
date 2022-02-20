@@ -98,3 +98,15 @@ class CustomerProfile(AbstractTimeStamp):
         verbose_name = "Customer Profile"
         verbose_name_plural = "Customer Profile"
         db_table = 'customer_profiles'
+
+
+class Subscription(AbstractTimeStamp):
+    email = models.EmailField(max_length=255, unique=True)
+
+    def __str__(self):
+        return self.email
+
+    class Meta:
+        verbose_name = "Subscription"
+        verbose_name_plural = "Subscriptions"
+        db_table = 'subscriptions'

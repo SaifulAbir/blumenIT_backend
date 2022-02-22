@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import *
+from product.models import Product, ProductCategory
 
 # list Serializer start
 class SliderImagesListSerializer(serializers.ModelSerializer):
@@ -33,4 +34,15 @@ class top_20_best_sellerListSerializer(serializers.ModelSerializer):
                 'rating',
                 'thumbnail',
                 ]
+
+class product_catListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductCategory
+        fields = [
+                'id',
+                'name',
+                'logo',
+                'cover',
+                ]
+
 # list Serializer end

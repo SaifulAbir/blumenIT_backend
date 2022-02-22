@@ -24,6 +24,8 @@ pre_save.connect(pre_save_product_brand, sender=ProductBrand)
 
 class ProductCategory(AbstractTimeStamp):
     name = models.CharField(max_length=100, null=False, blank=False)
+    logo = models.ImageField(upload_to='product_category', blank=True, null=True)
+    cover = models.ImageField(upload_to='product_category', blank=True, null=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:

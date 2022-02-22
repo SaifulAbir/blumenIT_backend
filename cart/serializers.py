@@ -79,6 +79,15 @@ class CheckoutSerializer(serializers.ModelSerializer):
         if zip_object_order_items:
             for p,q in zip_object_order_items:
                 OrderItem.objects.create(order=order_instance, product=p, quantity=int(q), ordered=True, user=self.context['request'].user)
+                # update product quantity
+                product_current_quan = Product.objects.filter(slug = p.slug)[0].quantity
+                product_updated_quan = int(product_current_quan) - int(q)
+                Product.objects.filter(slug = p.slug).update(quantity=product_updated_quan)
+
+                # update product sell_count
+                product_sell_quan = Product.objects.filter(slug = p.slug)[0].sell_count
+                product_sell_quan += 1
+                Product.objects.filter(slug = p.slug).update(sell_count=product_sell_quan)
 
         zip_object_address = zip(address_type, first_name, last_name, country, company_name, street_address, city, zip_code, phone, email, default)
         if zip_object_address:
@@ -97,7 +106,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
                     email=e,
                     default=d,
                 )
- 
+
         return order_instance
 
 

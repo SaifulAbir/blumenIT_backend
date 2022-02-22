@@ -20,4 +20,17 @@ class DealsOfTheDayListSerializer(serializers.ModelSerializer):
                 'discount_price',
                 'discount_price_type'
                 ]
+
+class top_20_best_sellerListSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Product
+        fields = [
+                'id',
+                'title',
+                'slug',
+                'price',
+                'rating',
+                'thumbnail',
+                ]
 # list Serializer end

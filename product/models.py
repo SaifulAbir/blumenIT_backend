@@ -95,6 +95,7 @@ class Product(AbstractTimeStamp):
     created_by = models.CharField(max_length=255, null=True, blank=True)
     thumbnail = models.FileField(upload_to='products', blank=True, null=True)
     vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT,related_name='product_vendor')
+    sell_count = models.BigIntegerField(null=True, blank=True, default=0)
 
     class Meta:
         verbose_name = 'Product'

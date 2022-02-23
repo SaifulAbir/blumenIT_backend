@@ -24,36 +24,40 @@ class noteSerializer(serializers.ModelSerializer):
 #         return noteSerializer()
 
 class CheckoutSerializer(serializers.ModelSerializer):
-    ADDRESS_CHOICES = (
-        ('Billing'),
-        ('Shipping'),
-    )
+    # ADDRESS_CHOICES = (
+    #     ('Billing'),
+    #     ('Shipping'),
+    # )
 
     product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), many=True, write_only=True)
     quantity = serializers.ListField(child=serializers.IntegerField(), write_only=True)
 
-    address_type = serializers.ListField(child=serializers.ChoiceField(choices=ADDRESS_CHOICES), write_only=True)
-    first_name = serializers.ListField(child=serializers.CharField(), write_only=True)
-    last_name = serializers.ListField(child=serializers.CharField(), write_only=True)
-    country = serializers.ListField(child=serializers.CharField(), write_only=True)
-    company_name = serializers.ListField(child=serializers.CharField(), write_only=True)
-    street_address = serializers.ListField(child=serializers.CharField(), write_only=True)
-    city = serializers.ListField(child=serializers.CharField(), write_only=True)
-    zip_code = serializers.ListField(child=serializers.CharField(), write_only=True)
-    phone = serializers.ListField(child=serializers.CharField(), write_only=True)
-    email = serializers.ListField(child=serializers.CharField(), write_only=True)
-    default = serializers.ListField(child=serializers.BooleanField(), write_only=True)
+    billing_first_name = serializers.CharField(write_only=True)
+    billing_last_name = serializers.CharField(write_only=True)
+    billing_country = serializers.CharField(write_only=True)
+    billing_street_address = serializers.CharField(write_only=True)
+    billing_city = serializers.CharField(write_only=True)
+    billing_phone = serializers.CharField(write_only=True)
+    billing_zip_code = serializers.CharField(write_only=True)
+    billing_email = serializers.CharField(write_only=True)
+    billing_default = serializers.BooleanField(write_only=True)
+
+    shipping_first_name = serializers.CharField(write_only=True)
+    shipping_last_name = serializers.CharField(write_only=True)
+    shipping_country = serializers.CharField(write_only=True)
+    shipping_street_address = serializers.CharField(write_only=True)
+    shipping_city = serializers.CharField(write_only=True)
+    shipping_zip_code = serializers.CharField(write_only=True)
     class Meta:
         model = Order
         fields = ['id',
                 'notes',
                 'total_price',
-                'coupon_status',
                 'payment_type',
-                'shipping_type',
                 'product', 'quantity',
-                'address_type', 'first_name', 'last_name', 'country', 'company_name',
-                'street_address', 'city', 'zip_code', 'phone', 'email', 'default'
+                'billing_first_name','billing_last_name','billing_country','billing_street_address','billing_city','billing_phone',
+                'billing_zip_code','billing_email','billing_default',
+                'shipping_first_name','shipping_last_name','shipping_country','shipping_street_address','shipping_city','shipping_zip_code'
         ]
         # read_only_fields = ('ngo_username')
 
@@ -61,17 +65,23 @@ class CheckoutSerializer(serializers.ModelSerializer):
         product = validated_data.pop('product')
         quantity = validated_data.pop('quantity')
 
-        address_type = validated_data.pop('address_type')
-        first_name = validated_data.pop('first_name')
-        last_name = validated_data.pop('last_name')
-        country = validated_data.pop('country')
-        company_name = validated_data.pop('company_name')
-        street_address = validated_data.pop('street_address')
-        city = validated_data.pop('city')
-        zip_code = validated_data.pop('zip_code')
-        phone = validated_data.pop('phone')
-        email = validated_data.pop('email')
-        default = validated_data.pop('default')
+        billing_first_name = validated_data.pop('billing_first_name')
+        billing_last_name = validated_data.pop('billing_last_name')
+        billing_country = validated_data.pop('billing_country')
+        billing_street_address = validated_data.pop('billing_street_address')
+        billing_city = validated_data.pop('billing_city')
+        billing_phone = validated_data.pop('billing_phone')
+        billing_zip_code = validated_data.pop('billing_zip_code')
+        billing_email = validated_data.pop('billing_email')
+        billing_default = validated_data.pop('billing_default')
+
+        shipping_first_name = validated_data.pop('shipping_first_name')
+        shipping_last_name = validated_data.pop('shipping_last_name')
+        shipping_country = validated_data.pop('shipping_country')
+        shipping_street_address = validated_data.pop('shipping_street_address')
+        shipping_city = validated_data.pop('shipping_city')
+        shipping_zip_code = validated_data.pop('shipping_zip_code')
+
 
         order_instance = Order.objects.create(**validated_data, user=self.context['request'].user)
 
@@ -89,23 +99,30 @@ class CheckoutSerializer(serializers.ModelSerializer):
                 product_sell_quan += 1
                 Product.objects.filter(slug = p.slug).update(sell_count=product_sell_quan)
 
-        zip_object_address = zip(address_type, first_name, last_name, country, company_name, street_address, city, zip_code, phone, email, default)
-        if zip_object_address:
-            for a_t, f_n, l_n, country, c_n, s_a, city, z_c, phone, e, d  in zip_object_address:
-                CustomerAddress.objects.create(
-                    order=order_instance,
-                    address_type=a_t,
-                    first_name=f_n,
-                    last_name=l_n,
-                    country=country,
-                    company_name=c_n,
-                    street_address=s_a,
-                    city=city,
-                    zip_code=z_c,
-                    phone=phone,
-                    email=e,
-                    default=d,
-                )
+        CustomerAddress.objects.create(
+            order=order_instance,
+            address_type='Billing',
+            first_name=billing_first_name,
+            last_name=billing_last_name,
+            country=billing_country,
+            street_address=billing_street_address,
+            city=billing_city,
+            phone=billing_phone,
+            zip_code=billing_zip_code,
+            email=billing_email,
+            default=billing_default
+        )
+
+        CustomerAddress.objects.create(
+            order=order_instance,
+            address_type='Shipping',
+            first_name=shipping_first_name,
+            last_name=shipping_last_name,
+            country=shipping_country,
+            street_address=shipping_street_address,
+            city=shipping_city,
+            zip_code=shipping_zip_code
+        )
 
         return order_instance
 

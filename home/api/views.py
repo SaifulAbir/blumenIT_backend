@@ -31,7 +31,7 @@ class HomeDataAPIView(APIView):
         for category_id in category_ids:
             if category_id not in final_category_ids:
                 final_category_ids.append(category_id)
-        product_cat = ProductCategory.objects.filter(id__in=final_category_ids)
+        product_cat = ProductCategory.objects.filter(id__in=final_category_ids)[:6]
         product_cat_serializer = product_catListSerializer(product_cat, many=True)
 
 

@@ -3,7 +3,7 @@ from ecommerce.models import AbstractTimeStamp
 from vendor.models import Vendor
 from .utils import unique_slug_generator
 from django.db.models.signals import pre_save
-from user.models import User
+from user.models import User, CustomerProfile
 
 
 class ProductBrand(AbstractTimeStamp):
@@ -241,3 +241,16 @@ class ProductSizes(AbstractTimeStamp):
         return self.name
 
 
+class ProductReview(AbstractTimeStamp):
+    product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name = 'product_review', blank=True, null=True)
+    user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='user_review',blank=True, null=True)
+    # customer = models.ForeignKey(CustomerProfile, on_delete=models.PROTECT, related_name='customer_review',blank=True, null=True)
+    rating_number = models.IntegerField(default=0)
+    review_text = models.TextField(default='',blank=True, null=True)
+    class Meta:
+        verbose_name = 'ProductReview'
+        verbose_name_plural = 'ProductReviews'
+        db_table = 'productReview'
+
+    def __str__(self):
+        return str(self.pk)

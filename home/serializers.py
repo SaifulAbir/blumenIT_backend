@@ -22,7 +22,7 @@ class DealsOfTheDayListSerializer(serializers.ModelSerializer):
                 'discount_price_type'
                 ]
 
-class top_20_best_sellerListSerializer(serializers.ModelSerializer):
+class productListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product

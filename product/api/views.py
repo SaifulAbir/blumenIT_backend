@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.db.models.functions import Concat, text, Coalesce
 from django.db.models import Q, Count, Value, F, CharField, Prefetch, Subquery, Max, Min, ExpressionWrapper, \
     IntegerField, Sum, DecimalField
@@ -5,6 +7,7 @@ from ecommerce.settings import MEDIA_URL
 from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateAPIView, RetrieveAPIView, DestroyAPIView
 from rest_framework.views import APIView
 
+from home.models import ProductView
 from product.serializers import ProductCreateSerializer, ProductUpdateSerializer, ProductListSerializer, TagCreateSerializer,ProductTagsSerializer,  TagListSerializer, ProductCategoryListSerializer, ProductBrandListSerializer, ProductSubCategoryListSerializer, ProductDetailsSerializer, ProductSearchSerializer, ProductAllCategoryListSerializer
 
 from product.models import Product, Tags, ProductTags, ProductCategory, ProductSubCategory, ProductChildCategory, ProductBrand
@@ -20,6 +23,9 @@ from itertools import chain
 
 
 # create API views start
+from user.models import CustomerProfile
+
+
 class ProductCreateAPIView(CreateAPIView):
     serializer_class = ProductCreateSerializer
 
@@ -108,6 +114,15 @@ class ProductDetailsAPI(RetrieveAPIView):
     def get_object(self):
         slug = self.kwargs['slug']
         query = Product.objects.get(slug=slug)
+        if self.request.user.is_authenticated:
+            try:
+                product_view = ProductView.objects.get(user=self.request.user, product=query)
+                product_view.view_date = datetime.now()
+                product_view.view_count += 1
+                product_view.save()
+            except ProductView.DoesNotExist:
+                customer = CustomerProfile.objects.get(user=self.request.user)
+                ProductView.objects.create(user=self.request.user, product=query, customer=customer, view_date=datetime.now())
         return query
 
 class ProductSearchAPIView(APIView):

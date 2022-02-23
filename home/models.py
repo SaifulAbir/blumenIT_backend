@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.db import models
 from ecommerce.models import AbstractTimeStamp
 from product.models import Product
@@ -50,7 +52,8 @@ class ProductView(AbstractTimeStamp):
     product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='product_view_count')
     user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='user_product_view')
     customer = models.ForeignKey(CustomerProfile, on_delete=models.PROTECT, related_name='customer_product_view')
-    view_date = models.DateField(blank=True, null=True)
+    view_date = models.DateTimeField(default=datetime.now)
+    view_count = models.IntegerField(default=1)
 
     class Meta:
         verbose_name = 'Product View'

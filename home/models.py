@@ -1,6 +1,8 @@
 from django.db import models
 from ecommerce.models import AbstractTimeStamp
 from product.models import Product
+from user.models import User, CustomerProfile
+
 
 class SliderImage(AbstractTimeStamp):
     def validate_file_extension(value):
@@ -41,3 +43,19 @@ class DealsOfTheDay(AbstractTimeStamp):
 
     def __str__(self):
         return f"{self.pk}"
+
+
+class ProductView(AbstractTimeStamp):
+
+    product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='product_view_count')
+    user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='user_product_view')
+    customer = models.ForeignKey(CustomerProfile, on_delete=models.PROTECT, related_name='customer_product_view')
+    view_date = models.DateField(blank=True, null=True)
+
+    class Meta:
+        verbose_name = 'Product View'
+        verbose_name_plural = 'Product Views'
+        db_table = 'product_views'
+
+    def __str__(self):
+        return self.product.title

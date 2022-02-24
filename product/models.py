@@ -92,11 +92,13 @@ class Product(AbstractTimeStamp):
     rating = models.CharField(max_length=255, blank=True)
     status = models.CharField(max_length=20, choices=PRODUCT_STATUSES, default=PRODUCT_STATUSES[0][0])
     is_featured = models.BooleanField(null=False, blank=False, default=False)
-    product_category = models.ForeignKey(ProductCategory, related_name='category', blank=True, null=True, on_delete=models.CASCADE)
-    product_brand = models.ForeignKey(ProductBrand, related_name='brand', blank=True, null=True, on_delete=models.CASCADE)
+    product_category = models.ForeignKey(ProductCategory, related_name='category', blank=False, null=True, on_delete=models.PROTECT)
+    product_sub_category = models.ForeignKey(ProductSubCategory, related_name='sub_category', blank=True, null=True, on_delete=models.PROTECT)
+    product_child_category = models.ForeignKey(ProductChildCategory, related_name='child_category', blank=True, null=True, on_delete=models.PROTECT)
+    product_brand = models.ForeignKey(ProductBrand, related_name='brand', blank=True, null=True, on_delete=models.SET_NULL)
     created_by = models.CharField(max_length=255, null=True, blank=True)
     thumbnail = models.FileField(upload_to='products', blank=True, null=True)
-    vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT,related_name='product_vendor')
+    vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT,related_name='product_vendor', blank=False, null=False)
     sell_count = models.BigIntegerField(null=True, blank=True, default=0)
 
     class Meta:

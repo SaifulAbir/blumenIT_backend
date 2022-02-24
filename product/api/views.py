@@ -79,6 +79,35 @@ class ProductListByCategoryAPI(ListAPIView):
             queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
         return queryset
 
+class ProductListBySubCategoryAPI(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = ProductListSerializer
+    pagination_class = ProductCustomPagination
+    lookup_field = 'subcid'
+    lookup_url_kwarg = "subcid"
+    def get_queryset(self):
+        subcid = self.kwargs['subcid']
+        if subcid:
+            queryset = Product.objects.filter(product_sub_category=subcid, status='ACTIVE').order_by('-created_at')
+        else:
+            queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
+        return queryset
+
+class ProductListByChildCategoryAPI(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = ProductListSerializer
+    pagination_class = ProductCustomPagination
+    lookup_field = 'childcid'
+    lookup_url_kwarg = "childcid"
+    def get_queryset(self):
+        childcid = self.kwargs['childcid']
+        if childcid:
+            queryset = Product.objects.filter(product_child_category=childcid, status='ACTIVE').order_by('-created_at')
+        else:
+            queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
+        return queryset
+
+
 class ProductTagsListAPI(ListAPIView):
     permission_classes = (AllowAny,)
     queryset = ProductTags.objects.filter(is_active=True).order_by('-created_at')

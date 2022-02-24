@@ -64,8 +64,6 @@ class RecentAPIView(APIView):
         today = date.today()
         last_week = today - timedelta(days=7)
         user = self.request.user.id
-        # recent_view = Product.objects.filter(id__in = ProductView.objects.filter(user=user).values('product').order_by('-view_count'))[:24]
-        recent_view = Product.objects.filter(product_view_count__view_date__gt=last_week)[:24]
-        recent_view = Product.objects.filter(product_view_count__view_date__gt=some_day_last_week).order_by('-product_view_count__view_date')[:24]
+        recent_view = Product.objects.filter(product_view_count__view_date__gt=last_week).order_by('-product_view_count__view_date')[:24]
         recent_view_serializer = productListSerializer(recent_view, many=True)
         return Response({"recent_view":recent_view_serializer.data })

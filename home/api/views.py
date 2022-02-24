@@ -5,7 +5,7 @@ from home.serializers import SliderImagesListSerializer, DealsOfTheDayListSerial
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from datetime import date
-from django.db.models import Avg, Prefetch
+from django.db.models import Avg, Prefetch, Q
 
 from product.models import Product, ProductCategory, ProductReview
 
@@ -56,6 +56,13 @@ class HomeDataAPIView(APIView):
         ca_ids = query.values_list('product__id', flat=True).distinct()
         print(str(ca_ids))
 
+        # q = ProductReview.objects.annotate(
+        #     avg=Avg( 'rating_number',
+        #         filter=Q(product__status='ACTIVE'),
+        #         distinct=True
+        #     )
+        # ).filter(status='ACTIVE').order_by('-payment_count')[:5]
+
 
         return Response({"slider_images": slider_images_serializer.data, "deals_of_the_day": deals_of_the_day_serializer.data, "top_20_best_seller": top_20_best_seller_serializer.data, "product_cat_serializer": product_cat_serializer.data, "new_arrivals": new_arrivals_serializer.data, "featured": featured_serializer.data})
 
@@ -63,5 +70,6 @@ class RecentAPIView(APIView):
     def get(self, request):
         user = self.request.user.id
         recent_view = Product.objects.filter(id__in = ProductView.objects.filter(user=user).values('product').order_by('-view_count'))[:24]
+        print(str(recent_view))
         recent_view_serializer = productListSerializer(recent_view, many=True)
         return Response({"recent_view":recent_view_serializer.data })

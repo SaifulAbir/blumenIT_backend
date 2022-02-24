@@ -69,7 +69,7 @@ class HomeDataAPIView(APIView):
 class RecentAPIView(APIView):
     def get(self, request):
         user = self.request.user.id
-        recent_view = Product.objects.filter(id__in = ProductView.objects.filter(user=user).values('product').order_by('-view_count'))[:24]
+        recent_view = Product.objects.filter(id__in = ProductView.objects.filter(user=user).values('product').order_by('view_date'))[:24]
         print(str(recent_view))
         recent_view_serializer = productListSerializer(recent_view, many=True)
         return Response({"recent_view":recent_view_serializer.data })

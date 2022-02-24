@@ -65,6 +65,21 @@ class ProductListAPI(ListAPIView):
     serializer_class = ProductListSerializer
     pagination_class = ProductCustomPagination
 
+class ProductListByCategoryAPI(ListAPIView):
+    permission_classes = (AllowAny,)
+    # queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
+    serializer_class = ProductListSerializer
+    pagination_class = ProductCustomPagination
+    lookup_field = 'cid'
+    lookup_url_kwarg = "cid"
+    def get_queryset(self):
+        cid = self.kwargs['cid']
+        if cid:
+            queryset = Product.objects.filter(is_active=True).order_by('-created_at')
+        else:
+            queryset = Product.objects.filter(category=slug).order_by('-created_at')
+        return queryset
+
 class ProductTagsListAPI(ListAPIView):
     permission_classes = (AllowAny,)
     queryset = ProductTags.objects.filter(is_active=True).order_by('-created_at')

@@ -6,6 +6,7 @@ urlpatterns = [
     path('create-tag/', TagCreateAPIView.as_view()),
 
     path('product-list/', ProductListAPI.as_view()),
+    path('product-list-by-category/<int:cid>/', ProductListByCategoryAPI.as_view()),
     path('product-tags-list/', ProductTagsListAPI.as_view()),
     path('product-details/<str:slug>/', ProductDetailsAPI.as_view()),
     path('tags-list/', TagsListAPI.as_view()),

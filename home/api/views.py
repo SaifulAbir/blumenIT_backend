@@ -4,7 +4,7 @@ from home.serializers import SliderImagesListSerializer, DealsOfTheDayListSerial
 # from home.serializers import SliderImagesListSerializer
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-from datetime import date
+from datetime import date, timedelta
 from django.db.models import Avg, Prefetch, Q
 
 from product.models import Product, ProductCategory, ProductReview
@@ -62,8 +62,9 @@ class HomeDataAPIView(APIView):
 class RecentAPIView(APIView):
     def get(self, request):
         today = date.today()
+        some_day_last_week = today - timedelta(days=7)
         user = self.request.user.id
-        recent_view = Product.objects.filter(id__in = ProductView.objects.filter(user=user).values('product').order_by('-view_count'))[:24]
-        recent_view = Product.objects.filter(product_view_count__view_date__gt=)[:24]
+        # recent_view = Product.objects.filter(id__in = ProductView.objects.filter(user=user).values('product').order_by('-view_count'))[:24]
+        recent_view = Product.objects.filter(product_view_count__view_date__gt=some_day_last_week)[:24]
         recent_view_serializer = productListSerializer(recent_view, many=True)
         return Response({"recent_view":recent_view_serializer.data })

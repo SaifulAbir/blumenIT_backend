@@ -44,7 +44,7 @@ class HomeDataAPIView(APIView):
         featured_serializer = productListSerializer(featured, many=True)
 
         # most popular
-        most_popular = Product.objects.filter(product_review__rating_number__avg=Avg('rating_number'))
+        most_popular = Product.objects.filter(status="ACTIVE").annotate(average_rating=Avg("product_review__rating_number"))
         print(most_popular)
         # most_popular = Product.objects.annotate(Avg('productReview__rating_number'))
         # product = Product.objects.filter(status='ACTIVE').order_by('-created_at')

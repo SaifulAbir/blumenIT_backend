@@ -7,7 +7,6 @@ from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
-from datetime import datetime, timedelta
 from ecommerce.common.emails import send_email_without_delay
 from user import models as user_models
 import jwt

@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import *
 from product.models import Product, ProductCategory
+from product.serializers import ProductDetailsSerializer
 
 # list Serializer start
 class SliderImagesListSerializer(serializers.ModelSerializer):
@@ -13,6 +14,7 @@ class SliderImagesListSerializer(serializers.ModelSerializer):
                 ]
 
 class DealsOfTheDayListSerializer(serializers.ModelSerializer):
+    product = ProductDetailsSerializer(many=True, read_only=True)
     class Meta:
         model = DealsOfTheDay
         fields = [
@@ -33,6 +35,20 @@ class productListSerializer(serializers.ModelSerializer):
                 'price',
                 'rating',
                 'thumbnail',
+                ]
+
+class mostPopularProductListSerializer(serializers.ModelSerializer):
+    average_rating = serializers.CharField(read_only=True)
+    class Meta:
+        model = Product
+        fields = [
+                'id',
+                'title',
+                'slug',
+                'price',
+                'rating',
+                'thumbnail',
+                'average_rating'
                 ]
 
 class product_catListSerializer(serializers.ModelSerializer):

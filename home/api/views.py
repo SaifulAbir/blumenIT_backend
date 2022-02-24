@@ -43,18 +43,20 @@ class HomeDataAPIView(APIView):
         featured = Product.objects.filter(status='ACTIVE', is_featured=True).order_by('-created_at')[:10]
         featured_serializer = productListSerializer(featured, many=True)
 
-        # most popular 
+        # most popular
+        most_popular = Product.objects.filter(product_review__rating_number__avg=Avg('rating_number'))
+        print(most_popular)
         # most_popular = Product.objects.annotate(Avg('productReview__rating_number'))
         # product = Product.objects.filter(status='ACTIVE').order_by('-created_at')
         # review_avg = ProductReview.objects.filter(product = product).annotate(avg=Avg('rating_number'))
         # product = get_object_or_404(Product.objects.annotate(avg_rating_number=Avg('productReview__rating_number')),pk=1)
         # beers = Product.objects.order_by('-created_at').annotate(avg_rating_number=Avg('ratemodel__rating_number'))
-        product = Product.objects.filter(status='ACTIVE').order_by('-created_at')
+        # product = Product.objects.filter(status='ACTIVE').order_by('-created_at')
         # query = ProductReview.objects.annotate(avg=Avg('rating_number')).prefetch_related(
         #     Prefetch("product", queryset=Product.objects.filter(id__in=product).order_by('-created_at')))
-        query = ProductReview.objects.annotate(avg=Avg('rating_number'))
-        ca_ids = query.values_list('product__id', flat=True).distinct()
-        print(str(ca_ids))
+        # query = ProductReview.objects.annotate(avg=Avg('rating_number'))
+        # ca_ids = query.values_list('product__id', flat=True).distinct()
+        # print(str(ca_ids))
 
 
         return Response({"slider_images": slider_images_serializer.data, "deals_of_the_day": deals_of_the_day_serializer.data, "top_20_best_seller": top_20_best_seller_serializer.data, "product_cat_serializer": product_cat_serializer.data, "new_arrivals": new_arrivals_serializer.data, "featured": featured_serializer.data})

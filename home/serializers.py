@@ -21,7 +21,9 @@ class DealsOfTheDayListSerializer(serializers.ModelSerializer):
                 'id',
                 'product',
                 'discount_price',
-                'discount_price_type'
+                'discount_price_type',
+                'start_date',
+                'end_date'
                 ]
 
 class productListSerializer(serializers.ModelSerializer):

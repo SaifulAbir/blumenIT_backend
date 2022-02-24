@@ -62,9 +62,9 @@ class HomeDataAPIView(APIView):
 class RecentAPIView(APIView):
     def get(self, request):
         today = date.today()
-        some_day_last_week = today - timedelta(days=7)
+        last_week = today - timedelta(days=7)
         user = self.request.user.id
         # recent_view = Product.objects.filter(id__in = ProductView.objects.filter(user=user).values('product').order_by('-view_count'))[:24]
-        recent_view = Product.objects.filter(product_view_count__view_date__gt=some_day_last_week)[:24]
+        recent_view = Product.objects.filter(product_view_count__view_date__gt=last_week)[:24]
         recent_view_serializer = productListSerializer(recent_view, many=True)
         return Response({"recent_view":recent_view_serializer.data })

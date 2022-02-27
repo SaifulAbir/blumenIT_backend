@@ -1,11 +1,16 @@
 from time import time
 from django.conf import settings
+from django.contrib.auth.hashers import check_password, make_password
 from rest_framework import viewsets, mixins, status
+from rest_framework.decorators import api_view
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate
+from rest_framework.status import HTTP_401_UNAUTHORIZED, HTTP_200_OK
+from rest_framework.utils import json
 from rest_framework_simplejwt.tokens import RefreshToken
 from ecommerce.common.emails import send_email_without_delay
 from user import models as user_models
@@ -14,7 +19,6 @@ from django.template.loader import render_to_string
 from user import serializers as user_serializers
 from user.models import CustomerProfile, User
 from rest_framework.views import APIView
-
 from user.serializers import CustomerProfileUpdateSerializer, SubscriptionSerializer
 
 
@@ -125,3 +129,55 @@ class SubscriptionAPIView(CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         return super(SubscriptionAPIView, self).post(request, *args, **kwargs)
+
+
+@api_view(["POST"])
+def change_password(request):
+    received_json_data = json.loads(request.body)
+    user = request.user.id
+    try:
+        old_password = received_json_data["old_password"]
+    except KeyError:
+        raise ValidationError("Old password cannot be blank.")
+    try:
+        new_password = received_json_data["new_password"]
+    except KeyError:
+        raise ValidationError("New password cannot be blank.")
+
+    try:
+        user_obj = User.objects.get(id=user)
+    except User.DoesNotExist:
+        data = {
+            'status': 'failed',
+            'code': HTTP_401_UNAUTHORIZED,
+            "message": "User is not exists",
+            "result": ''
+        }
+        return Response(data, HTTP_401_UNAUTHORIZED)
+    status = check_password(old_password, user_obj.password)
+
+    if not status :
+        data = {
+            'status': 'failed',
+            'code': HTTP_401_UNAUTHORIZED,
+            "message": "Your old password is wrong",
+            "result": ''
+        }
+        return Response(data, HTTP_401_UNAUTHORIZED)
+    else:
+        new_password = make_password(new_password)
+        user_obj.password = new_password
+        user_obj.save()
+
+        data = {
+            'status': 'success',
+            'code': HTTP_200_OK,
+            "message": "Password changed successfully",
+            "result": {
+                "user": {
+                    "username": user_obj.username,
+                    'user_id': user_obj.id
+                }
+            }
+        }
+    return Response(data, HTTP_200_OK)

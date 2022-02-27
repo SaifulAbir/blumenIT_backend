@@ -9,7 +9,7 @@ from rest_framework.permissions import AllowAny
 from django.shortcuts import get_object_or_404
 from user.models import User
 from product.models import Product
-# from cart.models import Order, OrderItem, CustomerAddress, PaymentType, ShippingType
+from cart.models import Order, OrderItem, CustomerAddress, PaymentType, ShippingType
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 from drf_yasg.utils import swagger_auto_schema
@@ -20,6 +20,13 @@ class CheckoutAPIView(CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         return super(CheckoutAPIView, self).post(request, *args, **kwargs)
+
+class PaymentMethodsAPIView(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = PaymentTypesListSerializer
+    def get_queryset(self):
+        queryset = PaymentType.objects.filter(status=True)
+        return queryset
 
 # class CheckoutAPIView(APIView):
     # def get(self, request):

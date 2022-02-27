@@ -16,7 +16,7 @@ class VendorRequest(AbstractTimeStamp):
     first_name = models.CharField(max_length=100, null=False, blank=False)
     last_name = models.CharField(max_length=100, null=False, blank=False)
     vendor_status = models.CharField(max_length=20, choices=VENDOR_STATUSES)
-    is_verified = models.BooleanField(default=True)
+    is_verified = models.BooleanField(default=False)
     nid = models.CharField(max_length=50, null=False, blank=False)
     trade_license = models.ImageField(upload_to='images/trade_license', null=True, blank=True)
 
@@ -44,6 +44,7 @@ class Vendor(AbstractTimeStamp):
         VendorRequest, on_delete=models.PROTECT, blank=True, null=True, related_name="vendor_request",
         verbose_name=_('Vendor Request'))
     phone = models.CharField(max_length=255, null=True, blank=True, default="None")
+    password = models.CharField(max_length=255)
 
     def __str__(self):
         return self.organization_name

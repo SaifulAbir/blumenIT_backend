@@ -1,7 +1,7 @@
-from rest_framework.generics import CreateAPIView, ListAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import AllowAny
 from vendor.models import VendorRequest
-from vendor.serializers import VendorRequestSerializer
+from vendor.serializers import VendorRequestSerializer, VendorCreateSerializer
 
 
 class VendorRequestAPIView(CreateAPIView):
@@ -15,3 +15,7 @@ class VendorRequestAPIView(CreateAPIView):
 class VendorRequestListAPI(ListAPIView):
     queryset = VendorRequest.objects.all()
     serializer_class = VendorRequestSerializer
+
+
+class VendorCreateAPIView(CreateAPIView):
+    serializer_class = VendorCreateSerializer

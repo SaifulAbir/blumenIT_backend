@@ -233,6 +233,13 @@ class ProductSearchSerializer(serializers.Serializer):
     title = serializers.CharField()
     price = serializers.CharField()
     img = serializers.CharField(required=False)
+
+class MegaMenuDataAPIViewListSerializer(serializers.ModelSerializer):
+    product_sub_category = SubCategorySerializer(many=True)
+    class Meta:
+        model = ProductCategory
+        fields = ['id', 'name', 'logo', 'cover', 'product_sub_category']
+
 # list Serializer end
 
 # update Serializer start

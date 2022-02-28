@@ -8,7 +8,7 @@ from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateAP
 from rest_framework.views import APIView
 
 from home.models import ProductView
-from product.serializers import ProductCreateSerializer, ProductUpdateSerializer, ProductListSerializer, TagCreateSerializer,ProductTagsSerializer,  TagListSerializer, ProductCategoryListSerializer, ProductBrandListSerializer, ProductSubCategoryListSerializer, ProductDetailsSerializer, ProductSearchSerializer, ProductAllCategoryListSerializer
+from product.serializers import ProductCreateSerializer, ProductUpdateSerializer, ProductListSerializer, TagCreateSerializer,ProductTagsSerializer,  TagListSerializer, ProductCategoryListSerializer, ProductBrandListSerializer, ProductSubCategoryListSerializer, ProductDetailsSerializer, ProductSearchSerializer, ProductAllCategoryListSerializer, MegaMenuDataAPIViewListSerializer
 
 from product.models import Product, Tags, ProductTags, ProductCategory, ProductSubCategory, ProductChildCategory, ProductBrand
 
@@ -180,6 +180,13 @@ class ProductSearchAPIView(APIView):
             search_result = []
         serializer = ProductSearchSerializer(search_result, many=True)
         return Response({"search_result": serializer.data})
+
+class MegaMenuDataAPIView(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = MegaMenuDataAPIViewListSerializer
+    def get_queryset(self):
+        queryset = ProductCategory.objects.filter(is_active=True)
+        return queryset
 # list API views end
 
 

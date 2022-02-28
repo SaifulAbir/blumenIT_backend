@@ -41,7 +41,7 @@ def pre_save_product_category(sender, instance, *args, **kwargs):
 pre_save.connect(pre_save_product_category, sender=ProductCategory)
 
 class ProductSubCategory(AbstractTimeStamp):
-    category = models.ForeignKey(ProductCategory, on_delete=models.PROTECT, related_name='product_category')
+    category = models.ForeignKey(ProductCategory, on_delete=models.PROTECT, related_name='product_sub_category')
     name = models.CharField(max_length=100, null=False, blank=False)
     is_active = models.BooleanField(null=False, blank=False, default=True)
 

@@ -62,6 +62,7 @@ class Payment(AbstractTimeStamp):
 class Coupon(AbstractTimeStamp):
     code = models.CharField(max_length=15)
     amount = models.FloatField()
+    is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
         verbose_name = 'Coupon'

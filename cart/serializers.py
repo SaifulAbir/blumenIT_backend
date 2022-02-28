@@ -1,3 +1,5 @@
+from pyexpat import model
+from attr import fields
 from rest_framework import serializers
 from .models import *
 from product.models import Product
@@ -146,6 +148,11 @@ class ShippingTypesListSerializer(serializers.ModelSerializer):
                 'type_name',
                 'price'
                 ]
+
+class ActiveCouponListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Coupon
+        fields = '__all__'
 # list Serializer end
 
 

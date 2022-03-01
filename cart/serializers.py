@@ -9,7 +9,7 @@ from rest_framework.validators import UniqueTogetherValidator
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ['id','thumbnail','title','price']
+        fields = ['id','thumbnail','title','price','quantity']
 
 class noteSerializer(serializers.ModelSerializer):
     class Meta:
@@ -128,6 +128,19 @@ class CheckoutSerializer(serializers.ModelSerializer):
 
         return order_instance
 
+class WishListDataSerializer(serializers.ModelSerializer):
+    product = serializers.SerializerMethodField()
+    class Meta:
+        model = Wishlist
+        fields = ['id', 'product']
+
+    def get_product(self, obj):
+        selected_product = Product.objects.filter(slug=obj.product.slug).distinct()
+        return ProductSerializer(selected_product, many=True).data
+
+class WishlistSerializer(serializers.Serializer):
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), many=False, write_only=True)
+    
 
 # general Serializer end
 

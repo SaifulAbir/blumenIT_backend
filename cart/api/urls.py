@@ -5,6 +5,8 @@ urlpatterns = [
     path('checkout/', CheckoutAPIView.as_view()),
     path('payment-methods/', PaymentMethodsAPIView.as_view()),
     path('active-coupon/', ActiveCouponlistView.as_view()),
+    path('wishlist-data/', WishListAPIView.as_view()),
+    path('destroy-wishlist-data/<int:pk>/', WishlistDeleteAPIView.as_view()),
 
     # path('add-to-cart/<str:slug>/', AddToCartAPIView.as_view()),
     # path('remove-from-cart/<str:slug>/', RemoveFromCartAPIView.as_view()),

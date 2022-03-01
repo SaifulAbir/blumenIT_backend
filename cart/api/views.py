@@ -1,5 +1,5 @@
 
-from rest_framework.generics import ListAPIView, CreateAPIView, ListCreateAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView, ListCreateAPIView, DestroyAPIView
 from rest_framework.views import APIView
 from cart.serializers import CheckoutSerializer, PaymentTypesListSerializer, ActiveCouponListSerializer, WishlistSerializer, WishListDataSerializer
 from rest_framework.exceptions import ValidationError
@@ -57,6 +57,12 @@ class WishListAPIView(ListCreateAPIView):
                 else:
                     return Response({"status":"Already exist!"})
         return Response({"status":"Data uploaded!"})
+
+class WishlistDeleteAPIView(DestroyAPIView):
+    serializer_class = WishListDataSerializer
+    def get_queryset(self):
+        queryset = Wishlist.objects.filter(id=self.kwargs['pk'])
+        return queryset
 
 # class CheckoutAPIView(APIView):
     # def get(self, request):

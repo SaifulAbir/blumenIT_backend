@@ -1,5 +1,8 @@
+from django.template.loader import render_to_string
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+
+from ecommerce.common.emails import send_email_without_delay
 from user.models import User
 from user.serializers import UserRegisterSerializer
 from vendor.models import VendorRequest, Vendor
@@ -39,6 +42,12 @@ class VendorCreateSerializer(serializers.ModelSerializer):
 
             vendor_instance = Vendor.objects.create(organization_name=vendor_request.organization_name,
                                                     vendor_admin=user, vendor_request=vendor_request, password=password)
+            if vendor_instance:
+                email_list = user.email
+                subject = "Your Account"
+                html_message = render_to_string('vendor_email.html',
+                                                {'username': user.first_name, 'email': user.email, 'password': password})
+                send_email_without_delay(subject, html_message, email_list)
             return vendor_instance
         else:
             raise ValidationError("You should verify first to create a vendor")

@@ -1,6 +1,6 @@
 from rest_framework.views import APIView
 from home.models import SliderImage, DealsOfTheDay, ProductView
-from home.serializers import SliderImagesListSerializer, DealsOfTheDayListSerializer, productListSerializer, product_catListSerializer, mostPopularProductListSerializer
+from home.serializers import SliderImagesListSerializer, DealsOfTheDayListSerializer, productListSerializer, product_catListSerializer
 # from home.serializers import SliderImagesListSerializer
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
@@ -45,7 +45,7 @@ class HomeDataAPIView(APIView):
 
         # most popular
         most_popular = Product.objects.filter(status="ACTIVE").annotate(average_rating=Avg("product_review__rating_number")).order_by('-product_review__rating_number')
-        most_popular_serializer = mostPopularProductListSerializer(most_popular, many=True, context={"request": request})
+        most_popular_serializer = productListSerializer(most_popular, many=True, context={"request": request})
 
 
         return Response({"slider_images": slider_images_serializer.data, "deals_of_the_day": deals_of_the_day_serializer.data, "top_20_best_seller": top_20_best_seller_serializer.data, "product_cat_serializer": product_cat_serializer.data, "new_arrivals": new_arrivals_serializer.data, "featured": featured_serializer.data, "most_popular": most_popular_serializer.data})

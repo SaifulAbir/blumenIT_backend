@@ -1,14 +1,14 @@
 
-from rest_framework.generics import ListAPIView, CreateAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView, ListCreateAPIView
 from rest_framework.views import APIView
-from cart.serializers import CheckoutSerializer, PaymentTypesListSerializer, ActiveCouponListSerializer
+from cart.serializers import CheckoutSerializer, PaymentTypesListSerializer, ActiveCouponListSerializer, WishlistSerializer, WishListDataSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from django.shortcuts import get_object_or_404
 from user.models import User
 from product.models import Product
-from cart.models import PaymentType, Coupon
+from cart.models import PaymentType, Coupon, Wishlist
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 from drf_yasg.utils import swagger_auto_schema
@@ -33,6 +33,30 @@ class ActiveCouponlistView(ListAPIView):
     def get_queryset(self):
         queryset = Coupon.objects.filter(is_active=True)
         return queryset
+
+class WishListAPIView(ListCreateAPIView):
+
+    def get(self, request):
+        user = self.request.user.id
+        wishlist = Wishlist.objects.filter(user=user,is_active=True)
+        wishlist_serializer_data = WishListDataSerializer(wishlist, many=True)
+        return Response({"wishlist": wishlist_serializer_data.data})
+
+    def post(self, request):
+        wishlist_serializer = WishlistSerializer(data=request.data)
+        if wishlist_serializer.is_valid():
+            product = request.POST.get("product")
+            if product:
+                whishlist_exc = Wishlist.objects.filter(user=User.objects.get(id=self.request.user.id), product=Product.objects.get(id=product), is_active=True)
+                if not whishlist_exc:
+                    wishlist = Wishlist(
+                        user = User.objects.get(id=self.request.user.id),
+                        product=Product.objects.get(id=product)
+                    )
+                    wishlist.save()
+                else:
+                    return Response({"status":"Already exist!"})
+        return Response({"status":"Data uploaded!"})
 
 # class CheckoutAPIView(APIView):
     # def get(self, request):

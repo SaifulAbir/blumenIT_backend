@@ -620,3 +620,4 @@ staticfiles/
 media
 staticfiles
 .vscode
+help.txt

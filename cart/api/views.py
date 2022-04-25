@@ -1,7 +1,7 @@
 
-from rest_framework.generics import ListAPIView, CreateAPIView, ListCreateAPIView, DestroyAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView, ListCreateAPIView, DestroyAPIView, RetrieveUpdateAPIView
 from rest_framework.views import APIView
-from cart.serializers import CheckoutSerializer, PaymentTypesListSerializer, ActiveCouponListSerializer, WishlistSerializer, WishListDataSerializer
+from cart.serializers import CheckoutSerializer, PaymentTypesListSerializer, WishlistSerializer, WishListDataSerializer, ApplyCouponSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
@@ -27,14 +27,23 @@ class PaymentMethodsAPIView(ListAPIView):
         queryset = PaymentType.objects.filter(status=True)
         return queryset
 
-class ActiveCouponlistView(ListAPIView):
+class ApplyCouponAPIView(RetrieveUpdateAPIView):
     permission_classes = (AllowAny,)
-    serializer_class = ActiveCouponListSerializer
-    def get_queryset(self):
-        queryset = Coupon.objects.filter(is_active=True)
-        return queryset
+    serializer_class = ApplyCouponSerializer
+    lookup_field = 'code'
+    lookup_url_kwarg = "code"
 
-class WishListAPIView(ListCreateAPIView):
+    def get_queryset(self):
+        code = self.kwargs['code']
+        query = Coupon.objects.filter(code=code, is_active=True)
+        return query
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+# class WishListAPIView(ListCreateAPIView):
+class WishListAPIView(APIView):
+    permission_classes = (AllowAny,)
 
     def get(self, request):
         user = self.request.user.id
@@ -61,7 +70,7 @@ class WishListAPIView(ListCreateAPIView):
 class WishlistDeleteAPIView(DestroyAPIView):
     serializer_class = WishListDataSerializer
     def get_queryset(self):
-        queryset = Wishlist.objects.filter(id=self.kwargs['pk'])
+        queryset = Wishlist.objects.filter(id=self.kwargs['id'])
         return queryset
 
 # class CheckoutAPIView(APIView):
@@ -277,3 +286,10 @@ class WishlistDeleteAPIView(DestroyAPIView):
 #                 return Response({"status":'Out of stock.'})
 #         else:
 #             return Response({"status":"Product not found"})
+
+# class ActiveCouponlistView(ListAPIView):
+#     permission_classes = (AllowAny,)
+#     serializer_class = ActiveCouponListSerializer
+#     def get_queryset(self):
+#         queryset = Coupon.objects.filter(is_active=True)
+#         return queryset

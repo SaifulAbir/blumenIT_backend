@@ -65,6 +65,7 @@ class Coupon(AbstractTimeStamp):
     is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
+        unique_together = [('code')]
         verbose_name = 'Coupon'
         verbose_name_plural = 'Coupons'
         db_table = 'coupons'
@@ -89,6 +90,7 @@ class Order(AbstractTimeStamp):
     coupon_status = models.BooleanField(default=False)
     notes = models.TextField(null=True, blank=True, default='')
     total_price = models.FloatField(max_length=255, null=False, blank=False, default=0)
+    discounted_price = models.FloatField(max_length=255, null=False, blank=False, default=0)
 
     class Meta:
         verbose_name = 'Order'

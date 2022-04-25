@@ -50,11 +50,20 @@ class CheckoutSerializer(serializers.ModelSerializer):
     shipping_street_address = serializers.CharField(write_only=True)
     shipping_city = serializers.CharField(write_only=True)
     shipping_zip_code = serializers.CharField(write_only=True)
+
+    total_price = serializers.FloatField(write_only=True, required=True)
+    discounted_price = serializers.FloatField(write_only=True, required=False)
+    coupon = serializers.PrimaryKeyRelatedField(queryset=Coupon.objects.all(), many=False, write_only=True, required=False)
+    coupon_status = serializers.BooleanField(write_only=True, required=False)
+
     class Meta:
         model = Order
         fields = ['id',
                 'notes',
                 'total_price',
+                'discounted_price',
+                'coupon',
+                'coupon_status',
                 'payment_type',
                 'product', 'quantity',
                 'billing_first_name','billing_last_name','billing_country','billing_street_address','billing_city','billing_phone',
@@ -162,10 +171,15 @@ class ShippingTypesListSerializer(serializers.ModelSerializer):
                 'price'
                 ]
 
-class ActiveCouponListSerializer(serializers.ModelSerializer):
+class ApplyCouponSerializer(serializers.ModelSerializer):
     class Meta:
         model = Coupon
-        fields = '__all__'
+        fields = [ 'id', 'amount' ]
+
+# class ActiveCouponListSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Coupon
+#         fields = '__all__'
 # list Serializer end
 
 

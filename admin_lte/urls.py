@@ -1,9 +1,9 @@
 from django.urls import path
 from django.views.decorators.csrf import csrf_exempt
-from . import views
+from .views import VendorLogin, VendorRegisterView, ForgotPassword
 
 urlpatterns = [
-    path('login/', views.login, name='login'),
-    path('register/', views.register, name='register'),
-    path('forgot-password/', views.forgot_password, name='forgot_password'),
+    path('login/', VendorLogin.as_view(), name='login'),
+    path('register/', VendorRegisterView.as_view(), name='register'),
+    path('forgot-password/', ForgotPassword.as_view(), name='forgot_password'),
 ]

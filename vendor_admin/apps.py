@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class AdminLteConfig(AppConfig):
+class VendorAdminConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'admin_lte'
+    name = 'vendor_admin'

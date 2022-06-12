@@ -52,7 +52,8 @@ INSTALLED_APPS = [
     'cart',
     'currency',
     'home',
-    'admin_lte',
+    'vendor_admin',
+    # 'admin_lte',
     # 'django_countries',
 ]
 

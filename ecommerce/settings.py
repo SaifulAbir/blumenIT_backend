@@ -193,3 +193,9 @@ EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
+
+
+# LOGIN_URL = "user:login"
+# LOGIN_REDIRECT_URL = '/'
+LOGOUT_URL = "vendor_admin:logout"
+# LOGOUT_REDIRECT_URL = '/'

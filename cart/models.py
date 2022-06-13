@@ -74,6 +74,15 @@ class Coupon(AbstractTimeStamp):
         return self.code
 
 class Order(AbstractTimeStamp):
+    ORDER_CHOICES = [
+        ('PENDING', 'pending'),
+        ('PROCESSING', 'processing'),
+        ('SHIPPED', 'shipped'),
+        ('DELIVERED', 'delivered'),
+        ('RETURN', 'return'),
+        ('CANCEL', 'cancel'),
+        ]
+
     user = models.ForeignKey(User, on_delete=models.PROTECT,related_name='order_user', blank=True, null=True)
     slug  = models.SlugField(null=False, blank=False, allow_unicode=True)
     ref_code = models.CharField(max_length=20)
@@ -91,6 +100,7 @@ class Order(AbstractTimeStamp):
     notes = models.TextField(null=True, blank=True, default='')
     total_price = models.FloatField(max_length=255, null=False, blank=False, default=0)
     discounted_price = models.FloatField(max_length=255, null=False, blank=False, default=0)
+    order_status = models.CharField(max_length=20, null=False, blank=False, choices=ORDER_CHOICES, default=ORDER_CHOICES[1][1])
 
     class Meta:
         verbose_name = 'Order'

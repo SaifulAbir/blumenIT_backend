@@ -6,15 +6,41 @@
   <body class="hold-transition register-page">
     <div class="register-box">
       <div class="register-logo">
-        <a href="#"><b>Vendor</b> Request</a>
+        <b>Vendor</b> Request
       </div>
 
       <div class="card">
         <div class="card-body register-card-body">
           <p class="login-box-msg">Register a new membership</p>
 
-          <form method="post" enctype="multipart/form-data">
+          <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
+            {% if form.errors %}
+                <div class="alert alert-danger alert-dismissible" role="alert">
+                    <div id="form_errors">
+                        {% for key, value in form.errors.items %}
+                            <strong>{{ value }}</strong>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endif %}
+            {% if messages %}
+                {% for message in messages %}
+                    {% if message.tags == 'error' %}
+                        <div class="alert alert-dismissible alert-danger">
+                    {% else %}
+                        <div class="alert alert-dismissible alert-success">
+                    {% endif %}
+                    <button type="button" class="close" data-dismiss="alert">
+                    ×
+                    </button>
+                    <strong>{{message}}<strong>
+                    </div>
+                {% endfor %}
+            {% endif %}
             <div class="input-group mb-3">
               {{ form.email }}
               <div class="input-group-append">
@@ -53,11 +79,6 @@
 
             <div class="input-group mb-3">
               {{ form.vendor_status }}
-              <!-- <div class="input-group-append"> -->
-                <!-- <div class="input-group-text"> -->
-                  <!-- <span class="fas fa-user"></span> -->
-                <!-- </div> -->
-              <!-- </div> -->
             </div>
 
             <div class="input-group mb-3">
@@ -69,10 +90,10 @@
               </div>
             </div>
 
-            <div class="input-group mb-3">
+            <!-- <div class="input-group mb-3">
               <p>Trade License</p>
               {{ form.trade_license }}
-            </div>
+            </div> -->
 
 
             <div class="row">

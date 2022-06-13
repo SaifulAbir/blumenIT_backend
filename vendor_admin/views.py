@@ -1,6 +1,8 @@
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views import View
+
+from vendor.models import Vendor
 from .forms import VendorRequestForm
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth.views import LoginView
@@ -36,30 +38,27 @@ class VendorRequestView(View):
         return render(request, self.template_name, {'form': form})
 
     def post(self, request, *args, **kwargs):
-        # form = self.form_class(request.POST, request.FILES)
+        form = self.form_class(request.POST, request.FILES)
         # form = self.form_class(request.POST)
-        form = VendorRequestForm(request.POST)
-        print(form)
+        # form = VendorRequestForm(request.POST)
         email = request.POST.get('email')
-        if form.is_valid():
-            print('if')
-        else:
-            print('else')
-        # print(email)
-        # if email:
-        #     User = get_user_model()
-        #     if User.objects.filter(email = email).exists():
-        #         print('if')
-        #         messages.error(request, 'Email already in use!')
-        #         return redirect(to='request')
-        #     else:
-        #         if form.is_valid():
-        #             form.save()
-        #             messages.success(request, 'Your request submitted successfully.')
-        #             return redirect(to='login')
-        #         else:
-        #             messages.error(request, 'Form data not valid!')
-        #             return redirect(to='request')
+        organization_name = request.POST.get('organization_name')
+        if email:
+            User = get_user_model()
+            if User.objects.filter(email = email).exists():
+                messages.error(request, 'Email already in use!')
+                return redirect(to='request')
+            if Vendor.objects.filter(organization_name = organization_name).exists():
+                messages.error(request, 'Organization name already in use!')
+                return redirect(to='request')
+
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Your request submitted successfully.')
+                return redirect(to='login')
+            else:
+                messages.error(request, 'Form data not valid!')
+                return redirect(to='request')
         
 
 

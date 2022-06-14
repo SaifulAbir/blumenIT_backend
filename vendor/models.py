@@ -1,17 +1,26 @@
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.template.loader import render_to_string
+
+from ecommerce.common.emails import send_email_without_delay
 from ecommerce.models import AbstractTimeStamp
 from django.utils.translation import gettext as _
 from user.models import User
 
 
 class VendorRequest(AbstractTimeStamp):
+    VENDOR_STATUSES = [
+        ('ORGANIZATION', 'Organization'),
+        ('INDIVIDUAL', 'Individual'), ]
+
     email = models.EmailField(
         max_length=255, null=False, blank=False, unique=True)
     organization_name = models.CharField(
         max_length=254, null=False, blank=False, verbose_name=_('Organization/ Vendor Name'), unique=True)
     first_name = models.CharField(max_length=100, null=False, blank=False)
     last_name = models.CharField(max_length=100, null=False, blank=False)
-    vendor_type = models.CharField(max_length=20, null=True, blank=True)
+    vendor_status = models.CharField(max_length=20, choices=VENDOR_STATUSES)
     is_verified = models.BooleanField(default=False)
     nid = models.CharField(max_length=50, null=False, blank=False)
     trade_license = models.ImageField(upload_to='images/trade_license', null=True, blank=True)
@@ -49,3 +58,27 @@ class Vendor(AbstractTimeStamp):
         verbose_name_plural = "Vendors"
         verbose_name = "Vendor"
         db_table = 'vendors'
+
+
+@receiver(post_save, sender=VendorRequest)
+def create_vendor(sender, instance, created, **kwargs):
+    is_verified = instance.is_verified
+    try:
+        vendor = Vendor.objects.get(vendor_request=instance)
+    except Vendor.DoesNotExist:
+        vendor = None
+    if is_verified is True and not vendor:
+        password = User.objects.make_random_password()
+
+        user = User.objects.create(username=instance.email, email=instance.email,
+                                   first_name=instance.first_name, last_name=instance.last_name)
+        user.set_password(password)
+        user.save()
+        vendor_instance = Vendor.objects.create(organization_name=instance.organization_name,
+                                                vendor_admin=user, vendor_request=instance, password=password)
+        if vendor_instance:
+            email_list = user.email
+            subject = "Your Account Credentials"
+            html_message = render_to_string('vendor_email.html',
+                                            {'username': user.first_name, 'email': user.email, 'password': password})
+            send_email_without_delay(subject, html_message, email_list)

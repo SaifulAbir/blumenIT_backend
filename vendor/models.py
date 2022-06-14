@@ -10,7 +10,7 @@ from user.models import User
 
 
 class VendorRequest(AbstractTimeStamp):
-    VENDOR_STATUSES = [
+    VENDOR_TYPES = [
         ('ORGANIZATION', 'Organization'),
         ('INDIVIDUAL', 'Individual'), ]
 
@@ -20,7 +20,7 @@ class VendorRequest(AbstractTimeStamp):
         max_length=254, null=False, blank=False, verbose_name=_('Organization/ Vendor Name'), unique=True)
     first_name = models.CharField(max_length=100, null=False, blank=False)
     last_name = models.CharField(max_length=100, null=False, blank=False)
-    vendor_status = models.CharField(max_length=20, choices=VENDOR_STATUSES)
+    vendor_type = models.CharField(max_length=20, choices=VENDOR_TYPES)
     is_verified = models.BooleanField(default=False)
     nid = models.CharField(max_length=50, null=False, blank=False)
     trade_license = models.ImageField(upload_to='images/trade_license', null=True, blank=True)

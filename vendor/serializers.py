@@ -12,7 +12,8 @@ class VendorRequestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = VendorRequest
-        fields = ['id', 'email', 'organization_name', 'first_name', 'last_name', 'vendor_type', 'nid', 'trade_license']
+        fields = ['id', 'first_name', 'last_name', 'organization_name', 'email', 'vendor_type', 'nid', 'trade_license']
+        # fields = ['id', 'email', 'organization_name', 'first_name', 'last_name', 'vendor_type', 'nid', 'trade_license']
 
 
 class VendorCreateSerializer(serializers.ModelSerializer):
@@ -51,3 +52,8 @@ class VendorCreateSerializer(serializers.ModelSerializer):
             return vendor_instance
         else:
             raise ValidationError("You should verify first to create a vendor")
+
+class OrganizationNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VendorRequest
+        fields = ['organization_name']

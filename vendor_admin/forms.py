@@ -22,10 +22,8 @@ class VendorRequestForm(forms.ModelForm):
     nid = forms.CharField(max_length=100, required=True,widget=forms.TextInput(attrs={'placeholder': 'NID', 'class': 'form-control', }))
     trade_license= forms.ImageField(widget=forms.ClearableFileInput(attrs={'multiple': False, 'placeholder': 'Trade License'}))
 
-    class Meta: 
+    class Meta:
         model = VendorRequest
-        # fields = ['email', 'organization_name', 'first_name', 'last_name', 'nid' ]
-        # fields = ['email', 'organization_name', 'first_name', 'last_name', 'vendor_type', 'nid' ]
         fields = ['email', 'organization_name', 'first_name', 'last_name', 'vendor_type', 'nid', 'trade_license' ]
 
 class UserLoginForm(AuthenticationForm):

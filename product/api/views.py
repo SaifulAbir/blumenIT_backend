@@ -27,6 +27,7 @@ from user.models import CustomerProfile
 
 
 class ProductCreateAPIView(CreateAPIView):
+    permission_classes = (AllowAny,)
     serializer_class = ProductCreateSerializer
 
     def post(self, request, *args, **kwargs):

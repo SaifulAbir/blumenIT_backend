@@ -46,7 +46,7 @@ class RegisterUser(mixins.CreateModelMixin,
                 subject = "Verify Your Account"
                 token = jwt.encode({'email': email_list, 'exp': exp, 'scope': subject},
                                    settings.JWT_SECRET, algorithm='HS256')
-                html_message = render_to_string('verification_email.html', {'token': token, 'domain': 'http://127.0.0.1:8000/'})
+                html_message = render_to_string('verification_email.html', {'token': token, 'domain': settings.EMAIL_DOMAIN_NAME})
                 send_email_without_delay(subject, html_message, email_list)
                 CustomerProfile.objects.create(user=user)
                 data = {

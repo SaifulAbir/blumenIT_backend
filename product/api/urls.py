@@ -1,5 +1,6 @@
 from django.urls import path
 from .views import *
+from .vendor_admin_views import *
 
 urlpatterns = [
     path('create-product/', ProductCreateAPIView.as_view()),
@@ -23,5 +24,9 @@ urlpatterns = [
     path('product-search/', ProductSearchAPIView.as_view()),
 
     path('mega-menu-data/', MegaMenuDataAPIView.as_view()),
+
+    # vendor admin apies
+    path('vendor-admin/product-list/<int:id>/', VendorAdminProductListAPI.as_view()),
+
 
 ]

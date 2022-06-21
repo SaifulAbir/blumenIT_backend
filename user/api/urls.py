@@ -1,7 +1,7 @@
 from django.urls import path
 from django.views.decorators.csrf import csrf_exempt
 from user.api.views import RegisterUser, LoginUser, VerifyUserAPIView, CustomerRetrieveUpdateAPIView, \
-    SubscriptionAPIView, change_password
+    SubscriptionAPIView, change_password, UserListAPIView
 
 urlpatterns = [
     path('login/', LoginUser.as_view({'post': 'create'}), name='login_user'),
@@ -10,5 +10,6 @@ urlpatterns = [
     path('customer-profile/', CustomerRetrieveUpdateAPIView.as_view()),
     path('customer-profile/update/', CustomerRetrieveUpdateAPIView.as_view()),
     path('subscription/', SubscriptionAPIView.as_view()),
+    path('user-list/', UserListAPIView.as_view()),
     path('change-password/', change_password),
 ]

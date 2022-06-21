@@ -4,7 +4,7 @@ from django.contrib.auth.hashers import check_password, make_password
 from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import ValidationError
-from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView
+from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView, ListAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
@@ -19,7 +19,7 @@ from django.template.loader import render_to_string
 from user import serializers as user_serializers
 from user.models import CustomerProfile, User
 from rest_framework.views import APIView
-from user.serializers import CustomerProfileUpdateSerializer, SubscriptionSerializer
+from user.serializers import CustomerProfileUpdateSerializer, SubscriptionSerializer, UserRegisterSerializer
 
 
 class RegisterUser(mixins.CreateModelMixin,
@@ -181,3 +181,9 @@ def change_password(request):
             }
         }
     return Response(data, HTTP_200_OK)
+
+
+class UserListAPIView(ListAPIView):
+    queryset = User.objects.filter()
+    permission_classes = [AllowAny]
+    serializer_class = UserRegisterSerializer

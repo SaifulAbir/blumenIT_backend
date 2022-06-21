@@ -89,7 +89,7 @@ class CustomerProfile(AbstractTimeStamp):
     birth_date = models.DateField(_("Birthday"), null=True, blank=True)
 
     def __str__(self):
-        return self.phone
+        return self.user.email
 
     def associated_user(self):
         return self.user.get_full_name()

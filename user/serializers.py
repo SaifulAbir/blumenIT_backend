@@ -26,14 +26,28 @@ class LoginSerializer(serializers.Serializer):
 
 
 class CustomerProfileUpdateSerializer(serializers.ModelSerializer):
+    first_name = serializers.CharField(write_only=True)
+    last_name = serializers.CharField(write_only=True)
+    email = serializers.CharField(write_only=True)
     user = UserRegisterSerializer(read_only=True)
     gender_display_value = serializers.CharField(
         source='get_gender_display', read_only=True
     )
     class Meta:
         model = CustomerProfile
-        model_fields = ['id', 'user', 'phone', 'address', 'birth_date', 'gender', 'gender_display_value']
+        model_fields = ['id', 'user', 'phone', 'address', 'birth_date', 'gender', 'gender_display_value',
+                        'first_name', 'last_name', 'email']
         fields = model_fields
+
+    def update(self, instance, validated_data):
+        first_name = validated_data.pop('first_name')
+        last_name = validated_data.pop('last_name')
+        email = validated_data.pop('email')
+        user = instance.user
+        user.update(first_name=first_name,
+                    last_name=last_name,
+                    email=email,)
+        return super().update(instance, validated_data)
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):

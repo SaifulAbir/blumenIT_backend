@@ -8,7 +8,7 @@ from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateAP
 from rest_framework.views import APIView
 
 from home.models import ProductView
-from product.serializers import ProductCreateSerializer, ProductUpdateSerializer, ProductListSerializer, TagCreateSerializer,ProductTagsSerializer,  TagListSerializer, ProductCategoryListSerializer, ProductBrandListSerializer, ProductSubCategoryListSerializer, ProductDetailsSerializer, ProductSearchSerializer, ProductAllCategoryListSerializer, MegaMenuDataAPIViewListSerializer
+from product.serializers import ProductCreateSerializer, ProductUpdateSerializer, ProductListSerializer, TagCreateSerializer,ProductTagsSerializer,  TagListSerializer, ProductCategoryListSerializer, ProductBrandListSerializer, ProductSubCategoryListSerializer, ProductDetailsSerializer, ProductSearchSerializer, ProductAllCategoryListSerializer, MegaMenuDataAPIViewListSerializer, VendorProductListSerializer
 
 from product.models import Product, Tags, ProductTags, ProductCategory, ProductSubCategory, ProductChildCategory, ProductBrand
 
@@ -205,4 +205,22 @@ class ProductUpdateAPIView(RetrieveUpdateAPIView):
     def put(self, request, *args, **kwargs):
         return self.update(request, *args, **kwargs)
 # update API views end
+
+
+
+# Vendor apies start 
+class VendorAdminProductListAPI(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = VendorProductListSerializer
+    pagination_class = ProductCustomPagination
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+    def get_queryset(self):
+        id = self.kwargs['id']
+        if id:
+            queryset = Product.objects.filter(vendor_id=id, status='ACTIVE').order_by('-created_at')
+        else:
+            queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
+        return queryset
+
 

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from user import models as user_models
-from user.models import CustomerProfile, Subscription
+from user.models import CustomerProfile, Subscription, User
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
@@ -43,7 +43,7 @@ class CustomerProfileUpdateSerializer(serializers.ModelSerializer):
         first_name = validated_data.pop('first_name')
         last_name = validated_data.pop('last_name')
         email = validated_data.pop('email')
-        user = instance.user
+        user = User.objects.get(id=instance.user.id)
         user.update(first_name=first_name,
                     last_name=last_name,
                     email=email,)

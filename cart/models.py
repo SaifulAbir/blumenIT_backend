@@ -5,6 +5,7 @@ from django.db.models.signals import pre_save
 from user.models import User
 from django.utils.translation import gettext as _
 from product.models import Product
+from django.utils import timezone
 
 # from django_countries.fields import CountryField
 
@@ -17,6 +18,27 @@ from product.models import Product
     5. Received
     6. Refunds
 '''
+
+class Coupon(AbstractTimeStamp):
+    code = models.CharField(max_length=15)
+    amount = models.FloatField()
+    number_of_uses = models.IntegerField(default=0, null=False, blank=False)
+    start_time = models.DateTimeField(default=timezone.now)
+    end_time = models.DateTimeField(default=timezone.now)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        unique_together = [('code')]
+        verbose_name = 'Coupon'
+        verbose_name_plural = 'Coupons'
+        db_table = 'coupons'
+
+    def __str__(self):
+        return self.code
+
+class UseRecordOfCoupon(AbstractTimeStamp):
+    coupon_id = models.ForeignKey(Coupon, on_delete=models.CASCADE, related_name='coupon')
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user')
 
 class ShippingType(AbstractTimeStamp):
     type_name = models.CharField(max_length=50)
@@ -58,20 +80,6 @@ class Payment(AbstractTimeStamp):
 
     def __str__(self):
         return f"{self.pk}"
-
-class Coupon(AbstractTimeStamp):
-    code = models.CharField(max_length=15)
-    amount = models.FloatField()
-    is_active = models.BooleanField(null=False, blank=False, default=True)
-
-    class Meta:
-        unique_together = [('code')]
-        verbose_name = 'Coupon'
-        verbose_name_plural = 'Coupons'
-        db_table = 'coupons'
-
-    def __str__(self):
-        return self.code
 
 class Order(AbstractTimeStamp):
     ORDER_CHOICES = [
@@ -194,3 +202,4 @@ class Wishlist(AbstractTimeStamp):
     user = models.ForeignKey(User, on_delete=models.PROTECT,related_name='wishlist_user', blank=True, null=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True)
+

@@ -8,10 +8,11 @@ from rest_framework.permissions import AllowAny
 from django.shortcuts import get_object_or_404
 from user.models import User
 from product.models import Product
-from cart.models import PaymentType, Coupon, Wishlist
+from cart.models import PaymentType, Coupon, UseRecordOfCoupon, Wishlist
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 from drf_yasg.utils import swagger_auto_schema
+from django.utils import timezone
 
 
 class CheckoutAPIView(CreateAPIView):
@@ -27,19 +28,102 @@ class PaymentMethodsAPIView(ListAPIView):
         queryset = PaymentType.objects.filter(status=True)
         return queryset
 
-class ApplyCouponAPIView(RetrieveUpdateAPIView):
+# class ApplyCouponAPIView(RetrieveUpdateAPIView):
+#     permission_classes = (AllowAny,)
+#     serializer_class = ApplyCouponSerializer
+#     lookup_field = 'code'
+#     lookup_url_kwarg = "code"
+
+#     def get_queryset(self):
+#         code = self.kwargs['code']
+#         query = Coupon.objects.filter(code=code, is_active=True)
+#         return query
+
+    # def put(self, request, *args, **kwargs):
+    #     return self.update(request, *args, **kwargs)
+
+class ApplyCouponAPIView(APIView):
     permission_classes = (AllowAny,)
     serializer_class = ApplyCouponSerializer
     lookup_field = 'code'
-    lookup_url_kwarg = "code"
+    lookup_url_kwarg = 'code'
+    
 
-    def get_queryset(self):
-        code = self.kwargs['code']
-        query = Coupon.objects.filter(code=code, is_active=True)
-        return query
+    def get(self, request, code, uid):
+        # try:
+            code = self.kwargs['code']
+            uid = self.kwargs['uid']
+            # code = request.GET.get('code')
+            # code = request.data["code"]
+            # user = request.data["uid"]
+            # print(uid)
 
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
+            # check coupon code exist or not
+            code_exist = Coupon.objects.filter(code = code, is_active=True).exists()
+            if code_exist:
+                coupon_obj = Coupon.objects.filter(code = code)
+                start_date_time = coupon_obj[0].start_time
+                end_date_time = coupon_obj[0].end_time
+
+                current_time = timezone.now()
+
+                # date comparison with current date
+                if current_time > start_date_time and current_time < end_date_time:
+                    # return Response({"data": current_time, "start_date_time": start_date_time })
+
+                    # check number of uses of coupon
+                    number_of_uses = int(coupon_obj[0].number_of_uses)
+                    print(number_of_uses)
+                    if number_of_uses > 0:
+
+                        # check if this user already used this coupon 
+                        user = User.objects.filter(id = uid).exists()
+                        if user:
+                            user_obj = User.objects.filter(id = uid)
+                            check_in_use_coupon_record = UseRecordOfCoupon.objects.filter(coupon_id = coupon_obj[0].id, user_id = user_obj[0].id).exists()
+                            if check_in_use_coupon_record:
+                                return Response({"status": "You already used this coupon!"})
+                            else:
+                                coupon_id = Coupon.objects.get(code = coupon_obj[0].code)
+                                user_id = User.objects.get(id = uid)
+                                # print(type(coupon_id))
+                                UseRecordOfCoupon.objects.create(coupon_id = coupon_id, user_id = user_id)
+                                coupon_obj.update(number_of_uses = number_of_uses - 1)
+                                number_of_uses = Coupon.objects.get(code = coupon_obj[0].code).number_of_uses
+                                if number_of_uses < 1:
+                                    coupon_obj.update(is_active=False)
+
+                                return Response({"status": "Authentic coupon.", "amount":coupon_obj[0].amount})
+                        else:
+                            return Response({"status": "User doesn't exist!"})
+
+                    else:
+                        return Response({"status": "Invalid coupon!"})
+
+                else:
+                    if current_time > end_date_time:
+                        coupon_obj.update(is_active=False)
+                    return Response({"status": "Invalid coupon!"})
+
+
+
+
+                # if code_status == True:
+                #     return Response({"data": code_status})
+                # else:
+                #     return Response({"status": "Invalid coupon!"})
+
+
+                # return Response({"data": current_time, "start_date_time": start_date_time })
+            else:
+                return Response({"status": "Invalid coupon!"})
+                # return Response({"status": "Code Invalid, Coupon does not exist!"})
+        # except:
+        #     return Response({"status": "Something went wrong, contact with developer!"})
+
+            # return Response({"data": "code"})
+
+
 
 # class WishListAPIView(ListCreateAPIView):
 class WishListAPIView(APIView):

@@ -93,7 +93,7 @@ class ApplyCouponAPIView(APIView):
                                 if number_of_uses < 1:
                                     coupon_obj.update(is_active=False)
 
-                                return Response({"status": "Authentic coupon.", "amount":coupon_obj[0].amount})
+                                return Response({"status": "Authentic coupon.", "amount":coupon_obj[0].amount, "coupon_id": coupon_obj[0].id})
                         else:
                             return Response({"status": "User doesn't exist!"})
 

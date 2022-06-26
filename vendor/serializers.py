@@ -57,3 +57,11 @@ class OrganizationNameSerializer(serializers.ModelSerializer):
     class Meta:
         model = VendorRequest
         fields = ['organization_name']
+
+class VendorDetailSerializer(serializers.ModelSerializer):
+    vendor_request = VendorRequestSerializer(read_only=True)
+    vendor_admin = UserRegisterSerializer(read_only=True)
+
+    class Meta:
+        model = Vendor
+        fields = ['id', 'organization_name', 'vendor_admin', 'vendor_request', 'address', 'phone']

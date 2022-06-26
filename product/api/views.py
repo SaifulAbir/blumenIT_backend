@@ -8,9 +8,9 @@ from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateAP
 from rest_framework.views import APIView
 
 from home.models import ProductView
-from product.serializers import ProductCreateSerializer, ProductUpdateSerializer, ProductListSerializer, TagCreateSerializer,ProductTagsSerializer,  TagListSerializer, ProductCategoryListSerializer, ProductBrandListSerializer, ProductSubCategoryListSerializer, ProductDetailsSerializer, ProductSearchSerializer, ProductAllCategoryListSerializer, MegaMenuDataAPIViewListSerializer, VendorProductListSerializer
+# from product.serializers import ProductCreateSerializer, ProductUpdateSerializer, ProductListSerializer, TagCreateSerializer,ProductTagsSerializer,  TagListSerializer, ProductCategoryListSerializer, ProductBrandListSerializer, ProductSubCategoryListSerializer, ProductDetailsSerializer, ProductSearchSerializer, ProductAllCategoryListSerializer, MegaMenuDataAPIViewListSerializer, VendorProductListSerializer
 
-from product.models import Product, Tags, ProductTags, ProductCategory, ProductSubCategory, ProductChildCategory, ProductBrand
+# from product.models import Product, Tags, ProductTags, ProductCategory, ProductSubCategory, ProductChildCategory, ProductBrand
 
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response

@@ -1,7 +1,9 @@
+from django.db.models import Q
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import AllowAny
-from vendor.models import VendorRequest
-from vendor.serializers import VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer
+from vendor.models import VendorRequest, Vendor
+from vendor.serializers import VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
+    VendorDetailSerializer
 
 
 class VendorRequestAPIView(CreateAPIView):
@@ -24,3 +26,11 @@ class OrganizationNamesListAPIView(ListAPIView):
     permission_classes = [AllowAny]
     queryset = VendorRequest.objects.all()
     serializer_class = OrganizationNameSerializer
+
+
+class VendorDetailAPIView(RetrieveUpdateAPIView):
+    serializer_class = VendorDetailSerializer
+
+    def get_object(self):
+        vendor = Vendor.objects.get(vendor_admin=self.request.user)
+        return vendor

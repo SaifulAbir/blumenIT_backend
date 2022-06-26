@@ -7,7 +7,7 @@ from django.db.models.signals import pre_save
 from user.models import User, CustomerProfile
 
 class Category(AbstractTimeStamp):
-    title = models.CharField(max_length=100, null=False, blank=False)
+    title = models.CharField(max_length=100, null=False, blank=False, default="")
     is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
@@ -19,26 +19,74 @@ class Category(AbstractTimeStamp):
         return self.title
 
 class SubCategory(AbstractTimeStamp):
-    title = models.CharField(max_length=100, null=False, blank=False)
+    title = models.CharField(max_length=100, null=False, blank=False, default="")
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='sub_category_category')
+
+    class Meta:
+        verbose_name = 'SubCategory'
+        verbose_name_plural = 'SubCategories'
+        db_table = 'sub_category'
+
+    def __str__(self):
+        return self.title
 
 class SubSubCategory(AbstractTimeStamp):
-    title = models.CharField(max_length=100, null=False, blank=False)
+    title = models.CharField(max_length=100, null=False, blank=False, default="")
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='sub_sub_category_category')
+    sub_category = models.ForeignKey(SubCategory, on_delete=models.CASCADE, related_name='sub_sub_category_sub_category')
+
+    class Meta:
+        verbose_name = 'SubSubCategory'
+        verbose_name_plural = 'SubSubCategories'
+        db_table = 'sub_sub_category'
+
+    def __str__(self):
+        return self.title
 
 class Brand(AbstractTimeStamp):
-    title = models.CharField(max_length=100, null=False, blank=False)
+    title = models.CharField(max_length=100, null=False, blank=False, default="")
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'Brand'
+        verbose_name_plural = 'Brands'
+        db_table = 'brand'
+
+    def __str__(self):
+        return self.title
 
 class Units(AbstractTimeStamp):
-    title = models.CharField(max_length=100, null=False, blank=False)
+    title = models.CharField(max_length=100, null=False, blank=False, default="")
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'Unit'
+        verbose_name_plural = 'Units'
+        db_table = 'units'
+
+    def __str__(self):
+        return self.title
 
 class DiscountTypes(AbstractTimeStamp):
-    title = models.CharField(max_length=100, null=False, blank=False)
+    title = models.CharField(max_length=100, null=False, blank=False, default="")
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'DiscountType'
+        verbose_name_plural = 'DiscountTypes'
+        db_table = 'discount_types'
+
+    def __str__(self):
+        return self.title
 
 class Product(AbstractTimeStamp):
     PRODUCT_STATUSES = [
         ('PENDING', 'Pending'),
         ('ACTIVE', 'Active')]
 
-    title = models.CharField(max_length=500, null=False, blank=False)
+    title = models.CharField(max_length=500, null=False, blank=False, default="")
     slug  = models.SlugField(null=False, allow_unicode=True, blank=True)
     warranty  = models.CharField(max_length=255, blank=True, help_text="eg: 1 year or 6 months")
     full_description = models.TextField(default='')
@@ -46,15 +94,15 @@ class Product(AbstractTimeStamp):
     status = models.CharField(max_length=20, choices=PRODUCT_STATUSES, default=PRODUCT_STATUSES[0][0])
     is_featured = models.BooleanField(null=False, blank=False, default=False)
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE,related_name='product_vendor', blank=False, null=False)
-    category = models.ForeignKey(Category, related_name='category', blank=False, null=True, on_delete=models.SET_NULL)
-    sub_category = models.ForeignKey(SubCategory, related_name='sub_category', blank=True, null=True, on_delete=models.SET_NULL)
-    sub_sub_category = models.ForeignKey(SubSubCategory, related_name='sub_sub_category', blank=True, null=True, on_delete=models.SET_NULL)
-    brand = models.ForeignKey(Brand, related_name='brand', blank=True, null=True, on_delete=models.SET_NULL)
-    unit = models.ForeignKey(Units, related_name="unit", blank=True, null=True, on_delete=models.SET_NULL)
+    category = models.ForeignKey(Category, related_name='product_category', blank=False, null=True, on_delete=models.SET_NULL)
+    sub_category = models.ForeignKey(SubCategory, related_name='product_sub_category', blank=True, null=True, on_delete=models.SET_NULL)
+    sub_sub_category = models.ForeignKey(SubSubCategory, related_name='product_sub_sub_category', blank=True, null=True, on_delete=models.SET_NULL)
+    brand = models.ForeignKey(Brand, related_name='product_brand', blank=True, null=True, on_delete=models.SET_NULL)
+    unit = models.ForeignKey(Units, related_name="product_unit", blank=True, null=True, on_delete=models.SET_NULL)
     unit_price = models.FloatField(max_length=255, null=False, blank=False, default=0)
     purchase_price = models.FloatField(max_length=255, null=False, blank=False, default=0)
     tax_in_percent = models.IntegerField(null=True, blank=True, default=0)
-    discount_type = models.ForeignKey(DiscountTypes, related_name="discount_type", null=True, blank=True, on_delete=models.SET_NULL)
+    discount_type = models.ForeignKey(DiscountTypes, related_name="product_discount_type", null=True, blank=True, on_delete=models.SET_NULL)
     discount_amount = models.FloatField(max_length=255, null=True, blank=True, default=0)
     total_quantity = models.IntegerField(null=False, blank=False, default=0)
     shipping_cost = models.FloatField(max_length=255, null=True, blank=True, default=0)
@@ -63,8 +111,6 @@ class Product(AbstractTimeStamp):
     shipping_time = models.IntegerField(null=True, blank=True, default=0, help_text="eg: Days in count.")
     thumbnail = models.FileField(upload_to='products', blank=True, null=True)
     youtube_link = models.URLField(null=True, blank=True)
-
-
 
     class Meta:
         verbose_name = 'Product'
@@ -81,20 +127,69 @@ def pre_save_product(sender, instance, *args, **kwargs):
 pre_save.connect(pre_save_product, sender=Product)
 
 class Colors(AbstractTimeStamp):
-    title = models.CharField(max_length=100, null=False, blank=False)
+    title = models.CharField(max_length=100, null=False, blank=False, default="")
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'Color'
+        verbose_name_plural = 'Colors'
+        db_table = 'colors'
+
+    def __str__(self):
+        return self.title
 
 class Attributes(AbstractTimeStamp):
-    title = models.CharField(max_length=100, null=False, blank=False)
+    title = models.CharField(max_length=100, null=False, blank=False, default="")
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'Attribute'
+        verbose_name_plural = 'Attributes'
+        db_table = 'attributes'
+
+    def __str__(self):
+        return self.title
 
 class ProductColors(AbstractTimeStamp):
-    color = models.ForeignKey(Colors, on_delete=models.PROTECT, related_name='product_colors')
+    product = models.ForeignKey(Product, null=False, blank=False, on_delete=models.CASCADE, related_name="product_colors_product", default="")
+    color = models.ForeignKey(Colors, on_delete=models.CASCADE, null=False, blank=False, related_name='product_colors', default="")
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'ProductColor'
+        verbose_name_plural = 'ProductColors'
+        db_table = 'product_colors'
+
+    def __str__(self):
+        return self.product.title
+
 
 class ProductAttributes(AbstractTimeStamp):
-    attribute = models.ForeignKey(Attributes, on_delete=models.Prefetch, related_name='product_attributes_attributes')
+    product = models.ForeignKey(Product, null=False, blank=False, on_delete=models.CASCADE, related_name="product_attributes_product")
+    attribute = models.ForeignKey(Attributes, on_delete=models.CASCADE, null=False, blank=False, related_name='product_attributes_attributes')
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'ProductAttribute'
+        verbose_name_plural = 'ProductAttributes'
+        db_table = 'product_attributes'
+
+    def __str__(self):
+        return self.product.title
+
 
 class ProductAttributesValues(AbstractTimeStamp):
-    title = models.CharField(max_length=100, null=False, blank=False)
-    product_attribute = models.ForeignKey(ProductAttributes, on_delete=models.PROTECT, related_name='product_attributes_values_product_attributes')
+    title = models.CharField(max_length=100, null=False, blank=False, default="")
+    product = models.ForeignKey(Product, null=False, blank=False, on_delete=models.CASCADE, related_name="product_attributes_values_product")
+    product_attribute = models.ForeignKey(ProductAttributes, on_delete=models.CASCADE, related_name='product_attributes_values_product_attributes')
+
+    class Meta:
+        verbose_name = 'ProductAttributesValue'
+        verbose_name_plural = 'ProductAttributesValues'
+        db_table = 'product_attributes_values'
+
+    def __str__(self):
+        return self.title
 
 class ProductCombinations(AbstractTimeStamp):
     product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='product_combinations_product')
@@ -114,7 +209,17 @@ class ProductCombinations(AbstractTimeStamp):
         return self.sku
 
 class ProductTags(AbstractTimeStamp):
-    product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='product_tags_product')
+    title = models.CharField(max_length=100, null=False, blank=False, default="")
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=False, blank=False, related_name='product_tags_product', default="")
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'ProductTag'
+        verbose_name_plural = 'ProductTags'
+        db_table = 'product_tags'
+
+    def __str__(self):
+        return self.title
 
 class ProductMedia(AbstractTimeStamp):
     CHOICES = [
@@ -155,5 +260,15 @@ class ProductMedia(AbstractTimeStamp):
         return self.product.title
 
 class ProductReview(AbstractTimeStamp):
-    product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='product_review_product')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=False, blank=False, related_name='product_review_product', default="")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='product_review_user',blank=True, null=True)
+    rating_number = models.IntegerField(default=0)
+    review_text = models.TextField(default='',blank=True, null=True)
+    class Meta:
+        verbose_name = 'ProductReview'
+        verbose_name_plural = 'ProductReviews'
+        db_table = 'product_review'
+
+    def __str__(self):
+        return str(self.pk)
 

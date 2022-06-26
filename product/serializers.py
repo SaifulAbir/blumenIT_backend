@@ -1,6 +1,41 @@
-# from django.utils import timezone
-# from rest_framework import serializers
-# from .models import *
+from django.utils import timezone
+from rest_framework import serializers
+from product.models import \
+    Category, \
+    SubCategory, \
+    SubSubCategory
+
+
+class SubSubCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubSubCategory
+        fields = ['id','title']
+
+class SubCategorySerializer(serializers.ModelSerializer):
+    sub_sub_category = serializers.SerializerMethodField()
+    class Meta:
+        model = SubCategory
+        fields = [
+                    'id',
+                    'title',
+                    'sub_sub_category'
+                ]
+    def get_sub_sub_category(self, obj):
+        selected_sub_sub_category = SubSubCategory.objects.filter(sub_category=obj).distinct()
+        return SubSubCategorySerializer(selected_sub_sub_category, many=True).data
+
+class ProductAllCategoryListSerializer(serializers.ModelSerializer):
+    sub_category = serializers.SerializerMethodField()
+    class Meta:
+        model = Category
+        fields = [
+                'id',
+                'title',
+                'sub_category'
+                ]
+    def get_sub_category(self, obj):
+        selected_sub_category = SubCategory.objects.filter(category=obj).distinct()
+        return SubCategorySerializer(selected_sub_category, many=True).data
 
 
 # # general Serializer start
@@ -75,18 +110,8 @@
 #             'product_media'
 #         ]
 
-# class ChildCategorySerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = ProductChildCategory
-#         fields = ['id','name']
-# class SubCategorySerializer(serializers.ModelSerializer):
-#     child_category = serializers.SerializerMethodField()
-#     class Meta:
-#         model = ProductSubCategory
-#         fields = ['id','name','child_category']
-#     def get_child_category(self, obj):
-#         selected_child_category = ProductChildCategory.objects.filter(sub_category=obj).distinct()
-#         return ChildCategorySerializer(selected_child_category, many=True).data
+# 
+
 # # general Serializer end
 
 
@@ -218,18 +243,6 @@
 #         model = ProductCategory
 #         fields = ['id', 'name']
 
-# class ProductAllCategoryListSerializer(serializers.ModelSerializer):
-#     sub_category = serializers.SerializerMethodField()
-#     class Meta:
-#         model = ProductCategory
-#         fields = [
-#                 'id',
-#                 'name',
-#                 'sub_category'
-#                 ]
-#     def get_sub_category(self, obj):
-#         selected_sub_category = ProductSubCategory.objects.filter(category=obj).distinct()
-#         return SubCategorySerializer(selected_sub_category, many=True).data
 
 # class ProductSubCategoryListSerializer(serializers.ModelSerializer):
 #     class Meta:
@@ -328,11 +341,6 @@
 #             validated_data.update({"modified_by": self.context['request'].user.id, "modified_at": timezone.now()})
 #             return super().update(instance, validated_data)
 # # update Serializer end
-
-
-
-
-
 
 
 

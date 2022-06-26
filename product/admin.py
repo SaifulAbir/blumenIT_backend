@@ -1,27 +1,26 @@
 from django.contrib import admin
-# from product.models import Product, ProductMedia, ProductCategory, ProductSubCategory, ProductChildCategory, ProductBrand, Tags, Colors, Sizes, ProductReview
+from product.models import Category, SubCategory, SubSubCategory, Brand, Units, DiscountTypes, Product, Colors, Attributes, ProductColors, ProductAttributes, ProductAttributesValues, ProductCombinations, ProductTags, ProductMedia, ProductReview
 
-# Register your models here.
-# admin.site.register(Product)
-# admin.site.register(ProductMedia)
-
-# @admin.register(Product)
-
-# class ProductImageInline(admin.TabularInline):
-#     model = ProductMedia
-#     fields = ['file']
-# @admin.register(Product)
-# class ProductAdmin(admin.ModelAdmin):
-#     inlines = [
-#         ProductImageInline,
-#     ]
-
-
-# admin.site.register(ProductCategory)
-# admin.site.register(ProductSubCategory)
-# admin.site.register(ProductChildCategory)
-# admin.site.register(ProductBrand)
-# admin.site.register(Tags)
-# admin.site.register(Colors)
-# admin.site.register(Sizes)
-# admin.site.register(ProductReview)
+admin.site.register(Category)
+admin.site.register(SubCategory)
+admin.site.register(SubSubCategory)
+admin.site.register(Brand)
+admin.site.register(Units)
+admin.site.register(DiscountTypes)
+admin.site.register(ProductMedia)
+class ProductImageInline(admin.TabularInline):
+    model = ProductMedia
+    fields = ['file']
+@admin.register(Product)
+class ProductAdmin(admin.ModelAdmin):
+    inlines = [
+        ProductImageInline,
+    ]
+admin.site.register(Colors)
+admin.site.register(Attributes)
+admin.site.register(ProductColors)
+admin.site.register(ProductAttributes)
+admin.site.register(ProductAttributesValues)
+admin.site.register(ProductCombinations)
+admin.site.register(ProductTags)
+admin.site.register(ProductReview)

@@ -4,7 +4,8 @@ from .views import *
 urlpatterns = [
     path('checkout/', CheckoutAPIView.as_view()),
     path('payment-methods/', PaymentMethodsAPIView.as_view()),
-    path('apply-coupon/<str:code>/', ApplyCouponAPIView.as_view()),
+    path('apply-coupon/<str:code>/<int:uid>/', ApplyCouponAPIView.as_view()),
+    # path('apply-coupon/', ApplyCouponAPIView.as_view()),
     path('wishlist-data/', WishListAPIView.as_view()),
     path('destroy-wishlist-data/<int:id>/', WishlistDeleteAPIView.as_view()),
 

@@ -40,6 +40,14 @@ class UseRecordOfCoupon(AbstractTimeStamp):
     coupon_id = models.ForeignKey(Coupon, on_delete=models.CASCADE, related_name='coupon')
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user')
 
+    class Meta:
+        verbose_name = 'UseRecordOfCoupon'
+        verbose_name_plural = 'UseRecordOfCoupons'
+        db_table = 'use_record_of_coupon'
+
+    def __str__(self):
+        return f"{self.pk}"
+
 class ShippingType(AbstractTimeStamp):
     type_name = models.CharField(max_length=50)
     price = models.FloatField(default=0.00)

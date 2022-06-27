@@ -10,7 +10,8 @@ from rest_framework.views import APIView
 from home.models import ProductView
 
 from product.serializers import \
-    ProductAllCategoryListSerializer
+    ProductAllCategoryListSerializer, \
+    MegaMenuDataAPIViewListSerializer
 
 # from product.serializers import \
     # ProductCreateSerializer, \
@@ -52,7 +53,12 @@ class ProductAllCategoryListAPI(ListAPIView):
         return query
 
 
-
+class MegaMenuDataAPIView(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = MegaMenuDataAPIViewListSerializer
+    def get_queryset(self):
+        queryset = Category.objects.filter(is_active=True)
+        return queryset
 
 
 
@@ -204,12 +210,7 @@ class ProductAllCategoryListAPI(ListAPIView):
 #         serializer = ProductSearchSerializer(search_result, many=True)
 #         return Response({"search_result": serializer.data})
 
-# class MegaMenuDataAPIView(ListAPIView):
-#     permission_classes = (AllowAny,)
-#     serializer_class = MegaMenuDataAPIViewListSerializer
-#     def get_queryset(self):
-#         queryset = ProductCategory.objects.filter(is_active=True)
-#         return queryset
+# 
 # # list API views end
 
 

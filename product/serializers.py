@@ -37,6 +37,11 @@ class ProductAllCategoryListSerializer(serializers.ModelSerializer):
         selected_sub_category = SubCategory.objects.filter(category=obj).distinct()
         return SubCategorySerializer(selected_sub_category, many=True).data
 
+class MegaMenuDataAPIViewListSerializer(serializers.ModelSerializer):
+    product_sub_category = SubCategorySerializer(many=True)
+    class Meta:
+        model = Category
+        fields = ['id', 'title', 'logo', 'cover', 'product_sub_category']
 
 # # general Serializer start
 # class ProductCategoriesSerializer(serializers.ModelSerializer):
@@ -260,11 +265,7 @@ class ProductAllCategoryListSerializer(serializers.ModelSerializer):
 #     price = serializers.CharField()
 #     img = serializers.CharField(required=False)
 
-# class MegaMenuDataAPIViewListSerializer(serializers.ModelSerializer):
-#     product_sub_category = SubCategorySerializer(many=True)
-#     class Meta:
-#         model = ProductCategory
-#         fields = ['id', 'name', 'logo', 'cover', 'product_sub_category']
+# 
 
 # # list Serializer end
 

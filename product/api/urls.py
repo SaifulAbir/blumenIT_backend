@@ -4,6 +4,7 @@ from .views import *
 urlpatterns = [
 
     path('product-all-category-list/', ProductAllCategoryListAPI.as_view()),
+    path('mega-menu-data/', MegaMenuDataAPIView.as_view()),
 
 
     # path('product-list/', ProductListAPI.as_view()),
@@ -26,7 +27,7 @@ urlpatterns = [
     # path('update-product/<str:slug>/', ProductUpdateAPIView.as_view()),
     # path('product-search/', ProductSearchAPIView.as_view()),
 
-    # path('mega-menu-data/', MegaMenuDataAPIView.as_view()),
+    # 
 
     # # vendor admin apies
     # path('vendor-admin/product-list/<int:id>/', VendorAdminProductListAPI.as_view()),

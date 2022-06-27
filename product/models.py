@@ -130,6 +130,7 @@ pre_save.connect(pre_save_product, sender=Product)
 
 class Colors(AbstractTimeStamp):
     title = models.CharField(max_length=100, null=False, blank=False, default="")
+    color_code = models.CharField(max_length=100, null=True, blank=True, default="")
     is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
@@ -163,7 +164,7 @@ class ProductColors(AbstractTimeStamp):
         db_table = 'product_colors'
 
     def __str__(self):
-        return self.product.title
+        return self.product.title + ' ' + self.color.title
 
 
 class ProductAttributes(AbstractTimeStamp):
@@ -177,7 +178,11 @@ class ProductAttributes(AbstractTimeStamp):
         db_table = 'product_attributes'
 
     def __str__(self):
-        return self.product.title
+        return self.product.title + ' ' + self.attribute.title
+
+    @property
+    def product_attribute_name(self):
+        return self.attribute.title
 
 
 class ProductAttributesValues(AbstractTimeStamp):
@@ -193,14 +198,20 @@ class ProductAttributesValues(AbstractTimeStamp):
     def __str__(self):
         return self.title
 
+    @property
+    def product_attribute_name(self):
+        return self.product_attribute.attribute.title
+
 class ProductCombinations(AbstractTimeStamp):
     product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='product_combinations_product')
     sku = models.CharField(max_length=500, null=False, blank=False)
     varient = models.CharField(max_length=500, null=False, blank=False)
     varient_price = models.FloatField(max_length=255, null=False, blank=False, default=0)
     quantity = models.IntegerField(null=False, blank=False, default=0)
-    product_color = models.ForeignKey(ProductColors, related_name="product_colors", null=True, blank=True, on_delete=models.SET_NULL)
-    product_attribute = models.ForeignKey(ProductAttributes, related_name="product_attributes", null=True, blank=True, on_delete=models.SET_NULL)
+    product_color = models.ForeignKey(ProductColors, related_name="product_combinations_product_color", null=True, blank=True, on_delete=models.SET_NULL)
+    product_attribute = models.ForeignKey(ProductAttributes, related_name="product_combinations_product_attributes", null=True, blank=True, on_delete=models.SET_NULL)
+    product_attribute_values = models.ForeignKey(ProductAttributesValues, related_name="product_combinations_product_attributes_values", null=True, blank=True, on_delete=models.SET_NULL)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
         verbose_name = 'ProductCombination'
@@ -208,7 +219,43 @@ class ProductCombinations(AbstractTimeStamp):
         db_table = 'product_combinations'
 
     def __str__(self):
-        return self.sku
+        title = self.product.title
+        if self.product_color:
+            color = self.product_color.color.title
+        else:
+            color = ''
+        if self.product_attribute:
+            attribute = self.product_attribute.attribute.title
+        else:
+            attribute = ''
+        if self.product_attribute_values:
+            attribute_value = self. product_attribute_values.title
+        else:
+            attribute_value = ''
+        combine = title + ' ' + color + ' ' + attribute + ' '+ attribute_value
+        return combine
+
+    @property
+    def product_color_name(self):
+        return self.product_color.color.title
+
+    @property
+    def product_color_code(self):
+        return self.product_color.color.color_code
+
+    def save(self, *args, **kwargs):
+        super(ProductCombinations, self).save(*args, **kwargs)
+        try:
+            product = Product.objects.get(id=self.product.id)
+            p_cs = ProductCombinations.objects.filter(product=self.product)
+            total = 0
+            for p_c in p_cs:
+                total += p_c.quantity
+            product.total_quantity = total
+            product.save()
+        except :
+            print("Error in product combination save.")
+        
 
 class ProductTags(AbstractTimeStamp):
     title = models.CharField(max_length=100, null=False, blank=False, default="")
@@ -225,9 +272,10 @@ class ProductTags(AbstractTimeStamp):
 
 class ProductMedia(AbstractTimeStamp):
     CHOICES = [
+        ('COMPLETE', 'Complete'),
         ('IN_QUEUE', 'In_Queue'),
         ('IN_PROCESSING', 'In_Processing'),
-        ('COMPLETE', 'Complete'),]
+        ]
 
     MEDIA_TYPES = [
         ('image', 'Image'),
@@ -250,7 +298,7 @@ class ProductMedia(AbstractTimeStamp):
     product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='product_media_product')
     type = models.CharField(max_length=10, choices=MEDIA_TYPES)
     file = models.FileField(upload_to='products', validators=[validate_file_extension])
-    status = models.CharField(max_length=20, choices=CHOICES)
+    status = models.CharField(max_length=20, choices=CHOICES, default=CHOICES[0][0])
     video_type = models.CharField(max_length=50, null=True, blank=True, choices=VIDEO_TYPES)
 
     class Meta:
@@ -266,6 +314,7 @@ class ProductReview(AbstractTimeStamp):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='product_review_user',blank=True, null=True)
     rating_number = models.IntegerField(default=0)
     review_text = models.TextField(default='',blank=True, null=True)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
     class Meta:
         verbose_name = 'ProductReview'
         verbose_name_plural = 'ProductReviews'

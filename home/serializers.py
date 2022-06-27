@@ -1,17 +1,17 @@
-# from rest_framework import serializers
-# from .models import *
-# from product.models import Product, ProductCategory
+from rest_framework import serializers
+from .models import *
+from product.models import Product, Category
 # from product.serializers import ProductDetailsSerializer, ProductMediaSerializer
 
 # # list Serializer start
-# class SliderImagesListSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = SliderImage
-#         fields = [
-#                 'id',
-#                 'file',
-#                 'text',
-#                 ]
+class SliderImagesListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SliderImage
+        fields = [
+                'id',
+                'file',
+                'text',
+                ]
 
 # class DealsOfTheDayListSerializer(serializers.ModelSerializer):
 #     product = ProductDetailsSerializer(many=True, read_only=True)

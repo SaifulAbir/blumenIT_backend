@@ -1,13 +1,12 @@
-# from rest_framework.views import APIView
-# from home.models import SliderImage, DealsOfTheDay, ProductView
+from rest_framework.views import APIView
+from home.models import SliderImage, DealsOfTheDay, ProductView
 # from home.serializers import SliderImagesListSerializer, DealsOfTheDayListSerializer, productListSerializer, product_catListSerializer
-# # from home.serializers import SliderImagesListSerializer
-# from rest_framework.response import Response
-# from rest_framework.permissions import AllowAny
-# from datetime import date, timedelta
-# from django.db.models import Avg, Prefetch, Q
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
+from datetime import date, timedelta
+from django.db.models import Avg, Prefetch, Q
 
-# from product.models import Product, ProductCategory, ProductReview
+from product.models import Product, Category, ProductReview
 
 # class HomeDataAPIView(APIView):
 #     permission_classes = (AllowAny,)
@@ -32,7 +31,7 @@
 #         for category_id in category_ids:
 #             if category_id not in final_category_ids:
 #                 final_category_ids.append(category_id)
-#         product_cat = ProductCategory.objects.filter(id__in=final_category_ids)[:6]
+#         product_cat = Category.objects.filter(id__in=final_category_ids)[:6]
 #         product_cat_serializer = product_catListSerializer(product_cat, many=True)
 
 #         # new arrivals

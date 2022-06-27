@@ -5,6 +5,7 @@ urlpatterns = [
 
     path('product-all-category-list/', ProductAllCategoryListAPI.as_view()),
     path('mega-menu-data/', MegaMenuDataAPIView.as_view()),
+    path('product-details/<str:slug>/', ProductDetailsAPI.as_view()),
 
 
     # path('product-list/', ProductListAPI.as_view()),
@@ -17,7 +18,7 @@ urlpatterns = [
     # path('product-list-by-sub-category/<int:subcid>/', ProductListBySubCategoryAPI.as_view()),
     # path('product-list-by-child-category/<int:childcid>/', ProductListByChildCategoryAPI.as_view()),
     # path('product-tags-list/', ProductTagsListAPI.as_view()),
-    # path('product-details/<str:slug>/', ProductDetailsAPI.as_view()),
+    # 
     # path('tags-list/', TagsListAPI.as_view()),
     # path('product-category-list/', ProductCategoryListAPI.as_view()),
     # path('product-sub-category-list/<str:slug>/', ProductSubCategoryListAPI.as_view()),

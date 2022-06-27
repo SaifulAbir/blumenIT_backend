@@ -3,7 +3,14 @@ from rest_framework import serializers
 from product.models import \
     Category, \
     SubCategory, \
-    SubSubCategory
+    SubSubCategory, \
+    Product, \
+    ProductTags, \
+    ProductReview, \
+    ProductMedia, \
+    ProductCombinations, \
+    ProductAttributes, \
+    ProductAttributesValues
 
 
 class SubSubCategorySerializer(serializers.ModelSerializer):
@@ -38,10 +45,143 @@ class ProductAllCategoryListSerializer(serializers.ModelSerializer):
         return SubCategorySerializer(selected_sub_category, many=True).data
 
 class MegaMenuDataAPIViewListSerializer(serializers.ModelSerializer):
-    product_sub_category = SubCategorySerializer(many=True)
+    # product_sub_category = SubCategorySerializer(many=True)
+    sub_category = serializers.SerializerMethodField()
     class Meta:
         model = Category
-        fields = ['id', 'title', 'logo', 'cover', 'product_sub_category']
+        fields = ['id', 'title', 'logo', 'cover', 'sub_category']
+        # fields = ['id', 'title', 'logo', 'cover', 'product_sub_category']
+
+    def get_sub_category(self, obj):
+        selected_sub_category = SubCategory.objects.filter(category=obj).distinct()
+        return SubCategorySerializer(selected_sub_category, many=True).data
+
+class ProductTagsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductTags
+        fields = ['id', 'title']
+
+class ProductReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductReview
+        fields = ['id', 'user', 'rating_number', 'review_text']
+
+class ProductMediaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductMedia
+        fields = ['id', 'type', 'file', 'video_type']
+
+class ProductAttributeValuesSerializer(serializers.ModelSerializer):
+    product_attribute_name = serializers.ReadOnlyField()
+    class Meta:
+        model = ProductAttributesValues
+        fields = ['id', 'title', 'product_attribute', 'product_attribute_name']
+
+class ProductAttributeSerializer(serializers.ModelSerializer):
+    product_attribute_name = serializers.ReadOnlyField()
+    class Meta:
+        model = ProductAttributes
+        fields = ['id', 'product_attribute_name']
+class ProductCombinationSerializer(serializers.ModelSerializer):
+    product_color_name = serializers.ReadOnlyField()
+    product_color_code = serializers.ReadOnlyField()
+    product_attribute = serializers.SerializerMethodField()
+    product_attribute_values = serializers.SerializerMethodField()
+    class Meta:
+        model = ProductCombinations
+        fields = ['id', 'sku', 'varient', 'varient_price', 'quantity', 'product_color_name', 'product_color_code', 'product_attribute', 'product_attribute_values']
+    def get_product_attribute(self, obj):
+        selected_product_attribute = ProductAttributes.objects.filter(product=obj.product).distinct()
+        return ProductAttributeSerializer(selected_product_attribute, many=True).data
+    def get_product_attribute_values(self, obj):
+        selected_product_attribute_values = ProductAttributesValues.objects.filter(id=obj.product_attribute_values.id).distinct()
+        return ProductAttributeValuesSerializer(selected_product_attribute_values, many=True).data
+
+class ProductDetailsSerializer(serializers.ModelSerializer):
+    # tags = serializers.PrimaryKeyRelatedField(queryset=Tags.objects.all(), many=True, write_only=True)
+    # colors = serializers.PrimaryKeyRelatedField(queryset=Colors.objects.all(), many=True, write_only=True)
+    # sizes = serializers.PrimaryKeyRelatedField(queryset=Sizes.objects.all(), many=True, write_only=True)
+    # media = serializers.ListField(child=serializers.FileField(), write_only=True)
+
+    product_tags = serializers.SerializerMethodField()
+    product_reviews = serializers.SerializerMethodField()
+    product_media = serializers.SerializerMethodField()
+    product_combinations = serializers.SerializerMethodField()
+    # product_colors = ProductColorsSerializer(many=True, read_only=True)
+    # product_sizes = ProductSizesSerializer(many=True, read_only=True)
+    # product_media = ProductMediaSerializer(many=True, read_only=True)
+    class Meta:
+        model = Product
+        fields = [
+            'id',
+            'title',
+            'slug',
+            'warranty',
+            'full_description',
+            'short_description',
+            'status',
+            'vendor',
+            'category',
+            'sub_category',
+            'sub_sub_category',
+            'brand',
+            'unit',
+            'unit_price',
+            'purchase_price',
+            'tax_in_percent',
+            'discount_type',
+            'discount_amount',
+            'total_quantity',
+            'total_shipping_cost',
+            'shipping_time',
+            'thumbnail',
+            'youtube_link',
+            'product_tags',
+            'product_reviews',
+            'product_media',
+            'product_combinations'
+        ]
+
+    def get_product_tags(self, obj):
+        selected_product_tags = ProductTags.objects.filter(product=obj).distinct()
+        return ProductTagsSerializer(selected_product_tags, many=True).data
+    def get_product_reviews(self, obj):
+        selected_product_reviews = ProductReview.objects.filter(product=obj, is_active=True).distinct()
+        return ProductReviewSerializer(selected_product_reviews, many=True).data
+    def get_product_media(self, obj):
+        selected_product_media = ProductMedia.objects.filter(product=obj, status="COMPLETE").distinct()
+        return ProductMediaSerializer(selected_product_media, many=True).data
+    def get_product_media(self, obj):
+        selected_product_media = ProductMedia.objects.filter(product=obj, status="COMPLETE").distinct()
+        return ProductMediaSerializer(selected_product_media, many=True).data
+    def get_product_combinations(self, obj):
+        selected_product_combinations = ProductCombinations.objects.filter(product=obj, is_active=True).distinct()
+        return ProductCombinationSerializer(selected_product_combinations, many=True).data
+        # fields = [
+        #     'id',
+        #     'title',
+        #     'price',
+        #     'full_description',
+        #     'short_description',
+        #     'quantity',
+        #     'warranty',
+        #     'variation',
+        #     'rating',
+        #     'status',
+        #     'is_featured',
+        #     'product_category',
+        #     'product_brand',
+        #     'thumbnail',
+        #     'vendor',
+        #     'tags',
+        #     'product_tags',
+        #     'colors',
+        #     'product_colors',
+        #     'sizes',
+        #     'product_sizes',
+        #     'media',
+        #     'product_media'
+        # ]
 
 # # general Serializer start
 # class ProductCategoriesSerializer(serializers.ModelSerializer):
@@ -72,48 +212,9 @@ class MegaMenuDataAPIViewListSerializer(serializers.ModelSerializer):
 #         model = ProductSizes
 #         fields = ['name']
 
-# class ProductMediaSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = ProductMedia
-#         fields = ['id', 'type', 'file', 'status']
+# 
 
-# class ProductDetailsSerializer(serializers.ModelSerializer):
-#     tags = serializers.PrimaryKeyRelatedField(queryset=Tags.objects.all(), many=True, write_only=True)
-#     colors = serializers.PrimaryKeyRelatedField(queryset=Colors.objects.all(), many=True, write_only=True)
-#     sizes = serializers.PrimaryKeyRelatedField(queryset=Sizes.objects.all(), many=True, write_only=True)
-#     media = serializers.ListField(child=serializers.FileField(), write_only=True)
-
-#     product_tags = ProductTagsSerializer(many=True, read_only=True)
-#     product_colors = ProductColorsSerializer(many=True, read_only=True)
-#     product_sizes = ProductSizesSerializer(many=True, read_only=True)
-#     product_media = ProductMediaSerializer(many=True, read_only=True)
-#     class Meta:
-#         model = Product
-#         fields = [
-#             'id',
-#             'title',
-#             'price',
-#             'full_description',
-#             'short_description',
-#             'quantity',
-#             'warranty',
-#             'variation',
-#             'rating',
-#             'status',
-#             'is_featured',
-#             'product_category',
-#             'product_brand',
-#             'thumbnail',
-#             'vendor',
-#             'tags',
-#             'product_tags',
-#             'colors',
-#             'product_colors',
-#             'sizes',
-#             'product_sizes',
-#             'media',
-#             'product_media'
-#         ]
+# 
 
 # 
 

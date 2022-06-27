@@ -204,7 +204,7 @@ class ProductAttributesValues(AbstractTimeStamp):
 
 class ProductCombinations(AbstractTimeStamp):
     product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='product_combinations_product')
-    sku = models.CharField(max_length=500, null=False, blank=False)
+    sku = models.CharField(max_length=500, null=False, blank=False, unique=True)
     varient = models.CharField(max_length=500, null=False, blank=False)
     varient_price = models.FloatField(max_length=255, null=False, blank=False, default=0)
     quantity = models.IntegerField(null=False, blank=False, default=0)

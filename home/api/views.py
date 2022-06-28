@@ -1,6 +1,7 @@
 from rest_framework.views import APIView
 from home.models import SliderImage, DealsOfTheDay, ProductView
-from home.serializers import SliderImagesListSerializer, DealsOfTheDayListSerializer, productListSerializer, product_catListSerializer
+from home.serializers import SliderImagesListSerializer, DealsOfTheDayListSerializer, product_catListSerializer
+from product.serializers import ProductListSerializer
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from datetime import date, timedelta

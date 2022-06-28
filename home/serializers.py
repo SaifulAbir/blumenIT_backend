@@ -26,41 +26,6 @@ class DealsOfTheDayListSerializer(serializers.ModelSerializer):
                 'end_date'
                 ]
 
-class productListSerializer(serializers.ModelSerializer):
-    product_media = ProductMediaSerializer(many=True, read_only=True)
-    category_name = serializers.SerializerMethodField()
-    brand_name = serializers.SerializerMethodField()
-    # average_rating = serializers.CharField(read_only=True)
-    class Meta:
-        model = Product
-        fields = [
-                'id',
-                'title',
-                'slug',
-                'unit_price',
-                'short_description',
-                'total_quantity',
-                'status',
-                'is_featured',
-                'category_name',
-                'brand_name',
-                'thumbnail',
-                'product_media'
-                ]
-
-    def get_category_name(self, obj):
-        if obj.category:
-            get_category=Category.objects.get(id= obj.category.id)
-            return get_category.title
-        else :
-            return obj.category
-    def get_brand_name(self, obj):
-        if obj.brand:
-            get_brand=Brand.objects.get(id= obj.brand.id)
-            return get_brand.title
-        else :
-            return obj.brand
-
 class product_catListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Category

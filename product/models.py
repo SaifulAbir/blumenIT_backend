@@ -113,6 +113,7 @@ class Product(AbstractTimeStamp):
     shipping_time = models.IntegerField(null=True, blank=True, default=0, help_text="eg: Days in count.")
     thumbnail = models.FileField(upload_to='products', blank=True, null=True)
     youtube_link = models.URLField(null=True, blank=True)
+    sell_count = models.BigIntegerField(null=True, blank=True, default=0)
 
     class Meta:
         verbose_name = 'Product'

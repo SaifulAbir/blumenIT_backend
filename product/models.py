@@ -196,7 +196,16 @@ class ProductAttributesValues(AbstractTimeStamp):
         db_table = 'product_attributes_values'
 
     def __str__(self):
-        return self.title
+
+        product_title = self.product.title
+        if self.product_attribute:
+            attribute = self.product_attribute.attribute.title
+        else:
+            attribute = ''
+        combine = product_title + ' ' + attribute + ' ' + self.title
+        return combine
+
+        # return self.product.title + ' ' + self.product_attribute.attribute.title + ' ' + self.title
 
     @property
     def product_attribute_name(self):

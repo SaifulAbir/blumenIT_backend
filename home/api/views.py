@@ -23,7 +23,7 @@ class HomeDataAPIView(APIView):
 
         # top 20 best seller
         top_20_best_seller = Product.objects.filter(status='ACTIVE').order_by('-sell_count')[:10]
-        top_20_best_seller_serializer = productListSerializer(top_20_best_seller, many=True, context={"request": request})
+        top_20_best_seller_serializer = ProductListSerializer(top_20_best_seller, many=True, context={"request": request})
 
         # top category of the month
         top_best_sellers = Product.objects.filter(status='ACTIVE').order_by('-sell_count')
@@ -37,15 +37,15 @@ class HomeDataAPIView(APIView):
 
         # new arrivals
         new_arrivals = Product.objects.filter(status='ACTIVE').order_by('-created_at')[:10]
-        new_arrivals_serializer = productListSerializer(new_arrivals, many=True, context={"request": request})
+        new_arrivals_serializer = ProductListSerializer(new_arrivals, many=True, context={"request": request})
 
         # featured
         featured = Product.objects.filter(status='ACTIVE', is_featured=True).order_by('-created_at')[:10]
-        featured_serializer = productListSerializer(featured, many=True, context={"request": request})
+        featured_serializer = ProductListSerializer(featured, many=True, context={"request": request})
 
         # most popular
         most_popular = Product.objects.filter(status="ACTIVE").annotate(average_rating=Avg("product_review_product__rating_number")).order_by('-product_review_product__rating_number')
-        most_popular_serializer = productListSerializer(most_popular, many=True, context={"request": request})
+        most_popular_serializer = ProductListSerializer(most_popular, many=True, context={"request": request})
 
 
         return Response({

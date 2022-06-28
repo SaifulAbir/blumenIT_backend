@@ -60,6 +60,34 @@ class Vendor(AbstractTimeStamp):
         db_table = 'vendors'
 
 
+class StoreSettings(AbstractTimeStamp):
+    store_name = models.CharField(
+        max_length=254, null=False, blank=False, verbose_name=_('Organization/ Vendor Name'))
+    address = models.CharField(
+        max_length=254, null=True, blank=True, verbose_name=_('Address'))
+    email = models.EmailField(
+        max_length=255, null=False, blank=False, unique=True)
+    vendor = models.ForeignKey(
+        Vendor, on_delete=models.PROTECT, blank=False, null=False, related_name="vendor_settings",
+        verbose_name=_('Vendor'))
+    logo = models.ImageField(upload_to='images/store_logo')
+    banner = models.ImageField(upload_to='images/banner')
+    phone = models.CharField(max_length=255, null=True, blank=True, default="None")
+    facebook = models.URLField()
+    twitter = models.URLField()
+    instagram = models.URLField()
+    youtube = models.URLField()
+    linkedin = models.URLField()
+
+    def __str__(self):
+        return self.store_name
+
+    class Meta:
+        verbose_name_plural = "Store Settings"
+        verbose_name = "Store Setting"
+        db_table = 'store_settings'
+
+
 @receiver(post_save, sender=VendorRequest)
 def create_vendor(sender, instance, created, **kwargs):
     is_verified = instance.is_verified

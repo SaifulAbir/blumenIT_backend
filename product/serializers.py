@@ -10,7 +10,8 @@ from product.models import \
     ProductMedia, \
     ProductCombinations, \
     ProductAttributes, \
-    ProductAttributesValues
+    ProductAttributesValues, \
+    Brand
 
 
 class SubSubCategorySerializer(serializers.ModelSerializer):
@@ -145,6 +146,40 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
         selected_product_combinations = ProductCombinations.objects.filter(product=obj, is_active=True).distinct()
         return ProductCombinationSerializer(selected_product_combinations, many=True).data
 
+class ProductListSerializer(serializers.ModelSerializer):
+    product_media = ProductMediaSerializer(many=True, read_only=True)
+    category_name = serializers.SerializerMethodField()
+    brand_name = serializers.SerializerMethodField()
+    # average_rating = serializers.CharField(read_only=True)
+    class Meta:
+        model = Product
+        fields = [
+                'id',
+                'title',
+                'slug',
+                'unit_price',
+                'short_description',
+                'total_quantity',
+                'status',
+                'is_featured',
+                'category_name',
+                'brand_name',
+                'thumbnail',
+                'product_media'
+                ]
+
+    def get_category_name(self, obj):
+        if obj.category:
+            get_category=Category.objects.get(id= obj.category.id)
+            return get_category.title
+        else :
+            return obj.category
+    def get_brand_name(self, obj):
+        if obj.brand:
+            get_brand=Brand.objects.get(id= obj.brand.id)
+            return get_brand.title
+        else :
+            return obj.brand
 
 # # general Serializer start
 # class ProductCategoriesSerializer(serializers.ModelSerializer):
@@ -266,41 +301,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
 
 
 # # list Serializer start
-# class ProductListSerializer(serializers.ModelSerializer):
-#     product_media = ProductMediaSerializer(many=True, read_only=True)
-#     product_category_name = serializers.SerializerMethodField()
-#     product_brand_name = serializers.SerializerMethodField()
-#     class Meta:
-#         model = Product
-#         fields = [
-#                 'id',
-#                 'title',
-#                 'slug',
-#                 'price',
-#                 'old_price',
-#                 'short_description',
-#                 'quantity',
-#                 'rating',
-#                 'status',
-#                 'is_featured',
-#                 'product_category_name',
-#                 'product_brand_name',
-#                 'thumbnail',
-#                 'product_media'
-#                 ]
-
-#     def get_product_category_name(self, obj):
-#         if obj.product_category:
-#             get_product_category=ProductCategory.objects.get(id= obj.product_category.id)
-#             return get_product_category.name
-#         else :
-#             return obj.get_product_category
-#     def get_product_brand_name(self, obj):
-#         if obj.product_category:
-#             get_product_brand_name=ProductBrand.objects.get(id= obj.product_brand.id)
-#             return get_product_brand_name.name
-#         else :
-#             return obj.get_product_brand_name
+#
 
 # class TagListSerializer(serializers.ModelSerializer):
 #     class Meta:

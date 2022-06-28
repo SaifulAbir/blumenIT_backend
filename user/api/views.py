@@ -121,8 +121,8 @@ class CustomerRetrieveUpdateAPIView(RetrieveUpdateAPIView):
         customer = CustomerProfile.objects.get(user=self.request.user)
         return customer
 
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
+    # def put(self, request, *args, **kwargs):
+    #     return self.update(request, *args, **kwargs)
 
 
 class SubscriptionAPIView(CreateAPIView):

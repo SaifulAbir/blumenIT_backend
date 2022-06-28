@@ -43,7 +43,7 @@ class CustomerProfileUpdateSerializer(serializers.ModelSerializer):
         first_name = validated_data.pop('first_name')
         last_name = validated_data.pop('last_name')
         email = validated_data.pop('email')
-        user = User.objects.get(id=instance.user.id)
+        user = User.objects.filter(id=instance.user.id)
         user.update(first_name=first_name,
                     last_name=last_name,
                     email=email,)

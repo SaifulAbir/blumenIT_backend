@@ -28,7 +28,6 @@ class LoginSerializer(serializers.Serializer):
 class CustomerProfileUpdateSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(write_only=True)
     last_name = serializers.CharField(write_only=True)
-    email = serializers.CharField(write_only=True, required=False)
     user = UserRegisterSerializer(read_only=True)
     gender_display_value = serializers.CharField(
         source='get_gender_display', read_only=True
@@ -36,20 +35,15 @@ class CustomerProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomerProfile
         model_fields = ['id', 'user', 'phone', 'address', 'birth_date', 'gender', 'gender_display_value',
-                        'first_name', 'last_name', 'email']
+                        'first_name', 'last_name']
         fields = model_fields
 
     def update(self, instance, validated_data):
         first_name = validated_data.pop('first_name')
         last_name = validated_data.pop('last_name')
-        try:
-            email = validated_data.pop('email')
-        except KeyError:
-            email = instance.user.email
         user = User.objects.get(id=instance.user.id)
         user.first_name=first_name
         user.last_name=last_name
-        user.email=email
         user.save()
         validated_data.update({"user": user})
         return super().update(instance, validated_data)

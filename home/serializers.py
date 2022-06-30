@@ -9,7 +9,8 @@ class SliderImagesListSerializer(serializers.ModelSerializer):
         model = SliderImage
         fields = [
                 'id',
-                'file',
+                'background_img',
+                'static_img',
                 'text',
                 ]
 

@@ -68,9 +68,15 @@ class ProductReviewSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'rating_number', 'review_text']
 
 class ProductMediaSerializer(serializers.ModelSerializer):
+    # file_url = serializers.SerializerMethodField()
     class Meta:
         model = ProductMedia
         fields = ['id', 'type', 'file', 'video_type']
+
+    # def get_file_url(self, ProductMedia):
+    #     request = self.context.get('request')
+    #     file_url = ProductMedia.file.url
+    #     return request.get_full_path(file_url)
 
 class ProductAttributeValuesSerializer(serializers.ModelSerializer):
     product_attribute_name = serializers.ReadOnlyField()
@@ -137,11 +143,9 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
         selected_product_reviews = ProductReview.objects.filter(product=obj, is_active=True).distinct()
         return ProductReviewSerializer(selected_product_reviews, many=True).data
     def get_product_media(self, obj):
-        selected_product_media = ProductMedia.objects.filter(product=obj, status="COMPLETE").distinct()
-        return ProductMediaSerializer(selected_product_media, many=True).data
-    def get_product_media(self, obj):
-        selected_product_media = ProductMedia.objects.filter(product=obj, status="COMPLETE").distinct()
-        return ProductMediaSerializer(selected_product_media, many=True).data
+        queryset = ProductMedia.objects.filter(product=obj).distinct()
+        serializer = ProductMediaSerializer(instance=queryset, many=True, context={'request': self.context['request']})
+        return serializer.data
     def get_product_combinations(self, obj):
         selected_product_combinations = ProductCombinations.objects.filter(product=obj, is_active=True).distinct()
         return ProductCombinationSerializer(selected_product_combinations, many=True).data

@@ -124,6 +124,12 @@ class ProductListBySubSubCategoryAPI(ListAPIView):
             queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
         return queryset
 
+class ProductListAPI(ListAPIView):
+    permission_classes = (AllowAny,)
+    queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
+    serializer_class = ProductListSerializer
+    pagination_class = ProductCustomPagination
+
 # class ProductCreateAPIView(CreateAPIView):
 #     permission_classes = (AllowAny,)
 #     serializer_class = ProductCreateSerializer

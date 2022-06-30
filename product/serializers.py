@@ -14,7 +14,10 @@ from product.models import \
     ProductColors, \
     ProductAttributes, \
     ProductAttributesValues, \
-    Brand
+    Brand, \
+    Attributes, \
+    DiscountTypes
+
 from vendor.models import Vendor
 
 
@@ -179,14 +182,31 @@ class ProductColorSerializerForProductCreate(serializers.ModelSerializer):
         fields = [
             'product', 'color'
         ]
+
+class ProductAttributeSerializerForProductCreate(serializers.ModelSerializer):
+    attribute = serializers.PrimaryKeyRelatedField(queryset=Attributes.objects.all())
+    class Meta:
+        model = ProductAttributes
+        fields = [
+            'product', 'attribute'
+        ]
+
+class ProductAttributeValuesSerializerForProductCreate(serializers.ModelSerializer):
+    ProductAttributes = serializers.PrimaryKeyRelatedField(queryset=ProductAttributes.objects.all())
+    class Meta:
+        model = ProductAttributesValues
+        fields = [
+            'product', 'ProductAttributes', 'title'
+        ]
 class ProductCombinationSerializerForProductCreate(serializers.ModelSerializer):
     sku = serializers.CharField(allow_blank=False, trim_whitespace=True, max_length=500)
     varient = serializers.CharField(allow_blank=False, max_length=500)
     varient_price = serializers.FloatField(default=0)
     quantity = serializers.IntegerField(default=0)
-    product_color = ProductColorSerializerForProductCreate()
-    # product_attribute = serializers.PrimaryKeyRelatedField(queryset=ProductAttributes.objects.all(), required=False)
-    # product_attribute_values = serializers.PrimaryKeyRelatedField(queryset=ProductAttributes.objects.all(), required=False)
+    product_color = ProductColorSerializerForProductCreate(required=False)
+    product_attribute = ProductAttributeSerializerForProductCreate(required=False)
+    product_attribute_values = ProductAttributeValuesSerializerForProductCreate(required=False)
+    discount_type = serializers.PrimaryKeyRelatedField(queryset=DiscountTypes.objects.all(), required=False)
 
     class Meta:
         model = ProductCombinations
@@ -195,7 +215,11 @@ class ProductCombinationSerializerForProductCreate(serializers.ModelSerializer):
             'varient',
             'varient_price',
             'quantity',
-            'product_color'
+            'product_color',
+            'product_attribute',
+            'product_attribute_values',
+            'discount_type',
+            'discount_amount'
         ]
 class ProductCreateSerializer(serializers.ModelSerializer):
     # tags = serializers.PrimaryKeyRelatedField(queryset=Tags.objects.all(), many=True, write_only=True, required=False)
@@ -211,9 +235,9 @@ class ProductCreateSerializer(serializers.ModelSerializer):
     # title = serializers.CharField(allow_blank=False)
     product_media = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
     product_tags = serializers.ListField(child=serializers.CharField(), write_only=True, required=False)
-    product_colors = serializers.ListField(child=serializers.CharField(), write_only=True, required=False)
-    product_attributes = serializers.ListField(child=serializers.CharField(), write_only=True, required=False)
-    product_attribute_values = serializers.ListField(child=serializers.CharField(), write_only=True, required=False)
+    # product_colors = serializers.ListField(child=serializers.CharField(), write_only=True, required=False)
+    # product_attributes = serializers.ListField(child=serializers.CharField(), write_only=True, required=False)
+    # product_attribute_values = serializers.ListField(child=serializers.CharField(), write_only=True, required=False)
 
 
     # prodcut_combinations
@@ -247,9 +271,9 @@ class ProductCreateSerializer(serializers.ModelSerializer):
 
             'product_media',
             'product_tags',
-            'product_colors',
-            'product_attributes',
-            'product_attribute_values',
+            # 'product_colors',
+            # 'product_attributes',
+            # 'product_attribute_values',
             'product_combination'
     #         'price',
     #         'full_description',

@@ -3,18 +3,18 @@ from .views import *
 
 urlpatterns = [
 
-    path('product-all-category-list/', ProductAllCategoryListAPI.as_view()),
     path('mega-menu-data/', MegaMenuDataAPIView.as_view()),
     path('product-details/<str:slug>/', ProductDetailsAPI.as_view()),
 
     path('product-list-by-category/<int:cid>/', ProductListByCategoryAPI.as_view()),
     path('product-list-by-sub-category/<int:subcid>/', ProductListBySubCategoryAPI.as_view()),
     path('product-list-by-sub-sub-category/<int:subsubcid>/', ProductListBySubSubCategoryAPI.as_view()),
+    path('create-product/', ProductCreateAPIView.as_view()),
 
 
     # path('product-list/', ProductListAPI.as_view()),
 
-    # path('create-product/', ProductCreateAPIView.as_view()),
+    # 
     # path('create-tag/', TagCreateAPIView.as_view()),
 
     # path('product-list/', ProductListAPI.as_view()),
@@ -36,6 +36,7 @@ urlpatterns = [
 
     # # vendor admin apies
     # path('vendor-admin/product-list/<int:id>/', VendorAdminProductListAPI.as_view()),
+    # path('product-all-category-list/', ProductAllCategoryListAPI.as_view()),
 
 
 ]

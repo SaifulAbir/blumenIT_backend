@@ -33,7 +33,7 @@ class HomeDataAPIView(APIView):
             if category_id not in final_category_ids:
                 final_category_ids.append(category_id)
         product_cat = Category.objects.filter(id__in=final_category_ids)[:6]
-        product_cat_serializer = product_catListSerializer(product_cat, many=True)
+        product_cat_serializer = product_catListSerializer(product_cat, many=True, context={"request": request})
 
         # new arrivals
         new_arrivals = Product.objects.filter(status='ACTIVE').order_by('-created_at')[:10]

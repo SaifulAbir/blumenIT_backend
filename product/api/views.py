@@ -10,10 +10,10 @@ from rest_framework.views import APIView
 from home.models import ProductView
 
 from product.serializers import \
-    ProductAllCategoryListSerializer, \
     MegaMenuDataAPIViewListSerializer, \
     ProductDetailsSerializer, \
-    ProductListSerializer
+    ProductListSerializer, \
+    ProductCreateSerializer
 
 # from product.serializers import \
     # ProductCreateSerializer, \
@@ -47,14 +47,6 @@ from user.models import CustomerProfile
 
 
 
-
-
-class ProductAllCategoryListAPI(ListAPIView):
-    permission_classes = (AllowAny,)
-    serializer_class = ProductAllCategoryListSerializer
-    def get_queryset(self):
-        query = Category.objects.filter(is_active=True).order_by('-created_at')
-        return query
 
 class MegaMenuDataAPIView(ListAPIView):
     permission_classes = (AllowAny,)
@@ -133,9 +125,12 @@ class ProductListAPI(ListAPIView):
 # class ProductCreateAPIView(CreateAPIView):
 #     permission_classes = (AllowAny,)
 #     serializer_class = ProductCreateSerializer
+class ProductCreateAPIView(CreateAPIView):
+    # permission_classes = (AllowAny,)
+    serializer_class = ProductCreateSerializer
 
-#     def post(self, request, *args, **kwargs):
-#         return super(ProductCreateAPIView, self).post(request, *args, **kwargs)
+    def post(self, request, *args, **kwargs):
+        return super(ProductCreateAPIView, self).post(request, *args, **kwargs)
 
 # class TagCreateAPIView(CreateAPIView):
 #     serializer_class = TagCreateSerializer
@@ -268,5 +263,12 @@ class ProductListAPI(ListAPIView):
 #         else:
 #             queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
 #         return queryset
+
+# class ProductAllCategoryListAPI(ListAPIView):
+#     permission_classes = (AllowAny,)
+#     serializer_class = ProductAllCategoryListSerializer
+#     def get_queryset(self):
+#         query = Category.objects.filter(is_active=True).order_by('-created_at')
+#         return query
 
 

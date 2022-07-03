@@ -5,6 +5,8 @@ from vendor.models import Vendor
 from .utils import unique_slug_generator
 from django.db.models.signals import pre_save
 from user.models import User, CustomerProfile
+import string
+import random
 
 class Category(AbstractTimeStamp):
     title = models.CharField(max_length=100, null=False, blank=False, default="")
@@ -90,6 +92,7 @@ class Product(AbstractTimeStamp):
 
     title = models.CharField(max_length=500, null=False, blank=False, default="")
     slug  = models.SlugField(null=False, allow_unicode=True, blank=True)
+    sku = models.CharField(max_length=500, null=True, blank=True, default="")
     warranty  = models.CharField(max_length=255, blank=True, help_text="eg: 1 year or 6 months")
     full_description = models.TextField(default='')
     short_description = models.CharField(max_length=800, default='')
@@ -126,6 +129,9 @@ class Product(AbstractTimeStamp):
 def pre_save_product(sender, instance, *args, **kwargs):
     if not instance.slug:
         instance.slug = unique_slug_generator(instance)
+        # chars = string.ascii_lowercase + string.digits
+        # size = 10
+        # instance.sku = ''.join(random.choice(chars) for _ in range(size))
 
 pre_save.connect(pre_save_product, sender=Product)
 
@@ -214,7 +220,7 @@ class ProductAttributesValues(AbstractTimeStamp):
 
 class ProductCombinations(AbstractTimeStamp):
     product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='product_combinations_product')
-    sku = models.CharField(max_length=500, null=False, blank=False, unique=True)
+    sku = models.CharField(max_length=500, null=True, blank=True)
     varient = models.CharField(max_length=500, null=False, blank=False)
     varient_price = models.FloatField(max_length=255, null=False, blank=False, default=0)
     quantity = models.IntegerField(null=False, blank=False, default=0)
@@ -222,6 +228,8 @@ class ProductCombinations(AbstractTimeStamp):
     product_attribute = models.ForeignKey(ProductAttributes, related_name="product_combinations_product_attributes", null=True, blank=True, on_delete=models.SET_NULL)
     product_attribute_values = models.ForeignKey(ProductAttributesValues, related_name="product_combinations_product_attributes_values", null=True, blank=True, on_delete=models.SET_NULL)
     is_active = models.BooleanField(null=False, blank=False, default=True)
+    discount_type = models.ForeignKey(DiscountTypes, related_name="product_combinations_discount_type", null=True, blank=True, on_delete=models.SET_NULL)
+    discount_amount = models.FloatField(max_length=255, null=True, blank=True, default=0)
 
     class Meta:
         verbose_name = 'ProductCombination'
@@ -254,6 +262,7 @@ class ProductCombinations(AbstractTimeStamp):
         return self.product_color.color.color_code
 
     def save(self, *args, **kwargs):
+        # self.sku = "%s-%s" % (self.product.sku, self.varient)
         super(ProductCombinations, self).save(*args, **kwargs)
         try:
             product = Product.objects.get(id=self.product.id)
@@ -265,7 +274,6 @@ class ProductCombinations(AbstractTimeStamp):
             product.save()
         except :
             print("Error in product combination save.")
-        
 
 class ProductTags(AbstractTimeStamp):
     title = models.CharField(max_length=100, null=False, blank=False, default="")

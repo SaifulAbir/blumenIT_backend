@@ -8,8 +8,8 @@ from rest_framework.views import APIView
 from home.models import ProductView
 from product.serializers import \
     MegaMenuDataAPIViewListSerializer, \
-    ProductDetailsSerializer
-#     ProductListSerializer, \
+    ProductDetailsSerializer,\
+    ProductListSerializer
 #     ProductCreateSerializer
 from product.models import \
     Category, \
@@ -47,6 +47,13 @@ class ProductDetailsAPI(RetrieveAPIView):
                 customer = CustomerProfile.objects.get(user=self.request.user)
                 ProductView.objects.create(user=self.request.user, product=query, customer=customer, view_date=datetime.now())
         return query
+
+class ProductListAPI(ListAPIView):
+    permission_classes = (AllowAny,)
+    queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
+    serializer_class = ProductListSerializer
+    pagination_class = ProductCustomPagination
+
 
 # class ProductListByCategoryAPI(ListAPIView):
 #     permission_classes = (AllowAny,)
@@ -89,11 +96,7 @@ class ProductDetailsAPI(RetrieveAPIView):
 #             queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
 #         return queryset
 
-# class ProductListAPI(ListAPIView):
-#     permission_classes = (AllowAny,)
-#     queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
-#     serializer_class = ProductListSerializer
-#     pagination_class = ProductCustomPagination
+
 
 # class ProductCreateAPIView(CreateAPIView):
 #     serializer_class = ProductCreateSerializer

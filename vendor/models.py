@@ -50,7 +50,6 @@ class Vendor(AbstractTimeStamp):
         verbose_name=_('Vendor Request'))
     phone = models.CharField(max_length=255, null=True, blank=True, default="None")
     password = models.CharField(max_length=255)
-    vendor_logo = models.ImageField(upload_to='vendor_logo', blank=True, null=True)
 
     def __str__(self):
         return self.organization_name

@@ -1,4 +1,3 @@
-from itertools import product
 from statistics import mode
 from django.db import models
 from ecommerce.models import AbstractTimeStamp
@@ -52,7 +51,6 @@ class SubSubCategory(AbstractTimeStamp):
 
 class Brand(AbstractTimeStamp):
     title = models.CharField(max_length=100, null=False, blank=False, default="")
-    logo = models.ImageField(upload_to='brand', blank=True, null=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
@@ -94,7 +92,8 @@ class Product(AbstractTimeStamp):
 
     title = models.CharField(max_length=500, null=False, blank=False, default="")
     slug  = models.SlugField(null=False, allow_unicode=True, blank=True)
-    sku = models.CharField(max_length=500, null=True, blank=True, default="", unique=True)
+    # sku = models.CharField(max_length=500, null=True, blank=True, default="", unique=True)
+    sku = models.CharField(max_length=500, null=True, blank=True, default="")
     warranty  = models.CharField(max_length=255, blank=True, help_text="eg: 1 year or 6 months")
     full_description = models.TextField(default='')
     short_description = models.CharField(max_length=800, default='')
@@ -128,35 +127,15 @@ class Product(AbstractTimeStamp):
     def __str__(self):
         return self.title
 
-    def save(self, *args, **kwargs):
-        super(Product, self).save(*args, **kwargs)
-        try:
-            if self.shipping_cost_multiply == True:
-                self.total_shipping_cost = self.shipping_cost * self.shipping_cost
-                # product.save()
-                super(Product, self).save(*args, **kwargs)
-            elif self.shipping_cost_multiply == False:
-                self.total_shipping_cost = self.shipping_cost
-                super(Product, self).save(*args, **kwargs)
-            else:
-                super(Product, self).save(*args, **kwargs)
-        except :
-            print("Error in product combination save.")
-
 def pre_save_product(sender, instance, *args, **kwargs):
     if not instance.slug:
         instance.slug = unique_slug_generator(instance)
-        # chars = string.ascii_lowercase + string.digits
-        # size = 10
-        # instance.sku = ''.join(random.choice(chars) for _ in range(size))
 
 pre_save.connect(pre_save_product, sender=Product)
 
-
-class ProductAttributes(AbstractTimeStamp):
+class ProductAttribute(AbstractTimeStamp):
     title = models.CharField(max_length=100, null=False, blank=False, default="")
     is_active = models.BooleanField(null=False, blank=False, default=True)
-
     class Meta:
         verbose_name = 'ProductAttribute'
         verbose_name_plural = 'ProductAttributes'
@@ -167,12 +146,13 @@ class ProductAttributes(AbstractTimeStamp):
 
 class ProductCombinations(AbstractTimeStamp):
     product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='product_combinations_product')
-    product_attribute = models.ForeignKey(ProductAttributes, related_name="product_combinations_product_attributes", null=False, blank=False, on_delete=models.PROTECT)
+    # sku = models.CharField(max_length=500, null=True, blank=True, unique=True)
+    sku = models.CharField(max_length=500, null=True, blank=True)
+    
+    product_attribute = models.ForeignKey(ProductAttribute, related_name="product_combinations_product_attribute", null=False, blank=False, on_delete=models.PROTECT, default=0)
     product_attribute_value = models.CharField(max_length=500, null=False, blank=False, default="")
-    product_attribute_color_code = models.CharField(max_length=100, null=True, blank=True, default="")
-
+    product_attribute_color_code = models.CharField(max_length=100, null=False, blank=False, default="")
     is_active = models.BooleanField(null=False, blank=False, default=True)
-
 
     class Meta:
         verbose_name = 'ProductCombination'
@@ -181,12 +161,55 @@ class ProductCombinations(AbstractTimeStamp):
 
     def __str__(self):
         title = self.product.title
-        combine = title + ' ' + self.product_attribute.title + ' ' + self.product_attribute_value
+        combine = title + ' ' + self.product_attribute.title
         return combine
+
+class VariantType(AbstractTimeStamp):
+    title = models.CharField(max_length=500, null=False, blank=False, default="")
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'VariantType'
+        verbose_name_plural = 'VariantTypes'
+        db_table = 'variant_types'
+
+    def __str__(self):
+        return self.title
+
+class ProductCombinationsVariants(AbstractTimeStamp):
+    product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='product_combinations_variant_product', null=False, blank=False)
+    product_combination = models.ForeignKey(ProductCombinations, related_name="product_combinations_variant_product_combination", null=False, blank=False, on_delete=models.PROTECT)
+    variant_type = models.ForeignKey(VariantType, related_name="product_combinations_variant_variant_type", null=True, blank=True, on_delete=models.PROTECT)
+    variant_value = models.CharField(max_length=500, null=False, blank=False)
+    variant_price = models.FloatField(max_length=255, null=False, blank=False, default=0)
+    quantity = models.IntegerField(null=False, blank=False, default=0)
+    discount_type = models.ForeignKey(DiscountTypes, related_name="product_combinations_discount_type", null=True, blank=True, on_delete=models.PROTECT)
+    discount_amount = models.FloatField(max_length=255, null=True, blank=True, default=0)
+
+    class Meta:
+        verbose_name = 'ProductCombinationsVariant'
+        verbose_name_plural = 'ProductCombinationsVariants'
+        db_table = 'product_combinations_variant'
+
+    def __str__(self):
+        return self.product.title + ' ' + self.variant_type.title + ' ' + self.variant_value
+
+    def save(self, *args, **kwargs):
+        super(ProductCombinationsVariants, self).save(*args, **kwargs)
+        try:
+            product = Product.objects.get(id=self.product.id)
+            p_cs = ProductCombinationsVariants.objects.filter(product=self.product)
+            total = 0
+            for p_c in p_cs:
+                total += p_c.quantity
+            product.total_quantity = total
+            product.save()
+        except :
+            print("Error in product combination save.")
 
 class ProductTags(AbstractTimeStamp):
     title = models.CharField(max_length=100, null=False, blank=False, default="")
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=False, blank=False, related_name='product_tags_product', default="")
+    product = models.ForeignKey(Product, on_delete=models.PROTECT, null=False, blank=False, related_name='product_tags_product', default="")
     is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
@@ -224,20 +247,6 @@ class ProductMedia(AbstractTimeStamp):
     def __str__(self):
         return self.product.title
 
-class ProductReview(AbstractTimeStamp):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=False, blank=False, related_name='product_review_product', default="")
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='product_review_user',blank=True, null=True)
-    rating_number = models.IntegerField(default=0)
-    review_text = models.TextField(default='',blank=True, null=True)
-    is_active = models.BooleanField(null=False, blank=False, default=True)
-    class Meta:
-        verbose_name = 'ProductReview'
-        verbose_name_plural = 'ProductReviews'
-        db_table = 'product_review'
-
-    def __str__(self):
-        return str(self.pk)
-
 class ProductCombinationMedia(AbstractTimeStamp):
     CHOICES = [
         ('COMPLETE', 'Complete'),
@@ -263,50 +272,19 @@ class ProductCombinationMedia(AbstractTimeStamp):
         db_table = 'product_combination_medias'
 
     def __str__(self):
-        # return self.pk
-        return self.product_combination.product.title
+        return self.pk
+        # return self.product_combination.product.title
 
-class VariantType(AbstractTimeStamp):
-    title = models.CharField(max_length=500, null=False, blank=False, default="")
+class ProductReview(AbstractTimeStamp):
+    product = models.ForeignKey(Product, on_delete=models.PROTECT, null=False, blank=False, related_name='product_review_product', default="")
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='product_review_user',blank=True, null=True)
+    rating_number = models.IntegerField(default=0)
+    review_text = models.TextField(default='',blank=True, null=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
-
     class Meta:
-        verbose_name = 'VariantType'
-        verbose_name_plural = 'VariantTypes'
-        db_table = 'variant_types'
+        verbose_name = 'ProductReview'
+        verbose_name_plural = 'ProductReviews'
+        db_table = 'product_review'
 
     def __str__(self):
-        return self.title
-
-class ProductCombinationsVariants(AbstractTimeStamp):
-    product_combination = models.ForeignKey(ProductCombinations, related_name="product_combinations_variant_product_combination", null=False, blank=False, on_delete=models.PROTECT)
-    sku = models.CharField(max_length=500, null=True, blank=True, unique=True)
-    variant_type = models.ForeignKey(VariantType, related_name="product_combinations_variant_variant_type", null=False, blank=False, on_delete=models.PROTECT)
-    variant_value = models.CharField(max_length=500, null=False, blank=False)
-    variant_price = models.FloatField(max_length=255, null=False, blank=False, default=0)
-    quantity = models.IntegerField(null=False, blank=False, default=0)
-    discount_type = models.ForeignKey(DiscountTypes, related_name="product_combinations_variant_discount_type", null=True, blank=True, on_delete=models.PROTECT)
-    discount_amount = models.FloatField(max_length=255, null=True, blank=True, default=0)
-    is_active = models.BooleanField(null=False, blank=False, default=True)
-
-    class Meta:
-        verbose_name = 'ProductCombinationsVariant'
-        verbose_name_plural = 'ProductCombinationsVariants'
-        db_table = 'product_combinations_variant'
-
-    def __str__(self):
-        return self.variant_type.title + ' ' + self.variant_value
-
-    def save(self, *args, **kwargs):
-        super(ProductCombinationsVariants, self).save(*args, **kwargs)
-        try:
-            product = Product.objects.get(id=self.product.id)
-            p_cs = ProductCombinationsVariants.objects.filter(product=self.product)
-            total = 0
-            for p_c in p_cs:
-                total += p_c.quantity
-            product.total_quantity = total
-            product.save()
-        except :
-            print("Error in product combination save.")
-
+        return str(self.pk)

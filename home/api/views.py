@@ -1,7 +1,10 @@
 from rest_framework.views import APIView
 from home.models import SliderImage, DealsOfTheDay, ProductView
-from home.serializers import SliderImagesListSerializer, DealsOfTheDayListSerializer, product_catListSerializer
-from product.serializers import ProductListSerializer
+from home.serializers import \
+    SliderImagesListSerializer
+    # DealsOfTheDayListSerializer, \
+    # product_catListSerializer\
+# from product.serializers import ProductListSerializer
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from datetime import date, timedelta
@@ -17,13 +20,13 @@ class HomeDataAPIView(APIView):
         slider_images_serializer = SliderImagesListSerializer(slider_images, many=True, context={"request": request})
 
         # deals of the day
-        today = date.today()
-        deals_of_the_day = DealsOfTheDay.objects.filter( start_date__lte=today, end_date__gte=today, is_active = True)
-        deals_of_the_day_serializer = DealsOfTheDayListSerializer(deals_of_the_day, many=True, context={"request": request})
+        # today = date.today()
+        # deals_of_the_day = DealsOfTheDay.objects.filter( start_date__lte=today, end_date__gte=today, is_active = True)
+        # deals_of_the_day_serializer = DealsOfTheDayListSerializer(deals_of_the_day, many=True, context={"request": request})
 
         # top 20 best seller
-        top_20_best_seller = Product.objects.filter(status='ACTIVE').order_by('-sell_count')[:10]
-        top_20_best_seller_serializer = ProductListSerializer(top_20_best_seller, many=True, context={"request": request})
+        # top_20_best_seller = Product.objects.filter(status='ACTIVE').order_by('-sell_count')[:10]
+        # top_20_best_seller_serializer = ProductListSerializer(top_20_best_seller, many=True, context={"request": request})
 
         # top category of the month
         top_best_sellers = Product.objects.filter(status='ACTIVE').order_by('-sell_count')
@@ -58,11 +61,11 @@ class HomeDataAPIView(APIView):
             "most_popular": most_popular_serializer.data
         })
 
-# class RecentAPIView(APIView):
-#     def get(self, request):
-#         today = date.today()
-#         last_week = today - timedelta(days=7)
-#         user = self.request.user.id
-#         recent_view = Product.objects.filter(product_view_count__view_date__gt=last_week).order_by('-product_view_count__view_date')[:24]
-#         recent_view_serializer = productListSerializer(recent_view, many=True)
-#         return Response({"recent_view":recent_view_serializer.data })
+# # class RecentAPIView(APIView):
+# #     def get(self, request):
+# #         today = date.today()
+# #         last_week = today - timedelta(days=7)
+# #         user = self.request.user.id
+# #         recent_view = Product.objects.filter(product_view_count__view_date__gt=last_week).order_by('-product_view_count__view_date')[:24]
+# #         recent_view_serializer = productListSerializer(recent_view, many=True)
+# #         return Response({"recent_view":recent_view_serializer.data })

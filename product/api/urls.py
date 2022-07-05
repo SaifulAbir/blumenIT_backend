@@ -8,9 +8,9 @@ urlpatterns = [
     path('mega-menu-data/', MegaMenuDataAPIView.as_view()),
     path('product-details/<str:slug>/', ProductDetailsAPI.as_view()),
     path('product-list/', ProductListAPI.as_view()),
-    # path('product-list-by-category/<int:cid>/', ProductListByCategoryAPI.as_view()),
-    # path('product-list-by-sub-category/<int:subcid>/', ProductListBySubCategoryAPI.as_view()),
-    # path('product-list-by-sub-sub-category/<int:subsubcid>/', ProductListBySubSubCategoryAPI.as_view()),
+    path('product-list-by-category/<int:cid>/', ProductListByCategoryAPI.as_view()),
+    path('product-list-by-sub-category/<int:subcid>/', ProductListBySubCategoryAPI.as_view()),
+    path('product-list-by-sub-sub-category/<int:subsubcid>/', ProductListBySubSubCategoryAPI.as_view()),
     # path('create-product/', ProductCreateAPIView.as_view()),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

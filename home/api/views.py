@@ -1,16 +1,13 @@
 from rest_framework.views import APIView
 from home.models import SliderImage, DealsOfTheDay, ProductView
-from home.serializers import \
-    SliderImagesListSerializer
-    # DealsOfTheDayListSerializer, \
-    # product_catListSerializer\
-# from product.serializers import ProductListSerializer
+from home.serializers import SliderImagesListSerializer, DealsOfTheDayListSerializer, product_catListSerializer
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from datetime import date, timedelta
-from django.db.models import Avg, Prefetch, Q
+from django.db.models import Avg, Prefetch, Q, Count
 
 from product.models import Product, Category, ProductReview
+from product.serializers import ProductListSerializer
 
 class HomeDataAPIView(APIView):
     permission_classes = (AllowAny,)
@@ -20,13 +17,13 @@ class HomeDataAPIView(APIView):
         slider_images_serializer = SliderImagesListSerializer(slider_images, many=True, context={"request": request})
 
         # deals of the day
-        # today = date.today()
-        # deals_of_the_day = DealsOfTheDay.objects.filter( start_date__lte=today, end_date__gte=today, is_active = True)
-        # deals_of_the_day_serializer = DealsOfTheDayListSerializer(deals_of_the_day, many=True, context={"request": request})
+        today = date.today()
+        deals_of_the_day = DealsOfTheDay.objects.filter( start_date__lte=today, end_date__gte=today, is_active = True)
+        deals_of_the_day_serializer = DealsOfTheDayListSerializer(deals_of_the_day, many=True, context={"request": request})
 
         # top 20 best seller
-        # top_20_best_seller = Product.objects.filter(status='ACTIVE').order_by('-sell_count')[:10]
-        # top_20_best_seller_serializer = ProductListSerializer(top_20_best_seller, many=True, context={"request": request})
+        top_20_best_seller = Product.objects.filter(status='ACTIVE').order_by('-sell_count')[:10]
+        top_20_best_seller_serializer = ProductListSerializer(top_20_best_seller, many=True, context={"request": request})
 
         # top category of the month
         top_best_sellers = Product.objects.filter(status='ACTIVE').order_by('-sell_count')
@@ -47,7 +44,9 @@ class HomeDataAPIView(APIView):
         featured_serializer = ProductListSerializer(featured, many=True, context={"request": request})
 
         # most popular
-        most_popular = Product.objects.filter(status="ACTIVE").annotate(average_rating=Avg("product_review_product__rating_number")).order_by('-product_review_product__rating_number')
+        # most_popular = Product.objects.filter(status="ACTIVE").annotate(Avg("product_review_product__rating_number")).order_by('-product_review_product__rating_number')
+        most_popular = Product.objects.filter(status="ACTIVE").annotate(count=Count('product_review_product')).order_by('-count')
+        print(str(most_popular))
         most_popular_serializer = ProductListSerializer(most_popular, many=True, context={"request": request})
 
 

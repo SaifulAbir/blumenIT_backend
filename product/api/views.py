@@ -55,46 +55,47 @@ class ProductListAPI(ListAPIView):
     pagination_class = ProductCustomPagination
 
 
-# class ProductListByCategoryAPI(ListAPIView):
-#     permission_classes = (AllowAny,)
-#     serializer_class = ProductListSerializer
-#     pagination_class = ProductCustomPagination
-#     lookup_field = 'cid'
-#     lookup_url_kwarg = "cid"
-#     def get_queryset(self):
-#         cid = self.kwargs['cid']
-#         if cid:
-#             queryset = Product.objects.filter(category=cid, status='ACTIVE').order_by('-created_at')
-#         else:
-#             queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
-#         return queryset
+class ProductListByCategoryAPI(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = ProductListSerializer
+    pagination_class = ProductCustomPagination
+    lookup_field = 'cid'
+    lookup_url_kwarg = "cid"
+    def get_queryset(self):
+        cid = self.kwargs['cid']
+        if cid:
+            queryset = Product.objects.filter(category=cid, status='ACTIVE').order_by('-created_at')
+        else:
+            queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
+        return queryset
 
-# class ProductListBySubCategoryAPI(ListAPIView):
-#     permission_classes = (AllowAny,)
-#     serializer_class = ProductListSerializer
-#     pagination_class = ProductCustomPagination
-#     lookup_field = 'subcid'
-#     lookup_url_kwarg = "subcid"
-#     def get_queryset(self):
-#         subcid = self.kwargs['subcid']
-#         if subcid:
-#             queryset = Product.objects.filter(sub_category=subcid, status='ACTIVE').order_by('-created_at')
-#         else:
-#             queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
-#         return queryset
-# class ProductListBySubSubCategoryAPI(ListAPIView):
-#     permission_classes = (AllowAny,)
-#     serializer_class = ProductListSerializer
-#     pagination_class = ProductCustomPagination
-#     lookup_field = 'subsubcid'
-#     lookup_url_kwarg = "subsubcid"
-#     def get_queryset(self):
-#         subsubcid = self.kwargs['subsubcid']
-#         if subsubcid:
-#             queryset = Product.objects.filter(sub_sub_category=subsubcid, status='ACTIVE').order_by('-created_at')
-#         else:
-#             queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
-#         return queryset
+class ProductListBySubCategoryAPI(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = ProductListSerializer
+    pagination_class = ProductCustomPagination
+    lookup_field = 'subcid'
+    lookup_url_kwarg = "subcid"
+    def get_queryset(self):
+        subcid = self.kwargs['subcid']
+        if subcid:
+            queryset = Product.objects.filter(sub_category=subcid, status='ACTIVE').order_by('-created_at')
+        else:
+            queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
+        return queryset
+
+class ProductListBySubSubCategoryAPI(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = ProductListSerializer
+    pagination_class = ProductCustomPagination
+    lookup_field = 'subsubcid'
+    lookup_url_kwarg = "subsubcid"
+    def get_queryset(self):
+        subsubcid = self.kwargs['subsubcid']
+        if subsubcid:
+            queryset = Product.objects.filter(sub_sub_category=subsubcid, status='ACTIVE').order_by('-created_at')
+        else:
+            queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
+        return queryset
 
 
 

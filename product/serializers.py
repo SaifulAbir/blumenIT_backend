@@ -22,6 +22,7 @@ from product.models import \
     VariantType
 from user.models import User
 from vendor.models import StoreSettings, Vendor
+from django.db.models import Avg
 
 
 # supporting serializers start
@@ -203,6 +204,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
     brand = BrandSerializer()
     unit = UnitSerializer()
     discount_type = DiscountTypeSerializer()
+    avg_rating = serializers.SerializerMethodField()
     class Meta:
         model = Product
         fields = [
@@ -211,6 +213,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             'slug',
             'sku',
             'warranty',
+            'avg_rating',
             'full_description',
             'short_description',
             'status',
@@ -237,6 +240,8 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             'product_combinations'
         ]
 
+    def get_avg_rating(self, ob):
+        return ob.product_review_product.all().aggregate(Avg('rating_number'))['rating_number__avg']
     def get_product_tags(self, obj):
         selected_product_tags = ProductTags.objects.filter(product=obj).distinct()
         return ProductTagsSerializer(selected_product_tags, many=True).data
@@ -255,7 +260,7 @@ class ProductListSerializer(serializers.ModelSerializer):
     product_media = ProductMediaSerializer(many=True, read_only=True)
     category_name = serializers.SerializerMethodField()
     brand_name = serializers.SerializerMethodField()
-    # average_rating = serializers.CharField(read_only=True)
+    avg_rating = serializers.SerializerMethodField()
     class Meta:
         model = Product
         fields = [
@@ -272,8 +277,25 @@ class ProductListSerializer(serializers.ModelSerializer):
                 'category_name',
                 'brand_name',
                 'thumbnail',
-                'product_media'
+                'product_media',
+                'avg_rating'
                 ]
+
+    def get_avg_rating(self, ob):
+        return ob.product_review_product.all().aggregate(Avg('rating_number'))['rating_number__avg']
+
+    def get_category_name(self, obj):
+        if obj.category:
+            get_category=Category.objects.get(id= obj.category.id)
+            return get_category.title
+        else :
+            return obj.category
+    def get_brand_name(self, obj):
+        if obj.brand:
+            get_brand=Brand.objects.get(id= obj.brand.id)
+            return get_brand.title
+        else :
+            return obj.brand
 # main serializers end
 
 
@@ -297,18 +319,7 @@ class ProductListSerializer(serializers.ModelSerializer):
 
 
 
-#     def get_category_name(self, obj):
-#         if obj.category:
-#             get_category=Category.objects.get(id= obj.category.id)
-#             return get_category.title
-#         else :
-#             return obj.category
-#     def get_brand_name(self, obj):
-#         if obj.brand:
-#             get_brand=Brand.objects.get(id= obj.brand.id)
-#             return get_brand.title
-#         else :
-#             return obj.brand
+#     
 
 # class ProductColorSerializerForProductCreate(serializers.ModelSerializer):
 #     color = serializers.PrimaryKeyRelatedField(queryset=Colors.objects.all())

@@ -126,6 +126,12 @@ class Product(AbstractTimeStamp):
         verbose_name_plural = 'Products'
         db_table = 'products'
 
+    @property
+    def average_rating(self):
+        if hasattr(self, '_average_rating'):
+            return self._average_rating
+        return self.reviews.aggregate(Avg('rating'))
+
     def __str__(self):
         return self.title
 

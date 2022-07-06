@@ -30,7 +30,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-CSRF_TRUSTED_ORIGINS = ['https://ecomapi.mwebservices.co', 'http://localhost:3000']
+CSRF_TRUSTED_ORIGINS = ['https://ecomapi.mwebservices.co', 'http://localhost:3000', 'http://127.0.0.1:8000']
 
 # Application definition
 

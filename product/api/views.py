@@ -106,4 +106,28 @@ class ProductListBySubSubCategoryAPI(ListAPIView):
 #         return super(ProductCreateAPIView, self).post(request, *args, **kwargs)
 
 
+class ProductSearchAPI(ListAPIView):
+    permission_classes = ()
+    pagination_class = ProductCustomPagination
+    serializer_class = ProductListSerializer
+    def get_queryset(self):
+        request = self.request
+        query = request.GET.get('query')
+        category = request.GET.get('category_id')
+
+        queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
+
+        if query:
+            queryset = queryset.filter(
+                Q(title__icontains=query) | Q(full_description__icontains=query) |
+                Q(short_description__icontains=query) |
+                Q(sku__icontains=query)
+            )
+
+        if category:
+            queryset = queryset.filter(category__id=category)
+
+        return queryset
+
+
 

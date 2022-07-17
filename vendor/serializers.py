@@ -5,7 +5,7 @@ from rest_framework.exceptions import ValidationError
 from ecommerce.common.emails import send_email_without_delay
 from user.models import User
 from user.serializers import UserRegisterSerializer
-from vendor.models import VendorRequest, Vendor
+from vendor.models import VendorRequest, Vendor, StoreSettings
 
 
 class VendorRequestSerializer(serializers.ModelSerializer):
@@ -65,3 +65,17 @@ class VendorDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vendor
         fields = ['id', 'organization_name', 'vendor_admin', 'vendor_request', 'address', 'phone']
+
+
+class StoreSettingsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = StoreSettings
+        fields = ['id', 'store_name', 'address', 'email', 'phone', 'logo', 'banner', 'facebook', 'twitter', 'instagram', 'youtube', 'linkedin']
+
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        vendor = Vendor.objects.get(vendor_admin = user)
+        store_settings_instance = StoreSettings.objects.create(**validated_data, vendor=vendor)
+        return store_settings_instance

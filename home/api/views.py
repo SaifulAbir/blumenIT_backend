@@ -46,7 +46,6 @@ class HomeDataAPIView(APIView):
         # most popular
         # most_popular = Product.objects.filter(status="ACTIVE").annotate(Avg("product_review_product__rating_number")).order_by('-product_review_product__rating_number')
         most_popular = Product.objects.filter(status="ACTIVE").annotate(count=Count('product_review_product')).order_by('-count')
-        print(str(most_popular))
         most_popular_serializer = ProductListSerializer(most_popular, many=True, context={"request": request})
 
 

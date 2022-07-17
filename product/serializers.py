@@ -1,3 +1,4 @@
+from itertools import product
 from curses import meta
 from email.policy import default
 from pyexpat import model
@@ -22,7 +23,7 @@ from product.models import \
     VariantType
 from user.models import User
 from vendor.models import StoreSettings, Vendor
-from django.db.models import Avg
+from django.db.models import Avg, Count, Q, F
 
 
 # supporting serializers start
@@ -261,6 +262,9 @@ class ProductListSerializer(serializers.ModelSerializer):
     category_name = serializers.SerializerMethodField()
     brand_name = serializers.SerializerMethodField()
     avg_rating = serializers.SerializerMethodField()
+    review_count = serializers.SerializerMethodField()
+    # discount_type = serializers.CharField(source='discount_type.title')
+    discount_type = serializers.CharField()
     class Meta:
         model = Product
         fields = [
@@ -278,11 +282,14 @@ class ProductListSerializer(serializers.ModelSerializer):
                 'brand_name',
                 'thumbnail',
                 'product_media',
-                'avg_rating'
+                'avg_rating',
+                'review_count',
+                'discount_type',
+                'discount_amount'
                 ]
 
-    def get_avg_rating(self, ob):
-        return ob.product_review_product.all().aggregate(Avg('rating_number'))['rating_number__avg']
+    def get_avg_rating(self, obj):
+        return obj.product_review_product.all().aggregate(Avg('rating_number'))['rating_number__avg']
 
     def get_category_name(self, obj):
         if obj.category:
@@ -297,6 +304,10 @@ class ProductListSerializer(serializers.ModelSerializer):
         else :
             return obj.brand
 
+    def get_review_count(self, obj):
+        re_count = ProductReview.objects.filter(product = obj,is_active = True).count()
+        return re_count
+    
 class ProductCreateSerializer(serializers.ModelSerializer):
     product_media = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
     product_tags = serializers.ListField(child=serializers.CharField(), write_only=True, required=False)

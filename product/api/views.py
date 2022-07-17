@@ -6,14 +6,8 @@ from ecommerce.settings import MEDIA_URL
 from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateAPIView, RetrieveAPIView, DestroyAPIView
 from rest_framework.views import APIView
 from home.models import ProductView
-from product.serializers import \
-    MegaMenuDataAPIViewListSerializer, \
-    ProductDetailsSerializer,\
-    ProductListSerializer
-#     ProductCreateSerializer
-from product.models import \
-    Category, \
-    Product
+from product.serializers import MegaMenuDataAPIViewListSerializer, ProductCreateSerializer, ProductDetailsSerializer,ProductListSerializer
+from product.models import Category, Product
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework import status
@@ -99,11 +93,12 @@ class ProductListBySubSubCategoryAPI(ListAPIView):
 
 
 
-# class ProductCreateAPIView(CreateAPIView):
-#     serializer_class = ProductCreateSerializer
+class ProductCreateAPIView(CreateAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = ProductCreateSerializer
 
-#     def post(self, request, *args, **kwargs):
-#         return super(ProductCreateAPIView, self).post(request, *args, **kwargs)
+    def post(self, request, *args, **kwargs):
+        return super(ProductCreateAPIView, self).post(request, *args, **kwargs)
 
 
 

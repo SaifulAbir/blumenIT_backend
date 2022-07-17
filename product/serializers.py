@@ -296,6 +296,42 @@ class ProductListSerializer(serializers.ModelSerializer):
             return get_brand.title
         else :
             return obj.brand
+
+class ProductCreateSerializer(serializers.ModelSerializer):
+    product_media = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
+    product_tags = serializers.ListField(child=serializers.CharField(), write_only=True, required=False)
+
+
+    class Meta:
+        model = Product
+        fields = [
+            'id', 'title', 'warranty', 'short_description', 'full_description', 'status', 'vendor', 'category', 'sub_category', 'sub_sub_category', 'brand', 'unit', 'price', 'purchase_price', 'tax_in_percent', 'discount_type', 'discount_amount', 'total_quantity', 'shipping_cost', 'shipping_cost_multiply',
+            'shipping_time', 'thumbnail', 'youtube_link',
+            'product_media',
+            'product_tags'
+        ]
+        read_only_fields = ('slug', 'is_featured', 'old_price', 'total_shipping_cost', 'sell_count')
+
+    def create(self, validated_data):
+        # vendor = Vendor.objects.get(vendor_admin = self.context['request'].user.id)
+        # product_instance = Product.objects.create(**validated_data, vendor=vendor)
+        product_instance = Product.objects.create(**validated_data)
+    #     return product_instance
+        try:
+            product_media = validated_data.pop('product_media')
+            product_tags = validated_data.pop('product_tags')
+
+            if product_media:
+                for media_file in product_media:
+                    file_type = media_file.content_type.split('/')[0]
+                    ProductMedia.objects.create(product=product_instance, type=file_type, file=media_file, status="COMPLETE")
+            if product_tags:
+                for tag in product_tags:
+                    ProductTags.objects.create(title=tag, product=product_instance)
+
+            return product_instance
+        except:
+            return product_instance
 # main serializers end
 
 

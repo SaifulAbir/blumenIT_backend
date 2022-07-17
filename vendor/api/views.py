@@ -3,7 +3,7 @@ from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAP
 from rest_framework.permissions import AllowAny
 from vendor.models import VendorRequest, Vendor
 from vendor.serializers import VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
-    VendorDetailSerializer
+    VendorDetailSerializer, StoreSettingsSerializer
 
 
 class VendorRequestAPIView(CreateAPIView):
@@ -21,6 +21,11 @@ class VendorRequestListAPI(ListAPIView):
 
 class VendorCreateAPIView(CreateAPIView):
     serializer_class = VendorCreateSerializer
+
+
+class StoreSettingsUpdateAPIView(CreateAPIView):
+    serializer_class = StoreSettingsSerializer
+
 
 class OrganizationNamesListAPIView(ListAPIView):
     permission_classes = [AllowAny]

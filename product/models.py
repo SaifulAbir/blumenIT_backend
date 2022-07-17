@@ -11,6 +11,7 @@ import random
 
 class Category(AbstractTimeStamp):
     title = models.CharField(max_length=100, null=False, blank=False, default="")
+    subtitle = models.TextField(null=False, blank=False, default="")
     logo = models.ImageField(upload_to='product_category', blank=True, null=True)
     cover = models.ImageField(upload_to='product_category', blank=True, null=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)

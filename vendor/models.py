@@ -78,6 +78,7 @@ class StoreSettings(AbstractTimeStamp):
     instagram = models.URLField()
     youtube = models.URLField()
     linkedin = models.URLField()
+    bio = models.TextField(default='',blank=True, null=True)
 
     def __str__(self):
         return self.store_name
@@ -87,6 +88,19 @@ class StoreSettings(AbstractTimeStamp):
         verbose_name = "Store Setting"
         db_table = 'store_settings'
 
+class VendorReview(AbstractTimeStamp):
+    vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT, null=False, blank=False, related_name='vendor_review_vendor', default="")
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='vendor_review_user',blank=True, null=True)
+    rating_number = models.IntegerField(default=0)
+    review_text = models.TextField(default='',blank=True, null=True)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+    class Meta:
+        verbose_name = 'VendorReview'
+        verbose_name_plural = 'VendorReviews'
+        db_table = 'vendor_review'
+
+    def __str__(self):
+        return str(self.pk)
 
 @receiver(post_save, sender=VendorRequest)
 def create_vendor(sender, instance, created, **kwargs):

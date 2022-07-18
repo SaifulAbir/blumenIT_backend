@@ -22,7 +22,7 @@ from product.models import \
     Units, \
     VariantType
 from user.models import User
-from vendor.models import StoreSettings, Vendor
+from vendor.models import StoreSettings, Vendor, VendorReview
 from django.db.models import Avg, Count, Q, F
 
 
@@ -48,6 +48,7 @@ class StoreDataSerializer(serializers.ModelSerializer):
             'logo',
             'banner',
             'phone',
+            'bio',
             'facebook',
             'twitter',
             'instagram',
@@ -57,10 +58,26 @@ class StoreDataSerializer(serializers.ModelSerializer):
 
 class VendorSerializer(serializers.ModelSerializer):
     store_data = serializers.SerializerMethodField()
+    vendor_first_name = serializers.CharField(source="vendor_admin.first_name")
+    vendor_last_name = serializers.CharField(source="vendor_admin.last_name")
+    avg_rating = serializers.SerializerMethodField()
+    review_count = serializers.SerializerMethodField()
     class Meta:
         model = Vendor
-        fields = ['id', 'store_data']
+        fields = [
+                    'id',
+                    'vendor_first_name',
+                    'vendor_last_name',
+                    'avg_rating',
+                    'review_count',
+                    'store_data'
+                ]
 
+    def get_avg_rating(self, ob):
+        return ob.vendor_review_vendor.all().aggregate(Avg('rating_number'))['rating_number__avg']
+    def get_review_count(self, obj):
+        re_count = VendorReview.objects.filter(vendor = obj,is_active = True).count()
+        return re_count
     def get_store_data(self, obj):
         selected_store_data = StoreSettings.objects.filter(vendor=obj).distinct()
         return StoreDataSerializer(selected_store_data, many=True, context={'request': self.context['request']}).data
@@ -108,9 +125,16 @@ class ProductTagsSerializer(serializers.ModelSerializer):
         model = ProductTags
         fields = ['id', 'title']
 
+class ProductReviewCreateSerializer(serializers.ModelSerializer):
+    # user = UserDataSerializer()
+    # created_at = serializers.DateTimeField(format="%d %B, %Y %I:%M %p")
+    class Meta:
+        model = ProductReview
+        fields = ['id', 'user', 'rating_number', 'review_text']
+
 class ProductReviewSerializer(serializers.ModelSerializer):
     user = UserDataSerializer()
-    created_at = serializers.DateTimeField(format="%d %B, %Y")
+    created_at = serializers.DateTimeField(format="%d %B, %Y %I:%M %p")
     class Meta:
         model = ProductReview
         fields = ['id', 'user', 'rating_number', 'review_text', 'created_at']
@@ -176,10 +200,6 @@ class ProductCombinationSerializerForProductDetails(serializers.ModelSerializer)
         selected_variant = ProductCombinationsVariants.objects.filter(product_combination=obj, is_active=True).distinct()
         return ProductCombinationsVariantsSerializer(selected_variant, many=True).data
 # supporting serializers end
-
-
-
-
 
 
 
@@ -307,7 +327,7 @@ class ProductListSerializer(serializers.ModelSerializer):
     def get_review_count(self, obj):
         re_count = ProductReview.objects.filter(product = obj,is_active = True).count()
         return re_count
-    
+
 class ProductCreateSerializer(serializers.ModelSerializer):
     product_media = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
     product_tags = serializers.ListField(child=serializers.CharField(), write_only=True, required=False)

@@ -126,11 +126,9 @@ class ProductTagsSerializer(serializers.ModelSerializer):
         fields = ['id', 'title']
 
 class ProductReviewCreateSerializer(serializers.ModelSerializer):
-    # user = UserDataSerializer()
-    # created_at = serializers.DateTimeField(format="%d %B, %Y %I:%M %p")
     class Meta:
         model = ProductReview
-        fields = ['id', 'user', 'rating_number', 'review_text']
+        fields = ['id', 'user', 'product', 'rating_number', 'review_text']
 
 class ProductReviewSerializer(serializers.ModelSerializer):
     user = UserDataSerializer()

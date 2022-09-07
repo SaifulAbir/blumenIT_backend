@@ -188,6 +188,7 @@ class VariantTypeSerializer(serializers.ModelSerializer):
 class ProductCombinationsVariantsSerializer(serializers.ModelSerializer):
     variant_type = VariantTypeSerializer(required=False)
     discount_type = DiscountTypeSerializer(required=False)
+    variant_value = serializers.CharField(required=False)
 
     class Meta:
         model = ProductCombinationsVariants

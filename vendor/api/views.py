@@ -9,6 +9,7 @@ from vendor.models import VendorRequest, Vendor
 from vendor.serializers import VendorBrandSerializer, VendorCategorySerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
     VendorDetailSerializer, StoreSettingsSerializer, VendorSubCategorySerializer, VendorSubSubCategorySerializer, VendorUnitSerializer
 from rest_framework.response import Response
+from user.models import User
 
 
 class VendorRequestAPIView(CreateAPIView):

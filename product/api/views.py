@@ -48,20 +48,6 @@ class ProductListAPI(ListAPIView):
     serializer_class = ProductListSerializer
     pagination_class = ProductCustomPagination
 
-class VendorProductListAPI(ListAPIView):
-    permission_classes = (AllowAny,)
-    serializer_class = ProductListSerializer
-    pagination_class = ProductCustomPagination
-    lookup_field = 'vid'
-    lookup_url_kwarg = "vid"
-    def get_queryset(self):
-        vid = self.kwargs['vid']
-        if vid:
-            queryset = Product.objects.filter(vendor=vid, status='ACTIVE').order_by('-created_at')
-        else:
-            queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
-        return queryset
-
 class ProductListByCategoryAPI(ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = ProductListSerializer

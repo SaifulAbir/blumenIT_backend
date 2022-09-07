@@ -280,7 +280,6 @@ class ProductListSerializer(serializers.ModelSerializer):
     brand_name = serializers.SerializerMethodField()
     avg_rating = serializers.SerializerMethodField()
     review_count = serializers.SerializerMethodField()
-    # discount_type = serializers.CharField(source='discount_type.title')
     discount_type = serializers.CharField()
     class Meta:
         model = Product

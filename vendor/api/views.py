@@ -1,7 +1,9 @@
 from django.db.models import Q
+from product.pagination import ProductCustomPagination
+from product.serializers import ProductListSerializer
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import AllowAny
-from product.models import Brand, Category, SubCategory, SubSubCategory, Units
+from product.models import Brand, Category, Product, SubCategory, SubSubCategory, Units
 from vendor.models import VendorRequest, Vendor
 from vendor.serializers import VendorBrandSerializer, VendorCategorySerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
     VendorDetailSerializer, StoreSettingsSerializer, VendorSubCategorySerializer, VendorSubSubCategorySerializer, VendorUnitSerializer
@@ -92,3 +94,17 @@ class VendorUnitListAPIView(ListAPIView):
     permission_classes = [AllowAny]
     queryset = Units.objects.filter(is_active=True)
     serializer_class = VendorUnitSerializer
+
+class VendorProductListAPI(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = ProductListSerializer
+    pagination_class = ProductCustomPagination
+    lookup_field = 'vid'
+    lookup_url_kwarg = "vid"
+    def get_queryset(self):
+        vid = self.kwargs['vid']
+        if vid:
+            queryset = Product.objects.filter(vendor=vid, status='ACTIVE').order_by('-created_at')
+        else:
+            queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
+        return queryset

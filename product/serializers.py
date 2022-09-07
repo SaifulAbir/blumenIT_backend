@@ -200,7 +200,6 @@ class ProductCombinationSerializerForProductDetails(serializers.ModelSerializer)
 # supporting serializers end
 
 
-
 # main serializers start
 class MegaMenuDataAPIViewListSerializer(serializers.ModelSerializer):
     sub_category = serializers.SerializerMethodField()

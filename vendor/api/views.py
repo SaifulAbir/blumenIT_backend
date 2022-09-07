@@ -1,12 +1,13 @@
 from django.db.models import Q
 from product.pagination import ProductCustomPagination
-from product.serializers import ProductListSerializer
+from product.serializers import ProductCreateSerializer, ProductListSerializer
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from product.models import Brand, Category, Product, SubCategory, SubSubCategory, Units
 from vendor.models import VendorRequest, Vendor
 from vendor.serializers import VendorBrandSerializer, VendorCategorySerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
     VendorDetailSerializer, StoreSettingsSerializer, VendorSubCategorySerializer, VendorSubSubCategorySerializer, VendorUnitSerializer
+from rest_framework.response import Response
 
 
 class VendorRequestAPIView(CreateAPIView):
@@ -96,15 +97,32 @@ class VendorUnitListAPIView(ListAPIView):
     serializer_class = VendorUnitSerializer
 
 class VendorProductListAPI(ListAPIView):
-    permission_classes = (AllowAny,)
-    serializer_class = ProductListSerializer
+    permission_classes = [IsAuthenticated]
     pagination_class = ProductCustomPagination
-    lookup_field = 'vid'
-    lookup_url_kwarg = "vid"
-    def get_queryset(self):
-        vid = self.kwargs['vid']
+
+    def get(self, request):
+        # vid = self.context['request'].user
+        vid = Vendor.objects.get(vendor_admin = self.request.user.id)
+        # print("vid")
+        # print(vid)
         if vid:
-            queryset = Product.objects.filter(vendor=vid, status='ACTIVE').order_by('-created_at')
+            # print('if')
+            products = Product.objects.filter(vendor=vid, status='ACTIVE').order_by('-created_at')
+
+            result = list(products)
         else:
-            queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
-        return queryset
+            # print('else')
+            result = []
+        serializer = ProductListSerializer(result, many=True)
+        # print(serializer)
+        return Response({"search_result": serializer.data})
+
+
+
+class VendorProductCreateAPIView(CreateAPIView):
+    # permission_classes = (AllowAny,)
+    serializer_class = ProductCreateSerializer
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        return super(VendorProductCreateAPIView, self).post(request, *args, **kwargs)

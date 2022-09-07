@@ -176,6 +176,22 @@ class ProductCombinationsVariantsSerializer(serializers.ModelSerializer):
                 'discount_amount'
         ]
 
+class ProductCombinationSerializer(serializers.ModelSerializer):
+    product_attribute = ProductAttributeSerializer()
+    # combination_media = serializers.SerializerMethodField()
+    # variant = serializers.SerializerMethodField()
+    class Meta:
+        model = ProductCombinations
+        fields = [
+        'id',
+        'product_attribute',
+        # 'product_attribute_value',
+        # 'product_attribute_color_code',
+        # 'combination_media',
+        # 'variant'
+        ]
+
+
 class ProductCombinationSerializerForProductDetails(serializers.ModelSerializer):
     product_attribute = ProductAttributeSerializer()
     combination_media = serializers.SerializerMethodField()
@@ -320,25 +336,44 @@ class ProductListSerializer(serializers.ModelSerializer):
         return re_count
 
 class ProductCreateSerializer(serializers.ModelSerializer):
-    product_media = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
     product_tags = serializers.ListField(child=serializers.CharField(), write_only=True, required=False)
-
+    product_media = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
+    product_combinations = ProductCombinationSerializer(many=True)
 
     class Meta:
         model = Product
         fields = [
-            'id', 'title', 'warranty', 'short_description', 'full_description', 'status', 'vendor', 'category', 'sub_category', 'sub_sub_category', 'brand', 'unit', 'price', 'purchase_price', 'tax_in_percent', 'discount_type', 'discount_amount', 'total_quantity', 'shipping_cost', 'shipping_cost_multiply',
-            'shipping_time', 'thumbnail', 'youtube_link',
+            'id',
+            'title',
+            'warranty',
+            'short_description',
+            'full_description',
+            'status',
+            'vendor',
+            'category',
+            'sub_category',
+            'sub_sub_category',
+            'brand',
+            'unit',
+            'price',
+            'purchase_price',
+            'tax_in_percent',
+            'discount_type',
+            'discount_amount',
+            'total_quantity',
+            'shipping_cost',
+            'shipping_cost_multiply',
+            'shipping_time',
+            'thumbnail',
+            'youtube_link',
             'product_media',
-            'product_tags'
+            'product_tags',
+            'product_combinations'
         ]
         read_only_fields = ('slug', 'is_featured', 'old_price', 'total_shipping_cost', 'sell_count')
 
     def create(self, validated_data):
-        # vendor = Vendor.objects.get(vendor_admin = self.context['request'].user.id)
-        # product_instance = Product.objects.create(**validated_data, vendor=vendor)
         product_instance = Product.objects.create(**validated_data)
-    #     return product_instance
         try:
             product_media = validated_data.pop('product_media')
             product_tags = validated_data.pop('product_tags')

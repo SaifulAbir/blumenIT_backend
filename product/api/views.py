@@ -91,15 +91,6 @@ class ProductListBySubSubCategoryAPI(ListAPIView):
         return queryset
 
 
-
-class ProductCreateAPIView(CreateAPIView):
-    permission_classes = (AllowAny,)
-    serializer_class = ProductCreateSerializer
-
-    def post(self, request, *args, **kwargs):
-        return super(ProductCreateAPIView, self).post(request, *args, **kwargs)
-
-
 class ProductSearchAPI(ListAPIView):
     permission_classes = ()
     pagination_class = ProductCustomPagination

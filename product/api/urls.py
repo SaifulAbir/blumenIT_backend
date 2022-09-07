@@ -12,7 +12,6 @@ urlpatterns = [
     path('product-list-by-category/<int:cid>/', ProductListByCategoryAPI.as_view()),
     path('product-list-by-sub-category/<int:subcid>/', ProductListBySubCategoryAPI.as_view()),
     path('product-list-by-sub-sub-category/<int:subsubcid>/', ProductListBySubSubCategoryAPI.as_view()),
-    path('create-product/', ProductCreateAPIView.as_view()),
     path('create-product-review/', ProductReviewCreateAPIView.as_view()),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

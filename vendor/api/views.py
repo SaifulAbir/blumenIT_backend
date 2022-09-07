@@ -100,32 +100,39 @@ class VendorUnitListAPIView(ListAPIView):
 
 class VendorProductListAPI(ListAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = ProductListSerializer
     pagination_class = ProductCustomPagination
 
-    def get(self, request):
-        # vid = self.context['request'].user
-        # print(User.objects.get(id = self.request.user.id))
-        # print(self.request.user.id)
+    def get_queryset(self):
         if Vendor.objects.filter(vendor_admin = User.objects.get(id = self.request.user.id)).exists():
             vid = Vendor.objects.get(vendor_admin = User.objects.get(id = self.request.user.id))
-            # print("If")
-            # print("vid")
-            # print(vid)
             if vid:
-            #     # print('if')
-                products = Product.objects.filter(vendor=vid, status='ACTIVE').order_by('-created_at')
-
-                result = list(products)
-            else:
-            #     # print('else')
-                result = []
-            serializer = ProductListSerializer(result, many=True)
-            # print(serializer)
-            return Response({"result": serializer.data})
-            # return Response({"search_result": vid})
+                queryset = Product.objects.filter(vendor=vid, status='ACTIVE').order_by('-created_at')
+                return queryset
         else:
-            # print('else')
-            return Response({"result": "You are not a vendor"})
+            raise ValidationError({"msg":'You are not a vendor.'})
+
+    # def get_queryset(self):
+    #     cid = self.kwargs['cid']
+    #     if cid:
+    #         queryset = Product.objects.filter(category=cid, status='ACTIVE').order_by('-created_at')
+    #     else:
+    #         queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
+    #     return queryset
+
+    # def get(self, request):
+    #     if Vendor.objects.filter(vendor_admin = User.objects.get(id = self.request.user.id)).exists():
+    #         vid = Vendor.objects.get(vendor_admin = User.objects.get(id = self.request.user.id))
+    #         if vid:
+    #             products = Product.objects.filter(vendor=vid, status='ACTIVE').order_by('-created_at')
+
+    #             result = list(products)
+    #         else:
+    #             result = []
+    #         serializer = ProductListSerializer(result, many=True)
+    #         return Response({"result": serializer.data})
+    #     else:
+    #         return Response({"result": "You are not a vendor"})
 
 
 

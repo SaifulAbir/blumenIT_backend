@@ -4,6 +4,7 @@ from product.serializers import ProductCreateSerializer, ProductListSerializer
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from product.models import Brand, Category, Product, SubCategory, SubSubCategory, Units
+from user.models import User
 from vendor.models import VendorRequest, Vendor
 from vendor.serializers import VendorBrandSerializer, VendorCategorySerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
     VendorDetailSerializer, StoreSettingsSerializer, VendorSubCategorySerializer, VendorSubSubCategorySerializer, VendorUnitSerializer

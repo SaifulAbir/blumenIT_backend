@@ -10,6 +10,7 @@ from vendor.serializers import VendorBrandSerializer, VendorCategorySerializer, 
     VendorDetailSerializer, StoreSettingsSerializer, VendorSubCategorySerializer, VendorSubSubCategorySerializer, VendorUnitSerializer
 from rest_framework.response import Response
 from user.models import User
+from rest_framework.exceptions import ValidationError
 
 
 class VendorRequestAPIView(CreateAPIView):
@@ -98,19 +99,22 @@ class VendorUnitListAPIView(ListAPIView):
     queryset = Units.objects.filter(is_active=True)
     serializer_class = VendorUnitSerializer
 
+
 class VendorProductListAPI(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ProductListSerializer
     pagination_class = ProductCustomPagination
 
     def get_queryset(self):
-        if Vendor.objects.filter(vendor_admin = User.objects.get(id = self.request.user.id)).exists():
-            vid = Vendor.objects.get(vendor_admin = User.objects.get(id = self.request.user.id))
+        if Vendor.objects.filter(vendor_admin=User.objects.get(id=self.request.user.id)).exists():
+            vid = Vendor.objects.get(
+                vendor_admin=User.objects.get(id=self.request.user.id))
             if vid:
-                queryset = Product.objects.filter(vendor=vid, status='ACTIVE').order_by('-created_at')
+                queryset = Product.objects.filter(
+                    vendor=vid, status='ACTIVE').order_by('-created_at')
                 return queryset
         else:
-            raise ValidationError({"msg":'You are not a vendor.'})
+            raise ValidationError({"msg": 'You are not a vendor.'})
 
     # def get_queryset(self):
     #     cid = self.kwargs['cid']
@@ -133,7 +137,6 @@ class VendorProductListAPI(ListAPIView):
     #         return Response({"result": serializer.data})
     #     else:
     #         return Response({"result": "You are not a vendor"})
-
 
 
 class VendorProductCreateAPIView(CreateAPIView):

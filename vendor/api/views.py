@@ -102,20 +102,28 @@ class VendorProductListAPI(ListAPIView):
 
     def get(self, request):
         # vid = self.context['request'].user
-        vid = Vendor.objects.get(vendor_admin = self.request.user.id)
-        # print("vid")
-        # print(vid)
-        if vid:
-            # print('if')
-            products = Product.objects.filter(vendor=vid, status='ACTIVE').order_by('-created_at')
+        # print(User.objects.get(id = self.request.user.id))
+        # print(self.request.user.id)
+        if Vendor.objects.filter(vendor_admin = User.objects.get(id = self.request.user.id)).exists():
+            vid = Vendor.objects.get(vendor_admin = User.objects.get(id = self.request.user.id))
+            # print("If")
+            # print("vid")
+            # print(vid)
+            if vid:
+            #     # print('if')
+                products = Product.objects.filter(vendor=vid, status='ACTIVE').order_by('-created_at')
 
-            result = list(products)
+                result = list(products)
+            else:
+            #     # print('else')
+                result = []
+            serializer = ProductListSerializer(result, many=True)
+            # print(serializer)
+            return Response({"result": serializer.data})
+            # return Response({"search_result": vid})
         else:
             # print('else')
-            result = []
-        serializer = ProductListSerializer(result, many=True)
-        # print(serializer)
-        return Response({"search_result": serializer.data})
+            return Response({"result": "You are not a vendor"})
 
 
 

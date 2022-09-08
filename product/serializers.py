@@ -406,7 +406,6 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             'short_description',
             'full_description',
             'status',
-            'vendor',
             'category',
             'sub_category',
             'sub_sub_category',
@@ -431,7 +430,8 @@ class ProductCreateSerializer(serializers.ModelSerializer):
                             'total_shipping_cost', 'sell_count')
 
     def create(self, validated_data):
-        product_instance = Product.objects.create(**validated_data)
+        product_instance = Product.objects.create(
+            **validated_data, vendor=self.context['request'].user)
         try:
             product_media = validated_data.pop('product_media')
             product_tags = validated_data.pop('product_tags')

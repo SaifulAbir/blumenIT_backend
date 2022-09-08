@@ -1,3 +1,4 @@
+import base64
 from itertools import product
 from curses import meta
 from email.policy import default
@@ -396,8 +397,8 @@ class ProductListSerializer(serializers.ModelSerializer):
 
 
 class ProductCreateSerializer(serializers.ModelSerializer):
-    product_tags = serializers.ListField(
-        child=serializers.CharField(), write_only=True, required=False)
+    # product_tags = serializers.ListField(
+    #     child=serializers.CharField(), write_only=True, required=False)
     product_media = serializers.ListField(
         child=serializers.FileField(), write_only=True, required=False)
     product_combinations = ProductCombinationSerializer(
@@ -432,16 +433,16 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             'product_tags',
             'product_combinations'
         ]
+
         read_only_fields = ('slug', 'is_featured', 'old_price',
                             'total_shipping_cost', 'sell_count')
 
     def create(self, validated_data):
-        product_instance = Product.objects.create(
-            **validated_data, vendor=self.context['request'].user)
+        product_media = validated_data.pop('product_media')
+        product_tags = validated_data.pop('product_tags')
+        product_instance = Product.objects.create(**validated_data, vendor=Vendor.objects.get(vendor_admin=User.objects.get(
+            id=self.context['request'].user.id)))
         try:
-            product_media = validated_data.pop('product_media')
-            product_tags = validated_data.pop('product_tags')
-
             if product_media:
                 for media_file in product_media:
                     file_type = media_file.content_type.split('/')[0]

@@ -397,8 +397,8 @@ class ProductListSerializer(serializers.ModelSerializer):
 
 
 class ProductCreateSerializer(serializers.ModelSerializer):
-    # product_tags = serializers.ListField(
-    #     child=serializers.CharField(), write_only=True, required=False)
+    product_tags = serializers.ListField(
+        child=serializers.CharField(), write_only=True, required=False)
     product_media = serializers.ListField(
         child=serializers.FileField(), write_only=True, required=False)
     product_combinations = ProductCombinationSerializer(

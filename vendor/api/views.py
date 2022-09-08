@@ -1,9 +1,9 @@
 from django.db.models import Q
 from product.pagination import ProductCustomPagination
-from product.serializers import ProductCreateSerializer, ProductListSerializer
+from product.serializers import DiscountTypeSerializer, ProductAttributesSerializer, ProductCreateSerializer, ProductListSerializer, ProductTagsSerializer, VariantTypeSerializer
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from product.models import Brand, Category, Product, SubCategory, SubSubCategory, Units
+from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductTags, SubCategory, SubSubCategory, Units, VariantType
 from user.models import User
 from vendor.models import VendorRequest, Vendor
 from vendor.serializers import VendorBrandSerializer, VendorCategorySerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
@@ -74,14 +74,14 @@ class VendorSubCategoryListAPIView(ListAPIView):
 class VendorSubSubCategoryListAPIView(ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = VendorSubSubCategorySerializer
-    lookup_field = 'cid'
-    lookup_url_kwarg = "cid"
+    lookup_field = 'sid'
+    lookup_url_kwarg = "sid"
 
     def get_queryset(self):
-        cid = self.kwargs['cid']
-        if cid:
+        sid = self.kwargs['sid']
+        if sid:
             queryset = SubSubCategory.objects.filter(
-                category=cid, is_active=True).order_by('-created_at')
+                sub_category=sid, is_active=True).order_by('-created_at')
         else:
             queryset = SubSubCategory.objects.filter(
                 is_active=True).order_by('-created_at')
@@ -100,6 +100,30 @@ class VendorUnitListAPIView(ListAPIView):
     serializer_class = VendorUnitSerializer
 
 
+class VendorDiscountListAPIView(ListAPIView):
+    permission_classes = [AllowAny]
+    queryset = DiscountTypes.objects.filter(is_active=True)
+    serializer_class = DiscountTypeSerializer
+
+
+class VendorTagListAPIView(ListAPIView):
+    permission_classes = [AllowAny]
+    queryset = ProductTags.objects.filter(is_active=True)
+    serializer_class = ProductTagsSerializer
+
+
+class VendorAttributeListAPIView(ListAPIView):
+    permission_classes = [AllowAny]
+    queryset = ProductAttributes.objects.filter(is_active=True)
+    serializer_class = ProductAttributesSerializer
+
+
+class VendorVariantListAPIView(ListAPIView):
+    permission_classes = [AllowAny]
+    queryset = VariantType.objects.filter(is_active=True)
+    serializer_class = VariantTypeSerializer
+
+
 class VendorProductListAPI(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ProductListSerializer
@@ -115,28 +139,6 @@ class VendorProductListAPI(ListAPIView):
                 return queryset
         else:
             raise ValidationError({"msg": 'You are not a vendor.'})
-
-    # def get_queryset(self):
-    #     cid = self.kwargs['cid']
-    #     if cid:
-    #         queryset = Product.objects.filter(category=cid, status='ACTIVE').order_by('-created_at')
-    #     else:
-    #         queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
-    #     return queryset
-
-    # def get(self, request):
-    #     if Vendor.objects.filter(vendor_admin = User.objects.get(id = self.request.user.id)).exists():
-    #         vid = Vendor.objects.get(vendor_admin = User.objects.get(id = self.request.user.id))
-    #         if vid:
-    #             products = Product.objects.filter(vendor=vid, status='ACTIVE').order_by('-created_at')
-
-    #             result = list(products)
-    #         else:
-    #             result = []
-    #         serializer = ProductListSerializer(result, many=True)
-    #         return Response({"result": serializer.data})
-    #     else:
-    #         return Response({"result": "You are not a vendor"})
 
 
 class VendorProductCreateAPIView(CreateAPIView):

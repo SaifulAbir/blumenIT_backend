@@ -143,6 +143,12 @@ class ProductTagsSerializer(serializers.ModelSerializer):
         fields = ['id', 'title']
 
 
+class ProductAttributesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductAttributes
+        fields = ['id', 'title']
+
+
 class ProductReviewCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductReview

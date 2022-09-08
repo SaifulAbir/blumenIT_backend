@@ -408,10 +408,10 @@ class ProductCreateSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'title',
+            'sku',
             'warranty',
             'short_description',
             'full_description',
-            'status',
             'category',
             'sub_category',
             'sub_sub_category',

@@ -218,7 +218,7 @@ class ProductCombinations(AbstractTimeStamp):
     product = models.ForeignKey(
         Product, on_delete=models.PROTECT, related_name='product_combinations_product')
     product_attribute = models.ForeignKey(
-        ProductAttributes, related_name="product_combinations_product_attributes", null=False, blank=False, on_delete=models.PROTECT)
+        ProductAttributes, related_name="product_combinations_product_attributes", null=True, blank=True, on_delete=models.PROTECT)
     product_attribute_value = models.CharField(
         max_length=500, null=False, blank=False, default="")
     product_attribute_color_code = models.CharField(
@@ -232,9 +232,11 @@ class ProductCombinations(AbstractTimeStamp):
         db_table = 'product_combinations'
 
     def __str__(self):
-        title = self.product.title
-        combine = title + ' ' + self.product_attribute.title + \
-            ' ' + self.product_attribute_value
+        # title = self.product.title
+        # combine = title + ' ' + self.product_attribute.title + \
+        #     ' ' + self.product_attribute_value
+
+        combine = self.product_attribute_value
         return combine
 
 

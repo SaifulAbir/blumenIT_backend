@@ -23,7 +23,8 @@ class VendorRequest(AbstractTimeStamp):
     vendor_type = models.CharField(max_length=20, choices=VENDOR_TYPES)
     is_verified = models.BooleanField(default=False)
     nid = models.CharField(max_length=50, null=False, blank=False)
-    trade_license = models.ImageField(upload_to='images/trade_license', null=True, blank=True)
+    trade_license = models.ImageField(
+        upload_to='images/trade_license', null=True, blank=True)
 
     def __str__(self):
         return self.organization_name
@@ -48,7 +49,8 @@ class Vendor(AbstractTimeStamp):
     vendor_request = models.ForeignKey(
         VendorRequest, on_delete=models.PROTECT, blank=True, null=True, related_name="vendor_request",
         verbose_name=_('Vendor Request'))
-    phone = models.CharField(max_length=255, null=True, blank=True, default="None")
+    phone = models.CharField(max_length=255, null=True,
+                             blank=True, default="None")
     password = models.CharField(max_length=255)
 
     def __str__(self):
@@ -72,13 +74,13 @@ class StoreSettings(AbstractTimeStamp):
         verbose_name=_('Vendor'))
     logo = models.ImageField(upload_to='images/store_logo')
     banner = models.ImageField(upload_to='images/banner')
-    phone = models.CharField(max_length=255, null=True, blank=True, default="None")
-    facebook = models.URLField()
-    twitter = models.URLField()
-    instagram = models.URLField()
-    youtube = models.URLField()
-    linkedin = models.URLField()
-    bio = models.TextField(default='',blank=True, null=True)
+    phone = models.CharField(max_length=255, null=True, blank=True)
+    facebook = models.URLField(null=True, blank=True)
+    twitter = models.URLField(null=True, blank=True)
+    instagram = models.URLField(null=True, blank=True)
+    youtube = models.URLField(null=True, blank=True)
+    linkedin = models.URLField(null=True, blank=True)
+    bio = models.TextField(default='', blank=True, null=True)
 
     def __str__(self):
         return self.store_name
@@ -88,12 +90,16 @@ class StoreSettings(AbstractTimeStamp):
         verbose_name = "Store Setting"
         db_table = 'store_settings'
 
+
 class VendorReview(AbstractTimeStamp):
-    vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT, null=False, blank=False, related_name='vendor_review_vendor', default="")
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='vendor_review_user',blank=True, null=True)
+    vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT, null=False,
+                               blank=False, related_name='vendor_review_vendor', default="")
+    user = models.ForeignKey(User, on_delete=models.SET_NULL,
+                             related_name='vendor_review_user', blank=True, null=True)
     rating_number = models.IntegerField(default=0)
-    review_text = models.TextField(default='',blank=True, null=True)
+    review_text = models.TextField(default='', blank=True, null=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
+
     class Meta:
         verbose_name = 'VendorReview'
         verbose_name_plural = 'VendorReviews'
@@ -101,6 +107,7 @@ class VendorReview(AbstractTimeStamp):
 
     def __str__(self):
         return str(self.pk)
+
 
 @receiver(post_save, sender=VendorRequest)
 def create_vendor(sender, instance, created, **kwargs):

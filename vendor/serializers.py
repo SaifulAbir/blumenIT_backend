@@ -8,6 +8,8 @@ from user.models import User
 from user.serializers import UserRegisterSerializer
 from vendor.models import VendorRequest, Vendor, StoreSettings
 
+# Vendor Request serializer
+
 
 class VendorRequestSerializer(serializers.ModelSerializer):
 
@@ -18,6 +20,7 @@ class VendorRequestSerializer(serializers.ModelSerializer):
         # fields = ['id', 'email', 'organization_name', 'first_name', 'last_name', 'vendor_type', 'nid', 'trade_license']
 
 
+# Vendor Create serializer
 class VendorCreateSerializer(serializers.ModelSerializer):
     is_verified = serializers.BooleanField(write_only=True)
     request_id = serializers.IntegerField(write_only=True)
@@ -58,12 +61,14 @@ class VendorCreateSerializer(serializers.ModelSerializer):
             raise ValidationError("You should verify first to create a vendor")
 
 
+# Organization Name serializer
 class OrganizationNameSerializer(serializers.ModelSerializer):
     class Meta:
         model = VendorRequest
         fields = ['organization_name']
 
 
+# Vendor Detail serializer
 class VendorDetailSerializer(serializers.ModelSerializer):
     vendor_request = VendorRequestSerializer(read_only=True)
     vendor_admin = UserRegisterSerializer(read_only=True)
@@ -74,6 +79,7 @@ class VendorDetailSerializer(serializers.ModelSerializer):
                   'vendor_request', 'address', 'phone']
 
 
+# Store Settings serializer
 class StoreSettingsSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -89,6 +95,7 @@ class StoreSettingsSerializer(serializers.ModelSerializer):
         return store_settings_instance
 
 
+# Vendor Category serializer
 class VendorCategorySerializer(serializers.ModelSerializer):
     class Meta:
         ref_name = "vendor category serializer"
@@ -96,24 +103,28 @@ class VendorCategorySerializer(serializers.ModelSerializer):
         fields = ['id', 'title']
 
 
+# Vendor Sub Category serializer
 class VendorSubCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = SubCategory
         fields = ['id', 'title']
 
 
+# Vendor Sub Sub Category serializer
 class VendorSubSubCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = SubSubCategory
         fields = ['id', 'title']
 
 
+# Vendor Brand serializer
 class VendorBrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
         fields = ['id', 'title']
 
 
+# Vendor Unit serializer
 class VendorUnitSerializer(serializers.ModelSerializer):
     class Meta:
         model = Units

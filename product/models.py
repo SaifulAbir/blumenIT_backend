@@ -232,7 +232,7 @@ class ProductCombinations(AbstractTimeStamp):
         db_table = 'product_combinations'
 
     def __str__(self):
-        return self.product_attribute_value
+        return str(self.id) + '-'+self.product.title+'-'+self.product_attribute_value
 
     # def __str__(self):
     #     # title = self.product.title
@@ -377,7 +377,7 @@ class ProductCombinationsVariants(AbstractTimeStamp):
 
     def __str__(self):
         # return self.variant_type.title + ' ' + self.variant_value
-        return self.product_combination.product_attribute_value
+        return str(self.id)+'-'+self.product_combination.product.title+'-'+self.variant_type.title+'-'+self.variant_value
 
     def save(self, *args, **kwargs):
         super(ProductCombinationsVariants, self).save(*args, **kwargs)

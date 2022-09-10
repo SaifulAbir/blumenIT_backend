@@ -14,7 +14,7 @@ from vendor.models import StoreSettings, Vendor, VendorReview
 from django.db.models import Avg, Count, Q, F
 
 
-# supporting serializers start
+# User Data serializer
 class UserDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -26,6 +26,7 @@ class UserDataSerializer(serializers.ModelSerializer):
         ]
 
 
+# Store Data serializer
 class StoreDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = StoreSettings
@@ -46,6 +47,7 @@ class StoreDataSerializer(serializers.ModelSerializer):
         ]
 
 
+# Vendor serializer / Connect with ProductDetailsSerializer
 class VendorSerializer(serializers.ModelSerializer):
     store_data = serializers.SerializerMethodField()
     vendor_first_name = serializers.CharField(source="vendor_admin.first_name")
@@ -78,71 +80,81 @@ class VendorSerializer(serializers.ModelSerializer):
         return StoreDataSerializer(selected_store_data, many=True, context={'request': self.context['request']}).data
 
 
+# Category serializer / Connect with ProductDetailsSerializer
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ['id', 'title', 'subtitle', 'cover', 'logo']
 
 
+# Sub Sub Category serializer / Connect with ProductDetailsSerializer
 class SubSubCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = SubSubCategory
         fields = ['id', 'title']
 
 
+# Sub Category serializer / Connect with ProductDetailsSerializer
 class SubCategorySerializer(serializers.ModelSerializer):
-    sub_sub_category = serializers.SerializerMethodField()
+    # sub_sub_category = serializers.SerializerMethodField()
 
     class Meta:
         model = SubCategory
         fields = [
             'id',
             'title',
-            'sub_sub_category'
+            # 'sub_sub_category'
         ]
 
-    def get_sub_sub_category(self, obj):
-        selected_sub_sub_category = SubSubCategory.objects.filter(
-            sub_category=obj).distinct()
-        return SubSubCategorySerializer(selected_sub_sub_category, many=True).data
+    # def get_sub_sub_category(self, obj):
+    #     selected_sub_sub_category = SubSubCategory.objects.filter(
+    #         sub_category=obj).distinct()
+    #     return SubSubCategorySerializer(selected_sub_sub_category, many=True).data
 
 
+# Brands serializer / Connect with ProductDetailsSerializer
 class BrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
         fields = ['id', 'title', 'logo']
 
 
+# Units serializer / Connect with ProductDetailsSerializer
 class UnitSerializer(serializers.ModelSerializer):
     class Meta:
         model = Units
         fields = ['id', 'title']
 
 
+# Discount Types serializer / Connect with ProductDetailsSerializer
 class DiscountTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = DiscountTypes
         fields = ['id', 'title']
 
 
+# Product Tags serializer
 class ProductTagsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductTags
         fields = ['id', 'title']
 
 
+# Product Attributes serializer
 class ProductAttributesSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductAttributes
         fields = ['id', 'title']
 
 
+# Product Review Create serializer
 class ProductReviewCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductReview
         fields = ['id', 'user', 'product', 'rating_number', 'review_text']
 
 
+# Product Review serializer
 class ProductReviewSerializer(serializers.ModelSerializer):
     user = UserDataSerializer()
     created_at = serializers.DateTimeField(format="%d %B, %Y %I:%M %p")
@@ -152,24 +164,28 @@ class ProductReviewSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'rating_number', 'review_text', 'created_at']
 
 
+# Product Media serializer
 class ProductMediaSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductMedia
         fields = ['id', 'file']
 
 
+# Product Attribute serializer
 class ProductAttributeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductAttributes
         fields = ['id', 'title']
 
 
+# Product Combination Media serializer
 class ProductCombinationMediaSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductCombinationMedia
         fields = ['id', 'file']
 
 
+# Variant Types serializer
 class VariantTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = VariantType
@@ -179,6 +195,7 @@ class VariantTypeSerializer(serializers.ModelSerializer):
         ]
 
 
+# Product Combination Variant serializer
 class ProductCombinationsVariantsSerializer(serializers.ModelSerializer):
     variant_type = VariantTypeSerializer(required=False)
     discount_type = DiscountTypeSerializer(required=False)
@@ -198,10 +215,8 @@ class ProductCombinationsVariantsSerializer(serializers.ModelSerializer):
         ]
 
 
+# Product Combination serializer / Connect with ProductCreateSerializer
 class ProductCombinationSerializer(serializers.ModelSerializer):
-    # product_attribute = ProductAttributeSerializer(required=False)
-    # variant = ProductCombinationsVariantsSerializer(many=True, required=False)
-
     sku = serializers.CharField(required=False)
     variant_type = serializers.PrimaryKeyRelatedField(
         queryset=VariantType.objects.all(), many=False, write_only=True, required=False)
@@ -230,9 +245,10 @@ class ProductCombinationSerializer(serializers.ModelSerializer):
         ]
 
 
+# Product Combination serializer
 class ProductCombinationSerializerForProductDetails(serializers.ModelSerializer):
     product_attribute = ProductAttributeSerializer()
-    combination_media = serializers.SerializerMethodField()
+    # combination_media = serializers.SerializerMethodField()
     variant = serializers.SerializerMethodField()
 
     class Meta:
@@ -242,23 +258,22 @@ class ProductCombinationSerializerForProductDetails(serializers.ModelSerializer)
             'product_attribute',
             'product_attribute_value',
             'product_attribute_color_code',
-            'combination_media',
+            # 'combination_media',
             'variant'
         ]
 
-    def get_combination_media(self, obj):
-        selected_combination_media = ProductCombinationMedia.objects.filter(
-            product_combination=obj, status='COMPLETE').distinct()
-        return ProductCombinationMediaSerializer(selected_combination_media, many=True).data
+    # def get_combination_media(self, obj):
+    #     selected_combination_media = ProductCombinationMedia.objects.filter(
+    #         product_combination=obj, status='COMPLETE').distinct()
+    #     return ProductCombinationMediaSerializer(selected_combination_media, many=True).data
 
     def get_variant(self, obj):
         selected_variant = ProductCombinationsVariants.objects.filter(
             product_combination=obj, is_active=True).distinct()
         return ProductCombinationsVariantsSerializer(selected_variant, many=True).data
-# supporting serializers end
 
 
-# main serializers start
+# Mega Menu Data serializer
 class MegaMenuDataAPIViewListSerializer(serializers.ModelSerializer):
     sub_category = serializers.SerializerMethodField()
 
@@ -272,14 +287,18 @@ class MegaMenuDataAPIViewListSerializer(serializers.ModelSerializer):
         return SubCategorySerializer(selected_sub_category, many=True).data
 
 
+# Product Details serializer
 class ProductDetailsSerializer(serializers.ModelSerializer):
     product_tags = serializers.SerializerMethodField()
     product_reviews = serializers.SerializerMethodField()
     product_media = serializers.SerializerMethodField()
     product_combinations = serializers.SerializerMethodField()
+    # product_combinations = ProductCombinationSerializer(
+    #     many=True, required=False)
     vendor = VendorSerializer()
     category = CategorySerializer()
     sub_category = SubCategorySerializer()
+    sub_sub_category = SubSubCategorySerializer()
     brand = BrandSerializer()
     unit = UnitSerializer()
     discount_type = DiscountTypeSerializer()
@@ -301,6 +320,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             'vendor',
             'category',
             'sub_category',
+            'sub_sub_category',
             'brand',
             'unit',
             'price',
@@ -345,6 +365,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
         return ProductCombinationSerializerForProductDetails(selected_product_combinations, many=True).data
 
 
+# Product List serializer
 class ProductListSerializer(serializers.ModelSerializer):
     product_media = ProductMediaSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
@@ -392,6 +413,7 @@ class ProductListSerializer(serializers.ModelSerializer):
         return re_count
 
 
+# Product create serializer
 class ProductCreateSerializer(serializers.ModelSerializer):
     product_tags = serializers.ListField(
         child=serializers.CharField(), write_only=True, required=False)

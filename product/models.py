@@ -232,12 +232,15 @@ class ProductCombinations(AbstractTimeStamp):
         db_table = 'product_combinations'
 
     def __str__(self):
-        # title = self.product.title
-        # combine = title + ' ' + self.product_attribute.title + \
-        #     ' ' + self.product_attribute_value
+        return self.product_attribute_value
 
-        combine = self.product_attribute_value
-        return combine
+    # def __str__(self):
+    #     # title = self.product.title
+    #     # combine = title + ' ' + self.product_attribute.title + \
+    #     #     ' ' + self.product_attribute_value
+
+    #     combine = self.product_attribute_value
+    #     return combine
 
 
 class ProductTags(AbstractTimeStamp):
@@ -353,14 +356,14 @@ class VariantType(AbstractTimeStamp):
 
 class ProductCombinationsVariants(AbstractTimeStamp):
     product_combination = models.ForeignKey(
-        ProductCombinations, related_name="product_combinations_variant_product_combination", null=False, blank=False, on_delete=models.PROTECT)
+        ProductCombinations, related_name="product_combinations_variant_product_combination", null=True, blank=True, on_delete=models.PROTECT)
     sku = models.CharField(max_length=500, null=True, blank=True, unique=True)
     variant_type = models.ForeignKey(
-        VariantType, related_name="product_combinations_variant_variant_type", null=False, blank=False, on_delete=models.PROTECT)
-    variant_value = models.CharField(max_length=500, null=False, blank=False)
+        VariantType, related_name="product_combinations_variant_variant_type", null=True, blank=True, on_delete=models.PROTECT)
+    variant_value = models.CharField(max_length=500, null=True, blank=True)
     variant_price = models.FloatField(
-        max_length=255, null=False, blank=False, default=0)
-    quantity = models.IntegerField(null=False, blank=False, default=0)
+        max_length=255, null=True, blank=True, default=0)
+    quantity = models.IntegerField(null=True, blank=True, default=0)
     discount_type = models.ForeignKey(
         DiscountTypes, related_name="product_combinations_variant_discount_type", null=True, blank=True, on_delete=models.PROTECT)
     discount_amount = models.FloatField(
@@ -373,7 +376,8 @@ class ProductCombinationsVariants(AbstractTimeStamp):
         db_table = 'product_combinations_variant'
 
     def __str__(self):
-        return self.variant_type.title + ' ' + self.variant_value
+        # return self.variant_type.title + ' ' + self.variant_value
+        return self.product_combination.product_attribute_value
 
     def save(self, *args, **kwargs):
         super(ProductCombinationsVariants, self).save(*args, **kwargs)

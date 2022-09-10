@@ -1,3 +1,5 @@
+# from collections import OrderedDict
+import collections
 import base64
 from itertools import product
 from curses import meta
@@ -6,22 +8,7 @@ from pyexpat import model
 from attr import fields
 from django.utils import timezone
 from rest_framework import serializers
-from product.models import \
-    Category, \
-    ProductCombinationMedia, \
-    ProductCombinationsVariants, \
-    SubCategory, \
-    SubSubCategory, \
-    Product, \
-    ProductTags, \
-    ProductReview, \
-    ProductMedia, \
-    ProductCombinations, \
-    ProductAttributes, \
-    Brand, \
-    DiscountTypes, \
-    Units, \
-    VariantType
+from product.models import Category, ProductCombinationMedia, ProductCombinationsVariants, SubCategory, SubSubCategory, Product, ProductTags, ProductReview, ProductMedia, ProductCombinations, ProductAttributes, Brand, DiscountTypes, Units, VariantType
 from user.models import User
 from vendor.models import StoreSettings, Vendor, VendorReview
 from django.db.models import Avg, Count, Q, F
@@ -212,10 +199,18 @@ class ProductCombinationsVariantsSerializer(serializers.ModelSerializer):
 
 
 class ProductCombinationSerializer(serializers.ModelSerializer):
-    product_attribute = ProductAttributeSerializer(required=False)
-    combination_media = ProductCombinationMediaSerializer(
-        many=True, required=False)
-    variant = ProductCombinationsVariantsSerializer(many=True, required=False)
+    # product_attribute = ProductAttributeSerializer(required=False)
+    # variant = ProductCombinationsVariantsSerializer(many=True, required=False)
+
+    sku = serializers.CharField(required=False)
+    variant_type = serializers.PrimaryKeyRelatedField(
+        queryset=VariantType.objects.all(), many=False, write_only=True, required=False)
+    variant_value = serializers.CharField(required=False)
+    variant_price = serializers.FloatField(default=0.0, required=False)
+    quantity = serializers.IntegerField(required=False)
+    discount_type = serializers.PrimaryKeyRelatedField(
+        queryset=DiscountTypes.objects.all(), many=False, write_only=True, required=False)
+    discount_amount = serializers.FloatField(default=0.0, required=False)
 
     class Meta:
         model = ProductCombinations
@@ -224,14 +219,15 @@ class ProductCombinationSerializer(serializers.ModelSerializer):
             'product_attribute',
             'product_attribute_value',
             'product_attribute_color_code',
-            'combination_media',
-            'variant'
-        ]
 
-    def get_combination_media(self, obj):
-        selected_combination_media = ProductCombinationMedia.objects.filter(
-            product_combination=obj, status='COMPLETE').distinct()
-        return ProductCombinationMediaSerializer(selected_combination_media, many=True).data
+            'sku',
+            'variant_type',
+            'variant_value',
+            'variant_price',
+            'quantity',
+            'discount_type',
+            'discount_amount'
+        ]
 
 
 class ProductCombinationSerializerForProductDetails(serializers.ModelSerializer):
@@ -438,21 +434,49 @@ class ProductCreateSerializer(serializers.ModelSerializer):
                             'total_shipping_cost', 'sell_count')
 
     def create(self, validated_data):
-        product_media = validated_data.pop('product_media')
-        product_tags = validated_data.pop('product_tags')
+        try:
+            product_media = validated_data.pop('product_media')
+        except:
+            product_media = ''
+
+        try:
+            product_tags = validated_data.pop('product_tags')
+        except:
+            product_tags = ''
+
+        try:
+            product_combinations = validated_data.pop('product_combinations')
+        except:
+            product_combinations = ''
         product_instance = Product.objects.create(**validated_data, vendor=Vendor.objects.get(vendor_admin=User.objects.get(
             id=self.context['request'].user.id)))
         try:
             if product_media:
                 for media_file in product_media:
-                    file_type = media_file.content_type.split('/')[0]
+                    # file_type = media_file.content_type.split('/')[0]
                     ProductMedia.objects.create(
-                        product=product_instance, type=file_type, file=media_file, status="COMPLETE")
+                        product=product_instance, file=media_file, status="COMPLETE")
             if product_tags:
                 for tag in product_tags:
                     ProductTags.objects.create(
                         title=tag, product=product_instance)
+            if product_combinations:
+                for product_combination in product_combinations:
+                    product_attribute = product_combination['product_attribute']
+                    product_attribute_value = product_combination['product_attribute_value']
+                    product_attribute_color_code = product_combination['product_attribute_color_code']
+                    product_combination_instance = ProductCombinations.objects.create(
+                        product_attribute=product_attribute, product_attribute_value=product_attribute_value, product_attribute_color_code=product_attribute_color_code, product=product_instance)
 
+                    sku = product_combination['sku']
+                    variant_type = product_combination['variant_type']
+                    variant_value = product_combination['variant_value']
+                    variant_price = product_combination['variant_price']
+                    quantity = product_combination['quantity']
+                    discount_type = product_combination['discount_type']
+                    discount_amount = product_combination['discount_amount']
+                    ProductCombinationsVariants.objects.create(
+                        sku=sku, variant_type=variant_type,  variant_value=variant_value, variant_price=variant_price, quantity=quantity, discount_type=discount_type, discount_amount=discount_amount, product_combination=product_combination_instance)
             return product_instance
         except:
             return product_instance

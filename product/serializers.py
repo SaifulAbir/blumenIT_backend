@@ -12,6 +12,7 @@ from product.models import Category, ProductCombinationMedia, ProductCombination
 from user.models import User
 from vendor.models import StoreSettings, Vendor, VendorReview
 from django.db.models import Avg, Count, Q, F
+from rest_framework.exceptions import ValidationError
 
 
 # User Data serializer
@@ -463,6 +464,29 @@ class ProductCreateSerializer(serializers.ModelSerializer):
                             'total_shipping_cost', 'sell_count')
 
     def create(self, validated_data):
+        # validation for sub category and sub sub category start
+        try:
+            category_id = validated_data["category"].id
+        except:
+            category_id = ''
+
+        # try:
+        sub_category = validated_data["sub_category"].id
+        if sub_category:
+            check_sub_category = SubCategory.objects.filter(
+                id=sub_category, category=category_id)
+            if not check_sub_category:
+                raise ValidationError(
+                    'This Sub category is not under your selected parent category.')
+
+        sub_sub_category = validated_data["sub_sub_category"].id
+        if sub_sub_category:
+            check_sub_sub_category = SubSubCategory.objects.filter(
+                id=sub_sub_category, sub_category=sub_category, category=category_id)
+            if not check_sub_sub_category:
+                raise ValidationError(
+                    'This Sub Sub category is not under your selected parent category.')
+
         try:
             product_media = validated_data.pop('product_media')
         except:
@@ -482,7 +506,6 @@ class ProductCreateSerializer(serializers.ModelSerializer):
         try:
             if product_media:
                 for media_file in product_media:
-                    # file_type = media_file.content_type.split('/')[0]
                     ProductMedia.objects.create(
                         product=product_instance, file=media_file, status="COMPLETE")
             if product_tags:

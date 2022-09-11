@@ -96,20 +96,29 @@ class SubSubCategorySerializer(serializers.ModelSerializer):
 
 # Sub Category serializer / Connect with ProductDetailsSerializer
 class SubCategorySerializer(serializers.ModelSerializer):
-    # sub_sub_category = serializers.SerializerMethodField()
+    class Meta:
+        model = SubCategory
+        fields = [
+            'id',
+            'title',
+        ]
+
+
+class SubCategorySerializerForMegaMenu(serializers.ModelSerializer):
+    sub_sub_category = serializers.SerializerMethodField()
 
     class Meta:
         model = SubCategory
         fields = [
             'id',
             'title',
-            # 'sub_sub_category'
+            'sub_sub_category'
         ]
 
-    # def get_sub_sub_category(self, obj):
-    #     selected_sub_sub_category = SubSubCategory.objects.filter(
-    #         sub_category=obj).distinct()
-    #     return SubSubCategorySerializer(selected_sub_sub_category, many=True).data
+    def get_sub_sub_category(self, obj):
+        selected_sub_sub_category = SubSubCategory.objects.filter(
+            sub_category=obj).distinct()
+        return SubSubCategorySerializer(selected_sub_sub_category, many=True).data
 
 
 # Brands serializer / Connect with ProductDetailsSerializer
@@ -276,22 +285,15 @@ class ProductCombinationSerializerForProductDetails(serializers.ModelSerializer)
 # Mega Menu Data serializer
 class MegaMenuDataAPIViewListSerializer(serializers.ModelSerializer):
     sub_category = serializers.SerializerMethodField()
-    sub_sub_category = serializers.SerializerMethodField()
 
     class Meta:
         model = Category
-        fields = ['id', 'title', 'logo', 'cover',
-                  'sub_category', 'sub_sub_category']
+        fields = ['id', 'title', 'logo', 'cover', 'sub_category']
 
     def get_sub_category(self, obj):
         selected_sub_category = SubCategory.objects.filter(
             category=obj).distinct()
-        return SubCategorySerializer(selected_sub_category, many=True).data
-
-    def get_sub_sub_category(self, obj):
-        selected_sub_sub_category = SubSubCategory.objects.filter(
-            category=obj).distinct()
-        return SubSubCategorySerializer(selected_sub_sub_category, many=True).data
+        return SubCategorySerializerForMegaMenu(selected_sub_category, many=True).data
 
 
 # Product Details serializer

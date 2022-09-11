@@ -23,6 +23,5 @@ urlpatterns = [
     path('vendor-product-variant-list/', VendorVariantListAPIView.as_view()),
     path('vendor-product-list/', VendorProductListAPI.as_view()),
     path('vendor-create-product/', VendorProductCreateAPIView.as_view()),
-    #     path('vendor-update-product/<str:slug>/',
-    #          VendorProductUpdateAPIView.as_view()),
+    # path('vendor-update-product/<str:slug>/',VendorProductUpdateAPIView.as_view()),
 ]

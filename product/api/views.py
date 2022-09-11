@@ -14,7 +14,10 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny
 from product.pagination import ProductCustomPagination
 from itertools import chain
-from user.models import CustomerProfile
+from user.models import CustomerProfile, User
+from vendor.models import Vendor
+# from django.core.exceptions import ValidationError
+from rest_framework.response import Response
 
 
 class MegaMenuDataAPIView(ListAPIView):
@@ -142,3 +145,25 @@ class ProductReviewCreateAPIView(CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         return super(ProductReviewCreateAPIView, self).post(request, *args, **kwargs)
+
+
+class VendorProductListForFrondEndAPI(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = ProductListSerializer
+    pagination_class = ProductCustomPagination
+    lookup_field = 'vid'
+    lookup_url_kwarg = "vid"
+
+    def get_queryset(self):
+        vid = self.kwargs['vid']
+        if vid:
+            try:
+                vendor = Vendor.objects.get(id=vid)
+                queryset = Product.objects.filter(
+                    vendor=vendor, status='ACTIVE').order_by('-created_at')
+            except:
+                raise ValidationError({"details": "Vendor Not Valid.!"})
+        else:
+            queryset = Product.objects.filter(
+                status='ACTIVE').order_by('-created_at')
+        return queryset

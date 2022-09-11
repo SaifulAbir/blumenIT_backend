@@ -594,12 +594,12 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
     product_combinations = ProductCombinationSerializer(
         many=True, required=False)
 
-    category = CategorySerializer()
-    sub_category = SubCategorySerializer()
-    sub_sub_category = SubSubCategorySerializer()
-    brand = BrandSerializer()
-    unit = UnitSerializer()
-    discount_type = DiscountTypeSerializer()
+    # category = CategorySerializer(read_only=True)
+    # sub_category = SubCategorySerializer(read_only=True)
+    # sub_sub_category = SubSubCategorySerializer(read_only=True)
+    # brand = BrandSerializer()
+    # unit = UnitSerializer()
+    # discount_type = DiscountTypeSerializer()
 
     class Meta:
         model = Product

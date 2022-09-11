@@ -374,12 +374,18 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
 
 # Product List serializer
 class ProductListSerializer(serializers.ModelSerializer):
-    product_media = ProductMediaSerializer(many=True, read_only=True)
-    category = CategorySerializer(read_only=True)
-    brand_name = serializers.SerializerMethodField()
+    product_tags = serializers.SerializerMethodField()
+    product_reviews = serializers.SerializerMethodField()
+    product_media = serializers.SerializerMethodField()
+    product_combinations = serializers.SerializerMethodField()
+    vendor = VendorSerializer()
+    category = CategorySerializer()
+    sub_category = SubCategorySerializer()
+    sub_sub_category = SubSubCategorySerializer()
+    brand = BrandSerializer()
+    unit = UnitSerializer()
+    discount_type = DiscountTypeSerializer()
     avg_rating = serializers.SerializerMethodField()
-    review_count = serializers.SerializerMethodField()
-    discount_type = serializers.CharField()
 
     class Meta:
         model = Product
@@ -388,37 +394,58 @@ class ProductListSerializer(serializers.ModelSerializer):
             'title',
             'slug',
             'sku',
-            'price',
-            'old_price',
+            'warranty',
+            'avg_rating',
+            'full_description',
             'short_description',
-            'total_quantity',
             'status',
             'is_featured',
+            'vendor',
             'category',
-            'brand_name',
-            'thumbnail',
-            'product_media',
-            'avg_rating',
-            'review_count',
+            'sub_category',
+            'sub_sub_category',
+            'brand',
+            'unit',
+            'price',
+            'old_price',
+            'purchase_price',
+            'tax_in_percent',
             'discount_type',
-            'discount_amount'
+            'discount_amount',
+            'total_quantity',
+            'total_shipping_cost',
+            'shipping_time',
+            'thumbnail',
+            'youtube_link',
+            'product_tags',
+            'product_reviews',
+            'product_media',
+            'product_combinations'
         ]
 
-    def get_avg_rating(self, obj):
-        return obj.product_review_product.all().aggregate(Avg('rating_number'))['rating_number__avg']
+    def get_avg_rating(self, ob):
+        return ob.product_review_product.all().aggregate(Avg('rating_number'))['rating_number__avg']
 
-    def get_brand_name(self, obj):
-        if obj.brand:
-            get_brand = Brand.objects.get(id=obj.brand.id)
-            return get_brand.title
-        else:
-            return obj.brand
+    def get_product_tags(self, obj):
+        selected_product_tags = ProductTags.objects.filter(
+            product=obj).distinct()
+        return ProductTagsSerializer(selected_product_tags, many=True).data
 
-    def get_review_count(self, obj):
-        re_count = ProductReview.objects.filter(
-            product=obj, is_active=True).count()
-        return re_count
+    def get_product_reviews(self, obj):
+        selected_product_reviews = ProductReview.objects.filter(
+            product=obj, is_active=True).distinct()
+        return ProductReviewSerializer(selected_product_reviews, many=True).data
 
+    def get_product_media(self, obj):
+        queryset = ProductMedia.objects.filter(product=obj).distinct()
+        serializer = ProductMediaSerializer(instance=queryset, many=True, context={
+                                            'request': self.context['request']})
+        return serializer.data
+
+    def get_product_combinations(self, obj):
+        selected_product_combinations = ProductCombinations.objects.filter(
+            product=obj, is_active=True).distinct()
+        return ProductCombinationSerializerForProductDetails(selected_product_combinations, many=True).data
 
 # Product create serializer
 class ProductCreateSerializer(serializers.ModelSerializer):

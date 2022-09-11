@@ -463,6 +463,18 @@ class ProductCreateSerializer(serializers.ModelSerializer):
                             'total_shipping_cost', 'sell_count')
 
     def create(self, validated_data):
+        # validation for sku start
+        try:
+            sku = validated_data["sku"]
+        except:
+            sku = ''
+
+        if sku:
+            check_sku = Product.objects.filter(sku=sku)
+            if check_sku:
+                raise ValidationError('This SKU already exist.')
+        # validation for sku end
+
         # validation for sub category and sub sub category start
         try:
             category_id = validated_data["category"].id

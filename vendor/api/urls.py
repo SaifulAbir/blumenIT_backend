@@ -1,5 +1,5 @@
 from django.urls import path
-from vendor.api.views import VendorAttributeListAPIView, VendorBrandListAPIView, VendorCategoryListAPIView, VendorProductUpdateAPIView, VendorRequestAPIView, VendorRequestListAPI, VendorCreateAPIView, \
+from vendor.api.views import VendorAttributeListAPIView, VendorBrandListAPIView, VendorCategoryListAPIView, VendorRequestAPIView, VendorRequestListAPI, VendorCreateAPIView, \
     OrganizationNamesListAPIView, VendorDetailAPIView, StoreSettingsUpdateAPIView, VendorSubCategoryListAPIView, VendorSubSubCategoryListAPIView, VendorTagListAPIView, VendorUnitListAPIView, VendorProductListAPI, VendorProductCreateAPIView, VendorDiscountListAPIView, VendorVariantListAPIView
 
 urlpatterns = [
@@ -23,6 +23,6 @@ urlpatterns = [
     path('vendor-product-variant-list/', VendorVariantListAPIView.as_view()),
     path('vendor-product-list/', VendorProductListAPI.as_view()),
     path('vendor-create-product/', VendorProductCreateAPIView.as_view()),
-    path('vendor-update-product/<str:slug>/',
-         VendorProductUpdateAPIView.as_view()),
+    #     path('vendor-update-product/<str:slug>/',
+    #          VendorProductUpdateAPIView.as_view()),
 ]

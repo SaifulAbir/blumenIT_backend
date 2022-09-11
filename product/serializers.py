@@ -511,70 +511,72 @@ class ProductCreateSerializer(serializers.ModelSerializer):
 # Product update serializer
 
 
-class ProductUpdateSerializer(serializers.ModelSerializer):
-    # #     tags = serializers.PrimaryKeyRelatedField(queryset=Tags.objects.all(), many=True, write_only=True)
-    # #     media = serializers.ListField(child=serializers.FileField(), write_only=True)
+# class ProductUpdateSerializer(serializers.ModelSerializer):
+#     # #     tags = serializers.PrimaryKeyRelatedField(queryset=Tags.objects.all(), many=True, write_only=True)
+#     # #     media = serializers.ListField(child=serializers.FileField(), write_only=True)
 
-    # #     product_tags = ProductTagsSerializer(many=True, read_only=True)
-    # #     product_media = ProductMediaSerializer(many=True, read_only=True)
-    product_tags = serializers.SerializerMethodField()
-    product_media = serializers.SerializerMethodField()
-    product_combinations = serializers.SerializerMethodField()
-    category = CategorySerializer()
-    sub_category = SubCategorySerializer()
-    sub_sub_category = SubSubCategorySerializer()
-    brand = BrandSerializer()
-    unit = UnitSerializer()
-    discount_type = DiscountTypeSerializer()
+#     # #     product_tags = ProductTagsSerializer(many=True, read_only=True)
+#     # #     product_media = ProductMediaSerializer(many=True, read_only=True)
+#     product_tags = serializers.SerializerMethodField()
+#     product_media = serializers.SerializerMethodField()
+#     product_combinations = serializers.SerializerMethodField()
+#     category = CategorySerializer()
+#     sub_category = SubCategorySerializer()
+#     sub_sub_category = SubSubCategorySerializer()
+#     brand = BrandSerializer()
+#     unit = UnitSerializer()
+#     discount_type = DiscountTypeSerializer()
 
-    class Meta:
-        model = Product
-        fields = [
-            'id',
-            'title',
-            'slug',
-            'sku',
-            'warranty',
-            'full_description',
-            'short_description',
-            'status',
-            'category',
-            'sub_category',
-            'sub_sub_category',
-            'brand',
-            'unit',
-            'price',
-            'purchase_price',
-            'tax_in_percent',
-            'discount_type',
-            'discount_amount',
-            'total_quantity',
-            'total_shipping_cost',
-            'shipping_time',
-            'thumbnail',
-            'youtube_link',
-            'product_tags',
-            'product_media',
-            'product_combinations'
-        ]
+#     class Meta:
+#         model = Product
+#         fields = [
+#             'id',
+#             'title',
+#             'slug',
+#             'sku',
+#             'warranty',
+#             'full_description',
+#             'short_description',
+#             'status',
+#             'category',
+#             'sub_category',
+#             'sub_sub_category',
+#             'brand',
+#             'unit',
+#             'price',
+#             'purchase_price',
+#             'tax_in_percent',
+#             'discount_type',
+#             'discount_amount',
+#             'total_quantity',
+#             'total_shipping_cost',
+#             'shipping_time',
+#             'thumbnail',
+#             'youtube_link',
+#             'product_tags',
+#             'product_media',
+#             'product_combinations'
+#         ]
 
-    def update(self, instance, validated_data):
-        try:
-            try:
-                product_media = validated_data.pop('product_media')
-            except:
-                product_media = ''
+#     def update(self, instance, validated_data):
+#         try:
+#             try:
+#                 product_media = validated_data.pop('product_media')
+#             except:
+#                 product_media = ''
 
-            try:
-                product_tags = validated_data.pop('product_tags')
-            except:
-                product_tags = ''
+#             try:
+#                 product_tags = validated_data.pop('product_tags')
+#             except:
+#                 product_tags = ''
 
-            try:
-                product_combinations = validated_data.pop(
-                    'product_combinations')
-            except:
-                product_combinations = ''
+#             try:
+#                 product_combinations = validated_data.pop(
+#                     'product_combinations')
+#             except:
+#                 product_combinations = ''
+
+
 # #             if tags:
 # #                 ProductTags.objects.filter(product=instance).delete()
 # #                 for tag in tags:
@@ -596,10 +598,10 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
 
 # #             validated_data.update({"modified_by": self.context['request'].user.id, "modified_at": timezone.now()})
 # #             return super().update(instance, validated_data)
-        except:
-            validated_data.update(
-                {"modified_by": self.context['request'].user.id, "modified_at": timezone.now()})
-            return super().update(instance, validated_data)
+        # except:
+        #     validated_data.update(
+        #         {"modified_by": self.context['request'].user.id, "modified_at": timezone.now()})
+        #     return super().update(instance, validated_data)
 
 
 #

@@ -357,6 +357,8 @@ class VariantType(AbstractTimeStamp):
 class ProductCombinationsVariants(AbstractTimeStamp):
     product_combination = models.ForeignKey(
         ProductCombinations, related_name="product_combinations_variant_product_combination", null=True, blank=True, on_delete=models.PROTECT)
+    product = models.ForeignKey(
+        Product, null=True, blank=True, on_delete=models.PROTECT, related_name='product_combinations_variant_product')
     variant_type = models.ForeignKey(
         VariantType, related_name="product_combinations_variant_variant_type", null=True, blank=True, on_delete=models.PROTECT)
     variant_value = models.CharField(max_length=500, null=True, blank=True)

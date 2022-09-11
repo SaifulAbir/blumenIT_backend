@@ -1,12 +1,12 @@
 from django.db.models import Q
 from product.pagination import ProductCustomPagination
-from product.serializers import DiscountTypeSerializer, ProductAttributesSerializer, ProductCreateSerializer, ProductListSerializer, ProductTagsSerializer, ProductUpdateSerializer, VariantTypeSerializer
+from product.serializers import DiscountTypeSerializer, ProductAttributesSerializer, ProductCreateSerializer, ProductTagsSerializer, ProductUpdateSerializer, VariantTypeSerializer
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductTags, SubCategory, SubSubCategory, Units, VariantType
 from user.models import User
 from vendor.models import VendorRequest, Vendor
-from vendor.serializers import VendorBrandSerializer, VendorCategorySerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
+from vendor.serializers import VendorBrandSerializer, VendorCategorySerializer, VendorProductListSerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
     VendorDetailSerializer, StoreSettingsSerializer, VendorSubCategorySerializer, VendorSubSubCategorySerializer, VendorUnitSerializer
 from rest_framework.response import Response
 from user.models import User
@@ -126,7 +126,7 @@ class VendorVariantListAPIView(ListAPIView):
 
 class VendorProductListAPI(ListAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = ProductListSerializer
+    serializer_class = VendorProductListSerializer
     pagination_class = ProductCustomPagination
 
     def get_queryset(self):

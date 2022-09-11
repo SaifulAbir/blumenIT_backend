@@ -1,6 +1,6 @@
 from django.db.models import Q
 from product.pagination import ProductCustomPagination
-from product.serializers import DiscountTypeSerializer, ProductAttributesSerializer, ProductCreateSerializer, ProductListSerializer, ProductTagsSerializer, VariantTypeSerializer
+from product.serializers import DiscountTypeSerializer, ProductAttributesSerializer, ProductCreateSerializer, ProductListSerializer, ProductTagsSerializer, ProductUpdateSerializer, VariantTypeSerializer
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductTags, SubCategory, SubSubCategory, Units, VariantType
@@ -148,3 +148,17 @@ class VendorProductCreateAPIView(CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         return super(VendorProductCreateAPIView, self).post(request, *args, **kwargs)
+
+
+class VendorProductUpdateAPIView(RetrieveUpdateAPIView):
+    serializer_class = ProductUpdateSerializer
+    lookup_field = 'slug'
+    lookup_url_kwarg = "slug"
+
+    def get_queryset(self):
+        slug = self.kwargs['slug']
+        query = Product.objects.filter(slug=slug)
+        return query
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)

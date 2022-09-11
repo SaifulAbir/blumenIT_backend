@@ -276,15 +276,22 @@ class ProductCombinationSerializerForProductDetails(serializers.ModelSerializer)
 # Mega Menu Data serializer
 class MegaMenuDataAPIViewListSerializer(serializers.ModelSerializer):
     sub_category = serializers.SerializerMethodField()
+    sub_sub_category = serializers.SerializerMethodField()
 
     class Meta:
         model = Category
-        fields = ['id', 'title', 'logo', 'cover', 'sub_category']
+        fields = ['id', 'title', 'logo', 'cover',
+                  'sub_category', 'sub_sub_category']
 
     def get_sub_category(self, obj):
         selected_sub_category = SubCategory.objects.filter(
             category=obj).distinct()
         return SubCategorySerializer(selected_sub_category, many=True).data
+
+    def get_sub_sub_category(self, obj):
+        selected_sub_sub_category = SubSubCategory.objects.filter(
+            category=obj).distinct()
+        return SubSubCategorySerializer(selected_sub_sub_category, many=True).data
 
 
 # Product Details serializer
@@ -293,8 +300,6 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
     product_reviews = serializers.SerializerMethodField()
     product_media = serializers.SerializerMethodField()
     product_combinations = serializers.SerializerMethodField()
-    # product_combinations = ProductCombinationSerializer(
-    #     many=True, required=False)
     vendor = VendorSerializer()
     category = CategorySerializer()
     sub_category = SubCategorySerializer()
@@ -502,7 +507,99 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             return product_instance
         except:
             return product_instance
-# main serializers end
+
+# Product update serializer
+
+
+class ProductUpdateSerializer(serializers.ModelSerializer):
+    # #     tags = serializers.PrimaryKeyRelatedField(queryset=Tags.objects.all(), many=True, write_only=True)
+    # #     media = serializers.ListField(child=serializers.FileField(), write_only=True)
+
+    # #     product_tags = ProductTagsSerializer(many=True, read_only=True)
+    # #     product_media = ProductMediaSerializer(many=True, read_only=True)
+    product_tags = serializers.SerializerMethodField()
+    product_media = serializers.SerializerMethodField()
+    product_combinations = serializers.SerializerMethodField()
+    category = CategorySerializer()
+    sub_category = SubCategorySerializer()
+    sub_sub_category = SubSubCategorySerializer()
+    brand = BrandSerializer()
+    unit = UnitSerializer()
+    discount_type = DiscountTypeSerializer()
+
+    class Meta:
+        model = Product
+        fields = [
+            'id',
+            'title',
+            'slug',
+            'sku',
+            'warranty',
+            'full_description',
+            'short_description',
+            'status',
+            'category',
+            'sub_category',
+            'sub_sub_category',
+            'brand',
+            'unit',
+            'price',
+            'purchase_price',
+            'tax_in_percent',
+            'discount_type',
+            'discount_amount',
+            'total_quantity',
+            'total_shipping_cost',
+            'shipping_time',
+            'thumbnail',
+            'youtube_link',
+            'product_tags',
+            'product_media',
+            'product_combinations'
+        ]
+
+    def update(self, instance, validated_data):
+        try:
+            try:
+                product_media = validated_data.pop('product_media')
+            except:
+                product_media = ''
+
+            try:
+                product_tags = validated_data.pop('product_tags')
+            except:
+                product_tags = ''
+
+            try:
+                product_combinations = validated_data.pop(
+                    'product_combinations')
+            except:
+                product_combinations = ''
+# #             if tags:
+# #                 ProductTags.objects.filter(product=instance).delete()
+# #                 for tag in tags:
+# #                     ProductTags.objects.create(name=tag, product=instance)
+
+# #             if colors:
+# #                 ProductColors.objects.filter(product=instance).delete()
+# #                 for color in colors:
+# #                     ProductColors.objects.create(name=color, product=instance)
+
+# #             if sizes:
+# #                 ProductSizes.objects.filter(product=instance).delete()
+# #                 for size in sizes:
+# #                     ProductSizes.objects.create(name=sizes, product=instance)
+# #             if media:
+# #                 for media_file in media:
+# #                     file_type = media_file.content_type.split('/')[0]
+# #                     ProductMedia.objects.create(product=instance, type=file_type, file=media_file, status="COMPLETE")
+
+# #             validated_data.update({"modified_by": self.context['request'].user.id, "modified_at": timezone.now()})
+# #             return super().update(instance, validated_data)
+        except:
+            validated_data.update(
+                {"modified_by": self.context['request'].user.id, "modified_at": timezone.now()})
+            return super().update(instance, validated_data)
 
 
 #

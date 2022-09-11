@@ -470,7 +470,6 @@ class ProductCreateSerializer(serializers.ModelSerializer):
         except:
             category_id = ''
 
-        # try:
         sub_category = validated_data["sub_category"].id
         if sub_category:
             check_sub_category = SubCategory.objects.filter(
@@ -486,6 +485,7 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             if not check_sub_sub_category:
                 raise ValidationError(
                     'This Sub Sub category is not under your selected parent category.')
+        # validation for sub category and sub sub category end
 
         try:
             product_media = validated_data.pop('product_media')

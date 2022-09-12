@@ -214,6 +214,7 @@ class ProductCombinationSerializer(serializers.ModelSerializer):
 
 class ProductCombinationSerializerForVendorProductDetails(serializers.ModelSerializer):
     # sku = serializers.CharField(required=False)
+    product_attribute = serializers.SerializerMethodField()
     variant_type = serializers.SerializerMethodField()
     variant_value = serializers.SerializerMethodField()
     variant_price = serializers.SerializerMethodField()
@@ -237,10 +238,18 @@ class ProductCombinationSerializerForVendorProductDetails(serializers.ModelSeria
             'discount_amount'
         ]
 
+    def get_product_attribute(self, obj):
+        try:
+            product_attribute = ProductCombinations.objects.get(
+                id=obj.id, is_active=True).product_attribute.title
+            return product_attribute
+        except:
+            return ''
+
     def get_variant_type(self, obj):
         try:
             variant_type = ProductCombinationsVariants.objects.get(
-                product_combination=obj, is_active=True).variant_type.id
+                product_combination=obj, is_active=True).variant_type.title
             return variant_type
         except:
             return ''
@@ -272,7 +281,7 @@ class ProductCombinationSerializerForVendorProductDetails(serializers.ModelSeria
     def get_discount_type(self, obj):
         try:
             discount_type = ProductCombinationsVariants.objects.get(
-                product_combination=obj, is_active=True).discount_type.id
+                product_combination=obj, is_active=True).discount_type.title
             return discount_type
         except:
             return ''

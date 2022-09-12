@@ -111,9 +111,9 @@ class Product(AbstractTimeStamp):
         ('PENDING', 'Pending'),
         ('ACTIVE', 'Active')]
 
-    title = models.CharField(
-        max_length=500, null=False, blank=False, default="")
-    slug = models.SlugField(null=False, allow_unicode=True, blank=True)
+    title = models.CharField(max_length=800, default='')
+    slug = models.SlugField(
+        null=False, allow_unicode=True, blank=True, max_length=255)
     sku = models.CharField(max_length=500, null=True,
                            blank=True, default="", unique=True)
     warranty = models.CharField(

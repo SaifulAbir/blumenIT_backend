@@ -226,7 +226,7 @@ class ProductCombinationsVariantsSerializer(serializers.ModelSerializer):
 
 # Product Combination serializer / Connect with ProductCreateSerializer
 class ProductCombinationSerializer(serializers.ModelSerializer):
-    sku = serializers.CharField(required=False)
+    # sku = serializers.CharField(required=False)
     variant_type = serializers.PrimaryKeyRelatedField(
         queryset=VariantType.objects.all(), many=False, write_only=True, required=False)
     variant_value = serializers.CharField(required=False)
@@ -586,11 +586,28 @@ class ProductCreateSerializer(serializers.ModelSerializer):
 class ProductUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ['id', 'title']
+        fields = ['id',
+                  'title',
+                  'sku',
+                  'warranty',
+                  'short_description',
+                  'full_description', ]
 
     def update(self, instance, validated_data):
-        # validated_data.update(
-        #     {"modified_by": self.context['request'].user.id, "modified_at": timezone.now()})
+        # validation for sku start
+        try:
+            sku = validated_data["sku"]
+        except:
+            sku = ''
+
+        if sku:
+            check_sku = Product.objects.filter(sku=sku)
+            if check_sku:
+                raise ValidationError('This SKU already exist.')
+        # validation for sku end
+
+        validated_data.update(
+            {"updated_at": timezone.now()})
         return super().update(instance, validated_data)
 
 

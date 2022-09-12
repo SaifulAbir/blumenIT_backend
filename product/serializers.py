@@ -244,7 +244,7 @@ class ProductCombinationSerializer(serializers.ModelSerializer):
             'product_attribute_value',
             'product_attribute_color_code',
 
-            'sku',
+            # 'sku',
             'variant_type',
             'variant_value',
             'variant_price',
@@ -584,15 +584,26 @@ class ProductCreateSerializer(serializers.ModelSerializer):
 
 
 class ProductUpdateSerializer(serializers.ModelSerializer):
-    product_media = serializers.SerializerMethodField()
-    product_media = serializers.ListField(
-        child=serializers.FileField(), write_only=True, required=False)
-    product_tags = serializers.SerializerMethodField()
-    product_tags = serializers.ListField(
-        child=serializers.CharField(), write_only=True, required=False)
-    product_combinations = serializers.SerializerMethodField()
-    product_combinations = ProductCombinationSerializer(
-        many=True, required=False)
+    class Meta:
+        model = Product
+        fields = ['id', 'title']
+
+    def update(self, instance, validated_data):
+        # validated_data.update(
+        #     {"modified_by": self.context['request'].user.id, "modified_at": timezone.now()})
+        return super().update(instance, validated_data)
+
+
+class ProductUpdateSerializerOld(serializers.ModelSerializer):
+    # product_media = serializers.SerializerMethodField()
+    # product_media = serializers.ListField(
+    #     child=serializers.FileField(), write_only=True, required=False)
+    # product_tags = serializers.SerializerMethodField()
+    # product_tags = serializers.ListField(
+    #     child=serializers.CharField(), write_only=True, required=False)
+    # product_combinations = serializers.SerializerMethodField()
+    # product_combinations = ProductCombinationSerializer(
+    #     many=True, required=False)
 
     # category = CategorySerializer(read_only=True)
     # sub_category = SubCategorySerializer(read_only=True)
@@ -606,154 +617,51 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'title',
-            'sku',
-            'warranty',
-            'full_description',
-            'short_description',
-            'status',
-            'category',
-            'sub_category',
-            'sub_sub_category',
-            'brand',
-            'unit',
-            'price',
-            'purchase_price',
-            'tax_in_percent',
-            'discount_type',
-            'discount_amount',
-            'total_quantity',
-            'total_shipping_cost',
-            'shipping_time',
-            'thumbnail',
-            'youtube_link',
-            'product_media',
-            'product_tags',
-            'product_combinations'
+            # 'sku',
+            # 'warranty',
+            # 'full_description',
+            # 'short_description',
+            # 'status',
+            # 'category',
+            # 'sub_category',
+            # 'sub_sub_category',
+            # 'brand',
+            # 'unit',
+            # 'price',
+            # 'purchase_price',
+            # 'tax_in_percent',
+            # 'discount_type',
+            # 'discount_amount',
+            # 'total_quantity',
+            # 'total_shipping_cost',
+            # 'shipping_time',
+            # 'thumbnail',
+            # 'youtube_link',
+            # 'product_media',
+            # 'product_tags',
+            # 'product_combinations'
         ]
 
-    def get_product_tags(self, obj):
-        selected_product_tags = ProductTags.objects.filter(
-            product=obj).distinct()
-        return ProductTagsSerializer(selected_product_tags, many=True).data
+    # def get_product_tags(self, obj):
+    #     selected_product_tags = ProductTags.objects.filter(
+    #         product=obj).distinct()
+    #     return ProductTagsSerializer(selected_product_tags, many=True).data
 
-    def get_product_media(self, obj):
-        queryset = ProductMedia.objects.filter(product=obj).distinct()
-        serializer = ProductMediaSerializer(instance=queryset, many=True, context={
-                                            'request': self.context['request']})
-        return serializer.data
+    # def get_product_media(self, obj):
+    #     queryset = ProductMedia.objects.filter(product=obj).distinct()
+    #     serializer = ProductMediaSerializer(instance=queryset, many=True, context={
+    #                                         'request': self.context['request']})
+    #     return serializer.data
 
-    def get_product_combinations(self, obj):
-        selected_product_combinations = ProductCombinations.objects.filter(
-            product=obj, is_active=True).distinct()
-        return ProductCombinationSerializerForProductDetails(selected_product_combinations, many=True).data
+    # def get_product_combinations(self, obj):
+    #     selected_product_combinations = ProductCombinations.objects.filter(
+    #         product=obj, is_active=True).distinct()
+    #     return ProductCombinationSerializerForProductDetails(selected_product_combinations, many=True).data
 
     def update(self, instance, validated_data):
-        # validation for sku start
-        try:
-            sku = validated_data["sku"]
-        except:
-            sku = ''
-
-        if sku:
-            check_sku = Product.objects.filter(sku=sku)
-            if check_sku:
-                raise ValidationError('This SKU already exist.')
-        # validation for sku end
-
-        # validation for sub category and sub sub category start
-        try:
-            category_id = validated_data["category"].id
-        except:
-            category_id = ''
-
-        sub_category = validated_data["sub_category"].id
-        if sub_category:
-            check_sub_category = SubCategory.objects.filter(
-                id=sub_category, category=category_id)
-            if not check_sub_category:
-                raise ValidationError(
-                    'This Sub category is not under your selected parent category.')
-
-        sub_sub_category = validated_data["sub_sub_category"].id
-        if sub_sub_category:
-            check_sub_sub_category = SubSubCategory.objects.filter(
-                id=sub_sub_category, sub_category=sub_category, category=category_id)
-            if not check_sub_sub_category:
-                raise ValidationError(
-                    'This Sub Sub category is not under your selected parent category.')
-        # validation for sub category and sub sub category end
-
-        # product price update start
-        try:
-            price = validated_data["price"]
-        except:
-            price = ''
-        if price:
-            product_obj = Product.objects.filter(id=instance.id)
-            if float(price) != float(product_obj[0].price):
-                product_obj.update(old_price=product_obj[0].price)
-        # product price update end
-
-        try:
-            try:
-                product_media = validated_data.pop('product_media')
-            except:
-                product_media = ''
-
-            try:
-                product_tags = validated_data.pop('product_tags')
-            except:
-                product_tags = ''
-
-            try:
-                product_combinations = validated_data.pop(
-                    'product_combinations')
-            except:
-                product_combinations = ''
-
-            try:
-                if product_media:
-                    ProductMedia.objects.filter(product=instance).delete()
-                    for media_file in product_media:
-                        ProductMedia.objects.create(
-                            product=instance, file=media_file, status="COMPLETE")
-
-                if product_tags:
-                    ProductTags.objects.filter(product=instance).delete()
-                    for product_tag in product_tags:
-                        ProductTags.objects.create(
-                            name=product_tag, product=instance)
-
-                if product_combinations:
-                    ProductCombinations.objects.filter(
-                        product=instance).delete()
-                    ProductCombinationsVariants.objects.filter(
-                        product=instance).delete()
-                    for product_combination in product_combinations:
-                        product_attribute = product_combination['product_attribute']
-                        product_attribute_value = product_combination['product_attribute_value']
-                        product_attribute_color_code = product_combination['product_attribute_color_code']
-                        product_combination_instance = ProductCombinations.objects.create(
-                            product_attribute=product_attribute, product_attribute_value=product_attribute_value, product_attribute_color_code=product_attribute_color_code, product=instance)
-
-                        variant_type = product_combination['variant_type']
-                        variant_value = product_combination['variant_value']
-                        variant_price = product_combination['variant_price']
-                        quantity = product_combination['quantity']
-                        discount_type = product_combination['discount_type']
-                        discount_amount = product_combination['discount_amount']
-                        ProductCombinationsVariants.objects.create(
-                            variant_type=variant_type,  variant_value=variant_value, variant_price=variant_price, quantity=quantity, discount_type=discount_type, discount_amount=discount_amount, product_combination=product_combination_instance)
-
-                validated_data.update(
-                    {"modified_by": self.context['request'].user.id, "modified_at": timezone.now()})
-                return super().update(instance, validated_data)
-            except:
-                return instance
-        except:
-            validated_data.update(
-                {"modified_by": self.context['request'].user.id, "modified_at": timezone.now()})
-            return super().update(instance, validated_data)
+        validated_data.update(
+            {"modified_by": self.context['request'].user.id, "modified_at": timezone.now()})
+        return super().update(instance, validated_data)
 
         #
 

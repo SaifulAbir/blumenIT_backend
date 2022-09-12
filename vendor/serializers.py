@@ -1,10 +1,10 @@
 from django.template.loader import render_to_string
-from product.serializers import BrandSerializer, CategorySerializer, DiscountTypeSerializer, ProductCombinationSerializerForProductDetails, ProductMediaSerializer, ProductReviewSerializer, ProductTagsSerializer, SubCategorySerializer, SubSubCategorySerializer, UnitSerializer
+from product.serializers import BrandSerializer, CategorySerializer, DiscountTypeSerializer, ProductCombinationSerializer, ProductCombinationSerializerForProductDetails, ProductMediaSerializer, ProductReviewSerializer, ProductTagsSerializer, SubCategorySerializer, SubSubCategorySerializer, UnitSerializer
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from ecommerce.common.emails import send_email_without_delay
-from product.models import Brand, Category, Product, ProductCombinations, ProductMedia, ProductReview, ProductTags, SubCategory, SubSubCategory, Units
+from product.models import Brand, Category, Product, ProductCombinations, ProductCombinationsVariants, ProductMedia, ProductReview, ProductTags, SubCategory, SubSubCategory, Units
 from user.models import User
 from user.serializers import UserRegisterSerializer
 from vendor.models import VendorRequest, Vendor, StoreSettings
@@ -180,6 +180,62 @@ class VendorProductListSerializer(serializers.ModelSerializer):
         return re_count
 
 
+class ProductCombinationSerializerForVendorProductDetails(serializers.ModelSerializer):
+    # sku = serializers.CharField(required=False)
+    variant_type = serializers.SerializerMethodField()
+    variant_value = serializers.SerializerMethodField()
+    variant_price = serializers.SerializerMethodField()
+    quantity = serializers.SerializerMethodField()
+    discount_type = serializers.SerializerMethodField()
+    discount_amount = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ProductCombinations
+        fields = [
+            'id',
+            'product_attribute',
+            'product_attribute_value',
+            'product_attribute_color_code',
+
+            'variant_type',
+            'variant_value',
+            'variant_price',
+            'quantity',
+            'discount_type',
+            'discount_amount'
+        ]
+
+    def get_variant_type(self, obj):
+        variant_type = ProductCombinationsVariants.objects.get(
+            product_combination=obj, is_active=True).variant_type.id
+        return variant_type
+
+    def get_variant_value(self, obj):
+        variant_value = ProductCombinationsVariants.objects.get(
+            product_combination=obj, is_active=True).variant_value
+        return variant_value
+
+    def get_variant_price(self, obj):
+        variant_price = ProductCombinationsVariants.objects.get(
+            product_combination=obj, is_active=True).variant_price
+        return variant_price
+
+    def get_quantity(self, obj):
+        quantity = ProductCombinationsVariants.objects.get(
+            product_combination=obj, is_active=True).quantity
+        return quantity
+
+    def get_discount_type(self, obj):
+        discount_type = ProductCombinationsVariants.objects.get(
+            product_combination=obj, is_active=True).discount_type.id
+        return discount_type
+
+    def get_discount_amount(self, obj):
+        discount_amount = ProductCombinationsVariants.objects.get(
+            product_combination=obj, is_active=True).discount_amount
+        return discount_amount
+
+
 class VendorProductDetailsSerializer(serializers.ModelSerializer):
     product_tags = serializers.SerializerMethodField()
     product_reviews = serializers.SerializerMethodField()
@@ -250,4 +306,5 @@ class VendorProductDetailsSerializer(serializers.ModelSerializer):
     def get_product_combinations(self, obj):
         selected_product_combinations = ProductCombinations.objects.filter(
             product=obj, is_active=True).distinct()
-        return ProductCombinationSerializerForProductDetails(selected_product_combinations, many=True).data
+        # return ProductCombinationSerializerForProductDetails(selected_product_combinations, many=True).data
+        return ProductCombinationSerializerForVendorProductDetails(selected_product_combinations, many=True).data

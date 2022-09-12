@@ -152,18 +152,20 @@ class VendorProductCreateAPIView(CreateAPIView):
 
 
 class VendorProductUpdateAPIView(RetrieveUpdateAPIView):
-    serializer_class = ProductUpdateSerializer
     permission_classes = [IsAuthenticated]
-    lookup_field = 'slug'
-    lookup_url_kwarg = "slug"
+    serializer_class = ProductUpdateSerializer
+    # serializer_class = ProductCreateSerializer
+    lookup_field = 'slugu'
+    lookup_url_kwarg = "slugu"
 
     def get_queryset(self):
-        slug = self.kwargs['slug']
+        slug = self.kwargs['slugu']
         # query = Product.objects.filter(slug=slug)
         query = Product.objects.get(slug=slug)
         return query
 
     def put(self, request, *args, **kwargs):
+        print('hehhehe')
         return self.update(request, *args, **kwargs)
 
 

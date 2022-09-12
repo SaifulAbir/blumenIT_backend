@@ -1,12 +1,13 @@
+from datetime import datetime
 from django.db.models import Q
 from product.pagination import ProductCustomPagination
-from product.serializers import DiscountTypeSerializer, ProductAttributesSerializer, ProductCreateSerializer, ProductTagsSerializer, ProductUpdateSerializer, VariantTypeSerializer
-from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView
+from product.serializers import DiscountTypeSerializer, ProductAttributesSerializer, ProductCreateSerializer, ProductDetailsSerializer, ProductTagsSerializer, ProductUpdateSerializer, VariantTypeSerializer
+from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductTags, SubCategory, SubSubCategory, Units, VariantType
-from user.models import User
+from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductReview, ProductTags, SubCategory, SubSubCategory, Units, VariantType
+from user.models import CustomerProfile, User
 from vendor.models import VendorRequest, Vendor
-from vendor.serializers import VendorBrandSerializer, VendorCategorySerializer, VendorProductListSerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
+from vendor.serializers import VendorBrandSerializer, VendorCategorySerializer, VendorProductDetailsSerializer, VendorProductListSerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
     VendorDetailSerializer, StoreSettingsSerializer, VendorSubCategorySerializer, VendorSubSubCategorySerializer, VendorUnitSerializer
 from rest_framework.response import Response
 from user.models import User
@@ -163,3 +164,29 @@ class VendorProductUpdateAPIView(RetrieveUpdateAPIView):
 
     def put(self, request, *args, **kwargs):
         return self.update(request, *args, **kwargs)
+
+
+class VendorProductDetailsAPI(RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = VendorProductDetailsSerializer
+    lookup_field = 'slugi'
+    lookup_url_kwarg = "slugi"
+
+    def get_object(self):
+        slug = self.kwargs['slugi']
+        if Vendor.objects.filter(vendor_admin=User.objects.get(id=self.request.user.id)).exists():
+            vid = Vendor.objects.get(
+                vendor_admin=User.objects.get(id=self.request.user.id))
+            if vid:
+                try:
+                    query = Product.objects.get(slug=slug, vendor=vid)
+                    if query:
+                        return query
+                    else:
+                        raise ValidationError(
+                            {"msg": 'You are not creator of this product!'})
+                except:
+                    raise ValidationError(
+                        {"msg": "Product doesn't exist!"})
+        else:
+            raise ValidationError({"msg": 'You are not a vendor.'})

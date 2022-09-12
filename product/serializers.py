@@ -347,8 +347,8 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             'product_combinations'
         ]
 
-    def get_avg_rating(self, ob):
-        return ob.product_review_product.all().aggregate(Avg('rating_number'))['rating_number__avg']
+    def get_avg_rating(self, obj):
+        return obj.product_review_product.all().aggregate(Avg('rating_number'))['rating_number__avg']
 
     def get_product_tags(self, obj):
         selected_product_tags = ProductTags.objects.filter(

@@ -16,8 +16,6 @@ from product.pagination import ProductCustomPagination
 from itertools import chain
 from user.models import CustomerProfile, User
 from vendor.models import Vendor
-# from django.core.exceptions import ValidationError
-from rest_framework.response import Response
 
 
 class MegaMenuDataAPIView(ListAPIView):
@@ -37,19 +35,23 @@ class ProductDetailsAPI(RetrieveAPIView):
 
     def get_object(self):
         slug = self.kwargs['slug']
-        query = Product.objects.get(slug=slug)
-        if self.request.user.is_authenticated:
-            try:
-                product_view = ProductView.objects.get(
-                    user=self.request.user, product=query)
-                product_view.view_date = datetime.now()
-                product_view.view_count += 1
-                product_view.save()
-            except ProductView.DoesNotExist:
-                customer = CustomerProfile.objects.get(user=self.request.user)
-                ProductView.objects.create(
-                    user=self.request.user, product=query, customer=customer, view_date=datetime.now())
-        return query
+        try:
+            query = Product.objects.get(slug=slug)
+            if self.request.user.is_authenticated:
+                try:
+                    product_view = ProductView.objects.get(
+                        user=self.request.user, product=query)
+                    product_view.view_date = datetime.now()
+                    product_view.view_count += 1
+                    product_view.save()
+                except ProductView.DoesNotExist:
+                    customer = CustomerProfile.objects.get(
+                        user=self.request.user)
+                    ProductView.objects.create(
+                        user=self.request.user, product=query, customer=customer, view_date=datetime.now())
+            return query
+        except:
+            raise ValidationError({"details": "Product doesn't exist!"})
 
 
 class ProductListAPI(ListAPIView):

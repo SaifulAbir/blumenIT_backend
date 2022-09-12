@@ -6,7 +6,7 @@ from ecommerce.settings import MEDIA_URL
 from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateAPIView, RetrieveAPIView, DestroyAPIView
 from rest_framework.views import APIView
 from home.models import ProductView
-from product.serializers import MegaMenuDataAPIViewListSerializer, ProductCreateSerializer, ProductDetailsSerializer, ProductListSerializer, ProductReviewCreateSerializer
+from product.serializers import MegaMenuDataAPIViewListSerializer, ProductDetailsSerializer, ProductListSerializer, ProductReviewCreateSerializer
 from product.models import Category, Product
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response

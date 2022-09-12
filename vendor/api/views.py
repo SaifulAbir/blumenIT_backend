@@ -1,15 +1,14 @@
 from datetime import datetime
 from django.db.models import Q
 from product.pagination import ProductCustomPagination
-from product.serializers import DiscountTypeSerializer, ProductAttributesSerializer, ProductCreateSerializer, ProductDetailsSerializer, ProductTagsSerializer, ProductUpdateSerializer, VariantTypeSerializer
+from product.serializers import DiscountTypeSerializer, ProductAttributesSerializer, ProductTagsSerializer, VariantTypeSerializer
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductReview, ProductTags, SubCategory, SubSubCategory, Units, VariantType
 from user.models import CustomerProfile, User
 from vendor.models import VendorRequest, Vendor
-from vendor.serializers import VendorBrandSerializer, VendorCategorySerializer, VendorProductDetailsSerializer, VendorProductListSerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
+from vendor.serializers import VendorBrandSerializer, VendorCategorySerializer, VendorProductCreateSerializer, VendorProductDetailsSerializer, VendorProductListSerializer, VendorProductUpdateSerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
     VendorDetailSerializer, StoreSettingsSerializer, VendorSubCategorySerializer, VendorSubSubCategorySerializer, VendorUnitSerializer
-from rest_framework.response import Response
 from user.models import User
 from rest_framework.exceptions import ValidationError
 
@@ -144,7 +143,7 @@ class VendorProductListAPI(ListAPIView):
 
 class VendorProductCreateAPIView(CreateAPIView):
     # permission_classes = (AllowAny,)
-    serializer_class = ProductCreateSerializer
+    serializer_class = VendorProductCreateSerializer
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
@@ -154,14 +153,13 @@ class VendorProductCreateAPIView(CreateAPIView):
 class VendorProductUpdateAPIView(RetrieveUpdateAPIView):
     # permission_classes = [IsAuthenticated]
     permission_classes = (AllowAny,)
-    serializer_class = ProductUpdateSerializer
+    serializer_class = VendorProductUpdateSerializer
     # serializer_class = ProductCreateSerializer
     lookup_field = 'slug'
     lookup_url_kwarg = "slug"
 
     def get_queryset(self):
         slug = self.kwargs['slug']
-        print(slug)
         query = Product.objects.filter(slug=slug)
         return query
 

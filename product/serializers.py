@@ -6,7 +6,6 @@ from curses import meta
 from email.policy import default
 from pyexpat import model
 from attr import fields
-from django.utils import timezone
 from rest_framework import serializers
 from product.models import Category, ProductCombinationMedia, ProductCombinationsVariants, SubCategory, SubSubCategory, Product, ProductTags, ProductReview, ProductMedia, ProductCombinations, ProductAttributes, Brand, DiscountTypes, Units, VariantType
 from user.models import User
@@ -224,34 +223,7 @@ class ProductCombinationsVariantsSerializer(serializers.ModelSerializer):
         ]
 
 
-# Product Combination serializer / Connect with ProductCreateSerializer
-class ProductCombinationSerializer(serializers.ModelSerializer):
-    # sku = serializers.CharField(required=False)
-    variant_type = serializers.PrimaryKeyRelatedField(
-        queryset=VariantType.objects.all(), many=False, write_only=True, required=False)
-    variant_value = serializers.CharField(required=False)
-    variant_price = serializers.FloatField(default=0.0, required=False)
-    quantity = serializers.IntegerField(required=False)
-    discount_type = serializers.PrimaryKeyRelatedField(
-        queryset=DiscountTypes.objects.all(), many=False, write_only=True, required=False)
-    discount_amount = serializers.FloatField(default=0.0, required=False)
 
-    class Meta:
-        model = ProductCombinations
-        fields = [
-            'id',
-            'product_attribute',
-            'product_attribute_value',
-            'product_attribute_color_code',
-
-            # 'sku',
-            'variant_type',
-            'variant_value',
-            'variant_price',
-            'quantity',
-            'discount_type',
-            'discount_amount'
-        ]
 
 
 # Product Combination serializer
@@ -450,168 +422,10 @@ class ProductListSerializer(serializers.ModelSerializer):
 # Product create serializer
 
 
-class ProductCreateSerializer(serializers.ModelSerializer):
-    product_tags = serializers.ListField(
-        child=serializers.CharField(), write_only=True, required=False)
-    product_media = serializers.ListField(
-        child=serializers.FileField(), write_only=True, required=False)
-    product_combinations = ProductCombinationSerializer(
-        many=True, required=False)
-
-    class Meta:
-        model = Product
-        fields = [
-            'id',
-            'title',
-            'sku',
-            'warranty',
-            'short_description',
-            'full_description',
-            'category',
-            'sub_category',
-            'sub_sub_category',
-            'brand',
-            'unit',
-            'price',
-            'purchase_price',
-            'tax_in_percent',
-            'discount_type',
-            'discount_amount',
-            'total_quantity',
-            'shipping_cost',
-            'shipping_cost_multiply',
-            'shipping_time',
-            'thumbnail',
-            'youtube_link',
-            'product_media',
-            'product_tags',
-            'product_combinations'
-        ]
-
-        read_only_fields = ('slug', 'is_featured', 'old_price',
-                            'total_shipping_cost', 'sell_count')
-
-    def create(self, validated_data):
-        # validation for sku start
-        try:
-            sku = validated_data["sku"]
-        except:
-            sku = ''
-
-        if sku:
-            check_sku = Product.objects.filter(sku=sku)
-            if check_sku:
-                raise ValidationError('This SKU already exist.')
-        # validation for sku end
-
-        # validation for sub category and sub sub category start
-        try:
-            category_id = validated_data["category"].id
-        except:
-            category_id = ''
-
-        try:
-            sub_category = validated_data["sub_category"].id
-        except:
-            sub_category = ''
-
-        if sub_category:
-            check_sub_category = SubCategory.objects.filter(
-                id=sub_category, category=category_id)
-            if not check_sub_category:
-                raise ValidationError(
-                    'This Sub category is not under your selected parent category.')
-
-        try:
-            sub_sub_category = validated_data["sub_sub_category"].id
-        except:
-            sub_sub_category = ''
-
-        if sub_sub_category:
-            check_sub_sub_category = SubSubCategory.objects.filter(
-                id=sub_sub_category, sub_category=sub_category, category=category_id)
-            if not check_sub_sub_category:
-                raise ValidationError(
-                    'This Sub Sub category is not under your selected parent category.')
-        # validation for sub category and sub sub category end
-
-        try:
-            product_media = validated_data.pop('product_media')
-        except:
-            product_media = ''
-
-        try:
-            product_tags = validated_data.pop('product_tags')
-        except:
-            product_tags = ''
-
-        try:
-            product_combinations = validated_data.pop('product_combinations')
-        except:
-            product_combinations = ''
-        product_instance = Product.objects.create(**validated_data, vendor=Vendor.objects.get(vendor_admin=User.objects.get(
-            id=self.context['request'].user.id)))
-        try:
-            if product_media:
-                for media_file in product_media:
-                    ProductMedia.objects.create(
-                        product=product_instance, file=media_file, status="COMPLETE")
-            if product_tags:
-                for tag in product_tags:
-                    ProductTags.objects.create(
-                        title=tag, product=product_instance)
-            if product_combinations:
-                for product_combination in product_combinations:
-                    product_attribute = product_combination['product_attribute']
-                    product_attribute_value = product_combination['product_attribute_value']
-                    product_attribute_color_code = product_combination['product_attribute_color_code']
-                    product_combination_instance = ProductCombinations.objects.create(
-                        product_attribute=product_attribute, product_attribute_value=product_attribute_value, product_attribute_color_code=product_attribute_color_code, product=product_instance)
-
-                    variant_type = product_combination['variant_type']
-                    variant_value = product_combination['variant_value']
-                    variant_price = product_combination['variant_price']
-                    quantity = product_combination['quantity']
-                    discount_type = product_combination['discount_type']
-                    discount_amount = product_combination['discount_amount']
-                    ProductCombinationsVariants.objects.create(
-                        variant_type=variant_type,  variant_value=variant_value, variant_price=variant_price, quantity=quantity, discount_type=discount_type, discount_amount=discount_amount, product=product_instance, product_combination=product_combination_instance)
-            return product_instance
-        except:
-            return product_instance
-
-# Product update serializer
 
 
-class ProductUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product
-        fields = ['id',
-                  'title',
-                  'sku',
-                  'warranty',
-                  'short_description',
-                  'full_description', ]
 
-    def update(self, instance, validated_data):
-        # validation for sku start
-        try:
-            sku = validated_data["sku"]
-        except:
-            sku = ''
-
-        if sku:
-            check_sku = Product.objects.filter(sku=sku)
-            if check_sku:
-                raise ValidationError('This SKU already exist.')
-        # validation for sku end
-
-        validated_data.update(
-            {"updated_at": timezone.now()})
-        return super().update(instance, validated_data)
-
-
-class ProductUpdateSerializerOld(serializers.ModelSerializer):
+# class ProductUpdateSerializerOld(serializers.ModelSerializer):
     # product_media = serializers.SerializerMethodField()
     # product_media = serializers.ListField(
     #     child=serializers.FileField(), write_only=True, required=False)
@@ -629,11 +443,11 @@ class ProductUpdateSerializerOld(serializers.ModelSerializer):
     # unit = UnitSerializer()
     # discount_type = DiscountTypeSerializer()
 
-    class Meta:
-        model = Product
-        fields = [
-            'id',
-            'title',
+    # class Meta:
+    #     model = Product
+    #     fields = [
+    #         'id',
+    #         'title',
             # 'sku',
             # 'warranty',
             # 'full_description',
@@ -657,7 +471,7 @@ class ProductUpdateSerializerOld(serializers.ModelSerializer):
             # 'product_media',
             # 'product_tags',
             # 'product_combinations'
-        ]
+        # ]
 
     # def get_product_tags(self, obj):
     #     selected_product_tags = ProductTags.objects.filter(
@@ -675,10 +489,10 @@ class ProductUpdateSerializerOld(serializers.ModelSerializer):
     #         product=obj, is_active=True).distinct()
     #     return ProductCombinationSerializerForProductDetails(selected_product_combinations, many=True).data
 
-    def update(self, instance, validated_data):
-        validated_data.update(
-            {"modified_by": self.context['request'].user.id, "modified_at": timezone.now()})
-        return super().update(instance, validated_data)
+    # def update(self, instance, validated_data):
+    #     validated_data.update(
+    #         {"modified_by": self.context['request'].user.id, "modified_at": timezone.now()})
+    #     return super().update(instance, validated_data)
 
         #
 

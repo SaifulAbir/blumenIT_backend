@@ -11,7 +11,7 @@ from product.models import Category, Product
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from product.pagination import ProductCustomPagination
 from itertools import chain
 from user.models import CustomerProfile, User
@@ -142,7 +142,8 @@ class ProductSearchAPI(ListAPIView):
 
 
 class ProductReviewCreateAPIView(CreateAPIView):
-    permission_classes = (AllowAny,)
+    # permission_classes = (AllowAny,)
+    permission_classes = [IsAuthenticated]
     serializer_class = ProductReviewCreateSerializer
 
     def post(self, request, *args, **kwargs):

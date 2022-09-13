@@ -151,10 +151,8 @@ class VendorProductCreateAPIView(CreateAPIView):
 
 
 class VendorProductUpdateAPIView(RetrieveUpdateAPIView):
-    # permission_classes = [IsAuthenticated]
-    permission_classes = (AllowAny,)
+    permission_classes = [IsAuthenticated]
     serializer_class = VendorProductUpdateSerializer
-    # serializer_class = ProductCreateSerializer
     lookup_field = 'slug'
     lookup_url_kwarg = "slug"
 

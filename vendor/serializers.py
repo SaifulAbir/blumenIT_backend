@@ -543,16 +543,43 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
                   'product_combinations'
                   ]
 
+    # def get_tags(self, obj):
+    #     selected_product_tags = ProductTags.objects.filter(
+    #         product=obj, is_active=True).distinct()
+    #     return ProductTagsSerializer(selected_product_tags, many=True).data
+
     def get_tags(self, obj):
-        selected_product_tags = ProductTags.objects.filter(
-            product=obj).distinct()
-        return ProductTagsSerializer(selected_product_tags, many=True).data
+        tags_list = []
+        try:
+            selected_product_tags = ProductTags.objects.filter(
+                product=obj, is_active=True).distinct()
+            for s_p_t in selected_product_tags:
+                tag_title = s_p_t.title
+                tags_list.append(tag_title)
+            return tags_list
+        except:
+            return tags_list
+
+    # def get_media(self, obj):
+    #     queryset = ProductMedia.objects.filter(product=obj).distinct()
+    #     serializer = ProductMediaSerializer(instance=queryset, many=True, context={
+    #                                         'request': self.context['request']})
+    #     return serializer.data
 
     def get_media(self, obj):
-        queryset = ProductMedia.objects.filter(product=obj).distinct()
-        serializer = ProductMediaSerializer(instance=queryset, many=True, context={
-                                            'request': self.context['request']})
-        return serializer.data
+        medias_list = []
+        try:
+            selected_product_medias = ProductMedia.objects.filter(
+                product=obj).distinct()
+            print(selected_product_medias)
+            for s_p_m in selected_product_medias:
+                request = self.context.get('request')
+                media_url = request.build_absolute_uri(s_p_m.file.url)
+                print(media_url)
+                medias_list.append(media_url)
+            return medias_list
+        except:
+            return medias_list
 
     def get_combinations(self, obj):
         selected_product_combinations = ProductCombinations.objects.filter(

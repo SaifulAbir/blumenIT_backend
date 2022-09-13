@@ -148,6 +148,16 @@ class ProductReviewCreateAPIView(CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         return super(ProductReviewCreateAPIView, self).post(request, *args, **kwargs)
+        # if User.objects.filter(id=self.request.user.id).exists():
+        #     uid = User.objects.get(id=self.request.user.id)
+        #     if uid:
+        #         return super(ProductReviewCreateAPIView, self).post(request, *args, **kwargs)
+        # else:
+        #     raise ValidationError({"msg": 'You are not a User.'})
+        # return super(ProductReviewCreateAPIView, self).post(request, *args, **kwargs)
+
+    # def post(self, request, *args, **kwargs):
+    #     return super(ProductReviewCreateAPIView, self).post(request, *args, **kwargs)
 
 
 class VendorProductListForFrondEndAPI(ListAPIView):

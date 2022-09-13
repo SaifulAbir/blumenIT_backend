@@ -302,6 +302,7 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
         child=serializers.FileField(), write_only=True, required=False)
     product_combinations = ProductCombinationSerializer(
         many=True, required=False)
+    thumbnail = serializers.FileField(write_only=True, required=False)
 
     class Meta:
         model = Product
@@ -394,8 +395,10 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
             product_combinations = validated_data.pop('product_combinations')
         except:
             product_combinations = ''
+
         product_instance = Product.objects.create(**validated_data, vendor=Vendor.objects.get(vendor_admin=User.objects.get(
             id=self.context['request'].user.id)))
+
         try:
             if product_media:
                 for media_file in product_media:
@@ -403,8 +406,11 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
                         product=product_instance, file=media_file, status="COMPLETE")
             if product_tags:
                 for tag in product_tags:
-                    ProductTags.objects.create(
-                        title=tag, product=product_instance)
+                    try:
+                        ProductTags.objects.create(
+                            title=tag, product=product_instance)
+                    except:
+                        pass
             if product_combinations:
                 for product_combination in product_combinations:
                     product_attribute = product_combination['product_attribute']
@@ -571,11 +577,9 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
         try:
             selected_product_medias = ProductMedia.objects.filter(
                 product=obj).distinct()
-            print(selected_product_medias)
             for s_p_m in selected_product_medias:
                 request = self.context.get('request')
                 media_url = request.build_absolute_uri(s_p_m.file.url)
-                print(media_url)
                 medias_list.append(media_url)
             return medias_list
         except:

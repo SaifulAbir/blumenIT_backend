@@ -158,8 +158,25 @@ class VendorProductUpdateAPIView(RetrieveUpdateAPIView):
 
     def get_queryset(self):
         slug = self.kwargs['slug']
-        query = Product.objects.filter(slug=slug)
-        return query
+        # query = Product.objects.filter(slug=slug)
+        # return query
+
+        if Vendor.objects.filter(vendor_admin=User.objects.get(id=self.request.user.id)).exists():
+            vid = Vendor.objects.get(
+                vendor_admin=User.objects.get(id=self.request.user.id))
+            if vid:
+                try:
+                    query = Product.objects.filter(slug=slug, vendor=vid)
+                    if query:
+                        return query
+                    else:
+                        raise ValidationError(
+                            {"msg": 'You are not creator of this product!'})
+                except:
+                    raise ValidationError(
+                        {"msg": "Product doesn't exist or You are not the creator of this product!"})
+        else:
+            raise ValidationError({"msg": 'You are not a vendor.'})
 
     # def put(self, request, *args, **kwargs):
     #     print('Put')
@@ -187,6 +204,6 @@ class VendorProductDetailsAPI(RetrieveAPIView):
                             {"msg": 'You are not creator of this product!'})
                 except:
                     raise ValidationError(
-                        {"msg": "Product doesn't exist!"})
+                        {"msg": "Product doesn't exist or You are not the creator of this product!"})
         else:
             raise ValidationError({"msg": 'You are not a vendor.'})

@@ -245,7 +245,7 @@ class ProductCombinations(AbstractTimeStamp):
 
 class ProductTags(AbstractTimeStamp):
     title = models.CharField(
-        max_length=100, null=False, blank=False, default="")
+        max_length=100, null=False, blank=False, default="", unique=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, null=False,
                                 blank=False, related_name='product_tags_product', default="")
     is_active = models.BooleanField(null=False, blank=False, default=True)

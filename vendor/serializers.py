@@ -652,7 +652,10 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
         try:
             if product_tags:
                 for tag in product_tags:
-                    ProductTags.objects.create(title=tag, product=instance)
+                    try:
+                        ProductTags.objects.create(title=tag, product=instance)
+                    except:
+                        pass
 
             if product_media:
                 for media_file in product_media:

@@ -302,7 +302,6 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
         child=serializers.FileField(), write_only=True, required=False)
     product_combinations = ProductCombinationSerializer(
         many=True, required=False)
-    thumbnail = serializers.FileField(write_only=True, required=False)
 
     class Meta:
         model = Product

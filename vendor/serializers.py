@@ -295,6 +295,88 @@ class ProductCombinationSerializerForVendorProductDetails(serializers.ModelSeria
             return ''
 
 
+class ProductCombinationSerializerForVendorProductUpdate(serializers.ModelSerializer):
+    product_attribute = serializers.SerializerMethodField()
+    variant_type = serializers.SerializerMethodField()
+    variant_value = serializers.SerializerMethodField()
+    variant_price = serializers.SerializerMethodField()
+    quantity = serializers.SerializerMethodField()
+    discount_type = serializers.SerializerMethodField()
+    discount_amount = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ProductCombinations
+        fields = [
+            'id',
+            'product_attribute',
+            'product_attribute_value',
+            'product_attribute_color_code',
+
+            'variant_type',
+            'variant_value',
+            'variant_price',
+            'quantity',
+            'discount_type',
+            'discount_amount'
+        ]
+
+    def get_product_attribute(self, obj):
+        try:
+            product_attribute = ProductCombinations.objects.get(
+                id=obj.id, is_active=True).product_attribute.id
+            return product_attribute
+        except:
+            return ''
+
+    def get_variant_type(self, obj):
+        try:
+            variant_type = ProductCombinationsVariants.objects.get(
+                product_combination=obj, is_active=True).variant_type.id
+            return variant_type
+        except:
+            return ''
+
+    def get_variant_value(self, obj):
+        try:
+            variant_value = ProductCombinationsVariants.objects.get(
+                product_combination=obj, is_active=True).variant_value
+            return variant_value
+        except:
+            return ''
+
+    def get_variant_price(self, obj):
+        try:
+            variant_price = ProductCombinationsVariants.objects.get(
+                product_combination=obj, is_active=True).variant_price
+            return variant_price
+        except:
+            return ''
+
+    def get_quantity(self, obj):
+        try:
+            quantity = ProductCombinationsVariants.objects.get(
+                product_combination=obj, is_active=True).quantity
+            return quantity
+        except:
+            return ''
+
+    def get_discount_type(self, obj):
+        try:
+            discount_type = ProductCombinationsVariants.objects.get(
+                product_combination=obj, is_active=True).discount_type.id
+            return discount_type
+        except:
+            return ''
+
+    def get_discount_amount(self, obj):
+        try:
+            discount_amount = ProductCombinationsVariants.objects.get(
+                product_combination=obj, is_active=True).discount_amount
+            return discount_amount
+        except:
+            return ''
+
+
 class VendorProductCreateSerializer(serializers.ModelSerializer):
     product_tags = serializers.ListField(
         child=serializers.CharField(), write_only=True, required=False)
@@ -587,7 +669,8 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
     def get_combinations(self, obj):
         selected_product_combinations = ProductCombinations.objects.filter(
             product=obj, is_active=True).distinct()
-        return ProductCombinationSerializerForVendorProductDetails(selected_product_combinations, many=True).data
+        return ProductCombinationSerializerForVendorProductUpdate(selected_product_combinations, many=True).data
+        # return ProductCombinationSerializerForVendorProductDetails(selected_product_combinations, many=True).data
 
     def update(self, instance, validated_data):
         # validation for sku start

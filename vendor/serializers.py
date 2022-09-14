@@ -575,7 +575,8 @@ class VendorProductDetailsSerializer(serializers.ModelSerializer):
         return ProductReviewSerializer(selected_product_reviews, many=True).data
 
     def get_product_media(self, obj):
-        queryset = ProductMedia.objects.filter(product=obj).distinct()
+        queryset = ProductMedia.objects.filter(
+            product=obj, is_active=True).distinct()
         serializer = ProductMediaSerializer(instance=queryset, many=True, context={
                                             'request': self.context['request']})
         return serializer.data
@@ -583,7 +584,6 @@ class VendorProductDetailsSerializer(serializers.ModelSerializer):
     def get_product_combinations(self, obj):
         selected_product_combinations = ProductCombinations.objects.filter(
             product=obj, is_active=True).distinct()
-        # return ProductCombinationSerializerForProductDetails(selected_product_combinations, many=True).data
         return ProductCombinationSerializerForVendorProductDetails(selected_product_combinations, many=True).data
 
 
@@ -648,7 +648,8 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
             return tags_list
 
     def get_media(self, obj):
-        queryset = ProductMedia.objects.filter(product=obj).distinct()
+        queryset = ProductMedia.objects.filter(
+            product=obj, is_active=True).distinct()
         serializer = ProductMediaSerializer(instance=queryset, many=True, context={
                                             'request': self.context['request']})
         return serializer.data
@@ -731,40 +732,41 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
         except:
             product_combinations = ''
 
-        try:
-            if product_tags:
-                for tag in product_tags:
-                    try:
-                        ProductTags.objects.create(title=tag, product=instance)
-                    except:
-                        pass
+        # try:
+        if product_tags:
+            ProductTags.objects.filter(product=instance).delete()
+            for tag in product_tags:
+                try:
+                    ProductTags.objects.create(title=tag, product=instance)
+                except:
+                    pass
 
-            if product_media:
-                for media_file in product_media:
-                    ProductMedia.objects.create(
-                        product=instance, file=media_file, status="COMPLETE")
+        if product_media:
+            for media_file in product_media:
+                ProductMedia.objects.create(
+                    product=instance, file=media_file, status="COMPLETE")
 
-            if product_combinations:
-                for product_combination in product_combinations:
-                    product_attribute = product_combination['product_attribute']
-                    product_attribute_value = product_combination['product_attribute_value']
-                    product_attribute_color_code = product_combination['product_attribute_color_code']
-                    product_combination_instance = ProductCombinations.objects.create(
-                        product_attribute=product_attribute, product_attribute_value=product_attribute_value, product_attribute_color_code=product_attribute_color_code, product=instance)
+        if product_combinations:
+            for product_combination in product_combinations:
+                product_attribute = product_combination['product_attribute']
+                product_attribute_value = product_combination['product_attribute_value']
+                product_attribute_color_code = product_combination['product_attribute_color_code']
+                product_combination_instance = ProductCombinations.objects.create(
+                    product_attribute=product_attribute, product_attribute_value=product_attribute_value, product_attribute_color_code=product_attribute_color_code, product=instance)
 
-                    variant_type = product_combination['variant_type']
-                    variant_value = product_combination['variant_value']
-                    variant_price = product_combination['variant_price']
-                    quantity = product_combination['quantity']
-                    discount_type = product_combination['discount_type']
-                    discount_amount = product_combination['discount_amount']
-                    ProductCombinationsVariants.objects.create(
-                        variant_type=variant_type,  variant_value=variant_value, variant_price=variant_price, quantity=quantity, discount_type=discount_type, discount_amount=discount_amount, product=instance, product_combination=product_combination_instance)
+                variant_type = product_combination['variant_type']
+                variant_value = product_combination['variant_value']
+                variant_price = product_combination['variant_price']
+                quantity = product_combination['quantity']
+                discount_type = product_combination['discount_type']
+                discount_amount = product_combination['discount_amount']
+                ProductCombinationsVariants.objects.create(
+                    variant_type=variant_type,  variant_value=variant_value, variant_price=variant_price, quantity=quantity, discount_type=discount_type, discount_amount=discount_amount, product=instance, product_combination=product_combination_instance)
 
-            validated_data.update(
-                {"updated_at": timezone.now()})
-            return super().update(instance, validated_data)
-        except:
-            validated_data.update(
-                {"updated_at": timezone.now()})
-            return super().update(instance, validated_data)
+        validated_data.update(
+            {"updated_at": timezone.now()})
+        return super().update(instance, validated_data)
+        # except:
+        #     validated_data.update(
+        #         {"updated_at": timezone.now()})
+        #     return super().update(instance, validated_data)

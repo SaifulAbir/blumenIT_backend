@@ -4,7 +4,7 @@ from product.pagination import ProductCustomPagination
 from product.serializers import DiscountTypeSerializer, ProductAttributesSerializer, ProductTagsSerializer, VariantTypeSerializer
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductReview, ProductTags, SubCategory, SubSubCategory, Units, VariantType
+from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductMedia, ProductReview, ProductTags, SubCategory, SubSubCategory, Units, VariantType
 from user.models import CustomerProfile, User
 from vendor.models import VendorRequest, Vendor
 from vendor.serializers import VendorBrandSerializer, VendorCategorySerializer, VendorProductCreateSerializer, VendorProductDetailsSerializer, VendorProductListSerializer, VendorProductUpdateSerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
@@ -198,6 +198,36 @@ class VendorProductDetailsAPI(RetrieveAPIView):
                 try:
                     query = Product.objects.get(slug=slug, vendor=vid)
                     if query:
+                        return query
+                    else:
+                        raise ValidationError(
+                            {"msg": 'You are not creator of this product!'})
+                except:
+                    raise ValidationError(
+                        {"msg": "Product doesn't exist or You are not the creator of this product!"})
+        else:
+            raise ValidationError({"msg": 'You are not a vendor.'})
+
+
+class VendorProductSingleMediaDeleteAPI(RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = VendorProductUpdateSerializer
+    lookup_field = 'slug'
+    lookup_url_kwarg = "slug"
+
+    def get_queryset(self):
+        slug = self.kwargs['slug']
+        mid = self.kwargs['mid']
+
+        if Vendor.objects.filter(vendor_admin=User.objects.get(id=self.request.user.id)).exists():
+            vid = Vendor.objects.get(
+                vendor_admin=User.objects.get(id=self.request.user.id))
+            if vid:
+                try:
+                    query = Product.objects.filter(slug=slug, vendor=vid)
+                    if query:
+                        media_obj = ProductMedia.objects.filter(id=int(mid))
+                        media_obj.update(is_active=False)
                         return query
                     else:
                         raise ValidationError(

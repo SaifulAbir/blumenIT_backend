@@ -280,6 +280,7 @@ class ProductMedia(AbstractTimeStamp):
                             validate_file_extension])
     status = models.CharField(
         max_length=20, choices=CHOICES, default=CHOICES[0][0])
+    is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
         verbose_name = 'ProductMedia'

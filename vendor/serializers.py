@@ -565,24 +565,24 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
         except:
             return tags_list
 
-    # def get_media(self, obj):
-    #     queryset = ProductMedia.objects.filter(product=obj).distinct()
-    #     serializer = ProductMediaSerializer(instance=queryset, many=True, context={
-    #                                         'request': self.context['request']})
-    #     return serializer.data
-
     def get_media(self, obj):
-        medias_list = []
-        try:
-            selected_product_medias = ProductMedia.objects.filter(
-                product=obj).distinct()
-            for s_p_m in selected_product_medias:
-                request = self.context.get('request')
-                media_url = request.build_absolute_uri(s_p_m.file.url)
-                medias_list.append(media_url)
-            return medias_list
-        except:
-            return medias_list
+        queryset = ProductMedia.objects.filter(product=obj).distinct()
+        serializer = ProductMediaSerializer(instance=queryset, many=True, context={
+                                            'request': self.context['request']})
+        return serializer.data
+
+    # def get_media(self, obj):
+    #     medias_list = []
+    #     try:
+    #         selected_product_medias = ProductMedia.objects.filter(
+    #             product=obj).distinct()
+    #         for s_p_m in selected_product_medias:
+    #             request = self.context.get('request')
+    #             media_url = request.build_absolute_uri(s_p_m.file.url)
+    #             medias_list.append(media_url)
+    #         return medias_list
+    #     except:
+    #         return medias_list
 
     def get_combinations(self, obj):
         selected_product_combinations = ProductCombinations.objects.filter(

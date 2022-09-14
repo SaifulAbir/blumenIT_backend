@@ -21,9 +21,11 @@ class CheckoutAPIView(CreateAPIView):
     def post(self, request, *args, **kwargs):
         return super(CheckoutAPIView, self).post(request, *args, **kwargs)
 
+
 class PaymentMethodsAPIView(ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = PaymentTypesListSerializer
+
     def get_queryset(self):
         queryset = PaymentType.objects.filter(status=True)
         return queryset
@@ -42,87 +44,80 @@ class PaymentMethodsAPIView(ListAPIView):
     # def put(self, request, *args, **kwargs):
     #     return self.update(request, *args, **kwargs)
 
+
 class ApplyCouponAPIView(APIView):
     permission_classes = (AllowAny,)
     serializer_class = ApplyCouponSerializer
     lookup_field = 'code'
     lookup_url_kwarg = 'code'
-    
 
     def get(self, request, code, uid):
         # try:
-            code = self.kwargs['code']
-            uid = self.kwargs['uid']
-            # code = request.GET.get('code')
-            # code = request.data["code"]
-            # user = request.data["uid"]
-            # print(uid)
+        code = self.kwargs['code']
+        uid = self.kwargs['uid']
 
-            # check coupon code exist or not
-            code_exist = Coupon.objects.filter(code = code, is_active=True).exists()
-            if code_exist:
-                coupon_obj = Coupon.objects.filter(code = code)
-                start_date_time = coupon_obj[0].start_time
-                end_date_time = coupon_obj[0].end_time
+        # check coupon code exist or not
+        code_exist = Coupon.objects.filter(code=code, is_active=True).exists()
+        if code_exist:
+            coupon_obj = Coupon.objects.filter(code=code)
+            start_date_time = coupon_obj[0].start_time
+            end_date_time = coupon_obj[0].end_time
 
-                current_time = timezone.now()
+            current_time = timezone.now()
 
-                # date comparison with current date
-                if current_time > start_date_time and current_time < end_date_time:
-                    # return Response({"data": current_time, "start_date_time": start_date_time })
-
-                    # check number of uses of coupon
-                    number_of_uses = int(coupon_obj[0].number_of_uses)
-                    print(number_of_uses)
-                    if number_of_uses > 0:
-
-                        # check if this user already used this coupon 
-                        user = User.objects.filter(id = uid).exists()
-                        if user:
-                            user_obj = User.objects.filter(id = uid)
-                            check_in_use_coupon_record = UseRecordOfCoupon.objects.filter(coupon_id = coupon_obj[0].id, user_id = user_obj[0].id).exists()
-                            if check_in_use_coupon_record:
-                                return Response({"status": "You already used this coupon!"})
-                            else:
-                                coupon_id = Coupon.objects.get(code = coupon_obj[0].code)
-                                user_id = User.objects.get(id = uid)
-                                # print(type(coupon_id))
-                                UseRecordOfCoupon.objects.create(coupon_id = coupon_id, user_id = user_id)
-                                coupon_obj.update(number_of_uses = number_of_uses - 1)
-                                number_of_uses = Coupon.objects.get(code = coupon_obj[0].code).number_of_uses
-                                if number_of_uses < 1:
-                                    coupon_obj.update(is_active=False)
-
-                                return Response({"status": "Authentic coupon.", "amount":coupon_obj[0].amount, "coupon_id": coupon_obj[0].id})
+            # date comparison with current date
+            if current_time > start_date_time and current_time < end_date_time:
+                # check number of uses of coupon
+                number_of_uses = int(coupon_obj[0].number_of_uses)
+                print(number_of_uses)
+                if number_of_uses > 0:
+                    # check if this user already used this coupon
+                    user = User.objects.filter(id=uid).exists()
+                    if user:
+                        user_obj = User.objects.filter(id=uid)
+                        check_in_use_coupon_record = UseRecordOfCoupon.objects.filter(
+                            coupon_id=coupon_obj[0].id, user_id=user_obj[0].id).exists()
+                        if check_in_use_coupon_record:
+                            return Response({"status": "You already used this coupon!"})
                         else:
-                            return Response({"status": "User doesn't exist!"})
+                            coupon_id = Coupon.objects.get(
+                                code=coupon_obj[0].code)
+                            user_id = User.objects.get(id=uid)
+                            # print(type(coupon_id))
+                            UseRecordOfCoupon.objects.create(
+                                coupon_id=coupon_id, user_id=user_id)
+                            coupon_obj.update(
+                                number_of_uses=number_of_uses - 1)
+                            number_of_uses = Coupon.objects.get(
+                                code=coupon_obj[0].code).number_of_uses
+                            if number_of_uses < 1:
+                                coupon_obj.update(is_active=False)
 
+                            return Response({"status": "Authentic coupon.", "amount": coupon_obj[0].amount, "coupon_id": coupon_obj[0].id})
                     else:
-                        return Response({"status": "Invalid coupon!"})
+                        return Response({"status": "User doesn't exist!"})
 
                 else:
-                    if current_time > end_date_time:
-                        coupon_obj.update(is_active=False)
                     return Response({"status": "Invalid coupon!"})
 
-
-
-
-                # if code_status == True:
-                #     return Response({"data": code_status})
-                # else:
-                #     return Response({"status": "Invalid coupon!"})
-
-
-                # return Response({"data": current_time, "start_date_time": start_date_time })
             else:
+                if current_time > end_date_time:
+                    coupon_obj.update(is_active=False)
                 return Response({"status": "Invalid coupon!"})
-                # return Response({"status": "Code Invalid, Coupon does not exist!"})
+
+            # if code_status == True:
+            #     return Response({"data": code_status})
+            # else:
+            #     return Response({"status": "Invalid coupon!"})
+
+            # return Response({"data": current_time, "start_date_time": start_date_time })
+        else:
+            return Response({"status": "Invalid coupon!"})
+            # return Response({"status": "Code Invalid, Coupon does not exist!"})
         # except:
         #     return Response({"status": "Something went wrong, contact with developer!"})
 
-            # return Response({"data": "code"})
-
+        # return Response({"data": "code"})
 
 
 # class WishListAPIView(ListCreateAPIView):
@@ -131,7 +126,7 @@ class WishListAPIView(APIView):
 
     def get(self, request):
         user = self.request.user.id
-        wishlist = Wishlist.objects.filter(user=user,is_active=True)
+        wishlist = Wishlist.objects.filter(user=user, is_active=True)
         wishlist_serializer_data = WishListDataSerializer(wishlist, many=True)
         return Response({"wishlist": wishlist_serializer_data.data})
 
@@ -140,19 +135,22 @@ class WishListAPIView(APIView):
         if wishlist_serializer.is_valid():
             product = request.POST.get("product")
             if product:
-                whishlist_exc = Wishlist.objects.filter(user=User.objects.get(id=self.request.user.id), product=Product.objects.get(id=product), is_active=True)
+                whishlist_exc = Wishlist.objects.filter(user=User.objects.get(
+                    id=self.request.user.id), product=Product.objects.get(id=product), is_active=True)
                 if not whishlist_exc:
                     wishlist = Wishlist(
-                        user = User.objects.get(id=self.request.user.id),
+                        user=User.objects.get(id=self.request.user.id),
                         product=Product.objects.get(id=product)
                     )
                     wishlist.save()
                 else:
-                    return Response({"status":"Already exist!"})
-        return Response({"status":"Data uploaded!"})
+                    return Response({"status": "Already exist!"})
+        return Response({"status": "Data uploaded!"})
+
 
 class WishlistDeleteAPIView(DestroyAPIView):
     serializer_class = WishListDataSerializer
+
     def get_queryset(self):
         queryset = Wishlist.objects.filter(id=self.kwargs['id'])
         return queryset
@@ -337,7 +335,6 @@ class WishlistDeleteAPIView(DestroyAPIView):
 #         user = User.objects.get(id = uid)
 #         query = OrderItem.objects.filter(user=user,ordered=False)
 #         return query
-
 
 
 # class PaymentTypeCreateAPIView(CreateAPIView):

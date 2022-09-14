@@ -1,9 +1,9 @@
 from django.contrib import admin
 from product.models import Category, SubCategory, SubSubCategory, Brand, Units, DiscountTypes, Product, ProductAttributes, ProductCombinations, VariantType, ProductCombinationsVariants, ProductTags, ProductMedia, ProductCombinationMedia, ProductReview
 
-# admin.site.register(Category)
-# admin.site.register(SubCategory)
-# admin.site.register(SubSubCategory)
+admin.site.register(Category)
+admin.site.register(SubCategory)
+admin.site.register(SubSubCategory)
 admin.site.register(Brand)
 admin.site.register(Units)
 admin.site.register(DiscountTypes)
@@ -16,21 +16,21 @@ admin.site.register(ProductCombinations)
 admin.site.register(ProductMedia)
 
 
-class ProductSubCategoryInline(admin.TabularInline):
-    model = SubCategory
-    fields = ['title']
+# class ProductSubCategoryInline(admin.TabularInline):
+#     model = SubCategory
+#     fields = ['title']
 
 
-class ProductSubSubCategoryInline(admin.TabularInline):
-    model = SubSubCategory
-    fields = ['title']
+# class ProductSubSubCategoryInline(admin.TabularInline):
+#     model = SubSubCategory
+#     fields = ['title']
 
 
-@admin.register(Category)
-class CategoryAdmin(admin.ModelAdmin):
-    inlines = [
-        ProductSubCategoryInline, ProductSubSubCategoryInline
-    ]
+# @admin.register(Category)
+# class CategoryAdmin(admin.ModelAdmin):
+#     inlines = [
+#         ProductSubCategoryInline, ProductSubSubCategoryInline
+#     ]
 
 
 class ProductImageInline(admin.TabularInline):

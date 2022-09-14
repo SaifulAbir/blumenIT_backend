@@ -115,7 +115,7 @@ class Product(AbstractTimeStamp):
     slug = models.SlugField(
         null=False, allow_unicode=True, blank=True, max_length=255)
     sku = models.CharField(max_length=500, null=True,
-                           blank=True, default="", unique=True)
+                           blank=True, default="")
     warranty = models.CharField(
         max_length=255, blank=True, help_text="eg: 1 year or 6 months")
     full_description = models.TextField(default='')

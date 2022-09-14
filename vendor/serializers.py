@@ -683,7 +683,12 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
         if sku:
             check_sku = Product.objects.filter(sku=sku)
             if check_sku:
-                raise ValidationError('This SKU already exist.')
+                if int(check_sku[0].id) == int(instance.id):
+                    pass
+                elif int(check_sku[0].id) != int(instance.id):
+                    raise ValidationError('This SKU already exist.')
+                else:
+                    pass
         # validation for sku end
 
         # validation for sub category and sub sub category start

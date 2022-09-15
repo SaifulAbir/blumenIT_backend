@@ -223,17 +223,24 @@ class VendorProductSingleMediaDeleteAPI(RetrieveAPIView):
             vid = Vendor.objects.get(
                 vendor_admin=User.objects.get(id=self.request.user.id))
             if vid:
-                try:
-                    query = Product.objects.filter(slug=slug, vendor=vid)
-                    if query:
-                        media_obj = ProductMedia.objects.filter(id=int(mid))
-                        media_obj.update(is_active=False)
+                # try:
+                query = Product.objects.filter(slug=slug, vendor=vid)
+                if query:
+                    media_obj = ProductMedia.objects.filter(
+                        id=int(mid), product=query[0].id).exists()
+                    if media_obj:
+                        media_obj_obj = ProductMedia.objects.filter(
+                            id=int(mid), product=query[0].id)
+                        media_obj_obj.update(is_active=False)
                         return query
                     else:
                         raise ValidationError(
-                            {"msg": 'You are not creator of this product!'})
-                except:
+                            {"msg": "Media doesn't found"})
+                else:
                     raise ValidationError(
-                        {"msg": "Product doesn't exist or You are not the creator of this product!"})
+                        {"msg": 'You are not creator of this product!'})
+                # except:
+                # raise ValidationError(
+                    # {"msg": "Product doesn't exist or You are not the creator of this product!"})
         else:
             raise ValidationError({"msg": 'You are not a vendor.'})

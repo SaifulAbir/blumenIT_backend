@@ -109,7 +109,8 @@ class DiscountTypes(AbstractTimeStamp):
 class Product(AbstractTimeStamp):
     PRODUCT_STATUSES = [
         ('PENDING', 'Pending'),
-        ('ACTIVE', 'Active')]
+        ('ACTIVE', 'Active'),
+        ('REMOVE', 'Remove')]
 
     title = models.CharField(max_length=800, default='')
     slug = models.SlugField(

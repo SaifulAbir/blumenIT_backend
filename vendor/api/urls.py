@@ -1,6 +1,6 @@
 from django.urls import path
 from product.api.views import ProductDetailsAPI
-from vendor.api.views import VendorAttributeListAPIView, VendorBrandListAPIView, VendorCategoryListAPIView, VendorProductDetailsAPI, VendorProductSingleMediaDeleteAPI, VendorProductUpdateAPIView, VendorRequestAPIView, VendorRequestListAPI, VendorCreateAPIView, \
+from vendor.api.views import VendorAttributeListAPIView, VendorBrandListAPIView, VendorCategoryListAPIView, VendorProductDeleteAPI, VendorProductDetailsAPI, VendorProductSingleMediaDeleteAPI, VendorProductUpdateAPIView, VendorRequestAPIView, VendorRequestListAPI, VendorCreateAPIView, \
     OrganizationNamesListAPIView, VendorDetailAPIView, StoreSettingsUpdateAPIView, VendorSubCategoryListAPIView, VendorSubSubCategoryListAPIView, VendorTagListAPIView, VendorUnitListAPIView, VendorProductListAPI, VendorProductCreateAPIView, VendorDiscountListAPIView, VendorVariantListAPIView
 
 urlpatterns = [
@@ -30,5 +30,7 @@ urlpatterns = [
          VendorProductDetailsAPI.as_view()),
     path('vendor-product-single-media-delete/<str:slug>/<int:mid>/',
          VendorProductSingleMediaDeleteAPI.as_view()),
+    path('vendor-product-delete/<str:slug>/',
+         VendorProductDeleteAPI.as_view()),
 
 ]

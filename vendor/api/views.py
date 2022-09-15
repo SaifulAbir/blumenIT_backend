@@ -224,8 +224,10 @@ class VendorProductSingleMediaDeleteAPI(RetrieveAPIView):
                 vendor_admin=User.objects.get(id=self.request.user.id))
             if vid:
                 # try:
-                query = Product.objects.filter(slug=slug, vendor=vid)
-                if query:
+                query_exist = Product.objects.filter(
+                    slug=slug, vendor=vid).exists()
+                if query_exist:
+                    query = Product.objects.filter(slug=slug, vendor=vid)
                     media_obj = ProductMedia.objects.filter(
                         id=int(mid), product=query[0].id).exists()
                     if media_obj:
@@ -242,5 +244,34 @@ class VendorProductSingleMediaDeleteAPI(RetrieveAPIView):
                 # except:
                 # raise ValidationError(
                     # {"msg": "Product doesn't exist or You are not the creator of this product!"})
+        else:
+            raise ValidationError({"msg": 'You are not a vendor.'})
+
+
+class VendorProductDeleteAPI(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = VendorProductListSerializer
+    pagination_class = ProductCustomPagination
+    lookup_field = 'slug'
+    lookup_url_kwarg = "slug"
+
+    def get_queryset(self):
+        slug = self.kwargs['slug']
+        if Vendor.objects.filter(vendor_admin=User.objects.get(id=self.request.user.id)).exists():
+            vid = Vendor.objects.get(
+                vendor_admin=User.objects.get(id=self.request.user.id))
+            if vid:
+                product_obj_exist = Product.objects.filter(
+                    slug=slug, vendor=vid).exists()
+                if product_obj_exist:
+                    product_obj = Product.objects.filter(slug=slug, vendor=vid)
+                    product_obj.update(status='REMOVE')
+
+                    queryset = Product.objects.filter(
+                        vendor=vid, status='ACTIVE').order_by('-created_at')
+                    return queryset
+                else:
+                    raise ValidationError(
+                        {"msg": 'You are not creator of this product!'})
         else:
             raise ValidationError({"msg": 'You are not a vendor.'})

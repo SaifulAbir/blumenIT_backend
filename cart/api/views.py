@@ -1,14 +1,14 @@
 
 from rest_framework.generics import ListAPIView, CreateAPIView, ListCreateAPIView, DestroyAPIView, RetrieveUpdateAPIView
 from rest_framework.views import APIView
-from cart.serializers import CheckoutSerializer, PaymentTypesListSerializer, WishlistSerializer, WishListDataSerializer, ApplyCouponSerializer
+from cart.serializers import BillingAddressSerializer, CheckoutSerializer, PaymentTypesListSerializer, WishlistSerializer, WishListDataSerializer, ApplyCouponSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from django.shortcuts import get_object_or_404
 from user.models import User
 from product.models import Product
-from cart.models import PaymentType, Coupon, UseRecordOfCoupon, Wishlist
+from cart.models import BillingAddress, PaymentType, Coupon, UseRecordOfCoupon, Wishlist
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 from drf_yasg.utils import swagger_auto_schema
@@ -374,3 +374,38 @@ class WishlistDeleteAPIView(DestroyAPIView):
 #     def get_queryset(self):
 #         queryset = Coupon.objects.filter(is_active=True)
 #         return queryset
+
+
+
+
+# urmi~~
+
+class BillingAddressCreateAPIView(CreateAPIView):
+    serializer_class = BillingAddressSerializer
+
+    def post(self, request, *args, **kwargs):
+        return super(BillingAddressCreateAPIView, self).post(request, *args, **kwargs)
+
+class BillingAddressUpdateAPIView(RetrieveUpdateAPIView):
+    serializer_class = BillingAddressSerializer
+    queryset = BillingAddress.objects.all()
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def put(self, request, *args, **kwargs):
+        return super(BillingAddressUpdateAPIView, self).put(request, *args, **kwargs)
+
+class BillingAddressListAPIView(ListAPIView):
+    serializer_class = BillingAddressSerializer
+    def get_queryset(self):
+        queryset = BillingAddress.objects.filter(user=self.request.user)
+        return queryset
+
+class BillingAddressDeleteAPIView(DestroyAPIView):
+    serializer_class = BillingAddressSerializer
+    queryset = BillingAddress.objects.all()
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def delete(self, request, *args, **kwargs):
+        return super(BillingAddressDeleteAPIView, self).delete(request, *args, **kwargs)

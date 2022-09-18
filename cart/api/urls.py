@@ -17,4 +17,10 @@ urlpatterns = [
     # path('create-payment-type/', PaymentTypeCreateAPIView.as_view()),
     # path('total-price/', TotalPriceAPIView.as_view()),
     # path('check-quantity/', CheckQuantityAPIView.as_view()),
-]
+
+    #urmi
+    path('create-billing-address/', BillingAddressCreateAPIView.as_view()),
+    path('update-billing-address/<int:id>/', BillingAddressUpdateAPIView.as_view()),
+    path('billing-address-list/', BillingAddressListAPIView.as_view()),
+    path('delete-billing-address/<int:id>/', BillingAddressDeleteAPIView.as_view()),
+] 

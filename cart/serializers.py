@@ -233,3 +233,9 @@ class CartListSerializer(serializers.ModelSerializer):
 #     def get_product(self, obj):
 #         selected_product = Product.objects.filter(slug=obj.product.slug).distinct()
 #         return ProductSerializer(selected_product, many=True).data
+
+
+class BillingAddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BillingAddress
+        fields = [ 'id', 'user','first_name', 'last_name', 'country', 'street_address', 'city', 'phone', 'zip_code', 'email','title', 'default']

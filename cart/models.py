@@ -211,3 +211,27 @@ class Wishlist(AbstractTimeStamp):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True)
 
+
+class BillingAddress(AbstractTimeStamp):
+    user= models.ForeignKey(User, on_delete=models.PROTECT,related_name='billing_address_user', blank=True, null=True)
+    first_name = models.CharField(max_length=100, null=False, blank=False, default='')
+    last_name = models.CharField(max_length=100, null=False, blank=False, default='')
+    country = models.CharField(max_length=100, blank=True, null=True, default='')
+    company_name = models.CharField(max_length=100, null=False, blank=False, default='')
+    street_address = models.CharField(max_length=100, blank=True, null=True, default='')
+    city = models.CharField(max_length=100, blank=True, null=True, default='')
+    zip_code = models.CharField(max_length=100, blank=True, null=True, default='')
+    phone = models.CharField(max_length=255, null=True, blank=True, default='')
+    email = models.CharField(max_length=255, null=True, blank=True, default='')
+    address_type = models.CharField(max_length=100, null=False, blank=False, default='')
+    title=models.CharField(max_length=200, null=True, blank=True, default='')
+    default = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = 'BillingAddress'
+        verbose_name_plural = 'BillingAddresses'
+        db_table = 'Billing_addresses'
+
+    def __str__(self):
+        return f"{self.pk}"
+

@@ -1,3 +1,4 @@
+from email.policy import default
 from pyexpat import model
 from attr import fields
 from rest_framework import serializers
@@ -61,7 +62,8 @@ class CheckoutSerializer(serializers.ModelSerializer):
     discounted_price = serializers.FloatField(write_only=True, required=False)
     coupon = serializers.PrimaryKeyRelatedField(
         queryset=Coupon.objects.all(), many=False, write_only=True, required=False)
-    coupon_status = serializers.BooleanField(write_only=True, required=False)
+    coupon_status = serializers.BooleanField(
+        write_only=True, required=False, default=False)
 
     class Meta:
         model = Order
@@ -146,6 +148,29 @@ class CheckoutSerializer(serializers.ModelSerializer):
             city=shipping_city,
             zip_code=shipping_zip_code
         )
+
+        # work with coupon start
+        coupon_status = validated_data.pop('coupon_status')
+        coupon = validated_data.pop('coupon')
+        if coupon_status == True and coupon:
+            coupon_id = Coupon.objects.get(id=coupon.id)
+            user_id = User.objects.get(id=self.context['request'].user.id)
+            coupon_obj = Coupon.objects.filter(id=coupon.id)
+            check_in_use_coupon_record = UseRecordOfCoupon.objects.filter(
+                coupon_id=coupon_obj[0].id, user_id=self.context['request'].user.id).exists()
+            if check_in_use_coupon_record:
+                print('pass')
+                pass
+            else:
+                UseRecordOfCoupon.objects.create(
+                    coupon_id=coupon_id, user_id=user_id)
+                number_of_uses = int(coupon_obj[0].number_of_uses)
+                coupon_obj.update(number_of_uses=number_of_uses - 1)
+                number_of_uses = Coupon.objects.get(
+                    code=coupon_obj[0].code).number_of_uses
+                if number_of_uses < 1:
+                    coupon_obj.update(is_active=False)
+        # work with coupon end
 
         return order_instance
 

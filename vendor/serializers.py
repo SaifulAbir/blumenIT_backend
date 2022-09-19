@@ -745,6 +745,8 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
                     ProductTags.objects.create(title=tag, product=instance)
                 except:
                     pass
+        else:
+            ProductTags.objects.filter(product=instance).delete()
 
         if product_media:
             for media_file in product_media:
@@ -752,6 +754,16 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
                     product=instance, file=media_file, status="COMPLETE")
 
         if product_combinations:
+            p_c_v = ProductCombinationsVariants.objects.filter(
+                product=instance).exists()
+            if p_c_v:
+                ProductCombinationsVariants.objects.filter(
+                    product=instance).delete()
+            p_c = ProductCombinations.objects.filter(
+                product=instance).exists()
+            if p_c:
+                ProductCombinations.objects.filter(product=instance).delete()
+            
             for product_combination in product_combinations:
                 product_attribute = product_combination['product_attribute']
                 product_attribute_value = product_combination['product_attribute_value']
@@ -767,6 +779,16 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
                 discount_amount = product_combination['discount_amount']
                 ProductCombinationsVariants.objects.create(
                     variant_type=variant_type,  variant_value=variant_value, variant_price=variant_price, quantity=quantity, discount_type=discount_type, discount_amount=discount_amount, product=instance, product_combination=product_combination_instance)
+        else:
+            p_c_v = ProductCombinationsVariants.objects.filter(
+                product=instance).exists()
+            if p_c_v:
+                ProductCombinationsVariants.objects.filter(
+                    product=instance).delete()
+            p_c = ProductCombinations.objects.filter(
+                product=instance).exists()
+            if p_c:
+                ProductCombinations.objects.filter(product=instance).delete()
 
         validated_data.update(
             {"updated_at": timezone.now()})

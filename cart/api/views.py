@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from cart.serializers import BillingAddressSerializer, CheckoutSerializer, PaymentTypesListSerializer, WishlistSerializer, WishListDataSerializer, ApplyCouponSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.shortcuts import get_object_or_404
 from user.models import User
 from product.models import Product
@@ -16,6 +16,7 @@ from django.utils import timezone
 
 
 class CheckoutAPIView(CreateAPIView):
+    permission_classes = [IsAuthenticated]
     serializer_class = CheckoutSerializer
 
     def post(self, request, *args, **kwargs):
@@ -79,21 +80,20 @@ class ApplyCouponAPIView(APIView):
                             coupon_id=coupon_obj[0].id, user_id=user_obj[0].id).exists()
                         if check_in_use_coupon_record:
                             return Response({"status": "You already used this coupon!"})
-                        else:
-                            coupon_id = Coupon.objects.get(
-                                code=coupon_obj[0].code)
-                            user_id = User.objects.get(id=uid)
-                            # print(type(coupon_id))
-                            UseRecordOfCoupon.objects.create(
-                                coupon_id=coupon_id, user_id=user_id)
-                            coupon_obj.update(
-                                number_of_uses=number_of_uses - 1)
-                            number_of_uses = Coupon.objects.get(
-                                code=coupon_obj[0].code).number_of_uses
-                            if number_of_uses < 1:
-                                coupon_obj.update(is_active=False)
+                        # else:
+                        #     coupon_id = Coupon.objects.get(
+                        #         code=coupon_obj[0].code)
+                        #     user_id = User.objects.get(id=uid)
+                        #     UseRecordOfCoupon.objects.create(
+                        #         coupon_id=coupon_id, user_id=user_id)
+                        #     coupon_obj.update(
+                        #         number_of_uses=number_of_uses - 1)
+                        #     number_of_uses = Coupon.objects.get(
+                        #         code=coupon_obj[0].code).number_of_uses
+                        #     if number_of_uses < 1:
+                        #         coupon_obj.update(is_active=False)
 
-                            return Response({"status": "Authentic coupon.", "amount": coupon_obj[0].amount, "coupon_id": coupon_obj[0].id})
+                        #     return Response({"status": "Authentic coupon.", "amount": coupon_obj[0].amount, "coupon_id": coupon_obj[0].id})
                     else:
                         return Response({"status": "User doesn't exist!"})
 

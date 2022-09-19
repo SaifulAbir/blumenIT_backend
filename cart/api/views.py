@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from cart.serializers import BillingAddressSerializer, CheckoutSerializer, PaymentTypesListSerializer, WishlistSerializer, WishListDataSerializer, ApplyCouponSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.shortcuts import get_object_or_404
 from user.models import User
 from product.models import Product
@@ -16,6 +16,7 @@ from django.utils import timezone
 
 
 class CheckoutAPIView(CreateAPIView):
+    permission_classes = [IsAuthenticated]
     serializer_class = CheckoutSerializer
 
     def post(self, request, *args, **kwargs):

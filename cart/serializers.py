@@ -149,8 +149,9 @@ class CheckoutSerializer(serializers.ModelSerializer):
 
         # work with coupon start
         coupon_status = validated_data.pop('coupon_status')
-        coupon = validated_data.pop('coupon')
-        if coupon_status == True and coupon:
+
+        if coupon_status == True:
+            coupon = validated_data.pop('coupon')
             coupon_id = Coupon.objects.get(id=coupon.id)
             user_id = User.objects.get(id=self.context['request'].user.id)
             coupon_obj = Coupon.objects.filter(id=coupon.id)

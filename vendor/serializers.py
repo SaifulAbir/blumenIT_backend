@@ -4,7 +4,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from ecommerce.common.emails import send_email_without_delay
-from product.models import Brand, Category, DiscountTypes, Product, ProductCombinations, ProductCombinationsVariants, ProductMedia, ProductReview, ProductTags, SubCategory, SubSubCategory, Units, VariantType
+from product.models import Brand, Category, DiscountTypes, Product, ProductCombinations, ProductCombinationsVariants, ProductMedia, ProductReview, ProductTags, SubCategory, SubSubCategory, Tags, Units, VariantType
 from user.models import User
 from user.serializers import UserRegisterSerializer
 from vendor.models import VendorRequest, Vendor, StoreSettings
@@ -485,13 +485,25 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
                 for media_file in product_media:
                     ProductMedia.objects.create(
                         product=product_instance, file=media_file, status="COMPLETE")
+
             if product_tags:
                 for tag in product_tags:
-                    try:
-                        ProductTags.objects.create(
-                            title=tag, product=product_instance)
-                    except:
-                        pass
+                    tag_s = tag.lower()
+                    if Tags.objects.filter(title=tag_s).exists():
+                        tag_obj = Tags.objects.get(title=tag_s)
+                        try:
+                            ProductTags.objects.create(
+                                tag=tag_obj, product=product_instance)
+                        except:
+                            pass
+                    else:
+                        tag_instance = Tags.objects.create(title=tag_s)
+                        try:
+                            ProductTags.objects.create(
+                                tag=tag_instance, product=product_instance)
+                        except:
+                            pass
+
             if product_combinations:
                 for product_combination in product_combinations:
                     product_attribute = product_combination['product_attribute']
@@ -763,7 +775,7 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
                 product=instance).exists()
             if p_c:
                 ProductCombinations.objects.filter(product=instance).delete()
-            
+
             for product_combination in product_combinations:
                 product_attribute = product_combination['product_attribute']
                 product_attribute_value = product_combination['product_attribute_value']

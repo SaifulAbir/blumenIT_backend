@@ -1,9 +1,10 @@
 from django.contrib import admin
-from product.models import Category, SubCategory, SubSubCategory, Brand, Units, DiscountTypes, Product, ProductAttributes, ProductCombinations, VariantType, ProductCombinationsVariants, ProductTags, ProductMedia, ProductCombinationMedia, ProductReview
+from product.models import Category, SubCategory, SubSubCategory, Brand, Tags, Units, DiscountTypes, Product, ProductAttributes, ProductCombinations, VariantType, ProductCombinationsVariants, ProductTags, ProductMedia, ProductCombinationMedia, ProductReview
 
 admin.site.register(Category)
 admin.site.register(SubCategory)
 admin.site.register(SubSubCategory)
+admin.site.register(Tags)
 admin.site.register(Brand)
 admin.site.register(Units)
 admin.site.register(DiscountTypes)
@@ -40,7 +41,7 @@ class ProductImageInline(admin.TabularInline):
 
 class ProductTagsInline(admin.TabularInline):
     model = ProductTags
-    fields = ['title']
+    fields = ['tag']
 
 
 @admin.register(Product)

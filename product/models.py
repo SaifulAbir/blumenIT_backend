@@ -244,9 +244,27 @@ class ProductCombinations(AbstractTimeStamp):
     #     return combine
 
 
-class ProductTags(AbstractTimeStamp):
+class Tags(AbstractTimeStamp):
     title = models.CharField(
         max_length=100, null=False, blank=False, default="", unique=True)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'Tag'
+        verbose_name_plural = 'Tags'
+        db_table = 'tags'
+
+    def __str__(self):
+        return self.title
+
+    # def save(self, force_insert=False, force_update=False):
+    #     self.title = self.title.upper()
+    #     super(Tags, self).save(force_insert, force_update)
+
+
+class ProductTags(AbstractTimeStamp):
+    tag = models.ForeignKey(Tags, on_delete=models.CASCADE, null=True,
+                            blank=True, related_name='product_tags_product', default="")
     product = models.ForeignKey(Product, on_delete=models.CASCADE, null=False,
                                 blank=False, related_name='product_tags_product', default="")
     is_active = models.BooleanField(null=False, blank=False, default=True)
@@ -257,7 +275,8 @@ class ProductTags(AbstractTimeStamp):
         db_table = 'product_tags'
 
     def __str__(self):
-        return self.title
+        return self.product.title
+        # return self.product.title + ' ' + self.tag.title
 
 
 class ProductMedia(AbstractTimeStamp):

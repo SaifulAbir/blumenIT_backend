@@ -7,7 +7,7 @@ from email.policy import default
 from pyexpat import model
 from attr import fields
 from rest_framework import serializers
-from product.models import Category, ProductCombinationMedia, ProductCombinationsVariants, SubCategory, SubSubCategory, Product, ProductTags, ProductReview, ProductMedia, ProductCombinations, ProductAttributes, Brand, DiscountTypes, Units, VariantType
+from product.models import Category, ProductCombinationMedia, ProductCombinationsVariants, SubCategory, SubSubCategory, Product, ProductTags, ProductReview, ProductMedia, ProductCombinations, ProductAttributes, Brand, DiscountTypes, Tags, Units, VariantType
 from user.models import User
 from vendor.models import StoreSettings, Vendor, VendorReview
 from django.db.models import Avg, Count, Q, F
@@ -146,6 +146,12 @@ class DiscountTypeSerializer(serializers.ModelSerializer):
 class ProductTagsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductTags
+        fields = ['id', 'tag']
+
+
+class TagsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tags
         fields = ['id', 'title']
 
 
@@ -221,9 +227,6 @@ class ProductCombinationsVariantsSerializer(serializers.ModelSerializer):
             'discount_type',
             'discount_amount'
         ]
-
-
-
 
 
 # Product Combination serializer
@@ -422,9 +425,6 @@ class ProductListSerializer(serializers.ModelSerializer):
 # Product create serializer
 
 
-
-
-
 # class ProductUpdateSerializerOld(serializers.ModelSerializer):
     # product_media = serializers.SerializerMethodField()
     # product_media = serializers.ListField(
@@ -448,29 +448,29 @@ class ProductListSerializer(serializers.ModelSerializer):
     #     fields = [
     #         'id',
     #         'title',
-            # 'sku',
-            # 'warranty',
-            # 'full_description',
-            # 'short_description',
-            # 'status',
-            # 'category',
-            # 'sub_category',
-            # 'sub_sub_category',
-            # 'brand',
-            # 'unit',
-            # 'price',
-            # 'purchase_price',
-            # 'tax_in_percent',
-            # 'discount_type',
-            # 'discount_amount',
-            # 'total_quantity',
-            # 'total_shipping_cost',
-            # 'shipping_time',
-            # 'thumbnail',
-            # 'youtube_link',
-            # 'product_media',
-            # 'product_tags',
-            # 'product_combinations'
+        # 'sku',
+        # 'warranty',
+        # 'full_description',
+        # 'short_description',
+        # 'status',
+        # 'category',
+        # 'sub_category',
+        # 'sub_sub_category',
+        # 'brand',
+        # 'unit',
+        # 'price',
+        # 'purchase_price',
+        # 'tax_in_percent',
+        # 'discount_type',
+        # 'discount_amount',
+        # 'total_quantity',
+        # 'total_shipping_cost',
+        # 'shipping_time',
+        # 'thumbnail',
+        # 'youtube_link',
+        # 'product_media',
+        # 'product_tags',
+        # 'product_combinations'
         # ]
 
     # def get_product_tags(self, obj):

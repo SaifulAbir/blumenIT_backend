@@ -23,4 +23,6 @@ urlpatterns = [
     path('update-billing-address/<int:id>/', BillingAddressUpdateAPIView.as_view()),
     path('billing-address-list/', BillingAddressListAPIView.as_view()),
     path('delete-billing-address/<int:id>/', BillingAddressDeleteAPIView.as_view()),
+    path('user-order-list/', UserOrderListAPIView.as_view()),
+    path('user-order-detail/<int:id>/', UserOrderDetailAPIView.as_view()),
 ] 

@@ -1,14 +1,14 @@
 
-from rest_framework.generics import ListAPIView, CreateAPIView, ListCreateAPIView, DestroyAPIView, RetrieveUpdateAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView, ListCreateAPIView, DestroyAPIView, RetrieveUpdateAPIView,RetrieveAPIView
 from rest_framework.views import APIView
-from cart.serializers import BillingAddressSerializer, CheckoutSerializer, PaymentTypesListSerializer, WishlistSerializer, WishListDataSerializer, ApplyCouponSerializer
+from cart.serializers import BillingAddressSerializer, CheckoutSerializer, OrderItemSerializer, OrderSerializer, PaymentTypesListSerializer, WishlistSerializer, WishListDataSerializer, ApplyCouponSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.shortcuts import get_object_or_404
 from user.models import User
 from product.models import Product
-from cart.models import BillingAddress, PaymentType, Coupon, UseRecordOfCoupon, Wishlist
+from cart.models import BillingAddress, Order, OrderItem, PaymentType, Coupon, UseRecordOfCoupon, Wishlist
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 from drf_yasg.utils import swagger_auto_schema
@@ -412,3 +412,27 @@ class BillingAddressDeleteAPIView(DestroyAPIView):
 
     def delete(self, request, *args, **kwargs):
         return super(BillingAddressDeleteAPIView, self).delete(request, *args, **kwargs)
+
+class UserOrderListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = OrderSerializer
+    def get_queryset(self):
+        queryset = Order.objects.filter(user=self.request.user)
+        return queryset
+
+class UserOrderDetailAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = OrderItemSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        if id:
+            try:
+                order = Order.objects.get(id=id)
+                orderItem = OrderItem.objects.filter(order=order)
+                return orderItem
+            except:
+                raise ValidationError({"details": "Order Is Not Valid.!"})
+        return orderItem

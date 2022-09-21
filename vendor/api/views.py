@@ -1,10 +1,10 @@
 from datetime import datetime
 from django.db.models import Q
 from product.pagination import ProductCustomPagination
-from product.serializers import DiscountTypeSerializer, ProductAttributesSerializer, ProductTagsSerializer, VariantTypeSerializer
+from product.serializers import DiscountTypeSerializer, ProductAttributesSerializer, ProductTagsSerializer, TagsSerializer, VariantTypeSerializer
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductMedia, ProductReview, ProductTags, SubCategory, SubSubCategory, Units, VariantType
+from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductMedia, ProductReview, ProductTags, SubCategory, SubSubCategory, Tags, Units, VariantType
 from user.models import CustomerProfile, User
 from vendor.models import VendorRequest, Vendor
 from vendor.serializers import VendorBrandSerializer, VendorCategorySerializer, VendorProductCreateSerializer, VendorProductDetailsSerializer, VendorProductListSerializer, VendorProductUpdateSerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
@@ -108,8 +108,10 @@ class VendorDiscountListAPIView(ListAPIView):
 
 class VendorTagListAPIView(ListAPIView):
     permission_classes = [AllowAny]
-    queryset = ProductTags.objects.filter(is_active=True)
-    serializer_class = ProductTagsSerializer
+    # queryset = ProductTags.objects.filter(is_active=True)
+    queryset = Tags.objects.filter(is_active=True)
+    # serializer_class = ProductTagsSerializer
+    serializer_class = TagsSerializer
 
 
 class VendorAttributeListAPIView(ListAPIView):

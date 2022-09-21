@@ -653,7 +653,8 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
             selected_product_tags = ProductTags.objects.filter(
                 product=obj, is_active=True).distinct()
             for s_p_t in selected_product_tags:
-                tag_title = s_p_t.title
+                # tag_title = s_p_t.title
+                tag_title = s_p_t.tag.title
                 tags_list.append(tag_title)
             return tags_list
         except:
@@ -749,63 +750,76 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
         except:
             product_combinations = ''
 
-        # try:
-        if product_tags:
-            ProductTags.objects.filter(product=instance).delete()
-            for tag in product_tags:
-                try:
-                    ProductTags.objects.create(title=tag, product=instance)
-                except:
-                    pass
-        else:
-            ProductTags.objects.filter(product=instance).delete()
+        try:
+            if product_tags:
+                ProductTags.objects.filter(product=instance).delete()
+                for tag in product_tags:
+                    tag_s = tag.lower()
+                    if Tags.objects.filter(title=tag_s).exists():
+                        tag_obj = Tags.objects.get(title=tag_s)
+                        try:
+                            ProductTags.objects.create(
+                                tag=tag_obj, product=instance)
+                        except:
+                            pass
+                    else:
+                        tag_instance = Tags.objects.create(title=tag_s)
+                        try:
+                            ProductTags.objects.create(
+                                tag=tag_instance, product=instance)
+                        except:
+                            pass
+            else:
+                ProductTags.objects.filter(product=instance).delete()
 
-        if product_media:
-            for media_file in product_media:
-                ProductMedia.objects.create(
-                    product=instance, file=media_file, status="COMPLETE")
+            if product_media:
+                for media_file in product_media:
+                    ProductMedia.objects.create(
+                        product=instance, file=media_file, status="COMPLETE")
 
-        if product_combinations:
-            p_c_v = ProductCombinationsVariants.objects.filter(
-                product=instance).exists()
-            if p_c_v:
-                ProductCombinationsVariants.objects.filter(
-                    product=instance).delete()
-            p_c = ProductCombinations.objects.filter(
-                product=instance).exists()
-            if p_c:
-                ProductCombinations.objects.filter(product=instance).delete()
+            if product_combinations:
+                p_c_v = ProductCombinationsVariants.objects.filter(
+                    product=instance).exists()
+                if p_c_v:
+                    ProductCombinationsVariants.objects.filter(
+                        product=instance).delete()
+                p_c = ProductCombinations.objects.filter(
+                    product=instance).exists()
+                if p_c:
+                    ProductCombinations.objects.filter(
+                        product=instance).delete()
 
-            for product_combination in product_combinations:
-                product_attribute = product_combination['product_attribute']
-                product_attribute_value = product_combination['product_attribute_value']
-                product_attribute_color_code = product_combination['product_attribute_color_code']
-                product_combination_instance = ProductCombinations.objects.create(
-                    product_attribute=product_attribute, product_attribute_value=product_attribute_value, product_attribute_color_code=product_attribute_color_code, product=instance)
+                for product_combination in product_combinations:
+                    product_attribute = product_combination['product_attribute']
+                    product_attribute_value = product_combination['product_attribute_value']
+                    product_attribute_color_code = product_combination['product_attribute_color_code']
+                    product_combination_instance = ProductCombinations.objects.create(
+                        product_attribute=product_attribute, product_attribute_value=product_attribute_value, product_attribute_color_code=product_attribute_color_code, product=instance)
 
-                variant_type = product_combination['variant_type']
-                variant_value = product_combination['variant_value']
-                variant_price = product_combination['variant_price']
-                quantity = product_combination['quantity']
-                discount_type = product_combination['discount_type']
-                discount_amount = product_combination['discount_amount']
-                ProductCombinationsVariants.objects.create(
-                    variant_type=variant_type,  variant_value=variant_value, variant_price=variant_price, quantity=quantity, discount_type=discount_type, discount_amount=discount_amount, product=instance, product_combination=product_combination_instance)
-        else:
-            p_c_v = ProductCombinationsVariants.objects.filter(
-                product=instance).exists()
-            if p_c_v:
-                ProductCombinationsVariants.objects.filter(
-                    product=instance).delete()
-            p_c = ProductCombinations.objects.filter(
-                product=instance).exists()
-            if p_c:
-                ProductCombinations.objects.filter(product=instance).delete()
+                    variant_type = product_combination['variant_type']
+                    variant_value = product_combination['variant_value']
+                    variant_price = product_combination['variant_price']
+                    quantity = product_combination['quantity']
+                    discount_type = product_combination['discount_type']
+                    discount_amount = product_combination['discount_amount']
+                    ProductCombinationsVariants.objects.create(
+                        variant_type=variant_type,  variant_value=variant_value, variant_price=variant_price, quantity=quantity, discount_type=discount_type, discount_amount=discount_amount, product=instance, product_combination=product_combination_instance)
+            else:
+                p_c_v = ProductCombinationsVariants.objects.filter(
+                    product=instance).exists()
+                if p_c_v:
+                    ProductCombinationsVariants.objects.filter(
+                        product=instance).delete()
+                p_c = ProductCombinations.objects.filter(
+                    product=instance).exists()
+                if p_c:
+                    ProductCombinations.objects.filter(
+                        product=instance).delete()
 
-        validated_data.update(
-            {"updated_at": timezone.now()})
-        return super().update(instance, validated_data)
-        # except:
-        #     validated_data.update(
-        #         {"updated_at": timezone.now()})
-        #     return super().update(instance, validated_data)
+            validated_data.update(
+                {"updated_at": timezone.now()})
+            return super().update(instance, validated_data)
+        except:
+            validated_data.update(
+                {"updated_at": timezone.now()})
+            return super().update(instance, validated_data)

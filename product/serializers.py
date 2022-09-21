@@ -142,17 +142,27 @@ class DiscountTypeSerializer(serializers.ModelSerializer):
         fields = ['id', 'title']
 
 
-# Product Tags serializer
-class ProductTagsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProductTags
-        fields = ['id', 'tag']
-
-
 class TagsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tags
         fields = ['id', 'title']
+
+# Product Tags serializer
+
+
+class ProductTagsSerializer(serializers.ModelSerializer):
+    title = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ProductTags
+        fields = ['id', 'title', 'tag']
+
+    def get_title(self, obj):
+        try:
+            tag_title = Tags.objects.get(id=obj.tag.id).title
+        except:
+            tag_title = ''
+        return tag_title
 
 
 # Product Attributes serializer

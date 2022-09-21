@@ -653,7 +653,8 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
             selected_product_tags = ProductTags.objects.filter(
                 product=obj, is_active=True).distinct()
             for s_p_t in selected_product_tags:
-                tag_title = s_p_t.title
+                # tag_title = s_p_t.title
+                tag_title = s_p_t.tag.title
                 tags_list.append(tag_title)
             return tags_list
         except:
@@ -753,10 +754,21 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
         if product_tags:
             ProductTags.objects.filter(product=instance).delete()
             for tag in product_tags:
-                try:
-                    ProductTags.objects.create(title=tag, product=instance)
-                except:
-                    pass
+                tag_s = tag.lower()
+                if Tags.objects.filter(title=tag_s).exists():
+                    tag_obj = Tags.objects.get(title=tag_s)
+                    try:
+                        ProductTags.objects.create(
+                            tag=tag_obj, product=instance)
+                    except:
+                        pass
+                else:
+                    tag_instance = Tags.objects.create(title=tag_s)
+                    try:
+                        ProductTags.objects.create(
+                            tag=tag_instance, product=instance)
+                    except:
+                        pass
         else:
             ProductTags.objects.filter(product=instance).delete()
 

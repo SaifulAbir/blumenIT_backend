@@ -79,6 +79,8 @@ class CheckoutSerializer(serializers.ModelSerializer):
                   ]
         # read_only_fields = ('ngo_username')
 
+
+
     def create(self, validated_data):
         product = validated_data.pop('product')
         quantity = validated_data.pop('quantity')
@@ -264,3 +266,21 @@ class BillingAddressSerializer(serializers.ModelSerializer):
         model = BillingAddress
         fields = ['id', 'user', 'first_name', 'last_name', 'country',
                   'street_address', 'city', 'phone', 'zip_code', 'email', 'title', 'default']
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['id', 'user','ordered_date','order_status', 'total_price']
+
+    # def get_order_items(self, obj):
+    #     selected_order_items = OrderItem.objects.filter(
+    #         user=obj.product.slug).distinct()
+    #     return ProductSerializer(selected_product, many=True).data
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    order = OrderSerializer( read_only=True)
+    product = ProductSerializer( read_only=True)
+    class Meta:
+        model = OrderItem
+        fields = ['id', 'order', 'product', 'quantity', 'subtotal']

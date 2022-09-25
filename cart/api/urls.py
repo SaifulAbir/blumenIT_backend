@@ -3,6 +3,7 @@ from .views import *
 
 urlpatterns = [
     path('checkout/', CheckoutAPIView.as_view()),
+    path('checkout-details/<int:oid>/', CheckoutDetailsAPIView.as_view()),
     path('payment-methods/', PaymentMethodsAPIView.as_view()),
     path('apply-coupon/<str:code>/<int:uid>/', ApplyCouponAPIView.as_view()),
     # path('apply-coupon/', ApplyCouponAPIView.as_view()),
@@ -18,11 +19,13 @@ urlpatterns = [
     # path('total-price/', TotalPriceAPIView.as_view()),
     # path('check-quantity/', CheckQuantityAPIView.as_view()),
 
-    #urmi
+    # urmi
     path('create-billing-address/', BillingAddressCreateAPIView.as_view()),
-    path('update-billing-address/<int:id>/', BillingAddressUpdateAPIView.as_view()),
+    path('update-billing-address/<int:id>/',
+         BillingAddressUpdateAPIView.as_view()),
     path('billing-address-list/', BillingAddressListAPIView.as_view()),
-    path('delete-billing-address/<int:id>/', BillingAddressDeleteAPIView.as_view()),
+    path('delete-billing-address/<int:id>/',
+         BillingAddressDeleteAPIView.as_view()),
     path('user-order-list/', UserOrderListAPIView.as_view()),
     path('user-order-detail/<int:id>/', UserOrderDetailAPIView.as_view()),
-] 
+]

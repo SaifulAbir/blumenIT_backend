@@ -79,8 +79,6 @@ class CheckoutSerializer(serializers.ModelSerializer):
                   ]
         # read_only_fields = ('ngo_username')
 
-
-
     def create(self, validated_data):
         product = validated_data.pop('product')
         quantity = validated_data.pop('quantity')
@@ -103,13 +101,13 @@ class CheckoutSerializer(serializers.ModelSerializer):
         shipping_zip_code = validated_data.pop('shipping_zip_code')
 
         order_instance = Order.objects.create(
-            **validated_data, user=self.context['request'].user)
+            **validated_data, user=self.context['request'].user, customer_profile=CustomerProfile.objects.get(user=self.context['request'].user))
 
         zip_object_order_items = zip(product, quantity)
         if zip_object_order_items:
             for p, q in zip_object_order_items:
                 OrderItem.objects.create(order=order_instance, product=p, quantity=int(
-                    q), ordered=True, user=self.context['request'].user)
+                    q), ordered=True, user=self.context['request'].user, vendor=p.vendor)
                 # update product quantity
                 product_current_quan = Product.objects.filter(slug=p.slug)[
                     0].total_quantity
@@ -160,7 +158,6 @@ class CheckoutSerializer(serializers.ModelSerializer):
             check_in_use_coupon_record = UseRecordOfCoupon.objects.filter(
                 coupon_id=coupon_obj[0].id, user_id=self.context['request'].user.id).exists()
             if check_in_use_coupon_record:
-                print('pass')
                 pass
             else:
                 UseRecordOfCoupon.objects.create(
@@ -174,6 +171,33 @@ class CheckoutSerializer(serializers.ModelSerializer):
         # work with coupon end
 
         return order_instance
+
+
+class CheckoutDetailsBillingAddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomerAddress
+        fields = "__all__"
+
+
+class CheckoutDetailsSerializer(serializers.ModelSerializer):
+    payment_type_name = serializers.SerializerMethodField()
+    billing_address = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Order
+        # fields = "__all__"
+        fields = ['id', 'order_status', 'ordered_date',
+                  'total_price', 'discounted_price', 'payment_type_name', 'billing_address']
+
+    def get_payment_type_name(self, obj):
+        payment_type_name = PaymentType.objects.filter(id=obj.payment_type.id)[
+            0].type_name
+        return payment_type_name
+
+    def get_billing_address(self, obj):
+        billing_address = CustomerAddress.objects.filter(
+            order=obj, address_type='Billing')
+        return CheckoutDetailsBillingAddressSerializer(billing_address, many=False).data
 
 
 class WishListDataSerializer(serializers.ModelSerializer):
@@ -271,16 +295,18 @@ class BillingAddressSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = ['id', 'user','ordered_date','order_status', 'total_price']
+        fields = ['id', 'user', 'ordered_date', 'order_status', 'total_price']
 
     # def get_order_items(self, obj):
     #     selected_order_items = OrderItem.objects.filter(
     #         user=obj.product.slug).distinct()
     #     return ProductSerializer(selected_product, many=True).data
 
+
 class OrderItemSerializer(serializers.ModelSerializer):
-    order = OrderSerializer( read_only=True)
-    product = ProductSerializer( read_only=True)
+    order = OrderSerializer(read_only=True)
+    product = ProductSerializer(read_only=True)
+
     class Meta:
         model = OrderItem
         fields = ['id', 'order', 'product', 'quantity', 'subtotal']

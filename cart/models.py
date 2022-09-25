@@ -1,8 +1,9 @@
 from django.db import models
 from ecommerce.models import AbstractTimeStamp
+from vendor.models import Vendor
 from .utils import unique_slug_generator_cart
 from django.db.models.signals import pre_save
-from user.models import User
+from user.models import CustomerProfile, User
 from django.utils.translation import gettext as _
 from product.models import Product
 from django.utils import timezone
@@ -18,6 +19,7 @@ from django.utils import timezone
     5. Received
     6. Refunds
 '''
+
 
 class Coupon(AbstractTimeStamp):
     code = models.CharField(max_length=15)
@@ -36,9 +38,12 @@ class Coupon(AbstractTimeStamp):
     def __str__(self):
         return self.code
 
+
 class UseRecordOfCoupon(AbstractTimeStamp):
-    coupon_id = models.ForeignKey(Coupon, on_delete=models.CASCADE, related_name='coupon')
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user')
+    coupon_id = models.ForeignKey(
+        Coupon, on_delete=models.CASCADE, related_name='coupon')
+    user_id = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='user')
 
     class Meta:
         verbose_name = 'UseRecordOfCoupon'
@@ -47,6 +52,7 @@ class UseRecordOfCoupon(AbstractTimeStamp):
 
     def __str__(self):
         return f"{self.pk}"
+
 
 class ShippingType(AbstractTimeStamp):
     type_name = models.CharField(max_length=50)
@@ -89,6 +95,7 @@ class Payment(AbstractTimeStamp):
     def __str__(self):
         return f"{self.pk}"
 
+
 class Order(AbstractTimeStamp):
     ORDER_CHOICES = [
         ('PENDING', 'pending'),
@@ -97,10 +104,13 @@ class Order(AbstractTimeStamp):
         ('DELIVERED', 'delivered'),
         ('RETURN', 'return'),
         ('CANCEL', 'cancel'),
-        ]
+    ]
 
-    user = models.ForeignKey(User, on_delete=models.PROTECT,related_name='order_user', blank=True, null=True)
-    slug  = models.SlugField(null=False, blank=False, allow_unicode=True)
+    user = models.ForeignKey(User, on_delete=models.PROTECT,
+                             related_name='order_user', blank=True, null=True)
+    customer_profile = models.ForeignKey(
+        CustomerProfile, on_delete=models.PROTECT, related_name='order_customer_profile', blank=True, null=True)
+    slug = models.SlugField(null=False, blank=False, allow_unicode=True)
     ref_code = models.CharField(max_length=20)
     ordered_date = models.DateTimeField(auto_now_add=True)
     ordered = models.BooleanField(default=True)
@@ -108,15 +118,22 @@ class Order(AbstractTimeStamp):
     received = models.BooleanField(default=False)
     refund_requested = models.BooleanField(default=False)
     refund_granted = models.BooleanField(default=False)
-    payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, blank=True, null=True)
-    shipping_type = models.ForeignKey(ShippingType, on_delete=models.SET_NULL, blank=True, null=True)
-    payment_type = models.ForeignKey(PaymentType, on_delete=models.SET_NULL, blank=True, null=True)
-    coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, blank=True, null=True)
+    payment = models.ForeignKey(
+        Payment, on_delete=models.SET_NULL, blank=True, null=True)
+    shipping_type = models.ForeignKey(
+        ShippingType, on_delete=models.SET_NULL, blank=True, null=True)
+    payment_type = models.ForeignKey(
+        PaymentType, on_delete=models.SET_NULL, blank=True, null=True)
+    coupon = models.ForeignKey(
+        Coupon, on_delete=models.SET_NULL, blank=True, null=True)
     coupon_status = models.BooleanField(default=False)
     notes = models.TextField(null=True, blank=True, default='')
-    total_price = models.FloatField(max_length=255, null=False, blank=False, default=0)
-    discounted_price = models.FloatField(max_length=255, null=False, blank=False, default=0)
-    order_status = models.CharField(max_length=20, null=False, blank=False, choices=ORDER_CHOICES, default=ORDER_CHOICES[1][1])
+    total_price = models.FloatField(
+        max_length=255, null=False, blank=False, default=0)
+    discounted_price = models.FloatField(
+        max_length=255, null=False, blank=False, default=0)
+    order_status = models.CharField(
+        max_length=20, null=False, blank=False, choices=ORDER_CHOICES, default=ORDER_CHOICES[1][1])
 
     class Meta:
         verbose_name = 'Order'
@@ -126,23 +143,31 @@ class Order(AbstractTimeStamp):
     def __str__(self):
         return self.user.username
 
+
 def pre_save_order(sender, instance, *args, **kwargs):
     if not instance.slug:
         instance.slug = unique_slug_generator_cart(instance)
 
+
 pre_save.connect(pre_save_order, sender=Order)
 
+
 class OrderItem(AbstractTimeStamp):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, blank=True, null=True)
+    order = models.ForeignKey(
+        Order, on_delete=models.CASCADE, blank=True, null=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
     ordered = models.BooleanField(default=False)
-    user = models.ForeignKey(User, on_delete=models.PROTECT,related_name='order_items_user', blank=True, null=True)
+    user = models.ForeignKey(User, on_delete=models.PROTECT,
+                             related_name='order_items_user', blank=True, null=True)
+    vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT,
+                               related_name='order_items_vendor', blank=True, null=True)
 
     @property
     def subtotal(self):
         total_item_price = self.quantity * self.product.price
         return total_item_price
+
     class Meta:
         verbose_name = 'OrderItem'
         verbose_name_plural = 'OrderItems'
@@ -170,18 +195,27 @@ class OrderItem(AbstractTimeStamp):
         #     return self.get_total_discount_item_price()
         return self.get_total_item_price()
 
+
 class CustomerAddress(AbstractTimeStamp):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, blank=True, null=True)
-    first_name = models.CharField(max_length=100, null=False, blank=False, default='')
-    last_name = models.CharField(max_length=100, null=False, blank=False, default='')
-    country = models.CharField(max_length=100, blank=True, null=True, default='')
-    company_name = models.CharField(max_length=100, null=False, blank=False, default='')
-    street_address = models.CharField(max_length=100, blank=True, null=True, default='')
+    order = models.ForeignKey(
+        Order, on_delete=models.CASCADE, blank=True, null=True)
+    first_name = models.CharField(
+        max_length=100, null=False, blank=False, default='')
+    last_name = models.CharField(
+        max_length=100, null=False, blank=False, default='')
+    country = models.CharField(
+        max_length=100, blank=True, null=True, default='')
+    company_name = models.CharField(
+        max_length=100, null=False, blank=False, default='')
+    street_address = models.CharField(
+        max_length=100, blank=True, null=True, default='')
     city = models.CharField(max_length=100, blank=True, null=True, default='')
-    zip_code = models.CharField(max_length=100, blank=True, null=True, default='')
+    zip_code = models.CharField(
+        max_length=100, blank=True, null=True, default='')
     phone = models.CharField(max_length=255, null=True, blank=True, default='')
     email = models.CharField(max_length=255, null=True, blank=True, default='')
-    address_type = models.CharField(max_length=100, null=False, blank=False, default='')
+    address_type = models.CharField(
+        max_length=100, null=False, blank=False, default='')
     default = models.BooleanField(default=False)
 
     class Meta:
@@ -191,6 +225,7 @@ class CustomerAddress(AbstractTimeStamp):
 
     def __str__(self):
         return f"{self.pk}"
+
 
 class Refund(AbstractTimeStamp):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
@@ -206,25 +241,35 @@ class Refund(AbstractTimeStamp):
     def __str__(self):
         return f"{self.pk}"
 
+
 class Wishlist(AbstractTimeStamp):
-    user = models.ForeignKey(User, on_delete=models.PROTECT,related_name='wishlist_user', blank=True, null=True)
+    user = models.ForeignKey(User, on_delete=models.PROTECT,
+                             related_name='wishlist_user', blank=True, null=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True)
 
 
 class BillingAddress(AbstractTimeStamp):
-    user= models.ForeignKey(User, on_delete=models.PROTECT,related_name='billing_address_user', blank=True, null=True)
-    first_name = models.CharField(max_length=100, null=False, blank=False, default='')
-    last_name = models.CharField(max_length=100, null=False, blank=False, default='')
-    country = models.CharField(max_length=100, blank=True, null=True, default='')
-    company_name = models.CharField(max_length=100, null=False, blank=False, default='')
-    street_address = models.CharField(max_length=100, blank=True, null=True, default='')
+    user = models.ForeignKey(User, on_delete=models.PROTECT,
+                             related_name='billing_address_user', blank=True, null=True)
+    first_name = models.CharField(
+        max_length=100, null=False, blank=False, default='')
+    last_name = models.CharField(
+        max_length=100, null=False, blank=False, default='')
+    country = models.CharField(
+        max_length=100, blank=True, null=True, default='')
+    company_name = models.CharField(
+        max_length=100, null=False, blank=False, default='')
+    street_address = models.CharField(
+        max_length=100, blank=True, null=True, default='')
     city = models.CharField(max_length=100, blank=True, null=True, default='')
-    zip_code = models.CharField(max_length=100, blank=True, null=True, default='')
+    zip_code = models.CharField(
+        max_length=100, blank=True, null=True, default='')
     phone = models.CharField(max_length=255, null=True, blank=True, default='')
     email = models.CharField(max_length=255, null=True, blank=True, default='')
-    address_type = models.CharField(max_length=100, null=False, blank=False, default='')
-    title=models.CharField(max_length=200, null=True, blank=True, default='')
+    address_type = models.CharField(
+        max_length=100, null=False, blank=False, default='')
+    title = models.CharField(max_length=200, null=True, blank=True, default='')
     default = models.BooleanField(default=False)
 
     class Meta:
@@ -234,4 +279,3 @@ class BillingAddress(AbstractTimeStamp):
 
     def __str__(self):
         return f"{self.pk}"
-

@@ -19,15 +19,6 @@ class noteSerializer(serializers.ModelSerializer):
         model = Order
         fields = ['notes']
 
-# class CheckoutSerializer(serializers.Serializer):
-#     notes = serializers.SerializerMethodField()
-#     class Meta:
-#         model = BillingAddress
-#         fields = "__all__"
-
-#     def get_notes(self, obj):
-#         return noteSerializer()
-
 
 class CheckoutSerializer(serializers.ModelSerializer):
     # ADDRESS_CHOICES = (
@@ -111,11 +102,6 @@ class CheckoutSerializer(serializers.ModelSerializer):
                 if p.vendor.id not in vendor_list:
                     vendor_list.append(p.vendor.id)
 
-                # if len(vendor_list) > 0:
-                #     for v in vendor_list:
-                #         print('VendorOrder create')
-                    # VendorOrder.objects.create(order=order_instance, )
-
                 # data store in orderIteam table
                 OrderItem.objects.create(order=order_instance, product=p, quantity=int(
                     q), ordered=True, user=self.context['request'].user, vendor=p.vendor)
@@ -197,16 +183,43 @@ class CheckoutDetailsAddressSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class CheckoutDetailsOrderItemSerializer(serializers.ModelSerializer):
+    product_name = serializers.SerializerMethodField()
+    product_price = serializers.SerializerMethodField()
+    vendor_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = OrderItem
+        fields = ['id', 'quantity', 'product_name',
+                  'product_price', 'vendor_name']
+
+    def get_product_name(self, obj):
+        product_name = Product.objects.filter(id=obj.product.id)[
+            0].title
+        return product_name
+
+    def get_product_price(self, obj):
+        product_price = Product.objects.filter(id=obj.product.id)[
+            0].price
+        return product_price
+
+    def get_vendor_name(self, obj):
+        vendor_name = Product.objects.filter(id=obj.product.id)[
+            0].vendor.vendor_admin.first_name
+        return vendor_name
+
+
 class CheckoutDetailsSerializer(serializers.ModelSerializer):
     payment_type_name = serializers.SerializerMethodField()
     billing_address = serializers.SerializerMethodField()
     shipping_address = serializers.SerializerMethodField()
+    order_items = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
         # fields = "__all__"
         fields = ['id', 'order_status', 'ordered_date',
-                  'total_price', 'discounted_price', 'payment_type_name', 'billing_address', 'shipping_address']
+                  'total_price', 'discounted_price', 'payment_type_name', 'order_items', 'billing_address', 'shipping_address']
 
     def get_payment_type_name(self, obj):
         payment_type_name = PaymentType.objects.filter(id=obj.payment_type.id)[
@@ -222,6 +235,10 @@ class CheckoutDetailsSerializer(serializers.ModelSerializer):
         shipping_address = CustomerAddress.objects.filter(
             order=obj, address_type='Shipping')
         return CheckoutDetailsAddressSerializer(shipping_address, many=True).data
+
+    def get_order_items(self, obj):
+        order_item = OrderItem.objects.filter(order=obj)
+        return CheckoutDetailsOrderItemSerializer(order_item, many=True).data
 
 
 class WishListDataSerializer(serializers.ModelSerializer):
@@ -269,28 +286,9 @@ class ApplyCouponSerializer(serializers.ModelSerializer):
         model = Coupon
         fields = ['id', 'amount']
 
-# class ActiveCouponListSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Coupon
-#         fields = '__all__'
-# list Serializer end
-
-
-# create Serializer start
-# class PaymentTypeCreateSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = PaymentType
-#         validators = [
-#             UniqueTogetherValidator(
-#                 queryset=PaymentType.objects.all(),
-#                 fields=['type_name']
-#             )
-#         ]
-#         fields = ['id', 'type_name', 'note']
-
-# create Serializer end
-
 # list Serializer start
+
+
 class CartListSerializer(serializers.ModelSerializer):
     product = serializers.SerializerMethodField()
     subtotal = serializers.ReadOnlyField()
@@ -334,3 +332,34 @@ class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
         fields = ['id', 'order', 'product', 'quantity', 'subtotal']
+
+
+# class ActiveCouponListSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Coupon
+#         fields = '__all__'
+# list Serializer end
+
+
+# create Serializer start
+# class PaymentTypeCreateSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = PaymentType
+#         validators = [
+#             UniqueTogetherValidator(
+#                 queryset=PaymentType.objects.all(),
+#                 fields=['type_name']
+#             )
+#         ]
+#         fields = ['id', 'type_name', 'note']
+
+# create Serializer end
+
+# class CheckoutSerializer(serializers.Serializer):
+#     notes = serializers.SerializerMethodField()
+#     class Meta:
+#         model = BillingAddress
+#         fields = "__all__"
+
+#     def get_notes(self, obj):
+#         return noteSerializer()

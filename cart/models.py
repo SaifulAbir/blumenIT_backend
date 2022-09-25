@@ -111,7 +111,6 @@ class Order(AbstractTimeStamp):
     customer_profile = models.ForeignKey(
         CustomerProfile, on_delete=models.PROTECT, related_name='order_customer_profile', blank=True, null=True)
     slug = models.SlugField(null=False, blank=False, allow_unicode=True)
-    ref_code = models.CharField(max_length=20)
     ordered_date = models.DateTimeField(auto_now_add=True)
     ordered = models.BooleanField(default=True)
     being_delivered = models.BooleanField(default=False)
@@ -152,9 +151,55 @@ def pre_save_order(sender, instance, *args, **kwargs):
 pre_save.connect(pre_save_order, sender=Order)
 
 
+class VendorOrder(AbstractTimeStamp):
+    ORDER_CHOICES = [
+        ('PENDING', 'pending'),
+        ('PROCESSING', 'processing'),
+        ('SHIPPED', 'shipped'),
+        ('DELIVERED', 'delivered'),
+        ('RETURN', 'return'),
+        ('CANCEL', 'cancel'),
+    ]
+
+    order = models.ForeignKey(Order, on_delete=models.PROTECT,
+                              related_name='vendor_order_order', blank=True, null=True)
+    user = models.ForeignKey(User, on_delete=models.PROTECT,
+                             related_name='vendor_order_user', blank=True, null=True)
+    customer_profile = models.ForeignKey(
+        CustomerProfile, on_delete=models.PROTECT, related_name='vendor_order_customer_profile', blank=True, null=True)
+    slug = models.SlugField(null=False, blank=False, allow_unicode=True)
+    ordered_date = models.DateTimeField(auto_now_add=True)
+    ordered = models.BooleanField(default=True)
+    received = models.BooleanField(default=False)
+    refund_requested = models.BooleanField(default=False)
+    refund_granted = models.BooleanField(default=False)
+    shipping_type = models.ForeignKey(
+        ShippingType, on_delete=models.SET_NULL, blank=True, null=True, related_name='vendor_order_shipping_type')
+    order_status = models.CharField(
+        max_length=20, null=False, blank=False, choices=ORDER_CHOICES, default=ORDER_CHOICES[1][1])
+
+    class Meta:
+        verbose_name = 'VendorOrder'
+        verbose_name_plural = 'VendorOrders'
+        db_table = 'vendor_orders'
+
+    def __str__(self):
+        return self.user.username
+
+
+def pre_save_order(sender, instance, *args, **kwargs):
+    if not instance.slug:
+        instance.slug = unique_slug_generator_cart(instance)
+
+
+pre_save.connect(pre_save_order, sender=VendorOrder)
+
+
 class OrderItem(AbstractTimeStamp):
     order = models.ForeignKey(
         Order, on_delete=models.CASCADE, blank=True, null=True)
+    vendor_order = models.ForeignKey(VendorOrder, on_delete=models.PROTECT,
+                                     related_name='order_items_vendor_order', blank=True, null=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
     ordered = models.BooleanField(default=False)

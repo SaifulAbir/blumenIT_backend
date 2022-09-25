@@ -103,9 +103,14 @@ class CheckoutSerializer(serializers.ModelSerializer):
         order_instance = Order.objects.create(
             **validated_data, user=self.context['request'].user, customer_profile=CustomerProfile.objects.get(user=self.context['request'].user))
 
+        vendor_list = []
         zip_object_order_items = zip(product, quantity)
         if zip_object_order_items:
             for p, q in zip_object_order_items:
+                # data add in vendor list
+                vendor_list.append(p.vendor.id)
+
+                # data store in orderIteam table
                 OrderItem.objects.create(order=order_instance, product=p, quantity=int(
                     q), ordered=True, user=self.context['request'].user, vendor=p.vendor)
                 # update product quantity
@@ -121,6 +126,9 @@ class CheckoutSerializer(serializers.ModelSerializer):
                 product_sell_quan += 1
                 Product.objects.filter(slug=p.slug).update(
                     sell_count=product_sell_quan)
+
+            print("vendor_list")
+            print(vendor_list)
 
         CustomerAddress.objects.create(
             order=order_instance,
@@ -173,7 +181,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
         return order_instance
 
 
-class CheckoutDetailsBillingAddressSerializer(serializers.ModelSerializer):
+class CheckoutDetailsAddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomerAddress
         fields = "__all__"
@@ -182,12 +190,13 @@ class CheckoutDetailsBillingAddressSerializer(serializers.ModelSerializer):
 class CheckoutDetailsSerializer(serializers.ModelSerializer):
     payment_type_name = serializers.SerializerMethodField()
     billing_address = serializers.SerializerMethodField()
+    shipping_address = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
         # fields = "__all__"
         fields = ['id', 'order_status', 'ordered_date',
-                  'total_price', 'discounted_price', 'payment_type_name', 'billing_address']
+                  'total_price', 'discounted_price', 'payment_type_name', 'billing_address', 'shipping_address']
 
     def get_payment_type_name(self, obj):
         payment_type_name = PaymentType.objects.filter(id=obj.payment_type.id)[
@@ -197,7 +206,12 @@ class CheckoutDetailsSerializer(serializers.ModelSerializer):
     def get_billing_address(self, obj):
         billing_address = CustomerAddress.objects.filter(
             order=obj, address_type='Billing')
-        return CheckoutDetailsBillingAddressSerializer(billing_address, many=False).data
+        return CheckoutDetailsAddressSerializer(billing_address, many=True).data
+
+    def get_shipping_address(self, obj):
+        shipping_address = CustomerAddress.objects.filter(
+            order=obj, address_type='Shipping')
+        return CheckoutDetailsAddressSerializer(shipping_address, many=True).data
 
 
 class WishListDataSerializer(serializers.ModelSerializer):

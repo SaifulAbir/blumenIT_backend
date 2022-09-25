@@ -177,6 +177,8 @@ class VendorOrder(AbstractTimeStamp):
         ShippingType, on_delete=models.SET_NULL, blank=True, null=True, related_name='vendor_order_shipping_type')
     order_status = models.CharField(
         max_length=20, null=False, blank=False, choices=ORDER_CHOICES, default=ORDER_CHOICES[1][1])
+    vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT,
+                               related_name='vendor_order_vendor', blank=True, null=True)
 
     class Meta:
         verbose_name = 'VendorOrder'

@@ -1,7 +1,7 @@
 
-from rest_framework.generics import ListAPIView, CreateAPIView, ListCreateAPIView, DestroyAPIView, RetrieveUpdateAPIView,RetrieveAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView, ListCreateAPIView, DestroyAPIView, RetrieveUpdateAPIView, RetrieveAPIView
 from rest_framework.views import APIView
-from cart.serializers import BillingAddressSerializer, CheckoutSerializer, OrderItemSerializer, OrderSerializer, PaymentTypesListSerializer, WishlistSerializer, WishListDataSerializer, ApplyCouponSerializer
+from cart.serializers import BillingAddressSerializer, CheckoutDetailsSerializer, CheckoutSerializer, OrderItemSerializer, OrderSerializer, PaymentTypesListSerializer, WishlistSerializer, WishListDataSerializer, ApplyCouponSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -21,6 +21,22 @@ class CheckoutAPIView(CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         return super(CheckoutAPIView, self).post(request, *args, **kwargs)
+
+
+class CheckoutDetailsAPIView(RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = CheckoutDetailsSerializer
+    lookup_field = 'oid'
+    lookup_url_kwarg = 'oid'
+
+    def get_object(self):
+        oid = self.kwargs['oid']
+        try:
+            query = Order.objects.get(id=int(oid), user=self.request.user)
+            return query
+        except:
+            raise ValidationError(
+                {"details": "Order doesn't exist, or this is not your order."})
 
 
 class PaymentMethodsAPIView(ListAPIView):
@@ -413,12 +429,15 @@ class BillingAddressDeleteAPIView(DestroyAPIView):
     def delete(self, request, *args, **kwargs):
         return super(BillingAddressDeleteAPIView, self).delete(request, *args, **kwargs)
 
+
 class UserOrderListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = OrderSerializer
+
     def get_queryset(self):
         queryset = Order.objects.filter(user=self.request.user)
         return queryset
+
 
 class UserOrderDetailAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]

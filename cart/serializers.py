@@ -135,9 +135,10 @@ class CheckoutSerializer(serializers.ModelSerializer):
                     sell_count=product_sell_quan)
 
             if len(vendor_list) > 0:
-                # data store in vendor order table
-                VendorOrder.objects.create(order=order_instance, user=self.context['request'].user, vendor=p.vendor, customer_profile=CustomerProfile.objects.get(
-                    user=self.context['request'].user), )
+                for v in vendor_list:
+                    # data store in vendor order table
+                    VendorOrder.objects.create(order=order_instance, user=self.context['request'].user, vendor=Vendor.objects.get(id=v), customer_profile=CustomerProfile.objects.get(
+                        user=self.context['request'].user))
 
         CustomerAddress.objects.create(
             order=order_instance,

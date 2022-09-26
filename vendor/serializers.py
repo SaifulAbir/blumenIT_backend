@@ -516,8 +516,15 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
                     variant_value = product_combination['variant_value']
                     variant_price = product_combination['variant_price']
                     quantity = product_combination['quantity']
-                    discount_type = product_combination['discount_type']
-                    discount_amount = product_combination['discount_amount']
+                    try:
+                        discount_type = product_combination['discount_type']
+                    except:
+                        discount_type = ''
+
+                    try:
+                        discount_amount = product_combination['discount_amount']
+                    except:
+                        discount_amount = ''
                     ProductCombinationsVariants.objects.create(
                         variant_type=variant_type,  variant_value=variant_value, variant_price=variant_price, quantity=quantity, discount_type=discount_type, discount_amount=discount_amount, product=product_instance, product_combination=product_combination_instance)
             return product_instance
@@ -800,8 +807,16 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
                     variant_value = product_combination['variant_value']
                     variant_price = product_combination['variant_price']
                     quantity = product_combination['quantity']
-                    discount_type = product_combination['discount_type']
-                    discount_amount = product_combination['discount_amount']
+                    try:
+                        discount_type = product_combination['discount_type']
+                    except:
+                        discount_type = ''
+
+                    try:
+                        discount_amount = product_combination['discount_amount']
+                    except:
+                        discount_amount = ''
+
                     ProductCombinationsVariants.objects.create(
                         variant_type=variant_type,  variant_value=variant_value, variant_price=variant_price, quantity=quantity, discount_type=discount_type, discount_amount=discount_amount, product=instance, product_combination=product_combination_instance)
             else:

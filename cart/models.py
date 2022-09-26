@@ -141,12 +141,12 @@ class Order(AbstractTimeStamp):
         db_table = 'orders'
 
     def __str__(self):
-        return self.user.username
+        return self.order_id
 
 
 def pre_save_order(sender, instance, *args, **kwargs):
     if not instance.order_id:
-        instance.order_id = 'or-' + \
+        instance.order_id = 'orid-' + \
             str(unique_order_id_generator_for_order(instance))
         # instance.order_id = 'or-' + str(unique_slug_generator_cart(instance))
 
@@ -190,12 +190,12 @@ class VendorOrder(AbstractTimeStamp):
         db_table = 'vendor_orders'
 
     def __str__(self):
-        return self.user.username
+        return self.vendor_order_id
 
 
 def pre_save_order(sender, instance, *args, **kwargs):
     if not instance.vendor_order_id:
-        instance.vendor_order_id = 'vor-' + \
+        instance.vendor_order_id = 'vorid-' + \
             str(unique_order_id_generator_for_vendor_order(instance))
         # instance.vendor_order_id = 'vor-' + str(unique_slug_generator_cart(instance))
 

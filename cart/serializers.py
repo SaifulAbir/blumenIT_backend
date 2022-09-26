@@ -95,20 +95,35 @@ class CheckoutSerializer(serializers.ModelSerializer):
             **validated_data, user=self.context['request'].user, customer_profile=CustomerProfile.objects.get(user=self.context['request'].user))
 
         vendor_list = []
-        count = 0
-        zip_object_order_items = zip(product, quantity)
-        if zip_object_order_items:
-            for p, q in zip_object_order_items:
-                # increase product count
-                count += 1
 
+        if product:
+            # print('if')
+            for p in product:
+                # print('for1')
                 # data add in vendor order table
                 if p.vendor.id not in vendor_list:
                     vendor_list.append(p.vendor.id)
 
+            if len(vendor_list) > 0:
+                for v in vendor_list:
+                    # print('loop')
+                    # data store in vendor order table
+                    VendorOrder.objects.create(order=order_instance, user=self.context['request'].user, vendor=Vendor.objects.get(id=v), customer_profile=CustomerProfile.objects.get(
+                        user=self.context['request'].user))
+
+        count = 0
+        zip_object_order_items2 = zip(product, quantity)
+        if zip_object_order_items2:
+            for p, q in zip_object_order_items2:
+                # print('for2')
+                # increase product count
+                count += 1
+                vendor_order = VendorOrder.objects.get(
+                    vendor=p.vendor, order=order_instance)
+
                 # data store in orderIteam table
                 OrderItem.objects.create(order=order_instance, product=p, quantity=int(
-                    q), ordered=True, user=self.context['request'].user, vendor=p.vendor)
+                    q), ordered=True, user=self.context['request'].user, vendor=p.vendor, vendor_order=vendor_order)
 
                 # update product quantity
                 product_current_quan = Product.objects.filter(slug=p.slug)[
@@ -123,12 +138,6 @@ class CheckoutSerializer(serializers.ModelSerializer):
                 product_sell_quan += 1
                 Product.objects.filter(slug=p.slug).update(
                     sell_count=product_sell_quan)
-
-            if len(vendor_list) > 0:
-                for v in vendor_list:
-                    # data store in vendor order table
-                    VendorOrder.objects.create(order=order_instance, user=self.context['request'].user, vendor=Vendor.objects.get(id=v), customer_profile=CustomerProfile.objects.get(
-                        user=self.context['request'].user))
 
             Order.objects.filter(id=order_instance.id).update(
                 product_count=count)

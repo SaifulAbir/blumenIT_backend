@@ -130,7 +130,8 @@ class CheckoutSerializer(serializers.ModelSerializer):
                     VendorOrder.objects.create(order=order_instance, user=self.context['request'].user, vendor=Vendor.objects.get(id=v), customer_profile=CustomerProfile.objects.get(
                         user=self.context['request'].user))
 
-            order_instance.update(product_count=count)
+            Order.objects.filter(id=order_instance.id).update(
+                product_count=count)
 
         CustomerAddress.objects.create(
             order=order_instance,

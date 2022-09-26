@@ -95,9 +95,13 @@ class CheckoutSerializer(serializers.ModelSerializer):
             **validated_data, user=self.context['request'].user, customer_profile=CustomerProfile.objects.get(user=self.context['request'].user))
 
         vendor_list = []
+        count = 0
         zip_object_order_items = zip(product, quantity)
         if zip_object_order_items:
             for p, q in zip_object_order_items:
+                # increase product count
+                count += 1
+
                 # data add in vendor order table
                 if p.vendor.id not in vendor_list:
                     vendor_list.append(p.vendor.id)
@@ -125,6 +129,8 @@ class CheckoutSerializer(serializers.ModelSerializer):
                     # data store in vendor order table
                     VendorOrder.objects.create(order=order_instance, user=self.context['request'].user, vendor=Vendor.objects.get(id=v), customer_profile=CustomerProfile.objects.get(
                         user=self.context['request'].user))
+
+            order_instance.update(product_count=count)
 
         CustomerAddress.objects.create(
             order=order_instance,

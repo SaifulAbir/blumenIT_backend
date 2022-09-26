@@ -110,7 +110,7 @@ class Order(AbstractTimeStamp):
                              related_name='order_user', blank=True, null=True)
     customer_profile = models.ForeignKey(
         CustomerProfile, on_delete=models.PROTECT, related_name='order_customer_profile', blank=True, null=True)
-    slug = models.SlugField(null=False, blank=False, allow_unicode=True)
+    order_id = models.SlugField(null=False, blank=False, allow_unicode=True)
     ordered_date = models.DateTimeField(auto_now_add=True)
     ordered = models.BooleanField(default=True)
     being_delivered = models.BooleanField(default=False)
@@ -133,6 +133,7 @@ class Order(AbstractTimeStamp):
         max_length=255, null=False, blank=False, default=0)
     order_status = models.CharField(
         max_length=20, null=False, blank=False, choices=ORDER_CHOICES, default=ORDER_CHOICES[1][1])
+    product_count = models.IntegerField(blank=True, null=True)
 
     class Meta:
         verbose_name = 'Order'
@@ -144,8 +145,8 @@ class Order(AbstractTimeStamp):
 
 
 def pre_save_order(sender, instance, *args, **kwargs):
-    if not instance.slug:
-        instance.slug = unique_slug_generator_cart(instance)
+    if not instance.order_id:
+        instance.order_id = 'or-' + str(unique_slug_generator_cart(instance))
 
 
 pre_save.connect(pre_save_order, sender=Order)
@@ -167,7 +168,8 @@ class VendorOrder(AbstractTimeStamp):
                              related_name='vendor_order_user', blank=True, null=True)
     customer_profile = models.ForeignKey(
         CustomerProfile, on_delete=models.PROTECT, related_name='vendor_order_customer_profile', blank=True, null=True)
-    slug = models.SlugField(null=False, blank=False, allow_unicode=True)
+    vendor_order_id = models.SlugField(
+        null=False, blank=False, allow_unicode=True)
     ordered_date = models.DateTimeField(auto_now_add=True)
     ordered = models.BooleanField(default=True)
     received = models.BooleanField(default=False)
@@ -190,8 +192,9 @@ class VendorOrder(AbstractTimeStamp):
 
 
 def pre_save_order(sender, instance, *args, **kwargs):
-    if not instance.slug:
-        instance.slug = unique_slug_generator_cart(instance)
+    if not instance.vendor_order_id:
+        instance.vendor_order_id = 'vor-' + \
+            str(unique_slug_generator_cart(instance))
 
 
 pre_save.connect(pre_save_order, sender=VendorOrder)

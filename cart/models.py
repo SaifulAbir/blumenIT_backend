@@ -1,7 +1,7 @@
 from django.db import models
 from ecommerce.models import AbstractTimeStamp
 from vendor.models import Vendor
-from .utils import unique_slug_generator_cart
+from .utils import unique_slug_generator_cart, unique_order_id_generator_for_order, unique_order_id_generator_for_vendor_order
 from django.db.models.signals import pre_save
 from user.models import CustomerProfile, User
 from django.utils.translation import gettext as _
@@ -146,7 +146,9 @@ class Order(AbstractTimeStamp):
 
 def pre_save_order(sender, instance, *args, **kwargs):
     if not instance.order_id:
-        instance.order_id = 'or-' + str(unique_slug_generator_cart(instance))
+        instance.order_id = 'or-' + \
+            str(unique_order_id_generator_for_order(instance))
+        # instance.order_id = 'or-' + str(unique_slug_generator_cart(instance))
 
 
 pre_save.connect(pre_save_order, sender=Order)
@@ -194,7 +196,8 @@ class VendorOrder(AbstractTimeStamp):
 def pre_save_order(sender, instance, *args, **kwargs):
     if not instance.vendor_order_id:
         instance.vendor_order_id = 'vor-' + \
-            str(unique_slug_generator_cart(instance))
+            str(unique_order_id_generator_for_vendor_order(instance))
+        # instance.vendor_order_id = 'vor-' + str(unique_slug_generator_cart(instance))
 
 
 pre_save.connect(pre_save_order, sender=VendorOrder)

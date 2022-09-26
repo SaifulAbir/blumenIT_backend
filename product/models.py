@@ -172,7 +172,7 @@ class Product(AbstractTimeStamp):
         return self.reviews.aggregate(Avg('rating'))
 
     def __str__(self):
-        return self.title
+        return self.title + '-' + self.vendor.vendor_admin.email
 
     def save(self, *args, **kwargs):
         super(Product, self).save(*args, **kwargs)

@@ -84,7 +84,8 @@ class CheckoutSerializer(serializers.ModelSerializer):
         product = validated_data.pop('product')
         quantity = validated_data.pop('quantity')
         try:
-            product_attribute = validated_data["product_attribute"].id
+            # product_attribute = validated_data["product_attribute"].id validated_data.pop('variant_value')
+            product_attribute = validated_data.pop('product_attribute')
         except:
             product_attribute = ''
         # product_attribute = validated_data.pop('product_attribute')
@@ -95,7 +96,8 @@ class CheckoutSerializer(serializers.ModelSerializer):
             product_attribute_value = ''
         # product_attribute_value = validated_data.pop('product_attribute_value')
         try:
-            variant_type = validated_data["variant_type"].id
+            # variant_type = validated_data["variant_type"].id
+            variant_type = validated_data.pop('variant_type')
         except:
             variant_type = ''
         # variant_type = validated_data.pop('variant_type')

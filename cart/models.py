@@ -5,7 +5,7 @@ from .utils import unique_slug_generator_cart, unique_order_id_generator_for_ord
 from django.db.models.signals import pre_save
 from user.models import CustomerProfile, User
 from django.utils.translation import gettext as _
-from product.models import Product
+from product.models import Product, ProductAttributes, VariantType
 from django.utils import timezone
 
 # from django_countries.fields import CountryField
@@ -247,6 +247,34 @@ class OrderItem(AbstractTimeStamp):
         # if self.item.discount_price:
         #     return self.get_total_discount_item_price()
         return self.get_total_item_price()
+
+
+class OrderItemCombination(AbstractTimeStamp):
+    product = models.ForeignKey(
+        Product, related_name="order_item_combination_product", on_delete=models.CASCADE, blank=True, null=True)
+    order = models.ForeignKey(
+        Order, related_name="order_item_combination_order", on_delete=models.CASCADE, blank=True, null=True)
+    orderItem = models.ForeignKey(
+        OrderItem, related_name="order_item_combination_order_item", on_delete=models.CASCADE, blank=True, null=True)
+    product_attribute = models.ForeignKey(
+        ProductAttributes, related_name="order_item_combination_product_attributes", null=True, blank=True, on_delete=models.PROTECT)
+    product_attribute_value = models.CharField(
+        max_length=500, null=False, blank=False, default="")
+    variant_type = models.ForeignKey(
+        VariantType, related_name="order_item_combination_variant_type", null=True, blank=True, on_delete=models.PROTECT)
+    variant_value = models.CharField(max_length=500, null=True, blank=True)
+    variant_price = models.FloatField(
+        max_length=255, null=True, blank=True, default=0)
+    variant_ordered_quantity = models.IntegerField(
+        null=True, blank=True, default=0)
+
+    class Meta:
+        verbose_name = 'OrderItemCombination'
+        verbose_name_plural = 'OrderItemCombinations'
+        db_table = 'order_item_combination'
+
+    def __str__(self):
+        return str(self.id)
 
 
 class CustomerAddress(AbstractTimeStamp):

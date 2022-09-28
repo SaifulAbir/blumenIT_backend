@@ -251,6 +251,8 @@ class OrderItem(AbstractTimeStamp):
 
 
 class OrderItemCombination(AbstractTimeStamp):
+    product = models.ForeignKey(
+        Product, related_name="order_item_combination_product", on_delete=models.CASCADE, blank=True, null=True)
     order = models.ForeignKey(
         Order, related_name="order_item_combination_order", on_delete=models.CASCADE, blank=True, null=True)
     orderItem = models.ForeignKey(

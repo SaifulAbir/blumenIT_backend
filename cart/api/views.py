@@ -435,7 +435,7 @@ class UserOrderListAPIView(ListAPIView):
     serializer_class = OrderSerializer
 
     def get_queryset(self):
-        queryset = Order.objects.filter(user=self.request.user)
+        queryset = Order.objects.filter(user=self.request.user).order_by('-ordered_date')
         return queryset
 
 

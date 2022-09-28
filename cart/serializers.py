@@ -174,7 +174,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
                 # data store in OrderItemCombination table
                 if p_a != 0:
                     order_item_combination_instance = OrderItemCombination.objects.create(
-                        product=p, order=order_instance, orderItem=order_item_instance, product_attribute=p_a, product_attribute_value=p_a_v, variant_type=v_t, variant_value=v_v, variant_price=v_p, variant_ordered_quantity=int(q))
+                        product=p, order=order_instance, orderItem=order_item_instance, product_attribute=ProductAttributes.objects.get(id=p_a), product_attribute_value=p_a_v, variant_type=VariantType.objects.get(id=v_t), variant_value=v_v, variant_price=v_p, variant_ordered_quantity=int(q))
 
                 # update product quantity
                 product_current_quan = Product.objects.filter(slug=p.slug)[

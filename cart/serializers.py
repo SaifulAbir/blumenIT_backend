@@ -4,6 +4,7 @@ from rest_framework import serializers
 from .models import *
 from product.models import Product
 from rest_framework.validators import UniqueTogetherValidator
+from rest_framework.exceptions import ValidationError
 
 # general Serializer start
 
@@ -30,16 +31,20 @@ class CheckoutSerializer(serializers.ModelSerializer):
         queryset=Product.objects.all(), many=True, write_only=True)
     quantity = serializers.ListField(
         child=serializers.IntegerField(), write_only=True)
-    product_attribute = serializers.PrimaryKeyRelatedField(
-        queryset=ProductAttributes.objects.all(), many=True, write_only=True, required=False)
+    # product_attribute = serializers.PrimaryKeyRelatedField(
+    #     queryset=ProductAttributes.objects.all(), many=True, write_only=True, required=True)
+    product_attribute = serializers.ListField(
+        child=serializers.IntegerField(), write_only=True, required=True)
     product_attribute_value = serializers.ListField(
-        child=serializers.CharField(), write_only=True, required=False)
-    variant_type = serializers.PrimaryKeyRelatedField(
-        queryset=VariantType.objects.all(), many=True, write_only=True, required=False)
+        child=serializers.CharField(), write_only=True, required=True)
+    # variant_type = serializers.PrimaryKeyRelatedField(
+    #     queryset=VariantType.objects.all(), many=True, write_only=True, required=False)
+    variant_type = serializers.ListField(
+        child=serializers.IntegerField(), write_only=True, required=True)
     variant_value = serializers.ListField(
-        child=serializers.CharField(), write_only=True, required=False)
+        child=serializers.CharField(), write_only=True, required=True)
     variant_price = serializers.ListField(
-        child=serializers.DecimalField(max_digits=255, decimal_places=2), write_only=True, required=False)
+        child=serializers.DecimalField(max_digits=255, decimal_places=2), write_only=True, required=True)
 
     billing_first_name = serializers.CharField(write_only=True)
     billing_last_name = serializers.CharField(write_only=True)
@@ -56,7 +61,9 @@ class CheckoutSerializer(serializers.ModelSerializer):
     shipping_country = serializers.CharField(write_only=True)
     shipping_street_address = serializers.CharField(write_only=True)
     shipping_city = serializers.CharField(write_only=True)
+    shipping_phone = serializers.CharField(write_only=True)
     shipping_zip_code = serializers.CharField(write_only=True)
+    shipping_email = serializers.CharField(write_only=True)
 
     total_price = serializers.FloatField(write_only=True, required=True)
     discounted_price = serializers.FloatField(write_only=True, required=False)
@@ -76,41 +83,41 @@ class CheckoutSerializer(serializers.ModelSerializer):
                   'product', 'quantity', 'product_attribute', 'product_attribute_value', 'variant_type', 'variant_value', 'variant_price',
                   'billing_first_name', 'billing_last_name', 'billing_country', 'billing_street_address', 'billing_city', 'billing_phone',
                   'billing_zip_code', 'billing_email', 'billing_default',
-                  'shipping_first_name', 'shipping_last_name', 'shipping_country', 'shipping_street_address', 'shipping_city', 'shipping_zip_code'
+                  'shipping_first_name', 'shipping_last_name', 'shipping_country', 'shipping_street_address', 'shipping_city', 'shipping_phone', 'shipping_zip_code', 'shipping_email'
                   ]
         # read_only_fields = ('ngo_username')
 
     def create(self, validated_data):
         product = validated_data.pop('product')
+        if not product:
+            raise ValidationError('Product field is required.')
         quantity = validated_data.pop('quantity')
+
         try:
-            # product_attribute = validated_data["product_attribute"].id validated_data.pop('variant_value')
             product_attribute = validated_data.pop('product_attribute')
         except:
-            product_attribute = ''
-        # product_attribute = validated_data.pop('product_attribute')
+            product_attribute.append(0)
+
         try:
             product_attribute_value = validated_data.pop(
                 'product_attribute_value')
         except:
-            product_attribute_value = ''
-        # product_attribute_value = validated_data.pop('product_attribute_value')
+            product_attribute_value.append("null")
+
         try:
-            # variant_type = validated_data["variant_type"].id
             variant_type = validated_data.pop('variant_type')
         except:
-            variant_type = ''
-        # variant_type = validated_data.pop('variant_type')
+            variant_type.append("null")
+
         try:
             variant_value = validated_data.pop('variant_value')
         except:
-            variant_value = ''
-        # variant_value = validated_data.pop('variant_value')
+            variant_value.append("null")
+
         try:
             variant_price = validated_data.pop('variant_price')
         except:
-            variant_price = ''
-        # variant_price = validated_data.pop('variant_price')
+            variant_price.append("null")
 
         billing_first_name = validated_data.pop('billing_first_name')
         billing_last_name = validated_data.pop('billing_last_name')
@@ -127,7 +134,9 @@ class CheckoutSerializer(serializers.ModelSerializer):
         shipping_country = validated_data.pop('shipping_country')
         shipping_street_address = validated_data.pop('shipping_street_address')
         shipping_city = validated_data.pop('shipping_city')
+        shipping_phone = validated_data.pop('shipping_phone')
         shipping_zip_code = validated_data.pop('shipping_zip_code')
+        shipping_email = validated_data.pop('shipping_email')
 
         order_instance = Order.objects.create(
             **validated_data, user=self.context['request'].user, customer_profile=CustomerProfile.objects.get(user=self.context['request'].user))
@@ -148,6 +157,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
 
         count = 0
         # zip_object_order_items = zip(product, quantity)
+        # zip_object_order_items = zip(product, quantity, product_attribute)
         zip_object_order_items = zip(
             product, quantity, product_attribute, product_attribute_value, variant_type, variant_value, variant_price)
         if zip_object_order_items:
@@ -162,8 +172,9 @@ class CheckoutSerializer(serializers.ModelSerializer):
                     q), ordered=True, user=self.context['request'].user, vendor=p.vendor, vendor_order=vendor_order)
 
                 # data store in OrderItemCombination table
-                order_item_combination_instance = OrderItemCombination.objects.create(product=p, order=order_instance, orderItem=order_item_instance, product_attribute=p_a, product_attribute_value=p_a_v, variant_type=v_t, variant_value=v_v, variant_price=v_p, variant_ordered_quantity=int(
-                    q))
+                if p_a != 0:
+                    order_item_combination_instance = OrderItemCombination.objects.create(
+                        product=p, order=order_instance, orderItem=order_item_instance, product_attribute=p_a, product_attribute_value=p_a_v, variant_type=v_t, variant_value=v_v, variant_price=v_p, variant_ordered_quantity=int(q))
 
                 # update product quantity
                 product_current_quan = Product.objects.filter(slug=p.slug)[
@@ -181,6 +192,8 @@ class CheckoutSerializer(serializers.ModelSerializer):
 
             Order.objects.filter(id=order_instance.id).update(
                 product_count=count)
+        else:
+            print('else')
 
         CustomerAddress.objects.create(
             order=order_instance,
@@ -204,7 +217,9 @@ class CheckoutSerializer(serializers.ModelSerializer):
             country=shipping_country,
             street_address=shipping_street_address,
             city=shipping_city,
-            zip_code=shipping_zip_code
+            phone=shipping_phone,
+            zip_code=shipping_zip_code,
+            email=shipping_email,
         )
 
         # work with coupon start

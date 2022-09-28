@@ -208,7 +208,8 @@ class OrderItem(AbstractTimeStamp):
         Order, on_delete=models.CASCADE, blank=True, null=True)
     vendor_order = models.ForeignKey(VendorOrder, on_delete=models.PROTECT,
                                      related_name='order_items_vendor_order', blank=True, null=True)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, null=False, blank=False)
     quantity = models.IntegerField(default=1)
     ordered = models.BooleanField(default=False)
     user = models.ForeignKey(User, on_delete=models.PROTECT,
@@ -250,8 +251,6 @@ class OrderItem(AbstractTimeStamp):
 
 
 class OrderItemCombination(AbstractTimeStamp):
-    product = models.ForeignKey(
-        Product, related_name="order_item_combination_product", on_delete=models.CASCADE, blank=True, null=True)
     order = models.ForeignKey(
         Order, related_name="order_item_combination_order", on_delete=models.CASCADE, blank=True, null=True)
     orderItem = models.ForeignKey(

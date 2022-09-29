@@ -1,3 +1,4 @@
+from pickle import TRUE
 from pyexpat import model
 from attr import fields
 from rest_framework import serializers
@@ -21,30 +22,36 @@ class noteSerializer(serializers.ModelSerializer):
         fields = ['notes']
 
 
-class CheckoutSerializer(serializers.ModelSerializer):
-    # ADDRESS_CHOICES = (
-    #     ('Billing'),
-    #     ('Shipping'),
-    # )
+class ProductCombinationForCheckoutSerializer(serializers.ModelSerializer):
 
-    product = serializers.PrimaryKeyRelatedField(
-        queryset=Product.objects.all(), many=True, write_only=True)
-    quantity = serializers.ListField(
-        child=serializers.IntegerField(), write_only=True)
-    # product_attribute = serializers.PrimaryKeyRelatedField(
-    #     queryset=ProductAttributes.objects.all(), many=True, write_only=True, required=True)
-    product_attribute = serializers.ListField(
-        child=serializers.IntegerField(), write_only=True, required=True)
-    product_attribute_value = serializers.ListField(
-        child=serializers.CharField(), write_only=True, required=True)
-    # variant_type = serializers.PrimaryKeyRelatedField(
-    #     queryset=VariantType.objects.all(), many=True, write_only=True, required=False)
-    variant_type = serializers.ListField(
-        child=serializers.IntegerField(), write_only=True, required=True)
-    variant_value = serializers.ListField(
-        child=serializers.CharField(), write_only=True, required=True)
-    variant_price = serializers.ListField(
-        child=serializers.DecimalField(max_digits=255, decimal_places=2), write_only=True, required=True)
+    product = serializers.IntegerField(write_only=True, required=True)
+    quantity = serializers.IntegerField(write_only=True, required=True)
+    price = serializers.DecimalField(
+        max_digits=255, decimal_places=2, required=True)
+    product_attribute = serializers.IntegerField(
+        write_only=True, required=False)
+    product_attribute_value = serializers.CharField(
+        write_only=True, required=False)
+    variant_type = serializers.IntegerField(write_only=True, required=False)
+    variant_value = serializers.CharField(write_only=True, required=False)
+
+    class Meta:
+        model = OrderItem
+        fields = ['id',
+                  'product',
+                  'quantity',
+                  'price',
+                  'product_attribute',
+                  'product_attribute_value',
+                  'variant_type',
+                  'variant_value'
+                  ]
+
+
+class CheckoutSerializer(serializers.ModelSerializer):
+
+    order_items = ProductCombinationForCheckoutSerializer(
+        many=True, required=False)
 
     billing_first_name = serializers.CharField(write_only=True)
     billing_last_name = serializers.CharField(write_only=True)
@@ -80,44 +87,14 @@ class CheckoutSerializer(serializers.ModelSerializer):
                   'coupon',
                   'coupon_status',
                   'payment_type',
-                  'product', 'quantity', 'product_attribute', 'product_attribute_value', 'variant_type', 'variant_value', 'variant_price',
+                  'order_items',
                   'billing_first_name', 'billing_last_name', 'billing_country', 'billing_street_address', 'billing_city', 'billing_phone',
                   'billing_zip_code', 'billing_email', 'billing_default',
-                  'shipping_first_name', 'shipping_last_name', 'shipping_country', 'shipping_street_address', 'shipping_city', 'shipping_phone', 'shipping_zip_code', 'shipping_email'
+                  'shipping_first_name', 'shipping_last_name', 'shipping_country', 'shipping_street_address', 'shipping_city', 'shipping_phone', 'shipping_zip_code', 'shipping_email',
                   ]
         # read_only_fields = ('ngo_username')
 
     def create(self, validated_data):
-        product = validated_data.pop('product')
-        if not product:
-            raise ValidationError('Product field is required.')
-        quantity = validated_data.pop('quantity')
-
-        try:
-            product_attribute = validated_data.pop('product_attribute')
-        except:
-            product_attribute.append(0)
-
-        try:
-            product_attribute_value = validated_data.pop(
-                'product_attribute_value')
-        except:
-            product_attribute_value.append("null")
-
-        try:
-            variant_type = validated_data.pop('variant_type')
-        except:
-            variant_type.append("null")
-
-        try:
-            variant_value = validated_data.pop('variant_value')
-        except:
-            variant_value.append("null")
-
-        try:
-            variant_price = validated_data.pop('variant_price')
-        except:
-            variant_price.append("null")
 
         billing_first_name = validated_data.pop('billing_first_name')
         billing_last_name = validated_data.pop('billing_last_name')
@@ -138,62 +115,125 @@ class CheckoutSerializer(serializers.ModelSerializer):
         shipping_zip_code = validated_data.pop('shipping_zip_code')
         shipping_email = validated_data.pop('shipping_email')
 
+        try:
+            order_items = validated_data.pop('order_items')
+        except:
+            order_items = ''
+
         order_instance = Order.objects.create(
             **validated_data, user=self.context['request'].user, customer_profile=CustomerProfile.objects.get(user=self.context['request'].user))
 
-        vendor_list = []
+        if order_items:
+            vendor_list = []
+            count = 0
 
-        if product:
-            for p in product:
-                # data add in vendor order table
-                if p.vendor.id not in vendor_list:
-                    vendor_list.append(p.vendor.id)
+            for order_item in order_items:
+                product = order_item['product']
+                quantity = order_item['quantity']
+                price = order_item['price']
+                try:
+                    product_attribute = order_item['product_attribute']
+                except:
+                    product_attribute = 0
+                try:
+                    product_attribute_value = order_item['product_attribute_value']
+                except:
+                    product_attribute_value = ''
+                try:
+                    variant_type = order_item['variant_type']
+                except:
+                    variant_type = 0
+                try:
+                    variant_value = order_item['variant_value']
+                except:
+                    variant_value = ''
 
-            if len(vendor_list) > 0:
-                for v in vendor_list:
+                product_obj = Product.objects.get(id=product)
+
+                vendor_id = product_obj.vendor.id
+                if vendor_id not in vendor_list:
+                    vendor_list.append(vendor_id)
+                    print(vendor_list)
                     # data store in vendor order table
-                    VendorOrder.objects.create(order=order_instance, user=self.context['request'].user, vendor=Vendor.objects.get(id=v), customer_profile=CustomerProfile.objects.get(
-                        user=self.context['request'].user))
+                    VendorOrder.objects.create(order=order_instance, user=self.context['request'].user, vendor=Vendor.objects.get(
+                        id=vendor_id), customer_profile=CustomerProfile.objects.get(user=self.context['request'].user))
 
-        count = 0
-        # zip_object_order_items = zip(product, quantity)
-        # zip_object_order_items = zip(product, quantity, product_attribute)
-        zip_object_order_items = zip(
-            product, quantity, product_attribute, product_attribute_value, variant_type, variant_value, variant_price)
-        if zip_object_order_items:
-            for p, q, p_a, p_a_v, v_t, v_v, v_p in zip_object_order_items:
-                # increase product count
+                # product sell count update
                 count += 1
-                vendor_order = VendorOrder.objects.get(
-                    vendor=p.vendor, order=order_instance)
+                product_sell_quan = Product.objects.filter(
+                    slug=product_obj.slug)[0].sell_count
+                product_sell_quan += 1
+                Product.objects.filter(slug=product_obj.slug).update(
+                    sell_count=product_sell_quan)
 
                 # data store in orderIteam table
-                order_item_instance = OrderItem.objects.create(order=order_instance, product=p, quantity=int(
-                    q), ordered=True, user=self.context['request'].user, vendor=p.vendor, vendor_order=vendor_order)
+                vendor_order = VendorOrder.objects.get(
+                    vendor=product_obj.vendor, order=order_instance)
+                order_item_instance = OrderItem.objects.create(order=order_instance, product=product_obj, quantity=int(
+                    quantity), ordered=True, user=self.context['request'].user, vendor=product_obj.vendor, vendor_order=vendor_order)
 
                 # data store in OrderItemCombination table
-                if p_a != 0:
+                if product_attribute != 0:
                     order_item_combination_instance = OrderItemCombination.objects.create(
-                        product=p, order=order_instance, orderItem=order_item_instance, product_attribute=ProductAttributes.objects.get(id=p_a), product_attribute_value=p_a_v, variant_type=VariantType.objects.get(id=v_t), variant_value=v_v, variant_price=v_p, variant_ordered_quantity=int(q))
-
-                # update product quantity
-                product_current_quan = Product.objects.filter(slug=p.slug)[
-                    0].total_quantity
-                product_updated_quan = int(product_current_quan) - int(q)
-                Product.objects.filter(slug=p.slug).update(
-                    total_quantity=product_updated_quan)
-
-                # update product sell_count
-                product_sell_quan = Product.objects.filter(slug=p.slug)[
-                    0].sell_count
-                product_sell_quan += 1
-                Product.objects.filter(slug=p.slug).update(
-                    sell_count=product_sell_quan)
+                        product=product_obj, order=order_instance, orderItem=order_item_instance, product_attribute=ProductAttributes.objects.get(id=product_attribute), product_attribute_value=product_attribute_value, product_attribute_price=price)
+                if variant_type != 0:
+                    OrderItemCombination.objects.filter(id=order_item_combination_instance).update(
+                        variant_type=VariantType.objects.get(id=variant_type), variant_value=variant_value, variant_price=price)
 
             Order.objects.filter(id=order_instance.id).update(
                 product_count=count)
-        else:
-            print('else')
+
+        # vendor_list = []
+
+        # if product:
+        #     for p in product:
+        #         # data add in vendor order table
+        #         if p.vendor.id not in vendor_list:
+        #             vendor_list.append(p.vendor.id)
+
+        #     if len(vendor_list) > 0:
+        #         for v in vendor_list:
+        #             # data store in vendor order table
+        #             VendorOrder.objects.create(order=order_instance, user=self.context['request'].user, vendor=Vendor.objects.get(id=v), customer_profile=CustomerProfile.objects.get(
+        #                 user=self.context['request'].user))
+
+        # count = 0
+        # zip_object_order_items = zip(
+        #     product, quantity, product_attribute, product_attribute_value, variant_type, variant_value, variant_price)
+        # if zip_object_order_items:
+        #     for p, q, p_a, p_a_v, v_t, v_v, v_p in zip_object_order_items:
+        #         # increase product count
+        #         count += 1
+        #         vendor_order = VendorOrder.objects.get(
+        #             vendor=p.vendor, order=order_instance)
+
+        #         # data store in orderIteam table
+        #         order_item_instance = OrderItem.objects.create(order=order_instance, product=p, quantity=int(
+        #             q), ordered=True, user=self.context['request'].user, vendor=p.vendor, vendor_order=vendor_order)
+
+        #         # data store in OrderItemCombination table
+        #         if p_a != 0:
+        #             order_item_combination_instance = OrderItemCombination.objects.create(
+        #                 product=p, order=order_instance, orderItem=order_item_instance, product_attribute=ProductAttributes.objects.get(id=p_a), product_attribute_value=p_a_v, variant_type=VariantType.objects.get(id=v_t), variant_value=v_v, variant_price=v_p, variant_ordered_quantity=int(q))
+
+        #         # update product quantity
+        #         product_current_quan = Product.objects.filter(slug=p.slug)[
+        #             0].total_quantity
+        #         product_updated_quan = int(product_current_quan) - int(q)
+        #         Product.objects.filter(slug=p.slug).update(
+        #             total_quantity=product_updated_quan)
+
+        #         # update product sell_count
+        #         product_sell_quan = Product.objects.filter(slug=p.slug)[
+        #             0].sell_count
+        #         product_sell_quan += 1
+        #         Product.objects.filter(slug=p.slug).update(
+        #             sell_count=product_sell_quan)
+
+        #     Order.objects.filter(id=order_instance.id).update(
+        #         product_count=count)
+        # else:
+        #     print('else')
 
         CustomerAddress.objects.create(
             order=order_instance,

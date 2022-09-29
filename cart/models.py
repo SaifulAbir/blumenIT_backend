@@ -261,6 +261,8 @@ class OrderItemCombination(AbstractTimeStamp):
         ProductAttributes, related_name="order_item_combination_product_attributes", null=True, blank=True, on_delete=models.PROTECT)
     product_attribute_value = models.CharField(
         max_length=500, null=False, blank=False, default="")
+    product_attribute_price = models.FloatField(
+        max_length=255, null=True, blank=True, default=0)
     variant_type = models.ForeignKey(
         VariantType, related_name="order_item_combination_variant_type", null=True, blank=True, on_delete=models.PROTECT)
     variant_value = models.CharField(max_length=500, null=True, blank=True)

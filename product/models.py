@@ -222,6 +222,8 @@ class ProductCombinations(AbstractTimeStamp):
         ProductAttributes, related_name="product_combinations_product_attributes", null=True, blank=True, on_delete=models.PROTECT)
     product_attribute_value = models.CharField(
         max_length=500, null=False, blank=False, default="")
+    product_attribute_price = models.FloatField(
+        max_length=255, null=True, blank=True, default=0)
     product_attribute_color_code = models.CharField(
         max_length=100, null=True, blank=True, default="")
 

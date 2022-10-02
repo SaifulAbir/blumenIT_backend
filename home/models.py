@@ -64,3 +64,31 @@ class ProductView(AbstractTimeStamp):
 
     def __str__(self):
         return self.product.title
+
+
+class FAQ(AbstractTimeStamp):
+    question = models.TextField(null=True, blank=True)
+    answer = models.TextField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = 'FAQ'
+        verbose_name_plural = 'FAQs'
+        db_table = 'faqs'
+
+    def __str__(self):
+        return f"{self.pk}"
+
+class ContactUs(AbstractTimeStamp):
+    name = models.CharField(max_length=255, null=True, blank=True)
+    email = models.EmailField(null=True, blank=True)
+    message = models.TextField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = 'ContactUs'
+        verbose_name_plural = 'ContactUs'
+        db_table = 'contactUs'
+
+    def __str__(self):
+        return f"{self.pk}"

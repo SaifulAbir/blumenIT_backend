@@ -57,3 +57,25 @@ class product_catListSerializer(serializers.ModelSerializer):
 # # #                 'thumbnail',
 # # #                 'average_rating'
 # # #                 ]
+
+
+class FaqSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FAQ
+        fields = [
+                'id',
+                'question',
+                'answer',
+                'is_active',
+                ]
+
+class ContactUsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContactUs
+        fields = [
+                'id',
+                'name',
+                'email',
+                'message',
+                'is_active',
+                ]

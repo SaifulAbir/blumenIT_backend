@@ -1,6 +1,6 @@
 from rest_framework.views import APIView
-from home.models import SliderImage, DealsOfTheDay, ProductView
-from home.serializers import SliderImagesListSerializer, DealsOfTheDayListSerializer, product_catListSerializer
+from home.models import SliderImage, DealsOfTheDay, ProductView, FAQ, ContactUs
+from home.serializers import SliderImagesListSerializer, DealsOfTheDayListSerializer, product_catListSerializer , ContactUsSerializer, FaqSerializer
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from datetime import date, timedelta
@@ -67,3 +67,44 @@ class HomeDataAPIView(APIView):
 # #         recent_view = Product.objects.filter(product_view_count__view_date__gt=last_week).order_by('-product_view_count__view_date')[:24]
 # #         recent_view_serializer = productListSerializer(recent_view, many=True)
 # #         return Response({"recent_view":recent_view_serializer.data })
+
+
+class ContactUsAPIView(APIView):
+    permission_classes = (AllowAny,)
+    serializer_class = ContactUsSerializer
+
+    def post(self, request):
+        try:
+            name = request.data.get('name')
+            email = request.data.get('email')
+            message = request.data.get('message')
+            contact = ContactUs(name=name, email=email, message=message)
+            contact.save()
+            return Response({"message": "Your message has been sent successfully."})
+        except:
+            return Response({"message": "Fill up all the fields."})
+
+    def get(self, request):
+        contact = ContactUs.objects.all()
+        contact_serializer = ContactUsSerializer(contact, many=True)
+        return Response(contact_serializer.data)
+
+class CreateGetFaqAPIView(APIView):
+    permission_classes = (AllowAny,)
+    serializer_class = FaqSerializer
+
+    def post(self, request):
+        try:
+            question = request.data.get('question')
+            answer = request.data.get('answer')
+            faq = FAQ(question=question, answer=answer)
+            faq.save()
+            return Response({"message": "Faq has been created successfully."})
+        except:
+            return Response({"message": "Fill up all the fields."})
+       
+
+    def get(self, request):
+        faq = FAQ.objects.all()
+        faq_serializer = FaqSerializer(faq, many=True)
+        return Response(faq_serializer.data)

@@ -252,6 +252,7 @@ class ProductCombinationSerializerForProductDetails(serializers.ModelSerializer)
             'product_attribute',
             'product_attribute_value',
             'product_attribute_color_code',
+            'product_attribute_price',
             # 'combination_media',
             'variant'
         ]

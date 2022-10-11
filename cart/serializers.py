@@ -177,7 +177,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
                     order_item_combination_instance = OrderItemCombination.objects.create(
                         product=product_obj, order=order_instance, orderItem=order_item_instance, product_attribute=ProductAttributes.objects.get(id=product_attribute), product_attribute_value=product_attribute_value, product_attribute_price=price)
                 if variant_type != 0:
-                    OrderItemCombination.objects.filter(id=order_item_combination_instance).update(
+                    OrderItemCombination.objects.filter(id=order_item_combination_instance.id).update(
                         variant_type=VariantType.objects.get(id=variant_type), variant_value=variant_value, variant_price=price)
 
             Order.objects.filter(id=order_instance.id).update(

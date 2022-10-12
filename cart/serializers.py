@@ -2,10 +2,14 @@ from pickle import TRUE
 from pyexpat import model
 from attr import fields
 from rest_framework import serializers
+
+from user.serializers import CustomerProfileSerializer
+from vendor.serializers import VendorDetailSerializer
 from .models import *
 from product.models import Product
 from rest_framework.validators import UniqueTogetherValidator
 from rest_framework.exceptions import ValidationError
+
 
 # general Serializer start
 
@@ -444,6 +448,27 @@ class OrderItemSerializer(serializers.ModelSerializer):
         model = OrderItem
         fields = ['id', 'order', 'product', 'quantity', 'subtotal']
 
+
+class VendorOrderSerializer(serializers.ModelSerializer):
+    customer_profile = CustomerProfileSerializer()
+    order = OrderSerializer()
+    # order_items_vendor_order = OrderItemSerializer(many=True)
+
+    class Meta:
+        model = VendorOrder
+        fields = ['id', 'order', 'user', 'customer_profile', 'vendor_order_id', 'ordered_date', 'ordered', 'received',
+                  'refund_requested', 'refund_granted', 'shipping_type', 'order_status', 'vendor', 'order_items_vendor_order']
+
+
+class VendorOrderDetailSerializer(serializers.ModelSerializer):
+    customer_profile = CustomerProfileSerializer()
+    order = OrderSerializer()
+    order_items_vendor_order = OrderItemSerializer(many=True)
+    vendor = VendorDetailSerializer()
+    class Meta:
+        model = VendorOrder
+        fields = ['id', 'order', 'user', 'customer_profile', 'vendor_order_id', 'ordered_date', 'ordered', 'received',
+                  'refund_requested', 'refund_granted', 'shipping_type', 'order_status', 'vendor', 'order_items_vendor_order']
 
 # class ActiveCouponListSerializer(serializers.ModelSerializer):
 #     class Meta:

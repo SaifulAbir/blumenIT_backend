@@ -51,6 +51,16 @@ class Vendor(AbstractTimeStamp):
         verbose_name=_('Vendor Request'))
     phone = models.CharField(max_length=255, null=True,
                              blank=True, default="None")
+    email = models.EmailField(
+        max_length=255, null=False, blank=False)
+    logo = models.ImageField(upload_to='images/store_logo', null=True, blank=True)
+    banner = models.ImageField(upload_to='images/banner', null=True, blank=True)
+    facebook = models.URLField(null=True, blank=True)
+    twitter = models.URLField(null=True, blank=True)
+    instagram = models.URLField(null=True, blank=True)
+    youtube = models.URLField(null=True, blank=True)
+    linkedin = models.URLField(null=True, blank=True)
+    bio = models.TextField(default='', blank=True, null=True)
     password = models.CharField(max_length=255)
 
     def __str__(self):
@@ -124,7 +134,7 @@ def create_vendor(sender, instance, created, **kwargs):
         user.set_password(password)
         user.save()
         vendor_instance = Vendor.objects.create(organization_name=instance.organization_name,
-                                                vendor_admin=user, vendor_request=instance, password=password)
+                                                vendor_admin=user, email=instance.email, vendor_request=instance, password=password)
         if vendor_instance:
             email_list = user.email
             subject = "Your Account Credentials"

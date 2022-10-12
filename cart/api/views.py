@@ -1,18 +1,22 @@
 
 from rest_framework.generics import ListAPIView, CreateAPIView, ListCreateAPIView, DestroyAPIView, RetrieveUpdateAPIView, RetrieveAPIView
 from rest_framework.views import APIView
-from cart.serializers import BillingAddressSerializer, CheckoutDetailsSerializer, CheckoutSerializer, OrderItemSerializer, OrderSerializer, PaymentTypesListSerializer, WishlistSerializer, WishListDataSerializer, ApplyCouponSerializer
+from cart.serializers import BillingAddressSerializer, CheckoutDetailsSerializer, CheckoutSerializer, \
+    OrderItemSerializer, OrderSerializer, PaymentTypesListSerializer, WishlistSerializer, WishListDataSerializer, \
+    ApplyCouponSerializer, VendorOrderSerializer, VendorOrderDetailSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.shortcuts import get_object_or_404
 from user.models import User
 from product.models import Product
-from cart.models import BillingAddress, Order, OrderItem, PaymentType, Coupon, UseRecordOfCoupon, Wishlist
+from cart.models import BillingAddress, Order, OrderItem, PaymentType, Coupon, UseRecordOfCoupon, Wishlist, VendorOrder
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 from drf_yasg.utils import swagger_auto_schema
 from django.utils import timezone
+
+from vendor.models import Vendor
 
 
 class CheckoutAPIView(CreateAPIView):
@@ -437,6 +441,28 @@ class UserOrderListAPIView(ListAPIView):
     def get_queryset(self):
         queryset = Order.objects.filter(user=self.request.user).order_by('-ordered_date')
         return queryset
+
+
+class VendorOrderListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = VendorOrderSerializer
+
+    def get_queryset(self):
+        vendor = Vendor.objects.get(vendor_admin=self.request.user)
+        queryset = VendorOrder.objects.prefetch_related('order_items_vendor_order').filter(vendor=vendor)
+        return queryset
+
+
+class VendorOrderDetailsAPIView(RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = VendorOrderDetailSerializer
+    # lookup_field = 'oid'
+    # lookup_url_kwarg = 'oid'
+
+    def get_object(self):
+        # oid = self.kwargs['oid']
+        query = VendorOrder.objects.get(pk=self.kwargs['pk'])
+        return query
 
 
 class UserOrderDetailAPIView(ListAPIView):

@@ -8,6 +8,7 @@ admin.site.register(UseRecordOfCoupon)
 admin.site.register(PaymentType)
 admin.site.register(BillingAddress)
 admin.site.register(VendorOrder)
+admin.site.register(OrderItem)
 admin.site.register(OrderItemCombination)
 
 # admin.site.register(Order)

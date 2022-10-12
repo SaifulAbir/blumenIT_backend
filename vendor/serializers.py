@@ -78,8 +78,8 @@ class VendorDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Vendor
-        fields = ['id', 'organization_name', 'vendor_admin',
-                  'vendor_request', 'address', 'phone']
+        fields = ['id', 'organization_name', 'vendor_admin', 'facebook', 'twitter', 'instagram', 'youtube',
+                  'vendor_request', 'address', 'phone', 'email', 'logo', 'banner', 'linkedin', 'bio']
 
 
 # Store Settings serializer

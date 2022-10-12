@@ -85,3 +85,15 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
+
+
+class CustomerProfileSerializer(serializers.ModelSerializer):
+    user = UserRegisterSerializer(read_only=True)
+    gender_display_value = serializers.CharField(
+        source='get_gender_display', read_only=True
+    )
+
+    class Meta:
+        model = CustomerProfile
+        model_fields = ['id', 'user', 'phone', 'address', 'birth_date', 'gender', 'gender_display_value']
+        fields = model_fields

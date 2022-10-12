@@ -432,7 +432,7 @@ class BillingAddressSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = ['id', 'user', 'order_id', 'ordered_date', 'order_status', 'total_price']
+        fields = ['id', 'user', 'order_id', 'product_count', 'ordered_date', 'order_status', 'total_price']
 
     # def get_order_items(self, obj):
     #     selected_order_items = OrderItem.objects.filter(

@@ -144,9 +144,9 @@ class VendorProductListAPI(ListAPIView):
 
 
 class VendorProductCreateAPIView(CreateAPIView):
-    # permission_classes = (AllowAny,)
+    permission_classes = (AllowAny,)
     serializer_class = VendorProductCreateSerializer
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         return super(VendorProductCreateAPIView, self).post(request, *args, **kwargs)

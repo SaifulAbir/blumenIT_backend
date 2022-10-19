@@ -195,7 +195,7 @@ class Product(AbstractTimeStamp):
     sku = models.CharField(max_length=500, null=True,
                            blank=True, default="")
     warranty = models.CharField(
-        max_length=255, blank=True, help_text="eg: 1 year or 6 months")
+        max_length=255, blank=True, null=True, help_text="eg: 1 year or 6 months")
     full_description = models.TextField(default='', null=False, blank=False)
     short_description = models.CharField(max_length=800, default='', null=False, blank=False)
     active_short_description = models.BooleanField(default=True)
@@ -203,7 +203,7 @@ class Product(AbstractTimeStamp):
         max_length=20, choices=PRODUCT_STATUSES, default=PRODUCT_STATUSES[0][0])
     is_featured = models.BooleanField(null=False, blank=False, default=False)
     vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT,
-                               related_name='product_vendor', blank=False, null=False)
+                               related_name='product_vendor', blank=True, null=True)
     category = models.ForeignKey(
         Category, related_name='product_category', blank=False, null=True, on_delete=models.PROTECT)
     sub_category = models.ForeignKey(
@@ -615,3 +615,56 @@ class ProductCombinationsVariants(AbstractTimeStamp):
             product.save()
         except:
             print("Error in product combination save.")
+
+
+class TextColor(AbstractTimeStamp):
+    title = models.CharField(
+        max_length=255, null=False, blank=False, default="")
+    code = models.CharField(
+        max_length=20, null=False, blank=False, default="")
+
+    class Meta:
+        verbose_name = 'TextColor'
+        verbose_name_plural = 'TextColors'
+        db_table = 'text_color'
+
+    def __str__(self):
+        return self.title
+
+class FlashDealInfo(AbstractTimeStamp):
+    title = models.CharField(
+        max_length=255, null=False, blank=False, default="")
+    background_color = models.CharField(
+        max_length=255, null=False, blank=False, default="")
+    text_color = models.ForeignKey(
+        TextColor, on_delete=models.PROTECT, related_name='flash_deal_info_text_color')
+    banner = models.ImageField(
+        upload_to='flash_deal_info', blank=True, null=True)
+    start_date = models.DateTimeField(null=True, blank=True)
+    end_date = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'FlashDealInfo'
+        verbose_name_plural = 'FlashDealInfos'
+        db_table = 'flash_deal_info'
+
+    def __str__(self):
+        return self.title
+
+class FlashDealProduct(AbstractTimeStamp):
+    flashDealInfo = models.ForeignKey(
+        FlashDealInfo, on_delete=models.PROTECT, related_name='flash_deal_product_flash_deal_info')
+    product = models.ForeignKey(
+        Product, on_delete=models.PROTECT, related_name='flash_deal_product_product')
+    discount_type = models.ForeignKey(
+        DiscountTypes, on_delete=models.PROTECT, related_name='flash_deal_product_discount_type')
+    discount_amount = models.FloatField(
+        max_length=255, null=True, blank=True, default=0)
+
+    class Meta:
+        verbose_name = 'FlashDealProduct'
+        verbose_name_plural = 'FlashDealProducts'
+        db_table = 'flash_deal_product'
+
+    def __str__(self):
+        return self.title

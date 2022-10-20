@@ -7,61 +7,90 @@ from ecommerce.common.emails import send_email_without_delay
 from product.models import Brand, Category, Color, DiscountTypes, FlashDealProduct, Inventory, InventoryVariation, Product, ProductAttributeValues, ProductAttributes, ProductColor, ProductCombinations, ProductCombinationsVariants, ProductImages, ProductMedia, ProductReview, ProductTags, ProductVariation, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units, VariantType
 from user.models import User
 from user.serializers import UserRegisterSerializer
-from vendor.models import VendorRequest, Vendor, StoreSettings
+from vendor.models import VendorRequest, Vendor, StoreSettings,Seller
 from django.db.models import Avg
 from django.utils import timezone
 
+
+#Seller Create serializer
+class SellerSerializer(serializers.ModelSerializer):
+
+
+    class Meta:
+        model = Seller
+        fields = ['id', 'name', 'address', 'phone', 'email', 'logo']
+
+
+# Seller Detail serializer
+class SellerDetailSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Seller
+        fields = ['id', 'name', 'email', 'address', 'phone','logo']
+
+
 # Vendor Request serializer
-
-
 class VendorRequestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = VendorRequest
         fields = ['id', 'first_name', 'last_name', 'organization_name',
                   'email', 'vendor_type', 'nid', 'trade_license']
+        read_only_field =['first_name', 'last_name', 'organization_name',
+                  'email', 'vendor_type', 'nid', 'trade_license']
         # fields = ['id', 'email', 'organization_name', 'first_name', 'last_name', 'vendor_type', 'nid', 'trade_license']
 
 
 # Vendor Create serializer
 class VendorCreateSerializer(serializers.ModelSerializer):
-    is_verified = serializers.BooleanField(write_only=True)
-    request_id = serializers.IntegerField(write_only=True)
-    vendor_request = VendorRequestSerializer(read_only=True)
-    vendor_admin = UserRegisterSerializer(read_only=True)
+    # is_verified = serializers.BooleanField(allow_null=True)
+    # request_id = serializers.IntegerField(allow_null=True)
 
     class Meta:
         model = Vendor
-        fields = ['id', 'organization_name', 'address', 'vendor_admin',
-                  'vendor_request', 'phone', 'is_verified', 'request_id']
-        read_only_fields = ('organization_name', 'address',
-                            'vendor_admin', 'vendor_request', 'phone')
+        fields = ['id', 'name', 'address', 'vendor_admin',
+                  'vendor_request', 'phone', 'email', 'logo']
+        read_only_fields = ('organization_name', 'vendor_admin', 'vendor_request')
 
-    def create(self, validated_data):
-        is_verified = validated_data.pop('is_verified')
-        request_id = validated_data.pop('request_id')
-        if is_verified is True:
-            password = User.objects.make_random_password()
-            vendor_request = VendorRequest.objects.get(id=request_id)
-            vendor_request.is_verified = True
-            vendor_request.save()
+    # def create(self):
+    #
+    #
+    #     return Vendor.objects.create()
+        #     is_verified = validated_data.pop('is_verified')
+    #     request_id = validated_data.pop('request_id')
+    #     if is_verified is True:
+    #         password = User.objects.make_random_password()
+    #         vendor_request = VendorRequest.objects.get(id=request_id)
+    #         vendor_request.is_verified = True
+    #         vendor_request.save()
+    #
+    #         user = User.objects.create(username=vendor_request.email, email=vendor_request.email,
+    #                                    first_name=vendor_request.first_name, last_name=vendor_request.last_name)
+    #         user.set_password(password)
+    #         user.save()
+    #
+    #         vendor_instance = Vendor.objects.create(organization_name=vendor_request.organization_name,
+    #                                                 vendor_admin=user, vendor_request=vendor_request, password=password)
+    #         if vendor_instance:
+    #             email_list = user.email
+    #             subject = "Your Account"
+    #             html_message = render_to_string('vendor_email.html',
+    #                                             {'username': user.first_name, 'email': user.email, 'password': password})
+    #             send_email_without_delay(subject, html_message, email_list)
+    #         return vendor_instance
+    #     else:
+    #         raise ValidationError("You should verify first to create a vendor")
+# Vendor Detail serializer
+class VendorDetailSerializer(serializers.ModelSerializer):
+    # vendor_request = VendorRequestSerializer(read_only=True)
+    # vendor_admin = UserRegisterSerializer(read_only=True)
 
-            user = User.objects.create(username=vendor_request.email, email=vendor_request.email,
-                                       first_name=vendor_request.first_name, last_name=vendor_request.last_name)
-            user.set_password(password)
-            user.save()
+    class Meta:
+        model = Vendor
+        fields = ['id', 'name', 'address', 'phone', 'email', 'organization_name', 'vendor_admin', 'facebook', 'twitter', 'instagram', 'youtube',
+                  'vendor_request', 'logo', 'banner', 'linkedin', 'bio']
+        read_only_fields = ('organization_name', 'vendor_admin', 'vendor_request')
 
-            vendor_instance = Vendor.objects.create(organization_name=vendor_request.organization_name,
-                                                    vendor_admin=user, vendor_request=vendor_request, password=password)
-            if vendor_instance:
-                email_list = user.email
-                subject = "Your Account"
-                html_message = render_to_string('vendor_email.html',
-                                                {'username': user.first_name, 'email': user.email, 'password': password})
-                send_email_without_delay(subject, html_message, email_list)
-            return vendor_instance
-        else:
-            raise ValidationError("You should verify first to create a vendor")
 
 
 # Organization Name serializer
@@ -70,16 +99,6 @@ class OrganizationNameSerializer(serializers.ModelSerializer):
         model = VendorRequest
         fields = ['organization_name']
 
-
-# Vendor Detail serializer
-class VendorDetailSerializer(serializers.ModelSerializer):
-    vendor_request = VendorRequestSerializer(read_only=True)
-    vendor_admin = UserRegisterSerializer(read_only=True)
-
-    class Meta:
-        model = Vendor
-        fields = ['id', 'organization_name', 'vendor_admin', 'facebook', 'twitter', 'instagram', 'youtube',
-                  'vendor_request', 'address', 'phone', 'email', 'logo', 'banner', 'linkedin', 'bio']
 
 
 # Store Settings serializer

@@ -1,7 +1,7 @@
 from django.urls import path
 from django.views.decorators.csrf import csrf_exempt
-from user.api.views import RegisterUser, LoginUser, VerifyUserAPIView, CustomerRetrieveUpdateAPIView, \
-    SubscriptionAPIView, UserListAPIView, ChangePasswordView, SendOTPAPIView, OTPVerifyAPIVIEW, ReSendOTPAPIView, \
+from user.api.views import LoginUser, VerifyUserAPIView,  \
+    SubscriptionAPIView,  ChangePasswordView, SendOTPAPIView, OTPVerifyAPIVIEW, ReSendOTPAPIView, \
     SetPasswordAPIView
 
 urlpatterns = [
@@ -12,10 +12,10 @@ urlpatterns = [
     path('resend-otp/', ReSendOTPAPIView.as_view(), name='resend_otp'),
     path('set-password/', SetPasswordAPIView.as_view(), name='set_password'),
     # path('verify-user/<str:verification_token>', VerifyUserAPIView.as_view()),
-    path('customer-profile/', CustomerRetrieveUpdateAPIView.as_view()),
-    path('customer-profile/update/', CustomerRetrieveUpdateAPIView.as_view()),
+    # path('customer-profile/', CustomerRetrieveUpdateAPIView.as_view()),
+    # path('customer-profile/update/', CustomerRetrieveUpdateAPIView.as_view()),
     path('subscription/', SubscriptionAPIView.as_view()),
-    path('user-list/', UserListAPIView.as_view()),
+    # path('user-list/', UserListAPIView.as_view()),
     path('change_password/', ChangePasswordView.as_view(), name='auth_change_password'),
     # path('change-password/', change_password),
 ]

@@ -26,49 +26,49 @@ from django.template.loader import render_to_string
 from user import serializers as user_serializers
 from user.models import CustomerProfile, User, OTPModel
 from rest_framework.views import APIView
-from user.serializers import CustomerProfileUpdateSerializer, SubscriptionSerializer, UserRegisterSerializer, \
+from user.serializers import  SubscriptionSerializer,  \
     ChangePasswordSerializer, OTPSendSerializer, OTPVerifySerializer, OTPReSendSerializer, SetPasswordSerializer
 
 
-class RegisterUser(mixins.CreateModelMixin,
-                   mixins.RetrieveModelMixin,
-                   viewsets.GenericViewSet):
-    queryset = user_models.User.objects.all()
-    serializer_class = user_serializers.UserRegisterSerializer
-    permission_classes = [AllowAny]
-
-    def create(self, request):
-        serializer = user_serializers.UserRegisterSerializer(data=request.data)
-
-        if serializer.is_valid():
-            serializer.save()
-            user = user_models.User.objects.none()
-            try:
-                user = user_models.User.objects.get(
-                    email=request.data["email"])
-
-                token = RefreshToken.for_user(user)
-
-                exp = time() + 1200 #20 minutes
-                email_list = request.data["email"]
-                subject = "Verify Your Account"
-                token = jwt.encode({'email': email_list, 'exp': exp, 'scope': subject},
-                                   settings.JWT_SECRET, algorithm='HS256')
-                html_message = render_to_string('verification_email.html', {'token': token, 'domain': settings.EMAIL_DOMAIN_NAME})
-                send_email_without_delay(subject, html_message, email_list)
-                CustomerProfile.objects.create(user=user)
-                data = {
-                    "user_id": user.id,
-                    "email": user.email,
-                    "full_name": user.first_name + " " + user.last_name
-                }
-                return Response({"status": True, "data": data}, status=status.HTTP_200_OK)
-            except (user_models.User.DoesNotExist):
-                if user:
-                    user.delete()
-                return Response({"status": False, "data": {"message": "User not registered. Please try again."}}, status=status.HTTP_409_CONFLICT)
-        else:
-            return Response({"status": False, "data": {"message": "User not registered. Please try again.", "errors": serializer.errors}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+# class RegisterUser(mixins.CreateModelMixin,
+#                    mixins.RetrieveModelMixin,
+#                    viewsets.GenericViewSet):
+#     queryset = user_models.User.objects.all()
+#     serializer_class = user_serializers.UserRegisterSerializer
+#     permission_classes = [AllowAny]
+#
+#     def create(self, request):
+#         serializer = user_serializers.UserRegisterSerializer(data=request.data)
+#
+#         if serializer.is_valid():
+#             serializer.save()
+#             user = user_models.User.objects.none()
+#             try:
+#                 user = user_models.User.objects.get(
+#                     email=request.data["email"])
+#
+#                 token = RefreshToken.for_user(user)
+#
+#                 exp = time() + 1200 #20 minutes
+#                 email_list = request.data["email"]
+#                 subject = "Verify Your Account"
+#                 token = jwt.encode({'email': email_list, 'exp': exp, 'scope': subject},
+#                                    settings.JWT_SECRET, algorithm='HS256')
+#                 html_message = render_to_string('verification_email.html', {'token': token, 'domain': settings.EMAIL_DOMAIN_NAME})
+#                 send_email_without_delay(subject, html_message, email_list)
+#                 CustomerProfile.objects.create(user=user)
+#                 data = {
+#                     "user_id": user.id,
+#                     "email": user.email,
+#                     "full_name": user.first_name + " " + user.last_name
+#                 }
+#                 return Response({"status": True, "data": data}, status=status.HTTP_200_OK)
+#             except (user_models.User.DoesNotExist):
+#                 if user:
+#                     user.delete()
+#                 return Response({"status": False, "data": {"message": "User not registered. Please try again."}}, status=status.HTTP_409_CONFLICT)
+#         else:
+#             return Response({"status": False, "data": {"message": "User not registered. Please try again.", "errors": serializer.errors}}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
 
 class SetPasswordAPIView(CreateAPIView):
@@ -254,15 +254,15 @@ class VerifyUserAPIView(APIView):
             return Response({"message": "Token expired. Get new one"}, status=status.HTTP_401_UNAUTHORIZED)
 
 
-class CustomerRetrieveUpdateAPIView(RetrieveUpdateAPIView):
-    serializer_class = CustomerProfileUpdateSerializer
-
-    def get_object(self):
-        customer = CustomerProfile.objects.get(user=self.request.user)
-        return customer
-
-    # def put(self, request, *args, **kwargs):
-    #     return self.update(request, *args, **kwargs)
+# class CustomerRetrieveUpdateAPIView(RetrieveUpdateAPIView):
+#     serializer_class = CustomerProfileUpdateSerializer
+#
+#     def get_object(self):
+#         customer = CustomerProfile.objects.get(user=self.request.user)
+#         return customer
+#
+#     # def put(self, request, *args, **kwargs):
+#     #     return self.update(request, *args, **kwargs)
 
 
 class SubscriptionAPIView(CreateAPIView):
@@ -325,10 +325,10 @@ class SubscriptionAPIView(CreateAPIView):
 #     return Response(data, HTTP_200_OK)
 
 
-class UserListAPIView(ListAPIView):
-    queryset = User.objects.filter()
-    permission_classes = [AllowAny]
-    serializer_class = UserRegisterSerializer
+# class UserListAPIView(ListAPIView):
+#     queryset = User.objects.filter()
+#     permission_classes = [AllowAny]
+#     serializer_class = UserRegisterSerializer
 
 
 class ChangePasswordView(generics.UpdateAPIView):

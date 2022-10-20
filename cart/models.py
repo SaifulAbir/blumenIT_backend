@@ -19,11 +19,23 @@ from django.utils import timezone
     5. Received
     6. Refunds
 '''
+class DiscountType(AbstractTimeStamp):
+    name = models.CharField(max_length=255, null=False, blank=False)
 
+    def __str__(self):
+        return self
+
+    class Meta:
+        verbose_name_plural = "DiscountTypes"
+        verbose_name = "DiscountType"
+        db_table = 'discounttype'
 
 class Coupon(AbstractTimeStamp):
     code = models.CharField(max_length=15)
+    coupon_type = models.CharField(max_length=255, null=False, blank=False)
+    min_shopping = models.FloatField()
     amount = models.FloatField()
+    discount_type =  models.ForeignKey(DiscountType, on_delete=models.CASCADE, related_name='discounttype')
     number_of_uses = models.IntegerField(default=0, null=False, blank=False)
     start_time = models.DateTimeField(default=timezone.now)
     end_time = models.DateTimeField(default=timezone.now)

@@ -11,8 +11,9 @@ from product.models import Brand, Category, DiscountTypes, Product, ProductAttri
 from user.models import CustomerProfile, User
 from vendor.models import VendorRequest, Vendor,Seller
 from vendor.serializers import VendorBrandSerializer, VendorCategorySerializer, VendorProductCreateSerializer, VendorProductDetailsSerializer, VendorProductListSerializer, VendorProductUpdateSerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
-    VendorDetailSerializer, StoreSettingsSerializer,SellerDetailSerializer , VendorSubCategorySerializer, VendorSubSubCategorySerializer, VendorUnitSerializer, SellerSerializer, ProductAttributesSerializer
+    VendorDetailSerializer, StoreSettingsSerializer,SellerDetailSerializer , VendorSubCategorySerializer, VendorSubSubCategorySerializer, VendorUnitSerializer, SellerSerializer, ProductAttributesSerializer, CouponSerializer
 from user.models import User
+from cart.models import Coupon
 from rest_framework.exceptions import ValidationError
 
 
@@ -59,6 +60,24 @@ class SellerDeleteAPIView(DestroyAPIView):
 
     def delete(self, request, *args, **kwargs):
         return super(SellerDeleteAPIView, self).delete(request, *args, **kwargs)
+
+class CouponCreateAPIView(CreateAPIView):
+
+    permission_classes = [AllowAny]
+    serializer_class = CouponSerializer
+
+    def post(self, request):
+        coupon = CouponSerializer(data=request.data)
+
+        # validating for already existing data
+        if Coupon.objects.filter(**request.data).exists():
+            raise serializers.ValidationError('This data already exists')
+
+        if coupon.is_valid():
+            coupon.save()
+            return (Response(coupon.data))
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 

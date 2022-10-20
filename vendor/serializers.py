@@ -516,10 +516,10 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
         if sku:
             product_check_sku = Product.objects.filter(sku=sku)
             if product_check_sku:
-                raise ValidationError('This SKU already exist.')
+                raise ValidationError('This SKU already exist in product.')
             variation_check_sku = ProductVariation.objects.filter(sku=sku)
             if variation_check_sku:
-                raise ValidationError('This SKU already exist.')
+                raise ValidationError('This SKU already exist in product variation.')
         # validation for sku end
 
         # validation for sub category and sub sub category start
@@ -654,33 +654,52 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
                     product_attribute_values = product_attribute['product_attribute_values']
                     for product_attribute_value in product_attribute_values:
                         attribute_value_value = product_attribute_value['value']
-                        # product_combination_instance = ProductAttributeValues.objects.create(
-                        # title=attribute_title, attribute=attribute_attribute, product=product_instance)
+                        product_combination_instance = ProductAttributeValues.objects.create(product_attribute = product_attributes_instance, value= attribute_value_value)
 
-    #         if product_combinations:
-    #             for product_combination in product_combinations:
-    #                 product_attribute = product_combination['product_attribute']
-    #                 product_attribute_value = product_combination['product_attribute_value']
-    #                 product_attribute_color_code = product_combination['product_attribute_color_code']
-    #                 product_combination_instance = ProductCombinations.objects.create(
-    #                     product_attribute=product_attribute, product_attribute_value=product_attribute_value, product_attribute_color_code=product_attribute_color_code, product=product_instance)
+            # product_variants
+            if product_variants:
+                for product_variant in product_variants:
+                    variation = product_variant['variation']
+                    variation_price = product_variant['variation_price']
+                    sku = product_variant['sku']
+                    if sku:
+                        product_check_sku = Product.objects.filter(sku=sku)
+                        if product_check_sku:
+                            raise ValidationError('This SKU already exist in product.')
+                        variation_check_sku = ProductVariation.objects.filter(sku=sku)
+                        if variation_check_sku:
+                            raise ValidationError('This SKU already exist in product variation.')
+                    quantity = product_variant['quantity']
+                    v_image = product_variant['image']
+                    
+                    if variation and variation_price and sku and quantity and v_image:
+                        total_price = float(variation_price) * float(quantity)
+                        product_variation_instance = ProductVariation.objects.create(product=product_instance,
+                        variation=variation, variation_price=variation_price, sku=sku, quantity=quantity, image=v_image, total_price=total_price  )
 
-    #                 variant_type = product_combination['variant_type']
-    #                 variant_value = product_combination['variant_value']
-    #                 variant_price = product_combination['variant_price']
-    #                 quantity = product_combination['quantity']
-    #                 try:
-    #                     discount_type = product_combination['discount_type']
-    #                 except:
-    #                     discount_type = ''
+            # product_specification
+            if product_specification:
+                for p_specification in product_specification:
+                    s_title = p_specification['title']
+                    if s_title:
+                        specification_instance = Specification.objects.create(
+                        title=s_title, product=product_instance)
+                    specification_values = p_specification['specification_values']
+                    for specification_value in specification_values:
+                        key = specification_value['key']
+                        value = specification_value['value']
+                        product_combination_instance = SpecificationValue.objects.create(specification = specification_instance, key=key, value= value)
 
-    #                 try:
-    #                     discount_amount = product_combination['discount_amount']
-    #                 except:
-    #                     discount_amount = ''
-    #                 ProductCombinationsVariants.objects.create(
-    #                     variant_type=variant_type,  variant_value=variant_value, variant_price=variant_price, quantity=quantity, discount_type=discount_type, discount_amount=discount_amount, product=product_instance, product_combination=product_combination_instance)
-    #         return product_instance
+            # flash_deal
+            if flash_deal:
+                for f_deal in flash_deal:
+                    flashDealInfo = f_deal['flashDealInfo']
+                    discount_type = f_deal['discount_type']
+                    discount_amount = f_deal['discount_amount']
+                    if s_title:
+                        flash_deal_product_instance = FlashDealProduct.objects.create(product=product_instance, flashDealInfo=flashDealInfo, discount_type=discount_type, discount_amount=discount_amount)
+
+            return product_instance
         except:
             return product_instance
 

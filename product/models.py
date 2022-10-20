@@ -402,8 +402,9 @@ class ProductVariation(AbstractTimeStamp):
         valid_extensions = ['.jpg', '.png', '.jpeg']
         if not ext.lower() in valid_extensions:
             raise ValidationError('Unsupported file extension.')
-    
-    product_attribute = models.ForeignKey(ProductAttributes, on_delete=models.CASCADE, null=True,
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True,
+                            blank=True, related_name='Product_variation_product')
+    attribute = models.ForeignKey(ProductAttributes, on_delete=models.CASCADE, null=True,
                             blank=True, related_name='Product_variation_product_attribute')
     variation = models.CharField(
         max_length=255, null=False, blank=False, default="")
@@ -413,7 +414,7 @@ class ProductVariation(AbstractTimeStamp):
     image = models.FileField(upload_to='product_variation', validators=[validate_file_extension])
     product_color = models.ForeignKey(ProductColor, on_delete=models.CASCADE, null=True,
                             blank=True, related_name='Product_variation_color')
-    total_quantity = models.IntegerField(null=False, blank=False, default=0)
+    total_price = models.FloatField(null=False, blank=False, default=0)
 
     class Meta:
         verbose_name = 'ProductVariation'

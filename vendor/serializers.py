@@ -401,7 +401,7 @@ class ProductVariantsSerializer(serializers.ModelSerializer):
         model = ProductVariation
         fields = [
             'id',
-            'product_attribute',
+            'attribute',
             'variation',
             'variation_price',
             'sku',
@@ -658,6 +658,7 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
             if product_variants:
                 variation_total_quan = 0
                 for product_variant in product_variants:
+                    attribute = product_variant['attribute']
                     variation = product_variant['variation']
                     variation_price = product_variant['variation_price']
                     sku = product_variant['sku']
@@ -672,9 +673,9 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
                     variation_total_quan += quantity
                     v_image = product_variant['image']
                     
-                    if variation and variation_price and sku and quantity and v_image:
+                    if attribute and variation and variation_price and sku and quantity and v_image:
                         total_price = float(variation_price) * float(quantity)
-                        product_variation_instance = ProductVariation.objects.create(product=product_instance,
+                        product_variation_instance = ProductVariation.objects.create(product=product_instance, attribute=attribute,
                         variation=variation, variation_price=variation_price, sku=sku, quantity=quantity, image=v_image, total_price=total_price  )
 
             # product_specification

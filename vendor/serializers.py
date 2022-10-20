@@ -4,7 +4,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from ecommerce.common.emails import send_email_without_delay
-from product.models import Brand, Category, Color, DiscountTypes, FlashDealProduct, Product, ProductAttributeValues, ProductAttributes, ProductColor, ProductCombinations, ProductCombinationsVariants, ProductImages, ProductMedia, ProductReview, ProductTags, ProductVariation, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units, VariantType
+from product.models import Brand, Category, Color, DiscountTypes, FlashDealProduct, Inventory, InventoryVariation, Product, ProductAttributeValues, ProductAttributes, ProductColor, ProductCombinations, ProductCombinationsVariants, ProductImages, ProductMedia, ProductReview, ProductTags, ProductVariation, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units, VariantType
 from user.models import User
 from user.serializers import UserRegisterSerializer
 from vendor.models import VendorRequest, Vendor, StoreSettings
@@ -455,6 +455,8 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
     flash_deal = FlashDealSerializer(
         many=False, required=False)
 
+    quantity = serializers.IntegerField(required=False, write_only=True)
+
 
     class Meta:
         model = Product
@@ -595,10 +597,6 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
         except:
             flash_deal = ''
 
-    #     try:
-    #         product_combinations = validated_data.pop('product_combinations')
-    #     except:
-    #         product_combinations = ''
 
         # product_instance = Product.objects.create(**validated_data, vendor=Vendor.objects.get(vendor_admin=User.objects.get(
             # id=self.context['request'].user.id)))
@@ -658,6 +656,7 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
 
             # product_variants
             if product_variants:
+                variation_total_quan = 0
                 for product_variant in product_variants:
                     variation = product_variant['variation']
                     variation_price = product_variant['variation_price']
@@ -670,6 +669,7 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
                         if variation_check_sku:
                             raise ValidationError('This SKU already exist in product variation.')
                     quantity = product_variant['quantity']
+                    variation_total_quan += quantity
                     v_image = product_variant['image']
                     
                     if variation and variation_price and sku and quantity and v_image:
@@ -698,6 +698,17 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
                     discount_amount = f_deal['discount_amount']
                     if s_title:
                         flash_deal_product_instance = FlashDealProduct.objects.create(product=product_instance, flashDealInfo=flashDealInfo, discount_type=discount_type, discount_amount=discount_amount)
+
+
+            # inventory update start
+            if quantity:
+                Product.objects.filter(id=product_instance.id).update(total_quantity=quantity)
+                Inventory.objects.create(product=product_instance, initial_quantity=quantity, current_quantity=quantity)
+            if variation_total_quan:
+                if variation_total_quan != 0:
+                    inventory_instance = Inventory.objects.create(product=product_instance)
+                    inventory_variation_instance = InventoryVariation.objects.create(inventory=inventory_instance, variation_initial_quantity=variation_total_quan, variation_current_quantity=variation_total_quan)
+            # inventory update end
 
             return product_instance
         except:

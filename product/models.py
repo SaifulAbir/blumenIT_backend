@@ -703,3 +703,34 @@ class FlashDealProduct(AbstractTimeStamp):
 
     def __str__(self):
         return self.title
+
+
+class Inventory(AbstractTimeStamp):
+    initial_quantity = models.IntegerField(null=False, blank=False, default=0)
+    current_quantity = models.IntegerField(null=False, blank=False, default=0)
+    product = models.ForeignKey(
+        Product, on_delete=models.PROTECT, related_name='inventory_product')
+
+    class Meta:
+        verbose_name = 'Inventory'
+        verbose_name_plural = 'Inventories'
+        db_table = 'inventory'
+
+    def __str__(self):
+        return self.product.title + ' ' + self.initial_quantity + ' ' + self.current_quantity
+
+class InventoryVariation(AbstractTimeStamp):
+    inventory = models.ForeignKey(
+        Inventory, on_delete=models.PROTECT, related_name='inventory_variation_inventory')
+    variation_initial_quantity = models.IntegerField(null=True, blank=True, default=0)
+    variation_current_quantity = models.IntegerField(null=True, blank=True, default=0)
+    product = models.ForeignKey(
+        Product, on_delete=models.PROTECT, related_name='inventory_variation_product')
+
+    class Meta:
+        verbose_name = 'InventoryVariation'
+        verbose_name_plural = 'InventoryVariations'
+        db_table = 'inventory_variation'
+
+    def __str__(self):
+        return self.inventory.product.title + ' ' + self.variation_initial_quantity + ' ' + self.variation_current_quantity

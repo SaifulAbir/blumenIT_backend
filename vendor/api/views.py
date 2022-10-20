@@ -1,16 +1,56 @@
 from datetime import datetime
 from django.db.models import Q
+from rest_framework import serializers
+from rest_framework.response import Response
+from rest_framework import status
 from product.pagination import ProductCustomPagination
 from product.serializers import DiscountTypeSerializer, ProductAttributesSerializer, ProductTagsSerializer, TagsSerializer, VariantTypeSerializer
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductMedia, ProductReview, ProductTags, SubCategory, SubSubCategory, Tags, Units, VariantType
 from user.models import CustomerProfile, User
-from vendor.models import VendorRequest, Vendor
+from vendor.models import VendorRequest, Vendor,Seller
 from vendor.serializers import VendorBrandSerializer, VendorCategorySerializer, VendorProductCreateSerializer, VendorProductDetailsSerializer, VendorProductListSerializer, VendorProductUpdateSerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
-    VendorDetailSerializer, StoreSettingsSerializer, VendorSubCategorySerializer, VendorSubSubCategorySerializer, VendorUnitSerializer
+    VendorDetailSerializer, StoreSettingsSerializer,SellerDetailSerializer , VendorSubCategorySerializer, VendorSubSubCategorySerializer, VendorUnitSerializer, SellerSerializer
 from user.models import User
 from rest_framework.exceptions import ValidationError
+
+
+class SellerCreateAPIView(CreateAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = SellerSerializer
+
+
+    def post(self, request):
+        seller = SellerSerializer(data=request.data)
+
+        # validating for already existing data
+        if Seller.objects.filter(**request.data).exists():
+            raise serializers.ValidationError('This data already exists')
+
+        if seller.is_valid():
+            seller.save()
+            return (Response(seller.data))
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+class SellerListAPIView(ListAPIView):
+
+        queryset = Seller.objects.filter()
+        permission_classes = [AllowAny]
+        serializer_class = SellerDetailSerializer
+
+
+class SellerUpdateAPIView(RetrieveUpdateAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = SellerSerializer
+    queryset = Seller.objects.all()
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def put(self, request, *args, **kwargs):
+        return super(SellerUpdateAPIView, self).put(request, *args, **kwargs)
+
 
 
 class VendorRequestAPIView(CreateAPIView):
@@ -26,8 +66,31 @@ class VendorRequestListAPI(ListAPIView):
     serializer_class = VendorRequestSerializer
 
 
+
 class VendorCreateAPIView(CreateAPIView):
+    permission_classes = [AllowAny]
     serializer_class = VendorCreateSerializer
+
+    # def get_permissions(self):
+    #
+    #     if self.request.method == 'POST':
+    #         return (permissions.AllowAny(),)
+
+
+    def post(self, request):
+        vendor = VendorCreateSerializer(data=request.data)
+
+        # validating for already existing data
+        if Vendor.objects.filter(**request.data).exists():
+            raise serializers.ValidationError('This data already exists')
+
+        if vendor.is_valid():
+            vendor.save()
+            return (Response(vendor.data))
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+
 
 
 class StoreSettingsUpdateAPIView(CreateAPIView):

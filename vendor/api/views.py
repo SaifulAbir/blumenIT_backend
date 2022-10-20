@@ -77,29 +77,7 @@ class VendorRequestListAPI(ListAPIView):
 
 
 class VendorCreateAPIView(CreateAPIView):
-    permission_classes = [AllowAny]
     serializer_class = VendorCreateSerializer
-
-    # def get_permissions(self):
-    #
-    #     if self.request.method == 'POST':
-    #         return (permissions.AllowAny(),)
-
-
-    def post(self, request):
-        vendor = VendorCreateSerializer(data=request.data)
-
-        # validating for already existing data
-        if Vendor.objects.filter(**request.data).exists():
-            raise serializers.ValidationError('This data already exists')
-
-        if vendor.is_valid():
-            vendor.save()
-            return (Response(vendor.data))
-        else:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-
 
 
 class StoreSettingsUpdateAPIView(CreateAPIView):
@@ -216,9 +194,9 @@ class VendorProductListAPI(ListAPIView):
 
 
 class VendorProductCreateAPIView(CreateAPIView):
-    # permission_classes = (AllowAny,)
+    permission_classes = (AllowAny,)
     serializer_class = VendorProductCreateSerializer
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         return super(VendorProductCreateAPIView, self).post(request, *args, **kwargs)

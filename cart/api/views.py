@@ -453,16 +453,16 @@ class VendorOrderListAPIView(ListAPIView):
         return queryset
 
 
-class VendorOrderDetailsAPIView(RetrieveAPIView):
-    permission_classes = [IsAuthenticated]
-    serializer_class = VendorOrderDetailSerializer
-    # lookup_field = 'oid'
-    # lookup_url_kwarg = 'oid'
+# class VendorOrderDetailsAPIView(RetrieveAPIView):
+#     permission_classes = [IsAuthenticated]
+#     serializer_class = VendorOrderDetailSerializer
+#     # lookup_field = 'oid'
+#     # lookup_url_kwarg = 'oid'
 
-    def get_object(self):
-        # oid = self.kwargs['oid']
-        query = VendorOrder.objects.get(pk=self.kwargs['pk'])
-        return query
+#     def get_object(self):
+#         # oid = self.kwargs['oid']
+#         query = VendorOrder.objects.get(pk=self.kwargs['pk'])
+#         return query
 
 
 class UserOrderDetailAPIView(ListAPIView):

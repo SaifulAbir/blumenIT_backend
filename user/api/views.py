@@ -1,6 +1,10 @@
 from time import time
+
+import pytz
 from django.conf import settings
 from django.contrib.auth.hashers import check_password, make_password
+from django.db.models import Q
+from datetime import datetime
 from rest_framework import viewsets, mixins, status, generics
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import ValidationError
@@ -12,15 +16,18 @@ from django.contrib.auth import authenticate
 from rest_framework.status import HTTP_401_UNAUTHORIZED, HTTP_200_OK
 from rest_framework.utils import json
 from rest_framework_simplejwt.tokens import RefreshToken
+
+from configs.SMSConfig import OTPManager
 from ecommerce.common.emails import send_email_without_delay
+from external.validation.data_validator import check_dict_data_rise_error
 from user import models as user_models
 import jwt
 from django.template.loader import render_to_string
 from user import serializers as user_serializers
-from user.models import CustomerProfile, User
+from user.models import CustomerProfile, User, OTPModel
 from rest_framework.views import APIView
 from user.serializers import CustomerProfileUpdateSerializer, SubscriptionSerializer, UserRegisterSerializer, \
-    ChangePasswordSerializer
+    ChangePasswordSerializer, OTPSendSerializer, OTPVerifySerializer, OTPReSendSerializer, SetPasswordSerializer
 
 
 class RegisterUser(mixins.CreateModelMixin,
@@ -64,6 +71,139 @@ class RegisterUser(mixins.CreateModelMixin,
             return Response({"status": False, "data": {"message": "User not registered. Please try again.", "errors": serializer.errors}}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
 
+class SetPasswordAPIView(CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = SetPasswordSerializer
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        email = check_dict_data_rise_error("email", request_data=request.data, arrise=True)
+        phone = check_dict_data_rise_error("phone", request_data=request.data, arrise=True)
+        password = check_dict_data_rise_error("password", request_data=request.data, arrise=True)
+        try:
+            user = User.objects.get(phone=phone, email=email)
+        except User.DoesNotExist:
+            user = None
+        if user:
+            user.set_password(password)
+            user.is_active = True
+            user.save()
+            return Response(
+                data={"user_id": user.id if user else None, "details": "Password setup successful"},
+                status=status.HTTP_201_CREATED)
+        else:
+            return Response(
+                data={"user_id": user.id if user else None, "details": "Password setup not successful"},
+                status=status.HTTP_400_BAD_REQUEST)
+
+
+class SendOTPAPIView(CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = OTPSendSerializer
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        email = check_dict_data_rise_error("email", request_data=request.data, arrise=True)
+        phone = check_dict_data_rise_error("phone", request_data=request.data, arrise=True)
+        user_obj = User.objects.filter(Q(email=email) | Q(phone=phone))
+        for user_data in user_obj:
+            if user_data.email == email:
+                return Response({"details": "Email already exists"}, status=status.HTTP_400_BAD_REQUEST)
+            if user_data.phone == phone:
+                return Response({"details": "Phone number already exists"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = User.objects.create(
+            email=email,
+            phone=phone,
+            username=email,
+            is_customer=True
+        )
+        # Generate OTP Here
+        sent_otp = OTPManager().initialize_otp_and_sms_otp(phone)
+        otp_sending_time = datetime.now(pytz.timezone('Asia/Dhaka'))
+        otp_model = OTPModel.objects.create(
+            contact_number=phone,
+            otp_number=sent_otp,
+            expired_time=otp_sending_time
+        )
+        otp_model.save()
+        user.is_active = False
+        user.set_password(phone)
+        user.save()
+        return Response(
+            data={"user_id": user.id if user else None, "sent_otp": sent_otp},
+            status=status.HTTP_201_CREATED)
+
+
+class ReSendOTPAPIView(CreateAPIView):
+    queryset = OTPModel.objects.all()
+    serializer_class = OTPReSendSerializer
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        contact_number = check_dict_data_rise_error("contact_number", request_data=request.data, arrise=True)
+        sent_otp = OTPManager().initialize_otp_and_sms_otp(contact_number)
+        otp_sending_time = datetime.now(pytz.timezone('Asia/Dhaka'))
+        try:
+            otp_obj = OTPModel.objects.get(contact_number=contact_number)
+        except OTPModel.DoesNotExist:
+            otp_obj = None
+        if not otp_obj:
+            return Response({
+                'details': "Number doesn't exists"
+            }, status=status.HTTP_400_BAD_REQUEST)
+        otp_model = OTPModel.objects.create(
+            contact_number=contact_number,
+            otp_number=sent_otp,
+            expired_time=otp_sending_time
+        )
+        otp_model.save()
+        return Response(
+            data={"sent_otp": sent_otp},
+            status=status.HTTP_201_CREATED)
+
+
+class OTPVerifyAPIVIEW(CreateAPIView):
+    """
+       Get OTP from user, and verify it
+    """
+    serializer_class = OTPVerifySerializer
+    queryset = OTPModel.objects.all()
+    permission_classes = [AllowAny, ]
+
+    def post(self, request, *args, **kwargs):
+        contact_number = check_dict_data_rise_error("contact_number", request_data=request.data, arrise=True)
+        otp_number = check_dict_data_rise_error("otp_number", request_data=request.data, arrise=True)
+        try:
+            otp_obj = OTPModel.objects.filter(contact_number=contact_number).last()
+            if str(otp_obj.otp_number) == otp_number:
+                otp_obj.verified_phone = True
+                # OTP matched
+                otp_sent_time = otp_obj.expired_time
+                timediff = datetime.now(pytz.timezone('Asia/Dhaka')) - otp_sent_time
+                time_in_seconds = timediff.total_seconds()
+
+                if time_in_seconds > 120:
+                    return Response({
+                        'result': 'time expired'
+                    }, status=status.HTTP_408_REQUEST_TIMEOUT)
+                try:
+                    user = User.objects.get(phone=contact_number)
+                    token = RefreshToken.for_user(user)
+                except:
+                    pass
+
+                otp_obj.save()
+                return Response({'details': 'Verified', "access_token": str(token.access_token) if token else None, "refresh_token": str(token) if token else None}, status=status.HTTP_200_OK)
+            else:
+                return Response({'details': "Incorrect OTP"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(
+                data={'details': "Number doesn't exists"},
+                status=status.HTTP_406_NOT_ACCEPTABLE
+            )
+
+
 class LoginUser(mixins.CreateModelMixin,
                 viewsets.GenericViewSet):
     serializer_class = user_serializers.LoginSerializer
@@ -86,8 +226,7 @@ class LoginUser(mixins.CreateModelMixin,
                 data = {
                     "user_id": user.id,
                     "email": user.email,
-                    "first_name": user.first_name,
-                    "last_name": user.last_name,
+                    "name": user.name,
                     "access_token": str(token.access_token),
                     "refresh_token": str(token)
                 }

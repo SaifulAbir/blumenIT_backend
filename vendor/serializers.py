@@ -4,7 +4,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from ecommerce.common.emails import send_email_without_delay
-from product.models import Brand, Category, DiscountTypes, Product, ProductCombinations, ProductCombinationsVariants, ProductMedia, ProductReview, ProductTags, SubCategory, SubSubCategory, Tags, Units, VariantType
+from product.models import Brand, Category, Color, DiscountTypes, FlashDealProduct, Inventory, InventoryVariation, Product, ProductAttributeValues, ProductAttributes, ProductColor, ProductCombinations, ProductCombinationsVariants, ProductImages, ProductMedia, ProductReview, ProductTags, ProductVariation, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units, VariantType
 from user.models import User
 from user.serializers import UserRegisterSerializer
 from vendor.models import VendorRequest, Vendor, StoreSettings
@@ -211,7 +211,6 @@ class ProductCombinationSerializer(serializers.ModelSerializer):
             'discount_amount'
         ]
 
-
 class ProductCombinationSerializerForVendorProductDetails(serializers.ModelSerializer):
     # sku = serializers.CharField(required=False)
     product_attribute = serializers.SerializerMethodField()
@@ -376,47 +375,138 @@ class ProductCombinationSerializerForVendorProductUpdate(serializers.ModelSerial
         except:
             return ''
 
+class ProductAttributeValuesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductAttributeValues
+        fields = [
+            'id',
+            'product_attribute',
+            'value'
+        ]
+
+class ProductAttributesSerializer(serializers.ModelSerializer):
+    product_attribute_values = ProductAttributeValuesSerializer(
+        many=True, required=False)
+    class Meta:
+        model = ProductAttributes
+        fields = [
+            'id',
+            'title',
+            'attribute',
+            'product_attribute_values'
+        ]
+
+class ProductVariantsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductVariation
+        fields = [
+            'id',
+            'attribute',
+            'variation',
+            'variation_price',
+            'sku',
+            'quantity',
+            'image'
+        ]
+
+class SpecificationValuesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SpecificationValue
+        fields = [
+            'id',
+            'key',
+            'value'
+        ]
+
+class ProductSpecificationSerializer(serializers.ModelSerializer):
+    specification_values = SpecificationValuesSerializer(
+        many=True, required=False)
+    class Meta:
+        model = Specification
+        fields = [
+            'id',
+            'title',
+            'specification_values'
+        ]
+
+class FlashDealSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FlashDealProduct
+        fields = [
+            'id',
+            'flashDealInfo',
+            'discount_amount',
+            'discount_type'
+        ]
 
 class VendorProductCreateSerializer(serializers.ModelSerializer):
     product_tags = serializers.ListField(
-        child=serializers.CharField(), write_only=True, required=False)
-    product_media = serializers.ListField(
+        child=serializers.IntegerField(), write_only=True, required=False)
+    product_images = serializers.ListField(
         child=serializers.FileField(), write_only=True, required=False)
-    product_combinations = ProductCombinationSerializer(
+    product_colors = serializers.ListField(
+        child=serializers.IntegerField(), write_only=True, required=False)
+    product_attributes = ProductAttributesSerializer(
         many=True, required=False)
+    product_variants = ProductVariantsSerializer(
+        many=True, required=False)
+    product_specification = ProductSpecificationSerializer(
+        many=True, required=False)
+    flash_deal = FlashDealSerializer(
+        many=False, required=False)
+
+    quantity = serializers.IntegerField(required=False, write_only=True)
+
 
     class Meta:
         model = Product
         fields = [
             'id',
             'title',
-            'sku',
-            'warranty',
-            'short_description',
-            'full_description',
             'category',
             'sub_category',
             'sub_sub_category',
             'brand',
+            'vendor',
             'unit',
-            'price',
-            'purchase_price',
-            'tax_in_percent',
-            'discount_type',
-            'discount_amount',
-            'total_quantity',
-            'shipping_cost',
-            'shipping_cost_multiply',
-            'shipping_time',
-            'thumbnail',
-            'youtube_link',
-            'product_media',
+            'minimum_purchase_quantity',
             'product_tags',
-            'product_combinations'
+            'bar_code',
+            'refundable',
+            'product_images',
+            'thumbnail',
+            'video_provider',
+            'video_link',
+            'product_colors',
+            'product_attributes',
+            'price',
+            'pre_payment_amount',
+            'discount_start_date',
+            'discount_end_date',
+            'discount_amount',
+            'discount_type',
+            'quantity',
+            'sku',
+            'external_link',
+            'external_link_button_text',
+            'product_variants',
+            'full_description',
+            'active_short_description',
+            'short_description',
+            'product_specification',
+            'low_stock_quantity_warning',
+            'show_stock_quantity',
+            'cash_on_delivery',
+            'is_featured',
+            'todays_deal',
+            'flash_deal',
+            'shipping_time',
+            'shipping_class',
+            'vat',
+            'vat_type'
         ]
 
-        read_only_fields = ('slug', 'is_featured', 'old_price',
-                            'total_shipping_cost', 'sell_count')
+        read_only_fields = ('slug', 'sell_count')
 
     def create(self, validated_data):
         # validation for sku start
@@ -426,9 +516,12 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
             sku = ''
 
         if sku:
-            check_sku = Product.objects.filter(sku=sku)
-            if check_sku:
-                raise ValidationError('This SKU already exist.')
+            product_check_sku = Product.objects.filter(sku=sku)
+            if product_check_sku:
+                raise ValidationError('This SKU already exist in product.')
+            variation_check_sku = ProductVariation.objects.filter(sku=sku)
+            if variation_check_sku:
+                raise ValidationError('This SKU already exist in product variation.')
         # validation for sku end
 
         # validation for sub category and sub sub category start
@@ -462,30 +555,55 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
                     'This Sub Sub category is not under your selected parent category.')
         # validation for sub category and sub sub category end
 
-        try:
-            product_media = validated_data.pop('product_media')
-        except:
-            product_media = ''
-
+        # product_tags
         try:
             product_tags = validated_data.pop('product_tags')
         except:
             product_tags = ''
 
+        # product_images
         try:
-            product_combinations = validated_data.pop('product_combinations')
+            product_images = validated_data.pop('product_images')
         except:
-            product_combinations = ''
+            product_images = ''
 
-        product_instance = Product.objects.create(**validated_data, vendor=Vendor.objects.get(vendor_admin=User.objects.get(
-            id=self.context['request'].user.id)))
+        # product_colors
+        try:
+            product_colors = validated_data.pop('product_colors')
+        except:
+            product_colors = ''
+
+        # product_attributes
+        try:
+            product_attributes = validated_data.pop('product_attributes')
+        except:
+            product_attributes = ''
+
+        # product_variants
+        try:
+            product_variants = validated_data.pop('product_variants')
+        except:
+            product_variants = ''
+
+        # product_specification
+        try:
+            product_specification = validated_data.pop('product_specification')
+        except:
+            product_specification = ''
+
+        # flash_deal
+        try:
+            flash_deal = validated_data.pop('flash_deal')
+        except:
+            flash_deal = ''
+
+
+        # product_instance = Product.objects.create(**validated_data, vendor=Vendor.objects.get(vendor_admin=User.objects.get(
+            # id=self.context['request'].user.id)))
+        product_instance = Product.objects.create(**validated_data)
 
         try:
-            if product_media:
-                for media_file in product_media:
-                    ProductMedia.objects.create(
-                        product=product_instance, file=media_file, status="COMPLETE")
-
+            # tags
             if product_tags:
                 for tag in product_tags:
                     tag_s = tag.lower()
@@ -504,29 +622,95 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
                         except:
                             pass
 
-            if product_combinations:
-                for product_combination in product_combinations:
-                    product_attribute = product_combination['product_attribute']
-                    product_attribute_value = product_combination['product_attribute_value']
-                    product_attribute_color_code = product_combination['product_attribute_color_code']
-                    product_combination_instance = ProductCombinations.objects.create(
-                        product_attribute=product_attribute, product_attribute_value=product_attribute_value, product_attribute_color_code=product_attribute_color_code, product=product_instance)
+            # product_images
+            if product_images:
+                for image in product_images:
+                    ProductImages.objects.create(
+                        product=product_instance, image=image, status="COMPLETE")
 
-                    variant_type = product_combination['variant_type']
-                    variant_value = product_combination['variant_value']
-                    variant_price = product_combination['variant_price']
-                    quantity = product_combination['quantity']
-                    try:
-                        discount_type = product_combination['discount_type']
-                    except:
-                        discount_type = ''
+            # product_colors
+            if product_colors:
+                for color in product_colors:
+                    if Color.objects.filter(title=color).exists():
+                        color_obj = Color.objects.get(title=color)
+                        if color_obj:
+                            ProductColor.objects.create(
+                                color=color_obj, product=product_instance)
+                        else:
+                            pass
+                    else:
+                        pass
 
-                    try:
-                        discount_amount = product_combination['discount_amount']
-                    except:
-                        discount_amount = ''
-                    ProductCombinationsVariants.objects.create(
-                        variant_type=variant_type,  variant_value=variant_value, variant_price=variant_price, quantity=quantity, discount_type=discount_type, discount_amount=discount_amount, product=product_instance, product_combination=product_combination_instance)
+            # product_attributes
+            if product_attributes:
+                for product_attribute in product_attributes:
+                    attribute_title = product_attribute['title']
+                    attribute_attribute = product_attribute['attribute']
+                    if product_instance and attribute_title and attribute_attribute:
+                        product_attributes_instance = ProductAttributes.objects.create(
+                        title=attribute_title, attribute=attribute_attribute, product=product_instance)
+                    product_attribute_values = product_attribute['product_attribute_values']
+                    for product_attribute_value in product_attribute_values:
+                        attribute_value_value = product_attribute_value['value']
+                        product_combination_instance = ProductAttributeValues.objects.create(product_attribute = product_attributes_instance, value= attribute_value_value)
+
+            # product_variants
+            if product_variants:
+                variation_total_quan = 0
+                for product_variant in product_variants:
+                    attribute = product_variant['attribute']
+                    variation = product_variant['variation']
+                    variation_price = product_variant['variation_price']
+                    sku = product_variant['sku']
+                    if sku:
+                        product_check_sku = Product.objects.filter(sku=sku)
+                        if product_check_sku:
+                            raise ValidationError('This SKU already exist in product.')
+                        variation_check_sku = ProductVariation.objects.filter(sku=sku)
+                        if variation_check_sku:
+                            raise ValidationError('This SKU already exist in product variation.')
+                    quantity = product_variant['quantity']
+                    variation_total_quan += quantity
+                    v_image = product_variant['image']
+                    
+                    if attribute and variation and variation_price and sku and quantity and v_image:
+                        total_price = float(variation_price) * float(quantity)
+                        product_variation_instance = ProductVariation.objects.create(product=product_instance, attribute=attribute,
+                        variation=variation, variation_price=variation_price, sku=sku, quantity=quantity, image=v_image, total_price=total_price  )
+
+            # product_specification
+            if product_specification:
+                for p_specification in product_specification:
+                    s_title = p_specification['title']
+                    if s_title:
+                        specification_instance = Specification.objects.create(
+                        title=s_title, product=product_instance)
+                    specification_values = p_specification['specification_values']
+                    for specification_value in specification_values:
+                        key = specification_value['key']
+                        value = specification_value['value']
+                        product_combination_instance = SpecificationValue.objects.create(specification = specification_instance, key=key, value= value)
+
+            # flash_deal
+            if flash_deal:
+                for f_deal in flash_deal:
+                    flashDealInfo = f_deal['flashDealInfo']
+                    discount_type = f_deal['discount_type']
+                    discount_amount = f_deal['discount_amount']
+                    if s_title:
+                        flash_deal_product_instance = FlashDealProduct.objects.create(product=product_instance, flashDealInfo=flashDealInfo, discount_type=discount_type, discount_amount=discount_amount)
+
+
+            # inventory update start
+            if quantity:
+                Product.objects.filter(id=product_instance.id).update(total_quantity=quantity)
+                Inventory.objects.create(product=product_instance, initial_quantity=quantity, current_quantity=quantity)
+            if variation_total_quan:
+                if variation_total_quan != 0:
+                    inventory_instance = Inventory.objects.create(product=product_instance)
+                    inventory_variation_instance = InventoryVariation.objects.create(inventory=inventory_instance, variation_initial_quantity=variation_total_quan, variation_current_quantity=variation_total_quan)
+            # inventory update end
+
             return product_instance
         except:
             return product_instance
@@ -838,3 +1022,159 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
             validated_data.update(
                 {"updated_at": timezone.now()})
             return super().update(instance, validated_data)
+
+
+
+# class VendorProductCreateSerializer(serializers.ModelSerializer):
+#     product_tags = serializers.ListField(
+#         child=serializers.CharField(), write_only=True, required=False)
+#     product_media = serializers.ListField(
+#         child=serializers.FileField(), write_only=True, required=False)
+#     product_combinations = ProductCombinationSerializer(
+#         many=True, required=False)
+
+#     class Meta:
+#         model = Product
+#         fields = [
+#             'id',
+#             'title',
+#             'sku',
+#             'warranty',
+#             'short_description',
+#             'full_description',
+#             'category',
+#             'sub_category',
+#             'sub_sub_category',
+#             'brand',
+#             'unit',
+#             'price',
+#             'purchase_price',
+#             'tax_in_percent',
+#             'discount_type',
+#             'discount_amount',
+#             'total_quantity',
+#             'shipping_cost',
+#             'shipping_cost_multiply',
+#             'shipping_time',
+#             'thumbnail',
+#             'youtube_link',
+#             'product_media',
+#             'product_tags',
+#             'product_combinations'
+#         ]
+
+#         read_only_fields = ('slug', 'is_featured', 'old_price',
+#                             'total_shipping_cost', 'sell_count')
+
+#     def create(self, validated_data):
+#         # validation for sku start
+#         try:
+#             sku = validated_data["sku"]
+#         except:
+#             sku = ''
+
+#         if sku:
+#             check_sku = Product.objects.filter(sku=sku)
+#             if check_sku:
+#                 raise ValidationError('This SKU already exist.')
+#         # validation for sku end
+
+#         # validation for sub category and sub sub category start
+#         try:
+#             category_id = validated_data["category"].id
+#         except:
+#             category_id = ''
+
+#         try:
+#             sub_category = validated_data["sub_category"].id
+#         except:
+#             sub_category = ''
+
+#         if sub_category:
+#             check_sub_category = SubCategory.objects.filter(
+#                 id=sub_category, category=category_id)
+#             if not check_sub_category:
+#                 raise ValidationError(
+#                     'This Sub category is not under your selected parent category.')
+
+#         try:
+#             sub_sub_category = validated_data["sub_sub_category"].id
+#         except:
+#             sub_sub_category = ''
+
+#         if sub_sub_category:
+#             check_sub_sub_category = SubSubCategory.objects.filter(
+#                 id=sub_sub_category, sub_category=sub_category, category=category_id)
+#             if not check_sub_sub_category:
+#                 raise ValidationError(
+#                     'This Sub Sub category is not under your selected parent category.')
+#         # validation for sub category and sub sub category end
+
+#         try:
+#             product_media = validated_data.pop('product_media')
+#         except:
+#             product_media = ''
+
+#         try:
+#             product_tags = validated_data.pop('product_tags')
+#         except:
+#             product_tags = ''
+
+#         try:
+#             product_combinations = validated_data.pop('product_combinations')
+#         except:
+#             product_combinations = ''
+
+#         product_instance = Product.objects.create(**validated_data, vendor=Vendor.objects.get(vendor_admin=User.objects.get(
+#             id=self.context['request'].user.id)))
+
+#         try:
+#             if product_media:
+#                 for media_file in product_media:
+#                     ProductMedia.objects.create(
+#                         product=product_instance, file=media_file, status="COMPLETE")
+
+#             if product_tags:
+#                 for tag in product_tags:
+#                     tag_s = tag.lower()
+#                     if Tags.objects.filter(title=tag_s).exists():
+#                         tag_obj = Tags.objects.get(title=tag_s)
+#                         try:
+#                             ProductTags.objects.create(
+#                                 tag=tag_obj, product=product_instance)
+#                         except:
+#                             pass
+#                     else:
+#                         tag_instance = Tags.objects.create(title=tag_s)
+#                         try:
+#                             ProductTags.objects.create(
+#                                 tag=tag_instance, product=product_instance)
+#                         except:
+#                             pass
+
+#             if product_combinations:
+#                 for product_combination in product_combinations:
+#                     product_attribute = product_combination['product_attribute']
+#                     product_attribute_value = product_combination['product_attribute_value']
+#                     product_attribute_color_code = product_combination['product_attribute_color_code']
+#                     product_combination_instance = ProductCombinations.objects.create(
+#                         product_attribute=product_attribute, product_attribute_value=product_attribute_value, product_attribute_color_code=product_attribute_color_code, product=product_instance)
+
+#                     variant_type = product_combination['variant_type']
+#                     variant_value = product_combination['variant_value']
+#                     variant_price = product_combination['variant_price']
+#                     quantity = product_combination['quantity']
+#                     try:
+#                         discount_type = product_combination['discount_type']
+#                     except:
+#                         discount_type = ''
+
+#                     try:
+#                         discount_amount = product_combination['discount_amount']
+#                     except:
+#                         discount_amount = ''
+#                     ProductCombinationsVariants.objects.create(
+#                         variant_type=variant_type,  variant_value=variant_value, variant_price=variant_price, quantity=quantity, discount_type=discount_type, discount_amount=discount_amount, product=product_instance, product_combination=product_combination_instance)
+#             return product_instance
+#         except:
+#             return product_instance

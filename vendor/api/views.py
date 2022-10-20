@@ -128,20 +128,28 @@ class VendorVariantListAPIView(ListAPIView):
 
 
 class VendorProductListAPI(ListAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+    # permission_classes = [IsAuthenticated]
     serializer_class = VendorProductListSerializer
     pagination_class = ProductCustomPagination
 
     def get_queryset(self):
-        if Vendor.objects.filter(vendor_admin=User.objects.get(id=self.request.user.id)).exists():
-            vid = Vendor.objects.get(
-                vendor_admin=User.objects.get(id=self.request.user.id))
-            if vid:
-                queryset = Product.objects.filter(
-                    vendor=vid, status='ACTIVE').order_by('-created_at')
-                return queryset
+        queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
+        if queryset:
+            return queryset
         else:
-            raise ValidationError({"msg": 'You are not a vendor.'})
+            raise ValidationError({"msg": 'No active product available or You are not a vendor.'})
+
+    # def get_queryset(self):
+    #     if Vendor.objects.filter(vendor_admin=User.objects.get(id=self.request.user.id)).exists():
+    #         vid = Vendor.objects.get(
+    #             vendor_admin=User.objects.get(id=self.request.user.id))
+    #         if vid:
+    #             queryset = Product.objects.filter(
+    #                 vendor=vid, status='ACTIVE').order_by('-created_at')
+    #             return queryset
+    #     else:
+    #         raise ValidationError({"msg": 'You are not a vendor.'})
 
 
 class VendorProductCreateAPIView(CreateAPIView):

@@ -135,50 +135,61 @@ class VendorUnitSerializer(serializers.ModelSerializer):
 
 
 class VendorProductListSerializer(serializers.ModelSerializer):
-    product_media = ProductMediaSerializer(many=True, read_only=True)
-    category = CategorySerializer(read_only=True)
-    brand_name = serializers.SerializerMethodField()
-    avg_rating = serializers.SerializerMethodField()
-    review_count = serializers.SerializerMethodField()
-    discount_type = serializers.CharField()
+    # product_media = ProductMediaSerializer(many=True, read_only=True)
+    # category = CategorySerializer(read_only=True)
+    # brand_name = serializers.SerializerMethodField()
+    # avg_rating = serializers.SerializerMethodField()
+    # review_count = serializers.SerializerMethodField()
+    # discount_type = serializers.CharField()
+
+    vendor_username = serializers.CharField(source="vendor.username",read_only=True)
 
     class Meta:
         model = Product
         fields = [
             'id',
-            'title',
-            'slug',
-            'sku',
-            'price',
-            'old_price',
-            'short_description',
-            'total_quantity',
-            'status',
-            'is_featured',
-            'category',
-            'brand_name',
             'thumbnail',
-            'product_media',
-            'avg_rating',
-            'review_count',
-            'discount_type',
-            'discount_amount'
+            'title',
+            'title',
         ]
 
-    def get_avg_rating(self, obj):
-        return obj.product_review_product.all().aggregate(Avg('rating_number'))['rating_number__avg']
+    # class Meta:
+    #     model = Product
+    #     fields = [
+    #         'id',
+    #         'title',
+    #         'slug',
+    #         'sku',
+    #         'price',
+    #         'old_price',
+    #         'short_description',
+    #         'total_quantity',
+    #         'status',
+    #         'is_featured',
+    #         'category',
+    #         'brand_name',
+    #         'thumbnail',
+    #         'product_media',
+    #         'avg_rating',
+    #         'review_count',
+    #         'discount_type',
+    #         'discount_amount'
+    #     ]
 
-    def get_brand_name(self, obj):
-        if obj.brand:
-            get_brand = Brand.objects.get(id=obj.brand.id)
-            return get_brand.title
-        else:
-            return obj.brand
+    # def get_avg_rating(self, obj):
+    #     return obj.product_review_product.all().aggregate(Avg('rating_number'))['rating_number__avg']
 
-    def get_review_count(self, obj):
-        re_count = ProductReview.objects.filter(
-            product=obj, is_active=True).count()
-        return re_count
+    # def get_brand_name(self, obj):
+    #     if obj.brand:
+    #         get_brand = Brand.objects.get(id=obj.brand.id)
+    #         return get_brand.title
+    #     else:
+    #         return obj.brand
+
+    # def get_review_count(self, obj):
+    #     re_count = ProductReview.objects.filter(
+    #         product=obj, is_active=True).count()
+    #     return re_count
 
 # Product Combination serializer / Connect with ProductCreateSerializer
 
@@ -1178,3 +1189,50 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
 #             return product_instance
 #         except:
 #             return product_instance
+
+
+# class VendorProductListSerializer(serializers.ModelSerializer):
+#     product_media = ProductMediaSerializer(many=True, read_only=True)
+#     category = CategorySerializer(read_only=True)
+#     brand_name = serializers.SerializerMethodField()
+#     avg_rating = serializers.SerializerMethodField()
+#     review_count = serializers.SerializerMethodField()
+#     discount_type = serializers.CharField()
+
+#     class Meta:
+#         model = Product
+#         fields = [
+#             'id',
+#             'title',
+#             'slug',
+#             'sku',
+#             'price',
+#             'old_price',
+#             'short_description',
+#             'total_quantity',
+#             'status',
+#             'is_featured',
+#             'category',
+#             'brand_name',
+#             'thumbnail',
+#             'product_media',
+#             'avg_rating',
+#             'review_count',
+#             'discount_type',
+#             'discount_amount'
+#         ]
+
+#     def get_avg_rating(self, obj):
+#         return obj.product_review_product.all().aggregate(Avg('rating_number'))['rating_number__avg']
+
+#     def get_brand_name(self, obj):
+#         if obj.brand:
+#             get_brand = Brand.objects.get(id=obj.brand.id)
+#             return get_brand.title
+#         else:
+#             return obj.brand
+
+#     def get_review_count(self, obj):
+#         re_count = ProductReview.objects.filter(
+#             product=obj, is_active=True).count()
+#         return re_count

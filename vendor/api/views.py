@@ -162,36 +162,42 @@ class VendorProductCreateAPIView(CreateAPIView):
 
 
 class VendorProductUpdateAPIView(RetrieveUpdateAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+    # permission_classes = [IsAuthenticated]
     serializer_class = VendorProductUpdateSerializer
     lookup_field = 'slug'
     lookup_url_kwarg = "slug"
 
     def get_queryset(self):
         slug = self.kwargs['slug']
-        # query = Product.objects.filter(slug=slug)
-        # return query
-
-        if Vendor.objects.filter(vendor_admin=User.objects.get(id=self.request.user.id)).exists():
-            vid = Vendor.objects.get(
-                vendor_admin=User.objects.get(id=self.request.user.id))
-            if vid:
-                try:
-                    query = Product.objects.filter(slug=slug, vendor=vid)
-                    if query:
-                        return query
-                    else:
-                        raise ValidationError(
-                            {"msg": 'You are not creator of this product!'})
-                except:
-                    raise ValidationError(
-                        {"msg": "Product doesn't exist or You are not the creator of this product!"})
+        query = Product.objects.filter(slug=slug)
+        if query:
+            return query
         else:
-            raise ValidationError({"msg": 'You are not a vendor.'})
+            raise ValidationError(
+                {"msg": 'You Can not edit this product!'})
 
-    # def put(self, request, *args, **kwargs):
-    #     print('Put')
-    #     return self.update(request, *args, **kwargs)
+    # def get_queryset(self):
+    #     slug = self.kwargs['slug']
+    #     # query = Product.objects.filter(slug=slug)
+    #     # return query
+
+    #     if Vendor.objects.filter(vendor_admin=User.objects.get(id=self.request.user.id)).exists():
+    #         vid = Vendor.objects.get(
+    #             vendor_admin=User.objects.get(id=self.request.user.id))
+    #         if vid:
+    #             try:
+    #                 query = Product.objects.filter(slug=slug, vendor=vid)
+    #                 if query:
+    #                     return query
+    #                 else:
+    #                     raise ValidationError(
+    #                         {"msg": 'You are not creator of this product!'})
+    #             except:
+    #                 raise ValidationError(
+    #                     {"msg": "Product doesn't exist or You are not the creator of this product!"})
+    #     else:
+    #         raise ValidationError({"msg": 'You are not a vendor.'})
 
 
 class VendorProductDetailsAPI(RetrieveAPIView):

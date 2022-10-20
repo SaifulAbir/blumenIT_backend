@@ -6,7 +6,7 @@ from rest_framework.exceptions import ValidationError
 from ecommerce.common.emails import send_email_without_delay
 from product.models import Brand, Category, Color, DiscountTypes, FlashDealProduct, Inventory, InventoryVariation, Product, ProductAttributeValues, ProductAttributes, ProductColor, ProductCombinations, ProductCombinationsVariants, ProductImages, ProductMedia, ProductReview, ProductTags, ProductVariation, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units, VariantType
 from user.models import User
-from user.serializers import UserRegisterSerializer
+# from user.serializers import UserRegisterSerializer
 from vendor.models import VendorRequest, Vendor, StoreSettings,Seller
 from django.db.models import Avg
 from django.utils import timezone
@@ -27,6 +27,13 @@ class SellerDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Seller
         fields = ['id', 'name', 'email', 'address', 'phone','logo']
+
+
+class CouponSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Seller
+        fields = ['id', 'code', 'coupon_type', 'amount', 'discount_type', 'start_time', 'min_shopping', 'end_time']
 
 
 # Vendor Request serializer

@@ -820,35 +820,37 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
     # product_combinations = ProductCombinationSerializer(
     #     many=True, required=False)
 
-    tags = serializers.SerializerMethodField()
-    product_tags = serializers.ListField(
-        child=serializers.IntegerField(), write_only=True, required=False)
+    
 
-    images = serializers.SerializerMethodField()
-    product_images = serializers.ListField(
-        child=serializers.FileField(), write_only=True, required=False)
+    # tags = serializers.SerializerMethodField()
+    # product_tags = serializers.ListField(
+    #     child=serializers.IntegerField(), write_only=True, required=False)
 
-    colors = serializers.SerializerMethodField()
-    product_colors = serializers.ListField(
-        child=serializers.IntegerField(), write_only=True, required=False)
+    # images = serializers.SerializerMethodField()
+    # product_images = serializers.ListField(
+    #     child=serializers.FileField(), write_only=True, required=False)
 
-    attributes = serializers.SerializerMethodField()
-    product_attributes = ProductAttributesSerializer(
-        many=True, required=False)
+    # colors = serializers.SerializerMethodField()
+    # product_colors = serializers.ListField(
+    #     child=serializers.IntegerField(), write_only=True, required=False)
 
-    variants = serializers.SerializerMethodField()
-    product_variants = ProductVariantsSerializer(
-        many=True, required=False)
+    # attributes = serializers.SerializerMethodField()
+    # product_attributes = ProductAttributesSerializer(
+    #     many=True, required=False)
 
-    variants = serializers.SerializerMethodField()
-    product_specification = ProductSpecificationSerializer(
-        many=True, required=False)
-    flash_deal = FlashDealSerializer(
-        many=False, required=False)
+    # variants = serializers.SerializerMethodField()
+    # product_variants = ProductVariantsSerializer(
+    #     many=True, required=False)
 
-    # class Meta:
-    #     model = Product
-    #     fields = ['id',
+    # variants = serializers.SerializerMethodField()
+    # product_specification = ProductSpecificationSerializer(
+    #     many=True, required=False)
+    # flash_deal = FlashDealSerializer(
+    #     many=False, required=False)
+
+    class Meta:
+        model = Product
+        fields = ['id',
     #               'title',
     #               'sku',
     #               'warranty',
@@ -876,7 +878,7 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
     #               'product_media',
     #               'combinations',
     #               'product_combinations'
-    #               ]
+                  ]
 
     # def get_tags(self, obj):
     #     tags_list = []

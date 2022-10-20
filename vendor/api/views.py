@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from product.pagination import ProductCustomPagination
 from product.serializers import DiscountTypeSerializer, ProductAttributesSerializer, ProductTagsSerializer, TagsSerializer, VariantTypeSerializer
-from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView, RetrieveAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView, RetrieveAPIView,DestroyAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductMedia, ProductReview, ProductTags, SubCategory, SubSubCategory, Tags, Units, VariantType
 from user.models import CustomerProfile, User
@@ -50,6 +50,15 @@ class SellerUpdateAPIView(RetrieveUpdateAPIView):
 
     def put(self, request, *args, **kwargs):
         return super(SellerUpdateAPIView, self).put(request, *args, **kwargs)
+
+class SellerDeleteAPIView(DestroyAPIView):
+    serializer_class = SellerSerializer
+    queryset = Seller.objects.all()
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def delete(self, request, *args, **kwargs):
+        return super(SellerDeleteAPIView, self).delete(request, *args, **kwargs)
 
 
 

@@ -14,6 +14,7 @@ import random
 class Attribute(AbstractTimeStamp):
     title = models.CharField(
         max_length=100, null=False, blank=False, default="", help_text="name")
+    is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
         verbose_name = 'Attribute'
@@ -28,6 +29,7 @@ class AttributeValues(AbstractTimeStamp):
                                related_name='attribute_values_attribute', blank=False, null=False)
     value = models.CharField(
         max_length=255, null=False, blank=False, default="")
+    is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
         verbose_name = 'AttributeValues'
@@ -346,12 +348,44 @@ class ProductAttributes(AbstractTimeStamp):
         db_table = 'product_attributes'
 
     def __str__(self):
-        return self.title
-class ProductColor(AbstractTimeStamp):
+        return self.product.title + ' ' + self.title
+
+class ProductAttributeValues(AbstractTimeStamp):
+    product_attribute = models.ForeignKey(ProductAttributes, on_delete=models.PROTECT,
+                               related_name='product_attribute_values_product_attribute', blank=False, null=False)
+    value = models.CharField(
+        max_length=255, null=False, blank=False, default="")
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'ProductAttributeValue'
+        verbose_name_plural = 'ProductAttributeValues'
+        db_table = 'product_attribute_value'
+
+    def __str__(self):
+        return self.product_attribute.product.title + ' ' + self.product_attribute.title + ' ' + self.value
+
+class Color(AbstractTimeStamp):
     title = models.CharField(
         max_length=255, null=False, blank=False, default="")
     color_code = models.CharField(
         max_length=20, null=False, blank=False, default="")
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'Color'
+        verbose_name_plural = 'Colors'
+        db_table = 'color'
+
+    def __str__(self):
+        return self.title
+
+class ProductColor(AbstractTimeStamp):
+    color = models.ForeignKey(Color, on_delete=models.CASCADE, null=True,
+                            blank=True, related_name='product_color_color', default="")
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=False,
+                                blank=False, related_name='product_color_product', default="")
+    is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
         verbose_name = 'ProductColor'
@@ -359,7 +393,7 @@ class ProductColor(AbstractTimeStamp):
         db_table = 'product_color'
 
     def __str__(self):
-        return self.title
+        return self.product.title + ' ' + self.color.title
 class ProductVariation(AbstractTimeStamp):
     def validate_file_extension(value):
         import os

@@ -8,6 +8,20 @@ from ecommerce.models import AbstractTimeStamp
 from django.utils.translation import gettext as _
 from user.models import User
 
+class Seller(AbstractTimeStamp):
+    name = models.CharField(max_length=254, null=True, blank=True)
+    phone = models.CharField(max_length=255, null=False, blank=False, unique=True)
+    email = models.EmailField(max_length=255, null=False, blank=False, unique=True)
+    address = models.CharField(max_length=254, null=True, blank=True)
+    logo = models.ImageField(null=True, blank=True, upload_to='images/logo')
+
+    def __str__(self):
+        return self
+
+    class Meta:
+        verbose_name_plural = "Sellers"
+        verbose_name = "Seller"
+        db_table = 'sellers'
 
 class VendorRequest(AbstractTimeStamp):
     VENDOR_TYPES = [
@@ -21,7 +35,7 @@ class VendorRequest(AbstractTimeStamp):
     first_name = models.CharField(max_length=100, null=False, blank=False)
     last_name = models.CharField(max_length=100, null=False, blank=False)
     vendor_type = models.CharField(max_length=20, choices=VENDOR_TYPES)
-    is_verified = models.BooleanField(default=False)
+    is_verified = models.BooleanField(default=False, null=True)
     nid = models.CharField(max_length=50, null=False, blank=False)
     trade_license = models.ImageField(
         upload_to='images/trade_license', null=True, blank=True)
@@ -39,21 +53,18 @@ class VendorRequest(AbstractTimeStamp):
 
 
 class Vendor(AbstractTimeStamp):
+    name = models.CharField(max_length=254,null=True,blank=True)
+    phone = models.CharField(max_length=255, null=False, blank=False, unique=True)
+    email = models.EmailField(max_length=255, null=False, blank=False, unique=True)
+    logo = models.ImageField( null=True, blank=True)
     organization_name = models.CharField(
-        max_length=254, null=False, blank=False, verbose_name=_('Organization/ Vendor Name'))
-    address = models.CharField(
-        max_length=254, null=True, blank=True, verbose_name=_('Address'))
+        max_length=254, null=True, blank=True)
+    address = models.CharField(max_length=254, null=True, blank=True)
     vendor_admin = models.ForeignKey(
-        User, on_delete=models.PROTECT, blank=False, null=False, related_name="vendor_admin",
-        verbose_name=_('Vendor Admin'))
+        User, on_delete=models.PROTECT, blank=True, null=True)
     vendor_request = models.ForeignKey(
         VendorRequest, on_delete=models.PROTECT, blank=True, null=True, related_name="vendor_request",
         verbose_name=_('Vendor Request'))
-    phone = models.CharField(max_length=255, null=True,
-                             blank=True, default="None")
-    email = models.EmailField(
-        max_length=255, null=False, blank=False)
-    logo = models.ImageField(upload_to='images/store_logo', null=True, blank=True)
     banner = models.ImageField(upload_to='images/banner', null=True, blank=True)
     facebook = models.URLField(null=True, blank=True)
     twitter = models.URLField(null=True, blank=True)
@@ -61,10 +72,10 @@ class Vendor(AbstractTimeStamp):
     youtube = models.URLField(null=True, blank=True)
     linkedin = models.URLField(null=True, blank=True)
     bio = models.TextField(default='', blank=True, null=True)
-    password = models.CharField(max_length=255)
+    password = models.CharField(max_length=255,null=True, blank=True)
 
     def __str__(self):
-        return self.organization_name
+        return self
 
     class Meta:
         verbose_name_plural = "Vendors"
@@ -119,25 +130,25 @@ class VendorReview(AbstractTimeStamp):
         return str(self.pk)
 
 
-@receiver(post_save, sender=VendorRequest)
-def create_vendor(sender, instance, created, **kwargs):
-    is_verified = instance.is_verified
-    try:
-        vendor = Vendor.objects.get(vendor_request=instance)
-    except Vendor.DoesNotExist:
-        vendor = None
-    if is_verified is True and not vendor:
-        password = User.objects.make_random_password()
-
-        user = User.objects.create(username=instance.email, email=instance.email,
-                                   first_name=instance.first_name, last_name=instance.last_name)
-        user.set_password(password)
-        user.save()
-        vendor_instance = Vendor.objects.create(organization_name=instance.organization_name,
-                                                vendor_admin=user, email=instance.email, vendor_request=instance, password=password)
-        if vendor_instance:
-            email_list = user.email
-            subject = "Your Account Credentials"
-            html_message = render_to_string('vendor_email.html',
-                                            {'username': user.first_name, 'email': user.email, 'password': password})
-            send_email_without_delay(subject, html_message, email_list)
+# @receiver(post_save, sender=VendorRequest)
+# def create_vendor(sender, instance, created, **kwargs):
+#     is_verified = instance.is_verified
+#     try:
+#         vendor = Vendor.objects.get(vendor_request=instance)
+#     except Vendor.DoesNotExist:
+#         vendor = None
+#     if is_verified is True and not vendor:
+#         password = User.objects.make_random_password()
+#
+#         user = User.objects.create(username=instance.email, email=instance.email,
+#                                    first_name=instance.first_name, last_name=instance.last_name)
+#         user.set_password(password)
+#         user.save()
+#         vendor_instance = Vendor.objects.create(organization_name=instance.organization_name,
+#                                                 vendor_admin=user, email=instance.email, vendor_request=instance, password=password)
+#         if vendor_instance:
+#             email_list = user.email
+#             subject = "Your Account Credentials"
+#             html_message = render_to_string('vendor_email.html',
+#                                             {'username': user.first_name, 'email': user.email, 'password': password})
+#             send_email_without_delay(subject, html_message, email_list)

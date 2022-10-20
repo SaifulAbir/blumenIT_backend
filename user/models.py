@@ -37,14 +37,19 @@ class UserManager(BaseUserManager):
         return self._create_user(email, password, **extra_fields)
 
 
+phone_regex = RegexValidator(regex='^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$',message='Invalid phone number')
+
+
 class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=100, unique=True)
-    first_name = models.CharField(max_length=150, blank=True)
-    last_name = models.CharField(max_length=150, blank=True)
+    name = models.CharField(max_length=150, blank=True)
     email = models.EmailField(max_length=255, unique=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
+    verified_email = models.BooleanField(default=False)
+    is_customer = models.BooleanField(default=False)
+    phone = models.CharField(max_length=255, validators=[phone_regex], null=True, blank=True)
     date_joined = models.DateTimeField(('date joined'), auto_now_add=True)
 
     USERNAME_FIELD = 'username'
@@ -75,7 +80,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         db_table = 'users'
 
 
-phone_regex = RegexValidator(regex='^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$',message='Invalid phone number')
+# phone_regex = RegexValidator(regex='^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$',message='Invalid phone number')
 class CustomerProfile(AbstractTimeStamp):
     GENDER_CHOICES = (
         ('M', 'Male'),
@@ -110,3 +115,25 @@ class Subscription(AbstractTimeStamp):
         verbose_name = "Subscription"
         verbose_name_plural = "Subscriptions"
         db_table = 'subscriptions'
+
+
+class OTPModel(AbstractTimeStamp):
+    """OTPModel to save otp value
+    Args:
+        contact_number: CharField
+        otp_number: IntegerField
+        expired_time: DateTimeField
+
+    """
+    contact_number = models.CharField(_('Contact Number'), max_length=20, null=False, blank=False)
+    otp_number = models.IntegerField(_('OTP Number'), null=False, blank=False)
+    verified_phone = models.BooleanField(default=False)
+    expired_time = models.DateTimeField(_('Expired Time'), null=False, blank=False)
+
+    def __str__(self):
+        return self.contact_number
+
+    class Meta:
+        verbose_name = "OTPModel"
+        verbose_name_plural = "OTPModels"
+        db_table = 'otp_models'

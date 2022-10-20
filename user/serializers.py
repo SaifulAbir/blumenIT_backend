@@ -1,7 +1,7 @@
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from user import models as user_models
-from user.models import CustomerProfile, Subscription, User
+from user.models import CustomerProfile, Subscription, User, OTPModel
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
@@ -16,6 +16,38 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         user = user_models.User.objects.create_user(
             **validated_data, username=validated_data['email'], is_active=False)
         return user
+
+
+class SetPasswordSerializer(serializers.ModelSerializer):
+    class Meta:
+        extra_kwargs = {'password': {'write_only': True},
+                        'email': {'required': True},
+                        'phone': {'required': True}}
+        fields = ('phone', 'email', 'password')
+        model = user_models.User
+
+
+class OTPSendSerializer(serializers.ModelSerializer):
+    class Meta:
+        extra_kwargs = {'email': {'required': True},
+                        'phone': {'required': True}}
+        fields = ('email', 'phone')
+        model = user_models.User
+
+
+class OTPReSendSerializer(serializers.ModelSerializer):
+    class Meta:
+        extra_kwargs = {'contact_number': {'required': True}}
+        fields = ('contact_number',)
+        model = OTPModel
+
+
+class OTPVerifySerializer(serializers.ModelSerializer):
+    class Meta:
+        extra_kwargs = {'contact_number': {'required': True},
+                        'otp_number': {'required': True}}
+        fields = ('contact_number', 'otp_number')
+        model = OTPModel
 
 
 class LoginSerializer(serializers.Serializer):

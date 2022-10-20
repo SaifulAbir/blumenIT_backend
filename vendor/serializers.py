@@ -138,11 +138,11 @@ class VendorProductListSerializer(serializers.ModelSerializer):
     # product_media = ProductMediaSerializer(many=True, read_only=True)
     # category = CategorySerializer(read_only=True)
     # brand_name = serializers.SerializerMethodField()
-    # avg_rating = serializers.SerializerMethodField()
+    avg_rating = serializers.SerializerMethodField()
     # review_count = serializers.SerializerMethodField()
     # discount_type = serializers.CharField()
 
-    vendor_username = serializers.CharField(source="vendor.username",read_only=True)
+    vendor_organization_name = serializers.CharField(source="vendor.organization_name",read_only=True)
 
     class Meta:
         model = Product
@@ -150,7 +150,15 @@ class VendorProductListSerializer(serializers.ModelSerializer):
             'id',
             'thumbnail',
             'title',
-            'title',
+            'vendor_organization_name',
+            'sell_count',
+            'price',
+            'avg_rating',
+            'quantity',
+            'low_stock_quantity_warning',
+            'todays_deal',
+            'is_published',
+            'is_featured'
         ]
 
     # class Meta:
@@ -176,8 +184,8 @@ class VendorProductListSerializer(serializers.ModelSerializer):
     #         'discount_amount'
     #     ]
 
-    # def get_avg_rating(self, obj):
-    #     return obj.product_review_product.all().aggregate(Avg('rating_number'))['rating_number__avg']
+    def get_avg_rating(self, obj):
+        return obj.product_review_product.all().aggregate(Avg('rating_number'))['rating_number__avg']
 
     # def get_brand_name(self, obj):
     #     if obj.brand:

@@ -265,6 +265,7 @@ class Product(AbstractTimeStamp):
         VatType, related_name="product_vat_type", null=True, blank=True, on_delete=models.PROTECT)
     product_condition = models.ForeignKey(
         ProductCondition, related_name="product_product_condition", null=True, blank=True, on_delete=models.PROTECT)
+    is_published = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
         verbose_name = 'Product'
@@ -553,7 +554,6 @@ class ProductReview(AbstractTimeStamp):
                              related_name='product_review_user', blank=True, null=True)
     rating_number = models.IntegerField(default=0)
     review_text = models.TextField(default='', blank=True, null=True)
-    is_published = models.BooleanField(null=False, blank=False, default=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:

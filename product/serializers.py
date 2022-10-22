@@ -7,7 +7,7 @@ from email.policy import default
 from pyexpat import model
 from attr import fields
 from rest_framework import serializers
-from product.models import Category, ProductCombinationMedia, ProductCombinationsVariants, SubCategory, SubSubCategory, Product, ProductTags, ProductReview, ProductMedia, ProductCombinations, ProductAttributes, Brand, DiscountTypes, Tags, Units, VariantType
+from product.models import Category, ProductCombinationMedia, ProductCombinationsVariants, ProductImages, SubCategory, SubSubCategory, Product, ProductTags, ProductReview, ProductMedia, ProductCombinations, ProductAttributes, Brand, DiscountTypes, Tags, Units, VariantType
 from user.models import User
 from vendor.models import StoreSettings, Vendor, VendorReview
 from django.db.models import Avg, Count, Q, F
@@ -194,6 +194,11 @@ class ProductMediaSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductMedia
         fields = ['id', 'file']
+
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImages
+        fields = ['id', 'image']
 
 
 # Product Attribute serializer

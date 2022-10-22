@@ -1,5 +1,5 @@
 from django.template.loader import render_to_string
-from product.serializers import BrandSerializer, CategorySerializer, DiscountTypeSerializer, ProductMediaSerializer, ProductReviewSerializer, ProductTagsSerializer, SubCategorySerializer, SubSubCategorySerializer, UnitSerializer
+from product.serializers import BrandSerializer, CategorySerializer, DiscountTypeSerializer, ProductImageSerializer, ProductMediaSerializer, ProductReviewSerializer, ProductTagsSerializer, SubCategorySerializer, SubSubCategorySerializer, UnitSerializer
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -846,15 +846,16 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
     # product_combinations = ProductCombinationSerializer(
     #     many=True, required=False)
 
-    
-
-    # tags = serializers.SerializerMethodField()
-    # product_tags = serializers.ListField(
-    #     child=serializers.IntegerField(), write_only=True, required=False)
-
-    # images = serializers.SerializerMethodField()
-    # product_images = serializers.ListField(
-    #     child=serializers.FileField(), write_only=True, required=False)
+    product_category_name = serializers.SerializerMethodField()
+    product_sub_category_name = serializers.SerializerMethodField()
+    product_sub_sub_category_name = serializers.SerializerMethodField()
+    product_brand_name = serializers.SerializerMethodField()
+    existing_product_tags = serializers.SerializerMethodField()
+    product_tags = serializers.ListField(
+        child=serializers.CharField(), write_only=True, required=False)
+    existing_product_images = serializers.SerializerMethodField()
+    product_images = serializers.ListField(
+        child=serializers.FileField(), write_only=True, required=False)
 
     # colors = serializers.SerializerMethodField()
     # product_colors = serializers.ListField(
@@ -876,8 +877,30 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['id',
-    #               'title',
+        fields = [
+                    'id',
+                    'title',
+                    'product_category_name',
+                    'category',
+                    'product_sub_category_name',
+                    'sub_category',
+                    'product_sub_sub_category_name',
+                    'sub_sub_category',
+                    'product_brand_name',
+                    'brand',
+                    'vendor',
+                    'unit',
+                    'minimum_purchase_quantity',
+                    'existing_product_tags',
+                    'product_tags',
+                    'bar_code',
+                    'refundable',
+                    'existing_product_images',
+                    'product_images',
+                    'thumbnail',
+
+
+
     #               'sku',
     #               'warranty',
     #               'short_description',
@@ -906,24 +929,56 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
     #               'product_combinations'
                   ]
 
-    # def get_tags(self, obj):
-    #     tags_list = []
-    #     try:
-    #         selected_product_tags = ProductTags.objects.filter(
-    #             product=obj, is_active=True).distinct()
-    #         for s_p_t in selected_product_tags:
-    #             tag_title = s_p_t.tag.title
-    #             tags_list.append(tag_title)
-    #         return tags_list
-    #     except:
-    #         return tags_list
+    def get_product_category_name(self, obj):
+        try:
+            get_cat=Category.objects.get(id= obj.category.id)
+            return get_cat.title
+        except:
+            return ''
 
-    # def get_media(self, obj):
-    #     queryset = ProductMedia.objects.filter(
-    #         product=obj, is_active=True).distinct()
-    #     serializer = ProductMediaSerializer(instance=queryset, many=True, context={
-    #                                         'request': self.context['request']})
-        # return serializer.data
+    def get_product_sub_category_name(self, obj):
+        try:
+            get_sub_cat=SubCategory.objects.get(id= obj.sub_category.id)
+            return get_sub_cat.title
+        except:
+            return ''
+
+    def get_product_sub_sub_category_name(self, obj):
+        try:
+            get_sub_sub_cat=SubSubCategory.objects.get(id= obj.sub_sub_category.id)
+            return get_sub_sub_cat.title
+        except:
+            return ''
+
+    def get_product_brand_name(self, obj):
+        try:
+            get_brand=Brand.objects.get(id= obj.brand.id)
+            return get_brand.title
+        except:
+            return ''
+
+
+    def get_existing_product_tags(self, obj):
+        tags_list = []
+        try:
+            selected_product_tags = ProductTags.objects.filter(
+                product=obj, is_active=True).distinct()
+            for s_p_t in selected_product_tags:
+                tag_title = s_p_t.tag.title
+                tags_list.append(tag_title)
+            return tags_list
+        except:
+            return tags_list
+
+    def get_existing_product_images(self, obj):
+        try:
+            queryset = ProductImages.objects.filter(
+                product=obj, is_active=True).distinct()
+            serializer = ProductImageSerializer(instance=queryset, many=True, context={
+                                                'request': self.context['request']})
+            return serializer.data
+        except:
+            return []
 
     # def get_combinations(self, obj):
     #     selected_product_combinations = ProductCombinations.objects.filter(

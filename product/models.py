@@ -2,7 +2,6 @@ from email.policy import default
 from hashlib import blake2b
 from itertools import product
 from statistics import mode
-from turtle import back
 from django.db import models
 from ecommerce.models import AbstractTimeStamp
 from vendor.models import Vendor

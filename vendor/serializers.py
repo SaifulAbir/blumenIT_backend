@@ -7,14 +7,13 @@ from ecommerce.common.emails import send_email_without_delay
 from product.models import Brand, Category, Color, DiscountTypes, FlashDealProduct, Inventory, InventoryVariation, Product, ProductAttributeValues, ProductAttributes, ProductColor, ProductCombinations, ProductCombinationsVariants, ProductImages, ProductMedia, ProductReview, ProductTags, ProductVariation, ProductVideoProvider, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units, VariantType, VatType
 from user.models import User
 # from user.serializers import UserRegisterSerializer
-from vendor.models import VendorRequest, Vendor, StoreSettings,Seller
+from vendor.models import VendorRequest, Vendor, StoreSettings, Seller
 from django.db.models import Avg
 from django.utils import timezone
 
 
 #Seller Create serializer
 class SellerSerializer(serializers.ModelSerializer):
-
 
     class Meta:
         model = Seller
@@ -26,14 +25,9 @@ class SellerDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Seller
-        fields = ['id', 'name', 'email', 'address', 'phone','logo']
+        fields = ['id', 'name', 'email', 'address', 'phone', 'logo']
 
 
-class CouponSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Seller
-        fields = ['id', 'code', 'coupon_type', 'amount', 'discount_type', 'start_time', 'min_shopping', 'end_time']
 
 
 # Vendor Request serializer
@@ -43,8 +37,7 @@ class VendorRequestSerializer(serializers.ModelSerializer):
         model = VendorRequest
         fields = ['id', 'first_name', 'last_name', 'organization_name',
                   'email', 'vendor_type', 'nid', 'trade_license']
-        read_only_field =['first_name', 'last_name', 'organization_name',
-                  'email', 'vendor_type', 'nid', 'trade_license']
+        read_only_field =['first_name', 'last_name', 'organization_name', 'email', 'vendor_type', 'nid', 'trade_license']
         # fields = ['id', 'email', 'organization_name', 'first_name', 'last_name', 'vendor_type', 'nid', 'trade_license']
 
 

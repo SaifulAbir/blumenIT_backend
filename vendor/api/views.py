@@ -269,29 +269,39 @@ class VendorProductUpdateAPIView(RetrieveUpdateAPIView):
 
 
 class VendorProductDetailsAPI(RetrieveAPIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     serializer_class = VendorProductDetailsSerializer
     lookup_field = 'slugi'
     lookup_url_kwarg = "slugi"
 
     def get_object(self):
         slug = self.kwargs['slugi']
-        if Vendor.objects.filter(vendor_admin=User.objects.get(id=self.request.user.id)).exists():
-            vid = Vendor.objects.get(
-                vendor_admin=User.objects.get(id=self.request.user.id))
-            if vid:
-                try:
-                    query = Product.objects.get(slug=slug, vendor=vid)
-                    if query:
-                        return query
-                    else:
-                        raise ValidationError(
-                            {"msg": 'You are not creator of this product!'})
-                except:
-                    raise ValidationError(
-                        {"msg": "Product doesn't exist or You are not the creator of this product!"})
+        query = Product.objects.get(slug=slug)
+        if query:
+            return query
         else:
-            raise ValidationError({"msg": 'You are not a vendor.'})
+            raise ValidationError(
+                {"msg": 'You are not creator of this product!'})
+
+    # def get_object(self):
+    #     slug = self.kwargs['slugi']
+    #     if Vendor.objects.filter(vendor_admin=User.objects.get(id=self.request.user.id)).exists():
+    #         vid = Vendor.objects.get(
+    #             vendor_admin=User.objects.get(id=self.request.user.id))
+    #         if vid:
+    #             try:
+    #                 query = Product.objects.get(slug=slug, vendor=vid)
+    #                 if query:
+    #                     return query
+    #                 else:
+    #                     raise ValidationError(
+    #                         {"msg": 'You are not creator of this product!'})
+    #             except:
+    #                 raise ValidationError(
+    #                     {"msg": "Product doesn't exist or You are not the creator of this product!"})
+    #     else:
+    #         raise ValidationError({"msg": 'You are not a vendor.'})
 
 
 class VendorProductSingleMediaDeleteAPI(RetrieveAPIView):

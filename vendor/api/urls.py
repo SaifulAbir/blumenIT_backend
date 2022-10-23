@@ -1,5 +1,6 @@
 from django.urls import path
 from product.api.views import ProductDetailsAPI
+from vendor.api.views import VendorAttributeListAPIView, VendorBrandListAPIView, VendorCategoryListAPIView, VendorProductDeleteAPI, VendorProductDetailsAPI, VendorProductSingleMediaDeleteAPI, VendorProductUpdateAPIView, VendorRequestAPIView, VendorRequestListAPI, VendorCreateAPIView, OrganizationNamesListAPIView, VendorDetailAPIView, StoreSettingsUpdateAPIView, VendorSubCategoryListAPIView, VendorSubSubCategoryListAPIView, VendorTagListAPIView, VendorUnitListAPIView, VendorProductListAPI, VendorProductCreateAPIView, VendorDiscountListAPIView, VendorVariantListAPIView, SellerCreateAPIView, SellerListAPIView, SellerUpdateAPIView, SellerDeleteAPIView
 from vendor.api.views import VendorAttributeListAPIView, VendorBrandListAPIView, VendorCategoryListAPIView, VendorProductDeleteAPI, VendorProductDetailsAPI, VendorProductSingleMediaDeleteAPI, VendorProductUpdateAPIView, VendorRequestAPIView, VendorRequestListAPI, VendorCreateAPIView, OrganizationNamesListAPIView, VendorDetailAPIView, StoreSettingsUpdateAPIView, VendorSubCategoryListAPIView, VendorSubSubCategoryListAPIView, VendorTagListAPIView, VendorUnitListAPIView, VendorProductListAPI, VendorProductCreateAPIView, VendorDiscountListAPIView, VendorVariantListAPIView,SellerCreateAPIView,SellerListAPIView,SellerUpdateAPIView, SellerDeleteAPIView, VendorVatTypeListAPIView, VendorVideoProviderListAPIView
 
 urlpatterns = [
@@ -7,9 +8,6 @@ urlpatterns = [
     path('seller-list/', SellerListAPIView.as_view()),
     path('seller-update/<int:id>/', SellerUpdateAPIView.as_view()),
     path('seller-delete/<int:id>/', SellerDeleteAPIView.as_view()),
-    path('coupon-create/', SellerCreateAPIView.as_view()),
-    path('coupon-list/', SellerListAPIView.as_view()),
-    path('coupon-update/<int:id>/', SellerUpdateAPIView.as_view()),
     # path('vendor-request/', VendorRequestAPIView.as_view()),
     # path('vendor-request-list/', VendorRequestListAPI.as_view()),
     # path('create-vendor/', VendorCreateAPIView.as_view()),

@@ -5,13 +5,13 @@ from rest_framework.response import Response
 from rest_framework import status
 from product.pagination import ProductCustomPagination
 from product.serializers import DiscountTypeSerializer, ProductTagsSerializer, TagsSerializer, VariantTypeSerializer
-from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView, RetrieveAPIView,DestroyAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView, RetrieveAPIView, DestroyAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductMedia, ProductReview, ProductTags, ProductVideoProvider, SubCategory, SubSubCategory, Tags, Units, VariantType, VatType
+from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductMedia, ProductReview, ProductTags, SubCategory, SubSubCategory, Tags, Units, VariantType, ProductVideoProvider, VatType
 from user.models import CustomerProfile, User
-from vendor.models import VendorRequest, Vendor,Seller
-from vendor.serializers import ProductVatProviderSerializer, ProductVideoProviderSerializer, VendorBrandSerializer, VendorCategorySerializer, VendorProductCreateSerializer, VendorProductDetailsSerializer, VendorProductListSerializer, VendorProductUpdateSerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
-    VendorDetailSerializer, StoreSettingsSerializer,SellerDetailSerializer , VendorSubCategorySerializer, VendorSubSubCategorySerializer, VendorUnitSerializer, SellerSerializer, ProductAttributesSerializer, CouponSerializer
+from vendor.models import VendorRequest, Vendor, Seller
+from vendor.serializers import VendorBrandSerializer, VendorCategorySerializer, VendorProductCreateSerializer, VendorProductDetailsSerializer, VendorProductListSerializer, VendorProductUpdateSerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
+    VendorDetailSerializer, StoreSettingsSerializer, SellerDetailSerializer, VendorSubCategorySerializer, VendorSubSubCategorySerializer, VendorUnitSerializer, SellerSerializer, ProductAttributesSerializer, ProductVideoProviderSerializer, ProductVatProviderSerializer
 from user.models import User
 from cart.models import Coupon
 from rest_framework.exceptions import ValidationError
@@ -20,7 +20,6 @@ from rest_framework.exceptions import ValidationError
 class SellerCreateAPIView(CreateAPIView):
     permission_classes = [AllowAny]
     serializer_class = SellerSerializer
-
 
     def post(self, request):
         seller = SellerSerializer(data=request.data)
@@ -31,15 +30,15 @@ class SellerCreateAPIView(CreateAPIView):
 
         if seller.is_valid():
             seller.save()
-            return (Response(seller.data))
+            return Response(seller.data)
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-class SellerListAPIView(ListAPIView):
 
-        queryset = Seller.objects.filter()
-        permission_classes = [AllowAny]
-        serializer_class = SellerDetailSerializer
+class SellerListAPIView(ListAPIView):
+    queryset = Seller.objects.filter()
+    permission_classes = [AllowAny]
+    serializer_class = SellerDetailSerializer
 
 
 class SellerUpdateAPIView(RetrieveUpdateAPIView):
@@ -52,6 +51,7 @@ class SellerUpdateAPIView(RetrieveUpdateAPIView):
     def put(self, request, *args, **kwargs):
         return super(SellerUpdateAPIView, self).put(request, *args, **kwargs)
 
+
 class SellerDeleteAPIView(DestroyAPIView):
     serializer_class = SellerSerializer
     queryset = Seller.objects.all()
@@ -60,25 +60,6 @@ class SellerDeleteAPIView(DestroyAPIView):
 
     def delete(self, request, *args, **kwargs):
         return super(SellerDeleteAPIView, self).delete(request, *args, **kwargs)
-
-class CouponCreateAPIView(CreateAPIView):
-
-    permission_classes = [AllowAny]
-    serializer_class = CouponSerializer
-
-    def post(self, request):
-        coupon = CouponSerializer(data=request.data)
-
-        # validating for already existing data
-        if Coupon.objects.filter(**request.data).exists():
-            raise serializers.ValidationError('This data already exists')
-
-        if coupon.is_valid():
-            coupon.save()
-            return (Response(coupon.data))
-        else:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
 
 
 class VendorRequestAPIView(CreateAPIView):
@@ -92,7 +73,6 @@ class VendorRequestAPIView(CreateAPIView):
 class VendorRequestListAPI(ListAPIView):
     queryset = VendorRequest.objects.all()
     serializer_class = VendorRequestSerializer
-
 
 
 class VendorCreateAPIView(CreateAPIView):
@@ -223,6 +203,7 @@ class VendorProductListAPI(ListAPIView):
 class VendorProductCreateAPIView(CreateAPIView):
     permission_classes = (AllowAny,)
     serializer_class = VendorProductCreateSerializer
+
     # permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
@@ -338,7 +319,7 @@ class VendorProductSingleMediaDeleteAPI(RetrieveAPIView):
                         {"msg": 'You are not creator of this product!'})
                 # except:
                 # raise ValidationError(
-                    # {"msg": "Product doesn't exist or You are not the creator of this product!"})
+                # {"msg": "Product doesn't exist or You are not the creator of this product!"})
         else:
             raise ValidationError({"msg": 'You are not a vendor.'})
 

@@ -163,6 +163,7 @@ class VatType(AbstractTimeStamp):
     def __str__(self):
         return self.title
 
+
 class ShippingClass(AbstractTimeStamp):
     title = models.CharField(max_length=800, default='', help_text="name")
     description = models.TextField(default='', null=False, blank=False)

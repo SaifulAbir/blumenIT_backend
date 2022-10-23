@@ -13,6 +13,11 @@ from rest_framework.exceptions import ValidationError
 
 # general Serializer start
 
+class CouponSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Coupon
+        fields = ['id', 'code', 'coupon_type', 'amount', 'discount_type', 'start_time', 'min_shopping', 'end_time', 'is_active' ]
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:

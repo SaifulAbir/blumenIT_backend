@@ -1,9 +1,11 @@
 
 from rest_framework.generics import ListAPIView, CreateAPIView, ListCreateAPIView, DestroyAPIView, RetrieveUpdateAPIView, RetrieveAPIView
 from rest_framework.views import APIView
+from rest_framework import status
+from rest_framework import serializers
 from cart.serializers import BillingAddressSerializer, CheckoutDetailsSerializer, CheckoutSerializer, \
     OrderItemSerializer, OrderSerializer, PaymentTypesListSerializer, WishlistSerializer, WishListDataSerializer, \
-    ApplyCouponSerializer
+    ApplyCouponSerializer, CouponSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -17,6 +19,43 @@ from drf_yasg.utils import swagger_auto_schema
 from django.utils import timezone
 
 from vendor.models import Vendor
+
+
+class CouponCreateAPIView(CreateAPIView):
+
+    permission_classes = [AllowAny]
+    serializer_class = CouponSerializer
+
+    def post(self, request):
+        coupon = CouponSerializer(data=request.data)
+
+        # validating for already existing data
+        if Coupon.objects.filter(**request.data).exists():
+            raise serializers.ValidationError('This data already exists')
+
+        if coupon.is_valid():
+            coupon.save()
+            return Response(coupon.data)
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+class CouponListAPIView(ListAPIView):
+
+    queryset = Coupon.objects.filter()
+    permission_classes = [AllowAny]
+    serializer_class = CouponSerializer
+
+
+class CouponUpdateAPIView(RetrieveUpdateAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = CouponSerializer
+    queryset = Coupon.objects.all()
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def put(self, request, *args, **kwargs):
+        return super(CouponUpdateAPIView, self).put(request, *args, **kwargs)
 
 
 class CheckoutAPIView(CreateAPIView):

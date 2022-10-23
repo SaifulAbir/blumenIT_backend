@@ -8,6 +8,7 @@ from ecommerce.models import AbstractTimeStamp
 from django.utils.translation import gettext as _
 from user.models import User
 
+
 class Seller(AbstractTimeStamp):
     name = models.CharField(max_length=254, null=True, blank=True)
     phone = models.CharField(max_length=255, null=False, blank=False, unique=True)
@@ -22,6 +23,7 @@ class Seller(AbstractTimeStamp):
         verbose_name_plural = "Sellers"
         verbose_name = "Seller"
         db_table = 'sellers'
+
 
 class VendorRequest(AbstractTimeStamp):
     VENDOR_TYPES = [

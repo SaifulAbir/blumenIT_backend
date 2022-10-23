@@ -7,10 +7,10 @@ from product.pagination import ProductCustomPagination
 from product.serializers import DiscountTypeSerializer, ProductTagsSerializer, TagsSerializer, VariantTypeSerializer
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView, RetrieveAPIView,DestroyAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductMedia, ProductReview, ProductTags, SubCategory, SubSubCategory, Tags, Units, VariantType
+from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductMedia, ProductReview, ProductTags, ProductVideoProvider, SubCategory, SubSubCategory, Tags, Units, VariantType, VatType
 from user.models import CustomerProfile, User
 from vendor.models import VendorRequest, Vendor,Seller
-from vendor.serializers import VendorBrandSerializer, VendorCategorySerializer, VendorProductCreateSerializer, VendorProductDetailsSerializer, VendorProductListSerializer, VendorProductUpdateSerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
+from vendor.serializers import ProductVatProviderSerializer, ProductVideoProviderSerializer, VendorBrandSerializer, VendorCategorySerializer, VendorProductCreateSerializer, VendorProductDetailsSerializer, VendorProductListSerializer, VendorProductUpdateSerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
     VendorDetailSerializer, StoreSettingsSerializer,SellerDetailSerializer , VendorSubCategorySerializer, VendorSubSubCategorySerializer, VendorUnitSerializer, SellerSerializer, ProductAttributesSerializer, CouponSerializer
 from user.models import User
 from cart.models import Coupon
@@ -375,3 +375,13 @@ class VendorProductDeleteAPI(ListAPIView):
     #                     {"msg": 'You are not creator of this product!'})
     #     else:
     #         raise ValidationError({"msg": 'You are not a vendor.'})
+
+class VendorVideoProviderListAPIView(ListAPIView):
+    permission_classes = [AllowAny]
+    queryset = ProductVideoProvider.objects.filter(is_active=True)
+    serializer_class = ProductVideoProviderSerializer
+
+class VendorVatTypeListAPIView(ListAPIView):
+    permission_classes = [AllowAny]
+    queryset = VatType.objects.filter(is_active=True)
+    serializer_class = ProductVatProviderSerializer

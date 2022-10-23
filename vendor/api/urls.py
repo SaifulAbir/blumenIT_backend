@@ -1,6 +1,6 @@
 from django.urls import path
 from product.api.views import ProductDetailsAPI
-from vendor.api.views import VendorAttributeListAPIView, VendorBrandListAPIView, VendorCategoryListAPIView, VendorProductDeleteAPI, VendorProductDetailsAPI, VendorProductSingleMediaDeleteAPI, VendorProductUpdateAPIView, VendorRequestAPIView, VendorRequestListAPI, VendorCreateAPIView, OrganizationNamesListAPIView, VendorDetailAPIView, StoreSettingsUpdateAPIView, VendorSubCategoryListAPIView, VendorSubSubCategoryListAPIView, VendorTagListAPIView, VendorUnitListAPIView, VendorProductListAPI, VendorProductCreateAPIView, VendorDiscountListAPIView, VendorVariantListAPIView,SellerCreateAPIView,SellerListAPIView,SellerUpdateAPIView, SellerDeleteAPIView
+from vendor.api.views import VendorAttributeListAPIView, VendorBrandListAPIView, VendorCategoryListAPIView, VendorProductDeleteAPI, VendorProductDetailsAPI, VendorProductSingleMediaDeleteAPI, VendorProductUpdateAPIView, VendorRequestAPIView, VendorRequestListAPI, VendorCreateAPIView, OrganizationNamesListAPIView, VendorDetailAPIView, StoreSettingsUpdateAPIView, VendorSubCategoryListAPIView, VendorSubSubCategoryListAPIView, VendorTagListAPIView, VendorUnitListAPIView, VendorProductListAPI, VendorProductCreateAPIView, VendorDiscountListAPIView, VendorVariantListAPIView,SellerCreateAPIView,SellerListAPIView,SellerUpdateAPIView, SellerDeleteAPIView, VendorVatTypeListAPIView, VendorVideoProviderListAPIView
 
 urlpatterns = [
     path('create-seller/', SellerCreateAPIView.as_view()),
@@ -26,6 +26,8 @@ urlpatterns = [
     path('vendor-product-unit-list/', VendorUnitListAPIView.as_view()),
     path('vendor-product-discount-list/', VendorDiscountListAPIView.as_view()),
     path('vendor-product-tag-list/', VendorTagListAPIView.as_view()),
+    path('vendor-product-video-provider-list/', VendorVideoProviderListAPIView.as_view()),
+    path('vendor-product-vat-type-list/', VendorVatTypeListAPIView.as_view()),
     # path('vendor-product-attribute-list/',
     #      VendorAttributeListAPIView.as_view()),
     # path('vendor-product-variant-list/', VendorVariantListAPIView.as_view()),

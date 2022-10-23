@@ -2,6 +2,7 @@ from email.policy import default
 from hashlib import blake2b
 from itertools import product
 from statistics import mode
+from turtle import back
 from django.db import models
 from ecommerce.models import AbstractTimeStamp
 from vendor.models import Vendor
@@ -144,6 +145,7 @@ class DiscountTypes(AbstractTimeStamp):
 
 class ProductVideoProvider(AbstractTimeStamp):
     title = models.CharField(max_length=800, default='', help_text="name")
+    is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
         verbose_name = 'ProductVideoProvider'
@@ -155,6 +157,7 @@ class ProductVideoProvider(AbstractTimeStamp):
 
 class VatType(AbstractTimeStamp):
     title = models.CharField(max_length=800, default='', help_text="name")
+    is_active = models.BooleanField(null=False, blank=False, default=True)
     class Meta:
         verbose_name = 'VatType'
         verbose_name_plural = 'VatTypes'
@@ -311,6 +314,7 @@ class Specification(AbstractTimeStamp):
     product = models.ForeignKey(
         Product, on_delete=models.PROTECT, related_name='specification_product')
     title = models.CharField(max_length=800, default='', help_text="name")
+    is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
         verbose_name = 'Specification'
@@ -325,6 +329,8 @@ class SpecificationValue(AbstractTimeStamp):
         Specification, on_delete=models.PROTECT, related_name='specification_specification')
     key = models.CharField(max_length=800, default='')
     value = models.CharField(max_length=255, default='')
+    product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='specification_value_product', null=True, blank=True)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
         verbose_name = 'SpecificationValue'
@@ -356,6 +362,8 @@ class ProductAttributeValues(AbstractTimeStamp):
                                related_name='product_attribute_values_product_attribute', blank=False, null=False)
     value = models.CharField(
         max_length=255, null=False, blank=False, default="")
+    product = models.ForeignKey(
+        Product, related_name='product_attributes_values_product', blank=True, null=True, on_delete=models.PROTECT)
     is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
@@ -416,6 +424,7 @@ class ProductVariation(AbstractTimeStamp):
     product_color = models.ForeignKey(ProductColor, on_delete=models.CASCADE, null=True,
                             blank=True, related_name='Product_variation_color')
     total_price = models.FloatField(null=False, blank=False, default=0)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
         verbose_name = 'ProductVariation'
@@ -677,6 +686,7 @@ class FlashDealInfo(AbstractTimeStamp):
         upload_to='flash_deal_info', blank=True, null=True)
     start_date = models.DateTimeField(null=True, blank=True)
     end_date = models.DateTimeField(null=True, blank=True)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
         verbose_name = 'FlashDealInfo'
@@ -695,6 +705,7 @@ class FlashDealProduct(AbstractTimeStamp):
         DiscountTypes, on_delete=models.PROTECT, related_name='flash_deal_product_discount_type')
     discount_amount = models.FloatField(
         max_length=255, null=True, blank=True, default=0)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
         verbose_name = 'FlashDealProduct'

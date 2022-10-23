@@ -1,11 +1,11 @@
 from django.db import models
 from ecommerce.models import AbstractTimeStamp
-from vendor.models import Vendor
+from vendor.models import Vendor, Seller
 from .utils import unique_slug_generator_cart, unique_order_id_generator_for_order, unique_order_id_generator_for_vendor_order
 from django.db.models.signals import pre_save
 from user.models import CustomerProfile, User
 from django.utils.translation import gettext as _
-from product.models import Product, ProductAttributes, VariantType
+from product.models import Product, ProductAttributes, VariantType, ShippingClass
 from django.utils import timezone
 
 # from django_countries.fields import CountryField
@@ -110,42 +110,67 @@ class Payment(AbstractTimeStamp):
 
 class Order(AbstractTimeStamp):
     ORDER_CHOICES = [
-        ('PENDING', 'pending'),
-        ('PROCESSING', 'processing'),
-        ('SHIPPED', 'shipped'),
-        ('DELIVERED', 'delivered'),
-        ('RETURN', 'return'),
-        ('CANCEL', 'cancel'),
+        ('PENDING', 'Pending'),
+        ('CONFIRMED', 'Confirmed'),
+        ('PICKED-UP', 'Picked Up'),
+        ('DELIVERED', 'Delivered'),
+        ('RETURN', 'Return'),
+        ('CANCEL', 'Cancel'),
     ]
 
+    PAYMENT_STATUSES = [
+        ('PAID', 'Paid'),
+        ('UN-PAID', 'Un-Paid'),
+    ]
+
+    order_id = models.SlugField(null=False, blank=False, allow_unicode=True)
     user = models.ForeignKey(User, on_delete=models.PROTECT,
                              related_name='order_user', blank=True, null=True)
-    customer_profile = models.ForeignKey(
-        CustomerProfile, on_delete=models.PROTECT, related_name='order_customer_profile', blank=True, null=True)
-    order_id = models.SlugField(null=False, blank=False, allow_unicode=True)
-    ordered_date = models.DateTimeField(auto_now_add=True)
-    ordered = models.BooleanField(default=True)
-    being_delivered = models.BooleanField(default=False)
-    received = models.BooleanField(default=False)
-    refund_requested = models.BooleanField(default=False)
-    refund_granted = models.BooleanField(default=False)
-    payment = models.ForeignKey(
-        Payment, on_delete=models.SET_NULL, blank=True, null=True)
-    shipping_type = models.ForeignKey(
-        ShippingType, on_delete=models.SET_NULL, blank=True, null=True)
-    payment_type = models.ForeignKey(
-        PaymentType, on_delete=models.SET_NULL, blank=True, null=True)
-    coupon = models.ForeignKey(
-        Coupon, on_delete=models.SET_NULL, blank=True, null=True)
-    coupon_status = models.BooleanField(default=False)
-    notes = models.TextField(null=True, blank=True, default='')
+    # customer_profile = models.ForeignKey(
+    #     CustomerProfile, on_delete=models.PROTECT, related_name='order_customer_profile', blank=True, null=True)
+    product_count = models.IntegerField(blank=True, null=True)
+    vendor = models.ForeignKey(
+        Seller, on_delete=models.PROTECT, related_name='order_vendor', blank=True, null=True)
     total_price = models.FloatField(
-        max_length=255, null=False, blank=False, default=0)
-    discounted_price = models.FloatField(
         max_length=255, null=False, blank=False, default=0)
     order_status = models.CharField(
         max_length=20, null=False, blank=False, choices=ORDER_CHOICES, default=ORDER_CHOICES[1][1])
-    product_count = models.IntegerField(blank=True, null=True)
+    payment_status = models.CharField(
+        max_length=20, null=False, blank=False, choices=PAYMENT_STATUSES, default=PAYMENT_STATUSES[1][1])
+    delivery_agent = models.CharField(max_length=100, null=True, blank=True)
+    refund = models.BooleanField(default=False)
+    order_date = models.DateTimeField(auto_now_add=True)
+    coupon = models.ForeignKey(
+        Coupon, on_delete=models.SET_NULL, blank=True, null=True)
+    coupon_discount_amount = models.FloatField(max_length=255, null=True, blank=True)
+    tax_amount = models.FloatField(max_length=255, null=True, blank=True)
+    shipping_cost = models.FloatField(max_length=255, null=True, blank=True)
+    shipping_class = models.ForeignKey(
+        ShippingClass, on_delete=models.SET_NULL, blank=True, null=True)
+    payment_type = models.ForeignKey(
+        PaymentType, on_delete=models.SET_NULL, blank=True, null=True)
+    cash_on_deliver = models.BooleanField(default=False)
+
+    # ordered = models.BooleanField(default=True)
+    # being_delivered = models.BooleanField(default=False)
+    # received = models.BooleanField(default=False)
+    # refund_requested = models.BooleanField(default=False)
+    # refund_granted = models.BooleanField(default=False)
+    # payment = models.ForeignKey(
+    #     Payment, on_delete=models.SET_NULL, blank=True, null=True)
+    # shipping_type = models.ForeignKey(
+    #     ShippingType, on_delete=models.SET_NULL, blank=True, null=True)
+    # payment_type = models.ForeignKey(
+    #     PaymentType, on_delete=models.SET_NULL, blank=True, null=True)
+    # coupon = models.ForeignKey(
+    #     Coupon, on_delete=models.SET_NULL, blank=True, null=True)
+    # coupon_status = models.BooleanField(default=False)
+    # notes = models.TextField(null=True, blank=True, default='')
+    # total_price = models.FloatField(
+    #     max_length=255, null=False, blank=False, default=0)
+    # discounted_price = models.FloatField(
+    #     max_length=255, null=False, blank=False, default=0)
+
 
     class Meta:
         verbose_name = 'Order'
@@ -218,11 +243,20 @@ pre_save.connect(pre_save_order, sender=VendorOrder)
 class OrderItem(AbstractTimeStamp):
     order = models.ForeignKey(
         Order, on_delete=models.CASCADE, blank=True, null=True)
-    vendor_order = models.ForeignKey(VendorOrder, on_delete=models.PROTECT,
-                                     related_name='order_items_vendor_order', blank=True, null=True)
     product = models.ForeignKey(
         Product, on_delete=models.CASCADE, null=False, blank=False)
     quantity = models.IntegerField(default=1)
+    unit_price = models.FloatField(
+        max_length=255, null=False, blank=False, default=0)
+    total_price = models.FloatField(
+        max_length=255, null=False, blank=False, default=0)
+    is_attribute = models.BooleanField(default=False)
+    is_varient = models.BooleanField(default=False)
+    attribute = models.ForeignKey(
+        ProductAttributes, on_delete=models.CASCADE, blank=True, null=True)
+
+    vendor_order = models.ForeignKey(VendorOrder, on_delete=models.PROTECT,
+                                     related_name='order_items_vendor_order', blank=True, null=True)
     ordered = models.BooleanField(default=False)
     user = models.ForeignKey(User, on_delete=models.PROTECT,
                              related_name='order_items_user', blank=True, null=True)

@@ -7,10 +7,10 @@ from product.pagination import ProductCustomPagination
 from product.serializers import DiscountTypeSerializer, ProductTagsSerializer, TagsSerializer, VariantTypeSerializer
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView, RetrieveAPIView,DestroyAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductMedia, ProductReview, ProductTags, SubCategory, SubSubCategory, Tags, Units, VariantType
+from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductMedia, ProductReview, ProductTags, ProductVideoProvider, SubCategory, SubSubCategory, Tags, Units, VariantType, VatType
 from user.models import CustomerProfile, User
 from vendor.models import VendorRequest, Vendor,Seller
-from vendor.serializers import VendorBrandSerializer, VendorCategorySerializer, VendorProductCreateSerializer, VendorProductDetailsSerializer, VendorProductListSerializer, VendorProductUpdateSerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
+from vendor.serializers import ProductVatProviderSerializer, ProductVideoProviderSerializer, VendorBrandSerializer, VendorCategorySerializer, VendorProductCreateSerializer, VendorProductDetailsSerializer, VendorProductListSerializer, VendorProductUpdateSerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
     VendorDetailSerializer, StoreSettingsSerializer,SellerDetailSerializer , VendorSubCategorySerializer, VendorSubSubCategorySerializer, VendorUnitSerializer, SellerSerializer, ProductAttributesSerializer, CouponSerializer
 from user.models import User
 from cart.models import Coupon
@@ -196,20 +196,28 @@ class VendorVariantListAPIView(ListAPIView):
 
 
 class VendorProductListAPI(ListAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+    # permission_classes = [IsAuthenticated]
     serializer_class = VendorProductListSerializer
     pagination_class = ProductCustomPagination
 
     def get_queryset(self):
-        if Vendor.objects.filter(vendor_admin=User.objects.get(id=self.request.user.id)).exists():
-            vid = Vendor.objects.get(
-                vendor_admin=User.objects.get(id=self.request.user.id))
-            if vid:
-                queryset = Product.objects.filter(
-                    vendor=vid, status='ACTIVE').order_by('-created_at')
-                return queryset
+        queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
+        if queryset:
+            return queryset
         else:
-            raise ValidationError({"msg": 'You are not a vendor.'})
+            raise ValidationError({"msg": 'No active product available or You are not a vendor.'})
+
+    # def get_queryset(self):
+    #     if Vendor.objects.filter(vendor_admin=User.objects.get(id=self.request.user.id)).exists():
+    #         vid = Vendor.objects.get(
+    #             vendor_admin=User.objects.get(id=self.request.user.id))
+    #         if vid:
+    #             queryset = Product.objects.filter(
+    #                 vendor=vid, status='ACTIVE').order_by('-created_at')
+    #             return queryset
+    #     else:
+    #         raise ValidationError({"msg": 'You are not a vendor.'})
 
 
 class VendorProductCreateAPIView(CreateAPIView):
@@ -222,36 +230,42 @@ class VendorProductCreateAPIView(CreateAPIView):
 
 
 class VendorProductUpdateAPIView(RetrieveUpdateAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+    # permission_classes = [IsAuthenticated]
     serializer_class = VendorProductUpdateSerializer
     lookup_field = 'slug'
     lookup_url_kwarg = "slug"
 
     def get_queryset(self):
         slug = self.kwargs['slug']
-        # query = Product.objects.filter(slug=slug)
-        # return query
-
-        if Vendor.objects.filter(vendor_admin=User.objects.get(id=self.request.user.id)).exists():
-            vid = Vendor.objects.get(
-                vendor_admin=User.objects.get(id=self.request.user.id))
-            if vid:
-                try:
-                    query = Product.objects.filter(slug=slug, vendor=vid)
-                    if query:
-                        return query
-                    else:
-                        raise ValidationError(
-                            {"msg": 'You are not creator of this product!'})
-                except:
-                    raise ValidationError(
-                        {"msg": "Product doesn't exist or You are not the creator of this product!"})
+        query = Product.objects.filter(slug=slug)
+        if query:
+            return query
         else:
-            raise ValidationError({"msg": 'You are not a vendor.'})
+            raise ValidationError(
+                {"msg": 'You Can not edit this product!'})
 
-    # def put(self, request, *args, **kwargs):
-    #     print('Put')
-    #     return self.update(request, *args, **kwargs)
+    # def get_queryset(self):
+    #     slug = self.kwargs['slug']
+    #     # query = Product.objects.filter(slug=slug)
+    #     # return query
+
+    #     if Vendor.objects.filter(vendor_admin=User.objects.get(id=self.request.user.id)).exists():
+    #         vid = Vendor.objects.get(
+    #             vendor_admin=User.objects.get(id=self.request.user.id))
+    #         if vid:
+    #             try:
+    #                 query = Product.objects.filter(slug=slug, vendor=vid)
+    #                 if query:
+    #                     return query
+    #                 else:
+    #                     raise ValidationError(
+    #                         {"msg": 'You are not creator of this product!'})
+    #             except:
+    #                 raise ValidationError(
+    #                     {"msg": "Product doesn't exist or You are not the creator of this product!"})
+    #     else:
+    #         raise ValidationError({"msg": 'You are not a vendor.'})
 
 
 class VendorProductDetailsAPI(RetrieveAPIView):
@@ -320,7 +334,8 @@ class VendorProductSingleMediaDeleteAPI(RetrieveAPIView):
 
 
 class VendorProductDeleteAPI(ListAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+    # permission_classes = [IsAuthenticated]
     serializer_class = VendorProductListSerializer
     pagination_class = ProductCustomPagination
     lookup_field = 'slug'
@@ -328,21 +343,45 @@ class VendorProductDeleteAPI(ListAPIView):
 
     def get_queryset(self):
         slug = self.kwargs['slug']
-        if Vendor.objects.filter(vendor_admin=User.objects.get(id=self.request.user.id)).exists():
-            vid = Vendor.objects.get(
-                vendor_admin=User.objects.get(id=self.request.user.id))
-            if vid:
-                product_obj_exist = Product.objects.filter(
-                    slug=slug, vendor=vid).exists()
-                if product_obj_exist:
-                    product_obj = Product.objects.filter(slug=slug, vendor=vid)
-                    product_obj.update(status='REMOVE')
+        product_obj_exist = Product.objects.filter(
+            slug=slug).exists()
+        if product_obj_exist:
+            product_obj = Product.objects.filter(slug=slug)
+            product_obj.update(status='REMOVE', is_published=False)
 
-                    queryset = Product.objects.filter(
-                        vendor=vid, status='ACTIVE').order_by('-created_at')
-                    return queryset
-                else:
-                    raise ValidationError(
-                        {"msg": 'You are not creator of this product!'})
+            queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
+            return queryset
         else:
-            raise ValidationError({"msg": 'You are not a vendor.'})
+            raise ValidationError(
+                {"msg": 'Product Does not exist!'})
+
+    # def get_queryset(self):
+    #     slug = self.kwargs['slug']
+    #     if Vendor.objects.filter(vendor_admin=User.objects.get(id=self.request.user.id)).exists():
+    #         vid = Vendor.objects.get(
+    #             vendor_admin=User.objects.get(id=self.request.user.id))
+    #         if vid:
+    #             product_obj_exist = Product.objects.filter(
+    #                 slug=slug, vendor=vid).exists()
+    #             if product_obj_exist:
+    #                 product_obj = Product.objects.filter(slug=slug, vendor=vid)
+    #                 product_obj.update(status='REMOVE')
+
+    #                 queryset = Product.objects.filter(
+    #                     vendor=vid, status='ACTIVE').order_by('-created_at')
+    #                 return queryset
+    #             else:
+    #                 raise ValidationError(
+    #                     {"msg": 'You are not creator of this product!'})
+    #     else:
+    #         raise ValidationError({"msg": 'You are not a vendor.'})
+
+class VendorVideoProviderListAPIView(ListAPIView):
+    permission_classes = [AllowAny]
+    queryset = ProductVideoProvider.objects.filter(is_active=True)
+    serializer_class = ProductVideoProviderSerializer
+
+class VendorVatTypeListAPIView(ListAPIView):
+    permission_classes = [AllowAny]
+    queryset = VatType.objects.filter(is_active=True)
+    serializer_class = ProductVatProviderSerializer

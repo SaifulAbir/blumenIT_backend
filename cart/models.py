@@ -21,18 +21,6 @@ from django.utils import timezone
 '''
 
 
-class DiscountType(AbstractTimeStamp):
-    name = models.CharField(max_length=255, null=False, blank=False)
-
-    def __str__(self):
-        return self
-
-    class Meta:
-        verbose_name_plural = "DiscountTypes"
-        verbose_name = "DiscountType"
-        db_table = 'discount_type'
-
-
 class Coupon(AbstractTimeStamp):
     code = models.CharField(max_length=15)
     coupon_type = models.CharField(max_length=255, null=False, blank=False)

@@ -7,11 +7,11 @@ from product.pagination import ProductCustomPagination
 from product.serializers import DiscountTypeSerializer, ProductTagsSerializer, TagsSerializer, VariantTypeSerializer
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView, RetrieveAPIView, DestroyAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductMedia, ProductReview, ProductTags, SubCategory, SubSubCategory, Tags, Units, VariantType
+from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductMedia, ProductReview, ProductTags, SubCategory, SubSubCategory, Tags, Units, VariantType, ProductVideoProvider, VatType
 from user.models import CustomerProfile, User
-from vendor.models import VendorRequest, Vendor,Seller
+from vendor.models import VendorRequest, Vendor, Seller
 from vendor.serializers import VendorBrandSerializer, VendorCategorySerializer, VendorProductCreateSerializer, VendorProductDetailsSerializer, VendorProductListSerializer, VendorProductUpdateSerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
-    VendorDetailSerializer, StoreSettingsSerializer,SellerDetailSerializer , VendorSubCategorySerializer, VendorSubSubCategorySerializer, VendorUnitSerializer, SellerSerializer, ProductAttributesSerializer, CouponSerializer
+    VendorDetailSerializer, StoreSettingsSerializer, SellerDetailSerializer, VendorSubCategorySerializer, VendorSubSubCategorySerializer, VendorUnitSerializer, SellerSerializer, ProductAttributesSerializer, ProductVideoProviderSerializer, ProductVatProviderSerializer
 from user.models import User
 from cart.models import Coupon
 from rest_framework.exceptions import ValidationError

@@ -1,21 +1,53 @@
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from user import models as user_models
-from user.models import CustomerProfile, Subscription, User
+from user.models import CustomerProfile, Subscription, User, OTPModel
 
 
-class UserRegisterSerializer(serializers.ModelSerializer):
+# class UserRegisterSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         extra_kwargs = {'password': {'write_only': True},
+#                         'first_name': {'required': True},
+#                         'last_name': {'required': True}}
+#         fields = ('first_name', 'last_name', 'email', 'password')
+#         model = user_models.User
+#
+#     def create(self, validated_data):
+#         user = user_models.User.objects.create_user(
+#             **validated_data, username=validated_data['email'], is_active=False)
+#         return user
+
+
+class SetPasswordSerializer(serializers.ModelSerializer):
     class Meta:
         extra_kwargs = {'password': {'write_only': True},
-                        'first_name': {'required': True},
-                        'last_name': {'required': True}}
-        fields = ('first_name', 'last_name', 'email', 'password')
+                        'email': {'required': True},
+                        'phone': {'required': True}}
+        fields = ('phone', 'email', 'password')
         model = user_models.User
 
-    def create(self, validated_data):
-        user = user_models.User.objects.create_user(
-            **validated_data, username=validated_data['email'], is_active=False)
-        return user
+
+class OTPSendSerializer(serializers.ModelSerializer):
+    class Meta:
+        extra_kwargs = {'email': {'required': True},
+                        'phone': {'required': True}}
+        fields = ('email', 'phone')
+        model = user_models.User
+
+
+class OTPReSendSerializer(serializers.ModelSerializer):
+    class Meta:
+        extra_kwargs = {'contact_number': {'required': True}}
+        fields = ('contact_number',)
+        model = OTPModel
+
+
+class OTPVerifySerializer(serializers.ModelSerializer):
+    class Meta:
+        extra_kwargs = {'contact_number': {'required': True},
+                        'otp_number': {'required': True}}
+        fields = ('contact_number', 'otp_number')
+        model = OTPModel
 
 
 class LoginSerializer(serializers.Serializer):
@@ -26,28 +58,28 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(required=True)
 
 
-class CustomerProfileUpdateSerializer(serializers.ModelSerializer):
-    first_name = serializers.CharField(write_only=True)
-    last_name = serializers.CharField(write_only=True)
-    user = UserRegisterSerializer(read_only=True)
-    gender_display_value = serializers.CharField(
-        source='get_gender_display', read_only=True
-    )
-    class Meta:
-        model = CustomerProfile
-        model_fields = ['id', 'user', 'phone', 'address', 'birth_date', 'gender', 'gender_display_value',
-                        'first_name', 'last_name']
-        fields = model_fields
-
-    def update(self, instance, validated_data):
-        first_name = validated_data.pop('first_name')
-        last_name = validated_data.pop('last_name')
-        user = User.objects.get(id=instance.user.id)
-        user.first_name=first_name
-        user.last_name=last_name
-        user.save()
-        validated_data.update({"user": user})
-        return super().update(instance, validated_data)
+# class CustomerProfileUpdateSerializer(serializers.ModelSerializer):
+#     first_name = serializers.CharField(write_only=True)
+#     last_name = serializers.CharField(write_only=True)
+#     user = UserRegisterSerializer(read_only=True)
+#     gender_display_value = serializers.CharField(
+#         source='get_gender_display', read_only=True
+#     )
+#     class Meta:
+#         model = CustomerProfile
+#         model_fields = ['id', 'user', 'phone', 'address', 'birth_date', 'gender', 'gender_display_value',
+#                         'first_name', 'last_name']
+#         fields = model_fields
+#
+#     def update(self, instance, validated_data):
+#         first_name = validated_data.pop('first_name')
+#         last_name = validated_data.pop('last_name')
+#         user = User.objects.get(id=instance.user.id)
+#         user.first_name=first_name
+#         user.last_name=last_name
+#         user.save()
+#         validated_data.update({"user": user})
+#         return super().update(instance, validated_data)
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
@@ -87,13 +119,13 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
         return instance
 
 
-class CustomerProfileSerializer(serializers.ModelSerializer):
-    user = UserRegisterSerializer(read_only=True)
-    gender_display_value = serializers.CharField(
-        source='get_gender_display', read_only=True
-    )
-
-    class Meta:
-        model = CustomerProfile
-        model_fields = ['id', 'user', 'phone', 'address', 'birth_date', 'gender', 'gender_display_value']
-        fields = model_fields
+# class CustomerProfileSerializer(serializers.ModelSerializer):
+#     user = UserRegisterSerializer(read_only=True)
+#     gender_display_value = serializers.CharField(
+#         source='get_gender_display', read_only=True
+#     )
+#
+#     class Meta:
+#         model = CustomerProfile
+#         model_fields = ['id', 'user', 'phone', 'address', 'birth_date', 'gender', 'gender_display_value']
+#         fields = model_fields

@@ -3,7 +3,7 @@ from rest_framework.generics import ListAPIView, CreateAPIView, ListCreateAPIVie
 from rest_framework.views import APIView
 from cart.serializers import BillingAddressSerializer, CheckoutDetailsSerializer, CheckoutSerializer, \
     OrderItemSerializer, OrderSerializer, PaymentTypesListSerializer, WishlistSerializer, WishListDataSerializer, \
-    ApplyCouponSerializer, VendorOrderSerializer, VendorOrderDetailSerializer
+    ApplyCouponSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -443,26 +443,26 @@ class UserOrderListAPIView(ListAPIView):
         return queryset
 
 
-class VendorOrderListAPIView(ListAPIView):
-    permission_classes = [IsAuthenticated]
-    serializer_class = VendorOrderSerializer
+# class VendorOrderListAPIView(ListAPIView):
+#     permission_classes = [IsAuthenticated]
+#     serializer_class = VendorOrderSerializer
+#
+#     def get_queryset(self):
+#         vendor = Vendor.objects.get(vendor_admin=self.request.user)
+#         queryset = VendorOrder.objects.prefetch_related('order_items_vendor_order').filter(vendor=vendor)
+#         return queryset
 
-    def get_queryset(self):
-        vendor = Vendor.objects.get(vendor_admin=self.request.user)
-        queryset = VendorOrder.objects.prefetch_related('order_items_vendor_order').filter(vendor=vendor)
-        return queryset
 
+# class VendorOrderDetailsAPIView(RetrieveAPIView):
+#     permission_classes = [IsAuthenticated]
+#     serializer_class = VendorOrderDetailSerializer
+#     # lookup_field = 'oid'
+#     # lookup_url_kwarg = 'oid'
 
-class VendorOrderDetailsAPIView(RetrieveAPIView):
-    permission_classes = [IsAuthenticated]
-    serializer_class = VendorOrderDetailSerializer
-    # lookup_field = 'oid'
-    # lookup_url_kwarg = 'oid'
-
-    def get_object(self):
-        # oid = self.kwargs['oid']
-        query = VendorOrder.objects.get(pk=self.kwargs['pk'])
-        return query
+#     def get_object(self):
+#         # oid = self.kwargs['oid']
+#         query = VendorOrder.objects.get(pk=self.kwargs['pk'])
+#         return query
 
 
 class UserOrderDetailAPIView(ListAPIView):

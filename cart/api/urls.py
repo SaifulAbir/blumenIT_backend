@@ -27,7 +27,9 @@ urlpatterns = [
     path('delete-billing-address/<int:id>/',
          BillingAddressDeleteAPIView.as_view()),
     path('user-order-list/', UserOrderListAPIView.as_view()),
-    path('vendor-order-list/', VendorOrderListAPIView.as_view()),
+    # path('vendor-order-list/', VendorOrderListAPIView.as_view()),
     path('user-order-detail/<int:id>/', UserOrderDetailAPIView.as_view()),
-    path('vendor-order-detail/<int:pk>/', VendorOrderDetailsAPIView.as_view()),
+
 ]
+
+#     path('vendor-order-detail/<int:pk>/', VendorOrderDetailsAPIView.as_view()),

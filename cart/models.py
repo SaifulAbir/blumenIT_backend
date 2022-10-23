@@ -318,6 +318,7 @@ class CustomerAddress(AbstractTimeStamp):
 class Refund(AbstractTimeStamp):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     reason = models.TextField()
+    refund_status = models.CharField(max_length=255, null=False, blank=False)
     accepted = models.BooleanField(default=False)
     email = models.EmailField()
 
@@ -328,6 +329,17 @@ class Refund(AbstractTimeStamp):
 
     def __str__(self):
         return f"{self.pk}"
+
+
+class RefundOrderItem(AbstractTimeStamp):
+    refund_id = models.ForeignKey(Refund, on_delete=models.PROTECT, blank=True, null=True)
+    order_item = models.ForeignKey(OrderItem, on_delete=models.PROTECT, blank=True, null=True)
+    refund_qty = models.IntegerField(null=False, blank=False)
+
+    class Meta:
+        verbose_name = 'RefundOrderItem'
+        verbose_name_plural = 'RefundOrderItems'
+        db_table = 'refund_order_item'
 
 
 class Wishlist(AbstractTimeStamp):

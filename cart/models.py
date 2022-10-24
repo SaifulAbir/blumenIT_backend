@@ -358,7 +358,7 @@ class CustomerAddress(AbstractTimeStamp):
 
 
 class Refund(AbstractTimeStamp):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_items_refund')
     reason = models.TextField()
     accepted = models.BooleanField(default=False)
     email = models.EmailField()

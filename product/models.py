@@ -257,7 +257,7 @@ class Product(AbstractTimeStamp):
     bar_code = models.CharField(max_length=255, blank=False, null=False, default='')
     refundable = models.BooleanField(default=False)
     digital = models.BooleanField(default=False)
-    in_house_product = models.BooleanField(default=False)
+    in_house_product = models.BooleanField(default=True)
     cash_on_delivery = models.BooleanField(default=False)
     todays_deal = models.BooleanField(default=False)
     show_stock_quantity = models.BooleanField(default=False)

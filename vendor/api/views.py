@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductMedia, ProductReview, ProductTags, SubCategory, SubSubCategory, Tags, Units, VariantType, ProductVideoProvider, VatType
 from user.models import CustomerProfile, User
 from vendor.models import VendorRequest, Vendor, Seller
-from vendor.serializers import VendorBrandSerializer, VendorCategorySerializer, VendorProductCreateSerializer, VendorProductDetailsSerializer, VendorProductListSerializer, VendorProductUpdateSerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
+from vendor.serializers import VendorBrandSerializer, VendorCategorySerializer, VendorProductCreateSerializer, VendorProductDetailsSerializer, VendorProductListSerializer, VendorProductUpdateSerializer, VendorProductViewSerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
     VendorDetailSerializer, StoreSettingsSerializer, SellerDetailSerializer, VendorSubCategorySerializer, VendorSubSubCategorySerializer, VendorUnitSerializer, SellerSerializer, ProductAttributesSerializer, ProductVideoProviderSerializer, ProductVatProviderSerializer
 from user.models import User
 from cart.models import Coupon
@@ -248,6 +248,20 @@ class VendorProductUpdateAPIView(RetrieveUpdateAPIView):
     #     else:
     #         raise ValidationError({"msg": 'You are not a vendor.'})
 
+class VendorProductViewAPI(RetrieveAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = VendorProductViewSerializer
+    lookup_field = 'slugi'
+    lookup_url_kwarg = "slugi"
+
+    def get_object(self):
+        slug = self.kwargs['slugi']
+        query = Product.objects.get(slug=slug)
+        if query:
+            return query
+        else:
+            raise ValidationError(
+                {"msg": 'You can not view this product!'})
 
 class VendorProductDetailsAPI(RetrieveAPIView):
     # permission_classes = [IsAuthenticated]
@@ -264,6 +278,25 @@ class VendorProductDetailsAPI(RetrieveAPIView):
         else:
             raise ValidationError(
                 {"msg": 'You are not creator of this product!'})
+
+    # def get_object(self):
+    #     slug = self.kwargs['slugi']
+    #     if Vendor.objects.filter(vendor_admin=User.objects.get(id=self.request.user.id)).exists():
+    #         vid = Vendor.objects.get(
+    #             vendor_admin=User.objects.get(id=self.request.user.id))
+    #         if vid:
+    #             try:
+    #                 query = Product.objects.get(slug=slug, vendor=vid)
+    #                 if query:
+    #                     return query
+    #                 else:
+    #                     raise ValidationError(
+    #                         {"msg": 'You are not creator of this product!'})
+    #             except:
+    #                 raise ValidationError(
+    #                     {"msg": "Product doesn't exist or You are not the creator of this product!"})
+    #     else:
+    #         raise ValidationError({"msg": 'You are not a vendor.'})
 
     # def get_object(self):
     #     slug = self.kwargs['slugi']

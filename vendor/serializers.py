@@ -774,6 +774,86 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
         except:
             return product_instance
 
+class VendorProductViewSerializer(serializers.ModelSerializer):
+    product_images = serializers.SerializerMethodField()
+    avg_rating = serializers.SerializerMethodField()
+    review_count = serializers.SerializerMethodField()
+    colors = serializers.SerializerMethodField()
+    product_attributes =serializers.SerializerMethodField('get_product_attributes')
+    product_variants = serializers.SerializerMethodField('get_product_variants')
+    product_specification = serializers.SerializerMethodField('get_product_specification')
+    product_reviews = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Product
+        fields = [
+            'id',
+            'product_images',
+            'title',
+            'avg_rating',
+            'review_count',
+            'in_house_product',
+            'digital',
+            'price',
+            'colors',
+            'product_attributes',
+            'quantity',
+            'product_variants',
+            'refundable',
+            'full_description',
+            'product_specification',
+            'product_reviews'
+        ]
+
+    def get_product_images(self, obj):
+        try:
+            queryset = ProductImages.objects.filter(
+                product=obj, is_active=True).distinct()
+            serializer = ProductImageSerializer(instance=queryset, many=True, context={
+                                                'request': self.context['request']})
+            return serializer.data
+        except:
+            return []
+
+    def get_avg_rating(self, ob):
+        return ob.product_review_product.all().aggregate(Avg('rating_number'))['rating_number__avg']
+
+    def get_review_count(self, obj):
+        re_count = ProductReview.objects.filter(
+            product=obj, is_active=True).count()
+        return re_count
+
+    def get_colors(self, obj):
+        color_list = []
+        try:
+            selected_colors = ProductColor.objects.filter(
+                product=obj, is_active=True).distinct()
+            for s_c in selected_colors:
+                color_title = s_c.color.title
+                color_list.append(color_title)
+            return color_list
+        except:
+            return color_list
+
+    def get_product_attributes(self, product):
+        queryset = ProductAttributes.objects.filter(product=product, is_active = True)
+        serializer = ProductAttributesSerializer(instance=queryset, many=True)
+        return serializer.data
+
+    def get_product_variants(self, product):
+        queryset = ProductVariation.objects.filter(product=product, is_active = True)
+        serializer = ProductVariantsSerializer(instance=queryset, many=True)
+        return serializer.data
+
+    def get_product_specification(self, product):
+        queryset = Specification.objects.filter(product=product, is_active = True)
+        serializer = ProductSpecificationSerializer(instance=queryset, many=True)
+        return serializer.data
+
+    def get_product_reviews(self, obj):
+        selected_product_reviews = ProductReview.objects.filter(
+            product=obj, is_active=True).distinct()
+        return ProductReviewSerializer(selected_product_reviews, many=True).data
 
 class VendorProductDetailsSerializer(serializers.ModelSerializer):
     product_tags = serializers.SerializerMethodField()
@@ -847,8 +927,7 @@ class VendorProductDetailsSerializer(serializers.ModelSerializer):
         selected_product_combinations = ProductCombinations.objects.filter(
             product=obj, is_active=True).distinct()
         return ProductCombinationSerializerForVendorProductDetails(selected_product_combinations, many=True).data
-
-
+    
 class VendorProductUpdateSerializer(serializers.ModelSerializer):
     product_category_name = serializers.SerializerMethodField()
     product_sub_category_name = serializers.SerializerMethodField()

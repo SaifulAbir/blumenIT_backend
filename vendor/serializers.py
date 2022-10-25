@@ -117,6 +117,11 @@ class StoreSettingsSerializer(serializers.ModelSerializer):
         return store_settings_instance
 
 
+class VendorCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        ref_name = "vendor category serializer"
+        model = Category
+        fields = ['id', 'title', 'ordering_number', 'type', 'banner', 'icon', 'filtering_attributes']
 class VendorAddNewCategorySerializer(serializers.ModelSerializer):
     title = serializers.CharField(required= True)
     ordering_number = serializers.CharField(required= True)
@@ -143,7 +148,6 @@ class VendorAddNewCategorySerializer(serializers.ModelSerializer):
 
         category_instance = Category.objects.create(**validated_data, title=title_get_data, ordering_number=ordering_number_get_data )
         return category_instance
-
 class VendorUpdateCategorySerializer(serializers.ModelSerializer):
     title = serializers.CharField(required= True)
     ordering_number = serializers.CharField(required= True)
@@ -171,6 +175,11 @@ class VendorUpdateCategorySerializer(serializers.ModelSerializer):
         validated_data.update({"updated_at": timezone.now(), "title":title_get_data, "ordering_number":ordering_number_get_data})
         return super().update(instance, validated_data)
 
+
+class VendorSubCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubCategory
+        fields = ['id', 'title', 'ordering_number', 'category']
 class VendorAddNewSubCategorySerializer(serializers.ModelSerializer):
     title = serializers.CharField(required= True)
     ordering_number = serializers.CharField(required= True)
@@ -197,8 +206,7 @@ class VendorAddNewSubCategorySerializer(serializers.ModelSerializer):
 
         sub_category_instance = SubCategory.objects.create(**validated_data, title=title_get_data, ordering_number=ordering_number_get_data )
         return sub_category_instance
-
-class VendorUpdateCategorySerializer(serializers.ModelSerializer):
+class VendorUpdateSubCategorySerializer(serializers.ModelSerializer):
     title = serializers.CharField(required= True)
     ordering_number = serializers.CharField(required= True)
     class Meta:
@@ -226,29 +234,61 @@ class VendorUpdateCategorySerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-
-
-# Vendor Category serializer
-class VendorCategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        ref_name = "vendor category serializer"
-        model = Category
-        fields = ['id', 'title', 'ordering_number', 'type', 'banner', 'icon', 'filtering_attributes']
-
-
-# Vendor Sub Category serializer
-class VendorSubCategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SubCategory
-        fields = ['id', 'title', 'ordering_number', 'category']
-
-
-# Vendor Sub Sub Category serializer
 class VendorSubSubCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = SubSubCategory
-        fields = ['id', 'title']
+        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category', 'is_active']
+class VendorAddNewSubSubCategorySerializer(serializers.ModelSerializer):
+    title = serializers.CharField(required= True)
+    ordering_number = serializers.CharField(required= True)
+    class Meta:
+        model = SubSubCategory
+        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category']
 
+    def create(self, validated_data):
+        # work with category title 
+        title_get = validated_data.pop('title')
+        title_get_data = title_get.lower()
+        if title_get:
+            title_get_for_check = SubSubCategory.objects.filter(title=title_get.lower())
+            if title_get_for_check:
+                raise ValidationError('This Sub Sub category title already exist in Sub Sub Category.')
+
+        # work with order number
+        ordering_number_get = validated_data.pop('ordering_number')
+        ordering_number_get_data = ordering_number_get.lower()
+        if ordering_number_get:
+            ordering_number_get_for_check = SubSubCategory.objects.filter(ordering_number=ordering_number_get)
+            if ordering_number_get_for_check:
+                raise ValidationError('This Sub Sub category ordering number already exist in Sub Sub Category.')
+
+        sub_category_instance = SubSubCategory.objects.create(**validated_data, title=title_get_data, ordering_number=ordering_number_get_data )
+        return sub_category_instance
+class VendorUpdateSubSubCategorySerializer(serializers.ModelSerializer):
+    title = serializers.CharField(required= True)
+    ordering_number = serializers.CharField(required= True)
+    class Meta:
+        model = SubSubCategory
+        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category', 'is_active']
+
+    def update(self, instance, validated_data):
+        # work with category title
+        title_get = validated_data.pop('title')
+        title_get_data = title_get.lower()
+        if title_get:
+            title_get_for_check = SubSubCategory.objects.filter(title=title_get.lower())
+            if title_get_for_check:
+                raise ValidationError('This Sub Sub category title already exist in Sub Sub Category.')
+
+        # work with order number
+        ordering_number_get = validated_data.pop('ordering_number')
+        ordering_number_get_data = ordering_number_get.lower()
+        if ordering_number_get:
+            ordering_number_get_for_check = SubSubCategory.objects.filter(ordering_number=ordering_number_get)
+            if ordering_number_get_for_check:
+                raise ValidationError('This Sub Sub category ordering number already exist in Sub Sub Category.')
+
+        validated_data.update({"updated_at": timezone.now(), "title":title_get_data, "ordering_number":ordering_number_get_data})
 
 # Vendor Brand serializer
 class VendorBrandSerializer(serializers.ModelSerializer):

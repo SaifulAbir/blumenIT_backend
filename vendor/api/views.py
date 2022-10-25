@@ -10,8 +10,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductMedia, ProductReview, ProductTags, SubCategory, SubSubCategory, Tags, Units, VariantType, ProductVideoProvider, VatType
 from user.models import CustomerProfile, User
 from vendor.models import VendorRequest, Vendor, Seller
-from vendor.serializers import VendorAddNewCategorySerializer, VendorAddNewSubCategorySerializer, VendorBrandSerializer, VendorCategorySerializer, VendorProductCreateSerializer, VendorProductDetailsSerializer, VendorProductListSerializer, VendorProductUpdateSerializer, VendorProductViewSerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
-    VendorDetailSerializer, StoreSettingsSerializer, SellerDetailSerializer, VendorSubCategorySerializer, VendorSubSubCategorySerializer, VendorUnitSerializer, SellerSerializer, ProductAttributesSerializer, ProductVideoProviderSerializer, ProductVatProviderSerializer, VendorUpdateCategorySerializer
+from vendor.serializers import VendorAddNewCategorySerializer, VendorAddNewSubCategorySerializer, VendorAddNewSubSubCategorySerializer, VendorBrandSerializer, VendorCategorySerializer, VendorProductCreateSerializer, VendorProductDetailsSerializer, VendorProductListSerializer, VendorProductUpdateSerializer, VendorProductViewSerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
+    VendorDetailSerializer, StoreSettingsSerializer, SellerDetailSerializer, VendorSubCategorySerializer, VendorSubSubCategorySerializer, VendorUnitSerializer, SellerSerializer, ProductAttributesSerializer, ProductVideoProviderSerializer, ProductVatProviderSerializer, VendorUpdateCategorySerializer, VendorUpdateSubSubCategorySerializer
 from user.models import User
 from cart.models import Coupon
 from rest_framework.exceptions import ValidationError
@@ -355,6 +355,10 @@ class VendorVatTypeListAPIView(ListAPIView):
 
 
 
+class VendorCategoryListAPIView(ListAPIView):
+    permission_classes = [AllowAny]
+    queryset = Category.objects.filter(is_active=True)
+    serializer_class = VendorCategorySerializer
 
 class VendorAddNewCategoryAPIView(CreateAPIView):
     permission_classes = (AllowAny,)
@@ -402,6 +406,7 @@ class VendorDeleteCategoryAPIView(ListAPIView):
         else:
             raise ValidationError(
                 {"msg": 'Category Does not exist!'})
+
 
 
 class VendorSubCategoryListAPIView(ListAPIView):
@@ -467,6 +472,7 @@ class VendorDeleteSubCategoryAPIView(ListAPIView):
             raise ValidationError(
                 {"msg": 'Sub Category Does not exist!'})
 
+
 class VendorSubSubCategoryListAPIView(ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = VendorSubSubCategorySerializer
@@ -483,3 +489,49 @@ class VendorSubSubCategoryListAPIView(ListAPIView):
                 is_active=True).order_by('-created_at')
         return queryset
 
+class VendorAddNewSubSubCategoryAPIView(CreateAPIView):
+    # permission_classes = [IsAuthenticated]
+    permission_classes = (AllowAny,)
+    serializer_class = VendorAddNewSubSubCategorySerializer
+
+
+    def post(self, request, *args, **kwargs):
+        return super(VendorAddNewSubSubCategoryAPIView, self).post(request, *args, **kwargs)
+
+class VendorUpdateSubSubCategoryAPIView(RetrieveUpdateAPIView):
+    # permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+    serializer_class = VendorUpdateSubSubCategorySerializer
+    lookup_field = 'ordering_number'
+    lookup_url_kwarg = "ordering_number"
+
+    def get_queryset(self):
+        ordering_number = self.kwargs['ordering_number']
+        query = SubSubCategory.objects.filter(ordering_number=int(ordering_number))
+        if query:
+            return query
+        else:
+            raise ValidationError(
+                {"msg": 'Sub Sub Category does not found!'})
+
+# class VendorDeleteSubCategoryAPIView(ListAPIView):
+#     permission_classes = [AllowAny]
+#     # permission_classes = [IsAuthenticated]
+#     serializer_class = VendorSubCategorySerializer
+#     pagination_class = ProductCustomPagination
+#     lookup_field = 'ordering_number'
+#     lookup_url_kwarg = "ordering_number"
+
+#     def get_queryset(self):
+#         ordering_number = self.kwargs['ordering_number']
+#         category_obj_exist = SubCategory.objects.filter(
+#             ordering_number=ordering_number).exists()
+#         if category_obj_exist:
+#             category_obj = SubCategory.objects.filter(ordering_number=ordering_number)
+#             category_obj.update(is_active=False)
+
+#             queryset = SubCategory.objects.filter(is_active=True).order_by('-created_at')
+#             return queryset
+#         else:
+#             raise ValidationError(
+#                 {"msg": 'Sub Category Does not exist!'})

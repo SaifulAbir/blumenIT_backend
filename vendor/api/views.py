@@ -514,24 +514,24 @@ class VendorUpdateSubSubCategoryAPIView(RetrieveUpdateAPIView):
             raise ValidationError(
                 {"msg": 'Sub Sub Category does not found!'})
 
-# class VendorDeleteSubCategoryAPIView(ListAPIView):
-#     permission_classes = [AllowAny]
-#     # permission_classes = [IsAuthenticated]
-#     serializer_class = VendorSubCategorySerializer
-#     pagination_class = ProductCustomPagination
-#     lookup_field = 'ordering_number'
-#     lookup_url_kwarg = "ordering_number"
+class VendorDeleteSubSubCategoryAPIView(ListAPIView):
+    permission_classes = [AllowAny]
+    # permission_classes = [IsAuthenticated]
+    serializer_class = VendorSubCategorySerializer
+    pagination_class = ProductCustomPagination
+    lookup_field = 'ordering_number'
+    lookup_url_kwarg = "ordering_number"
 
-#     def get_queryset(self):
-#         ordering_number = self.kwargs['ordering_number']
-#         category_obj_exist = SubCategory.objects.filter(
-#             ordering_number=ordering_number).exists()
-#         if category_obj_exist:
-#             category_obj = SubCategory.objects.filter(ordering_number=ordering_number)
-#             category_obj.update(is_active=False)
+    def get_queryset(self):
+        ordering_number = self.kwargs['ordering_number']
+        category_obj_exist = SubSubCategory.objects.filter(
+            ordering_number=ordering_number).exists()
+        if category_obj_exist:
+            category_obj = SubSubCategory.objects.filter(ordering_number=ordering_number)
+            category_obj.update(is_active=False)
 
-#             queryset = SubCategory.objects.filter(is_active=True).order_by('-created_at')
-#             return queryset
-#         else:
-#             raise ValidationError(
-#                 {"msg": 'Sub Category Does not exist!'})
+            queryset = SubSubCategory.objects.filter(is_active=True).order_by('-created_at')
+            return queryset
+        else:
+            raise ValidationError(
+                {"msg": 'Sub Sub Category Does not exist!'})

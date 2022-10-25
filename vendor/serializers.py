@@ -289,6 +289,7 @@ class VendorUpdateSubSubCategorySerializer(serializers.ModelSerializer):
                 raise ValidationError('This Sub Sub category ordering number already exist in Sub Sub Category.')
 
         validated_data.update({"updated_at": timezone.now(), "title":title_get_data, "ordering_number":ordering_number_get_data})
+        return super().update(instance, validated_data)
 
 # Vendor Brand serializer
 class VendorBrandSerializer(serializers.ModelSerializer):

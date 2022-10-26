@@ -44,11 +44,6 @@ class Category(AbstractTimeStamp):
         max_length=100, null=False, blank=False, default="", help_text="name")
     ordering_number = models.IntegerField(null=True, blank=True, default=0)
     type = models.CharField(max_length=100, null=True, blank=True, default="")
-    subtitle = models.TextField(null=False, blank=False, default="")
-    logo = models.ImageField(
-        upload_to='product_category', blank=True, null=True)
-    cover = models.ImageField(
-        upload_to='product_category', blank=True, null=True)
     banner = models.ImageField(
         upload_to='product_category', blank=True, null=True)
     icon = models.ImageField(
@@ -56,6 +51,12 @@ class Category(AbstractTimeStamp):
     is_active = models.BooleanField(null=False, blank=False, default=True)
     filtering_attributes = models.ForeignKey(Attribute, on_delete=models.PROTECT,
                                related_name='category_filtering_attributes', blank=True, null=True)
+
+    subtitle = models.TextField(null=False, blank=False, default="")
+    logo = models.ImageField(
+        upload_to='product_category', blank=True, null=True)
+    cover = models.ImageField(
+        upload_to='product_category', blank=True, null=True)
 
     class Meta:
         verbose_name = 'Category'
@@ -69,6 +70,7 @@ class Category(AbstractTimeStamp):
 class SubCategory(AbstractTimeStamp):
     title = models.CharField(
         max_length=100, null=False, blank=False, default="", help_text="name")
+    ordering_number = models.IntegerField(null=True, blank=True, default=0)
     is_active = models.BooleanField(null=False, blank=False, default=True)
     category = models.ForeignKey(
         Category, on_delete=models.PROTECT, related_name='sub_category_category')
@@ -85,6 +87,7 @@ class SubCategory(AbstractTimeStamp):
 class SubSubCategory(AbstractTimeStamp):
     title = models.CharField(
         max_length=100, null=False, blank=False, default="", help_text="name")
+    ordering_number = models.IntegerField(null=True, blank=True, default=0)
     is_active = models.BooleanField(null=False, blank=False, default=True)
     category = models.ForeignKey(
         Category, on_delete=models.PROTECT, related_name='sub_sub_category_category')
@@ -102,7 +105,7 @@ class SubSubCategory(AbstractTimeStamp):
 
 class Brand(AbstractTimeStamp):
     title = models.CharField(
-        max_length=100, null=False, blank=False, default="")
+        max_length=100, null=True, blank=True)
     logo = models.ImageField(upload_to='brand', blank=True, null=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
 
@@ -112,7 +115,7 @@ class Brand(AbstractTimeStamp):
         db_table = 'brand'
 
     def __str__(self):
-        return self.title
+        return self
 
 
 class Units(AbstractTimeStamp):
@@ -164,6 +167,7 @@ class VatType(AbstractTimeStamp):
 
     def __str__(self):
         return self.title
+
 
 class ShippingClass(AbstractTimeStamp):
     title = models.CharField(max_length=800, default='', help_text="name")
@@ -256,7 +260,7 @@ class Product(AbstractTimeStamp):
     bar_code = models.CharField(max_length=255, blank=False, null=False, default='')
     refundable = models.BooleanField(default=False)
     digital = models.BooleanField(default=False)
-    in_house_product = models.BooleanField(default=False)
+    in_house_product = models.BooleanField(default=True)
     cash_on_delivery = models.BooleanField(default=False)
     todays_deal = models.BooleanField(default=False)
     show_stock_quantity = models.BooleanField(default=False)
@@ -672,6 +676,7 @@ class TextColor(AbstractTimeStamp):
         max_length=255, null=False, blank=False, default="")
     code = models.CharField(
         max_length=20, null=False, blank=False, default="")
+    is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
         verbose_name = 'TextColor'

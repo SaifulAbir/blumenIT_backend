@@ -1,27 +1,35 @@
+from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.forms import forms
 from django.template.loader import render_to_string
 
 from ecommerce.common.emails import send_email_without_delay
 from ecommerce.models import AbstractTimeStamp
 from django.utils.translation import gettext as _
 from user.models import User
+from django.core import validators
+
+phone_regex = RegexValidator(regex='^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$',message='Invalid phone number')
+
 
 class Seller(AbstractTimeStamp):
-    name = models.CharField(max_length=254, null=True, blank=True)
-    phone = models.CharField(max_length=255, null=False, blank=False, unique=True)
-    email = models.EmailField(max_length=255, null=False, blank=False, unique=True)
+    name = models.CharField(max_length=254, null=False, blank=False)
+    phone = models.CharField(max_length=255, validators=[phone_regex], null=False, blank=False, unique=True)
+    email = models.EmailField(max_length=50, null=False, blank=False, unique=True, validators=[validators.EmailValidator(message="Invalid Email")])
     address = models.CharField(max_length=254, null=True, blank=True)
     logo = models.ImageField(null=True, blank=True, upload_to='images/logo')
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
-        return self
+        return self.name
 
     class Meta:
         verbose_name_plural = "Sellers"
         verbose_name = "Seller"
         db_table = 'sellers'
+
 
 class VendorRequest(AbstractTimeStamp):
     VENDOR_TYPES = [
@@ -53,7 +61,7 @@ class VendorRequest(AbstractTimeStamp):
 
 
 class Vendor(AbstractTimeStamp):
-    name = models.CharField(max_length=254,null=True,blank=True)
+    name = models.CharField(max_length=254, null=True, blank=True)
     phone = models.CharField(max_length=255, null=False, blank=False, unique=True)
     email = models.EmailField(max_length=255, null=False, blank=False, unique=True)
     logo = models.ImageField( null=True, blank=True)

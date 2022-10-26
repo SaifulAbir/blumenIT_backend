@@ -53,13 +53,28 @@ class SellerUpdateAPIView(RetrieveUpdateAPIView):
 
 
 class SellerDeleteAPIView(DestroyAPIView):
+    permission_classes = [AllowAny]
     serializer_class = SellerSerializer
     queryset = Seller.objects.all()
     lookup_field = 'id'
     lookup_url_kwarg = "id"
 
-    def delete(self, request, *args, **kwargs):
-        return super(SellerDeleteAPIView, self).delete(request, *args, **kwargs)
+    # def get_queryset(self):
+    #     s_id = self.kwargs['id']
+    #     seller_obj = Seller.objects.filter(id=s_id)
+
+    def get_queryset(self):
+        seller_id = self.kwargs['id']
+        seller_obj = Seller.objects.filter(id=seller_id).exists()
+        if seller_obj:
+            seller_obj = Product.objects.filter(id=seller_id)
+            seller_obj.update(status='REMOVE', is_published=False)
+
+            queryset = Seller.objects.filter(status='ACTIVE').order_by('-created_at')
+            return queryset
+        else:
+            raise ValidationError(
+                {"msg": 'Product Does not exist!'})
 
 
 class VendorRequestAPIView(CreateAPIView):

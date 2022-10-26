@@ -37,7 +37,7 @@ class AttributeValues(AbstractTimeStamp):
         db_table = 'attribute_attribute'
 
     def __str__(self):
-        return self.title
+        return self.value
 
 class Category(AbstractTimeStamp):
     title = models.CharField(
@@ -193,9 +193,9 @@ class ProductCondition(AbstractTimeStamp):
 
 class Product(AbstractTimeStamp):
     PRODUCT_STATUSES = [
-        ('PENDING', 'Pending'),
-        ('ACTIVE', 'Active'),
-        ('REMOVE', 'Remove')]
+        ('DRAFT', 'Draft'),
+        ('PUBLISH', 'Publish'),
+        ('UNPUBLISH', 'UnPublish')]
 
     title = models.CharField(max_length=800, default='')
     slug = models.SlugField(
@@ -285,7 +285,8 @@ class Product(AbstractTimeStamp):
         return self.reviews.aggregate(Avg('rating'))
 
     def __str__(self):
-        return self.title + '-' + self.vendor.vendor_admin.email
+        # return self.title + '-' + self.vendor.vendor_admin.email
+        return self.title
 
     def save(self, *args, **kwargs):
         super(Product, self).save(*args, **kwargs)
@@ -344,8 +345,6 @@ class SpecificationValue(AbstractTimeStamp):
         return self.key
 
 class ProductAttributes(AbstractTimeStamp):
-    title = models.CharField(
-        max_length=100, null=False, blank=False, default="")
     attribute = models.ForeignKey(
         Attribute, related_name='product_attributes_attribute', blank=True, null=True, on_delete=models.PROTECT)
     product = models.ForeignKey(
@@ -358,11 +357,11 @@ class ProductAttributes(AbstractTimeStamp):
         db_table = 'product_attributes'
 
     def __str__(self):
-        return self.product.title + ' ' + self.title
+        return self.product.title + ' ' + self.attribute.title
 
 class ProductAttributeValues(AbstractTimeStamp):
     product_attribute = models.ForeignKey(ProductAttributes, on_delete=models.PROTECT,
-                               related_name='product_attribute_values_product_attribute', blank=False, null=False)
+                               related_name='product_attribute_values_product_attribute', blank=True, null=True)
     value = models.CharField(
         max_length=255, null=False, blank=False, default="")
     product = models.ForeignKey(
@@ -375,7 +374,7 @@ class ProductAttributeValues(AbstractTimeStamp):
         db_table = 'product_attribute_value'
 
     def __str__(self):
-        return self.product_attribute.product.title + ' ' + self.product_attribute.title + ' ' + self.value
+        return self.product_attribute.product.title + ' ' + self.product_attribute.attribute.title + ' ' + self.value
 
 class Color(AbstractTimeStamp):
     title = models.CharField(
@@ -473,8 +472,6 @@ class Tags(AbstractTimeStamp):
     title = models.CharField(
         max_length=100, null=False, blank=False, default="", unique=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
-    product = models.ForeignKey(
-        Product, on_delete=models.PROTECT, related_name='tags_product', null=True, blank=True)
 
     class Meta:
         verbose_name = 'Tag'
@@ -538,6 +535,12 @@ class ProductMedia(AbstractTimeStamp):
         return self.product.title
 
 class ProductImages(AbstractTimeStamp):
+    CHOICES = [
+        ('COMPLETE', 'Complete'),
+        ('IN_QUEUE', 'In_Queue'),
+        ('IN_PROCESSING', 'In_Processing'),
+    ]
+
     def validate_file_extension(value):
         import os
         from django.core.exceptions import ValidationError
@@ -546,9 +549,13 @@ class ProductImages(AbstractTimeStamp):
         if not ext.lower() in valid_extensions:
             raise ValidationError('Unsupported file extension.')
 
-    image = models.FileField(upload_to='products', validators=[validate_file_extension])
     product = models.ForeignKey(
-        Product, on_delete=models.PROTECT, related_name='product_images_product', null=True, blank=True)
+        Product, on_delete=models.PROTECT, related_name='product_image_product', null=True, blank=True)
+    file = models.FileField(upload_to='products', validators=[
+                            validate_file_extension])
+    status = models.CharField(
+        max_length=20, choices=CHOICES, default=CHOICES[0][0])
+    is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
         verbose_name = 'ProductImage'
@@ -732,7 +739,7 @@ class Inventory(AbstractTimeStamp):
         db_table = 'inventory'
 
     def __str__(self):
-        return self.product.title + ' ' + self.initial_quantity + ' ' + self.current_quantity
+        return self.product.title + '-initial_quantity: ' + str(self.initial_quantity) + '-current_quantity: ' + str(self.current_quantity)
 
 class InventoryVariation(AbstractTimeStamp):
     inventory = models.ForeignKey(
@@ -748,4 +755,4 @@ class InventoryVariation(AbstractTimeStamp):
         db_table = 'inventory_variation'
 
     def __str__(self):
-        return self.inventory.product.title + ' ' + self.variation_initial_quantity + ' ' + self.variation_current_quantity
+        return self.inventory.product.title + '-variation_initial_quantity: ' + str(self.variation_initial_quantity) + '-variation_current_quantity ' + str(self.variation_current_quantity)

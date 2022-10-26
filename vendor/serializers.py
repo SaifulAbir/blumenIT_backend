@@ -4,7 +4,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from ecommerce.common.emails import send_email_without_delay
-from product.models import Brand, Category, Color, DiscountTypes, FlashDealProduct, Inventory, InventoryVariation, Product, ProductAttributeValues, ProductAttributes, ProductColor, ProductCombinations, ProductCombinationsVariants, ProductImages, ProductMedia, ProductReview, ProductTags, ProductVariation, ProductVideoProvider, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units, VariantType, VatType
+from product.models import Brand, Category, Color, DiscountTypes, FlashDealProduct, Inventory, InventoryVariation, Product, ProductAttributeValues, ProductAttributes, ProductColor, ProductCombinations, ProductCombinationsVariants, ProductImages, ProductMedia, ProductReview, ProductTags, ProductVariation, ProductVideoProvider, ShippingClass, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units, VariantType, VatType
 from user.models import User
 # from user.serializers import UserRegisterSerializer
 from vendor.models import VendorRequest, Vendor, StoreSettings, Seller
@@ -582,7 +582,6 @@ class ProductAttributesSerializer(serializers.ModelSerializer):
         model = ProductAttributes
         fields = [
             'id',
-            'title',
             'attribute',
             'product_attribute_values'
         ]
@@ -639,24 +638,32 @@ class FlashDealSerializer(serializers.ModelSerializer):
         ]
 
 class VendorProductCreateSerializer(serializers.ModelSerializer):
+    title = serializers.CharField(required=True)
+    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=False, write_only=True, required= True)
+    sub_category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=False, write_only=True, required= False)
+    sub_sub_category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=False, write_only=True, required= False)
+    brand = serializers.PrimaryKeyRelatedField(queryset=Brand.objects.all(), many=False, write_only=True, required= False)
+    unit = serializers.PrimaryKeyRelatedField(queryset=Units.objects.all(), many=False, write_only=True, required= False)
+    minimum_purchase_quantity = serializers.IntegerField(required=True)
+    price = serializers.FloatField(required=True)
+    quantity = serializers.IntegerField(required=False, write_only=True)
+    vat_type = VatTypeSerializer(many=False, required=False)
+    shipping_class = serializers.PrimaryKeyRelatedField(queryset=ShippingClass.objects.all(), many=False, write_only=True, required= False)
+
     product_tags = serializers.ListField(
-        child=serializers.IntegerField(), write_only=True, required=False)
+        child=serializers.CharField(), write_only=True, required=True)
     product_images = serializers.ListField(
         child=serializers.FileField(), write_only=True, required=False)
     product_colors = serializers.ListField(
-        child=serializers.IntegerField(), write_only=True, required=False)
+        child=serializers.PrimaryKeyRelatedField(queryset=Color.objects.all()), write_only=True, required=False)
     product_attributes = ProductAttributesSerializer(
         many=True, required=False)
-    product_variants = ProductVariantsSerializer(
-        many=True, required=False)
+    product_variants = ProductVariantsSerializer(many=True, required=False)
     product_specification = ProductSpecificationSerializer(
         many=True, required=False)
-    flash_deal = FlashDealSerializer(
-        many=False, required=False)
+    flash_deal = FlashDealSerializer(many=False, required=False)
 
-    quantity = serializers.IntegerField(required=False, write_only=True)
-    vat_type = VatTypeSerializer(
-        many=False, required=False)
+    
 
     class Meta:
         model = Product
@@ -824,9 +831,9 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
 
             # product_images
             if product_images:
-                for image in product_images:
+                for media_file in product_images:
                     ProductImages.objects.create(
-                        product=product_instance, image=image, status="COMPLETE")
+                        product=product_instance, file=media_file, status="COMPLETE")
 
             # product_colors
             if product_colors:
@@ -844,15 +851,13 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
             # product_attributes
             if product_attributes:
                 for product_attribute in product_attributes:
-                    attribute_title = product_attribute['title']
                     attribute_attribute = product_attribute['attribute']
-                    if product_instance and attribute_title and attribute_attribute:
-                        product_attributes_instance = ProductAttributes.objects.create(
-                        title=attribute_title, attribute=attribute_attribute, product=product_instance)
+                    if product_instance and attribute_attribute:
+                        product_attributes_instance = ProductAttributes.objects.create(attribute=attribute_attribute, product=product_instance)
                     product_attribute_values = product_attribute['product_attribute_values']
                     for product_attribute_value in product_attribute_values:
                         attribute_value_value = product_attribute_value['value']
-                        product_combination_instance = ProductAttributeValues.objects.create(product_attribute = product_attributes_instance, value= attribute_value_value, product=product_instance)
+                        product_attributes_value_instance = ProductAttributeValues.objects.create(product_attribute = product_attributes_instance, value= attribute_value_value, product=product_instance)
 
             # product with out variants
             single_quantity = validated_data["quantity"]
@@ -909,7 +914,7 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
                     for specification_value in specification_values:
                         key = specification_value['key']
                         value = specification_value['value']
-                        product_combination_instance = SpecificationValue.objects.create(specification = specification_instance, key=key, value= value)
+                        product_specification_instance = SpecificationValue.objects.create(specification = specification_instance, key=key, value= value)
 
             # flash_deal
             if flash_deal:
@@ -919,9 +924,6 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
                     discount_amount = f_deal['discount_amount']
                     if s_title:
                         flash_deal_product_instance = FlashDealProduct.objects.create(product=product_instance, flashDealInfo=flashDealInfo, discount_type=discount_type, discount_amount=discount_amount)
-
-
-            
 
             return product_instance
         except:

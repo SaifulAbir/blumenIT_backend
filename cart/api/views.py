@@ -80,35 +80,12 @@ class DiscountTypeListAPI(ListAPIView):
     serializer_class = DiscountTypeSerializer
 
 
+class CheckoutAPIView(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = CheckoutSerializer
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# class CheckoutAPIView(CreateAPIView):
-#     permission_classes = [IsAuthenticated]
-#     serializer_class = CheckoutSerializer
-
-#     def post(self, request, *args, **kwargs):
-#         return super(CheckoutAPIView, self).post(request, *args, **kwargs)
+    def post(self, request, *args, **kwargs):
+        return super(CheckoutAPIView, self).post(request, *args, **kwargs)
 
 
 # class CheckoutDetailsAPIView(RetrieveAPIView):

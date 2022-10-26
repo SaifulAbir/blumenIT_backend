@@ -5,7 +5,7 @@ from .utils import unique_slug_generator_cart, unique_order_id_generator_for_ord
 from django.db.models.signals import pre_save
 from user.models import CustomerProfile, User
 from django.utils.translation import gettext as _
-from product.models import Product, ProductAttributes, VariantType, ShippingClass
+from product.models import Product, ProductAttributes, VariantType, ShippingClass, ProductVariation
 from django.utils import timezone
 
 # from django_countries.fields import CountryField
@@ -111,8 +111,8 @@ class Order(AbstractTimeStamp):
     ]
 
     PAYMENT_STATUSES = [
-        ('PAID', 'Paid'),
         ('UN-PAID', 'Un-Paid'),
+        ('PAID', 'Paid'),
     ]
 
     order_id = models.SlugField(null=False, blank=False, allow_unicode=True)
@@ -141,7 +141,7 @@ class Order(AbstractTimeStamp):
         ShippingClass, on_delete=models.SET_NULL, blank=True, null=True)
     payment_type = models.ForeignKey(
         PaymentType, on_delete=models.SET_NULL, blank=True, null=True)
-    cash_on_deliver = models.BooleanField(default=False)
+    cash_on_delivery = models.BooleanField(default=False)
 
     # ordered = models.BooleanField(default=True)
     # being_delivered = models.BooleanField(default=False)
@@ -247,13 +247,8 @@ class OrderItem(AbstractTimeStamp):
     attribute = models.ForeignKey(
         ProductAttributes, on_delete=models.CASCADE, blank=True, null=True)
 
-    vendor_order = models.ForeignKey(VendorOrder, on_delete=models.PROTECT,
-                                     related_name='order_items_vendor_order', blank=True, null=True)
-    ordered = models.BooleanField(default=False)
-    user = models.ForeignKey(User, on_delete=models.PROTECT,
-                             related_name='order_items_user', blank=True, null=True)
-    vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT,
-                               related_name='order_items_vendor', blank=True, null=True)
+    variation = models.ForeignKey(ProductVariation, on_delete=models.PROTECT,
+                                     related_name='order_items_variation', blank=True, null=True)
 
     @property
     def subtotal(self):

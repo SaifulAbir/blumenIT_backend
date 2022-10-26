@@ -2,7 +2,7 @@ from django.urls import path
 from .views import *
 
 urlpatterns = [
-#     path('checkout/', CheckoutAPIView.as_view()),
+    path('checkout/', CheckoutAPIView.as_view()),
 #     path('checkout-details/<int:oid>/', CheckoutDetailsAPIView.as_view()),
 #     path('payment-methods/', PaymentMethodsAPIView.as_view()),
 #     path('apply-coupon/<str:code>/<int:uid>/', ApplyCouponAPIView.as_view()),

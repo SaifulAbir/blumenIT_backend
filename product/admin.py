@@ -1,5 +1,5 @@
 from django.contrib import admin
-from product.models import Category, SubCategory, SubSubCategory, Brand, Tags, Units, DiscountTypes, Product, ProductAttributes, ProductCombinations, VariantType, ProductCombinationsVariants, ProductTags, ProductMedia, ProductCombinationMedia, ProductReview, ProductVideoProvider
+from product.models import Attribute, AttributeValues, Category, Color, FlashDealInfo, SubCategory, SubSubCategory, Brand, Tags, Units, DiscountTypes, Product, ProductAttributes, ProductCombinations, VariantType, ProductCombinationsVariants, ProductTags, ProductMedia, ProductCombinationMedia, ProductReview, ProductVideoProvider, VatType
 
 admin.site.register(Category)
 admin.site.register(SubCategory)
@@ -14,8 +14,13 @@ admin.site.register(ProductCombinationsVariants)
 admin.site.register(ProductTags)
 admin.site.register(ProductReview)
 admin.site.register(ProductCombinations)
-admin.site.register(ProductMedia)
-admin.site.register(ProductVideoProvider)
+admin.site.register(ProductMedia) 
+admin.site.register(ProductVideoProvider) 
+admin.site.register(Color) 
+admin.site.register(Attribute) 
+admin.site.register(AttributeValues) 
+admin.site.register(FlashDealInfo)
+admin.site.register(VatType)
 
 
 # class ProductSubCategoryInline(admin.TabularInline):

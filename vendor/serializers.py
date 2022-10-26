@@ -12,12 +12,14 @@ from django.db.models import Avg
 from django.utils import timezone
 
 
-#Seller Create serializer
+# Seller Create serializer
+
 class SellerSerializer(serializers.ModelSerializer):
+    logo = serializers.ImageField(allow_null=True)
 
     class Meta:
         model = Seller
-        fields = ['id', 'name', 'address', 'phone', 'email', 'logo']
+        fields = ['id', 'name', 'address', 'phone', 'email', 'logo', 'is_active']
 
 
 # Seller Detail serializer

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from product.models import TextColor, Category, SubCategory, SubSubCategory, Brand, Tags, Units, DiscountTypes, Product, ProductAttributes, ProductCombinations, VariantType, ProductCombinationsVariants, ProductTags, ProductMedia, ProductCombinationMedia, ProductReview, ProductVideoProvider
+from product.models import TextColor, Attribute, AttributeValues, Category, Color, FlashDealInfo, Inventory, InventoryVariation, ProductAttributeValues, ProductColor, ProductImages, ShippingClass, SubCategory, SubSubCategory, Brand, Tags, Units, DiscountTypes, Product, ProductAttributes, ProductCombinations, VariantType, ProductCombinationsVariants, ProductTags, ProductMedia, ProductCombinationMedia, ProductReview, ProductVideoProvider, VatType
 
 
 admin.site.register(Category)
@@ -10,13 +10,23 @@ admin.site.register(Brand)
 admin.site.register(Units)
 admin.site.register(DiscountTypes)
 admin.site.register(ProductAttributes)
+admin.site.register(ProductAttributeValues)
 admin.site.register(VariantType)
 admin.site.register(ProductCombinationsVariants)
 admin.site.register(ProductTags)
 admin.site.register(ProductReview)
 admin.site.register(ProductCombinations)
-admin.site.register(ProductMedia)
-admin.site.register(ProductVideoProvider)
+admin.site.register(ProductImages) 
+admin.site.register(ProductVideoProvider) 
+admin.site.register(Color) 
+admin.site.register(Attribute) 
+admin.site.register(AttributeValues) 
+admin.site.register(FlashDealInfo) 
+admin.site.register(VatType) 
+admin.site.register(ProductColor)
+admin.site.register(Inventory) 
+admin.site.register(InventoryVariation)
+admin.site.register(ShippingClass)
 admin.site.register(TextColor)
 
 
@@ -40,7 +50,7 @@ admin.site.register(TextColor)
 
 
 class ProductImageInline(admin.TabularInline):
-    model = ProductMedia
+    model = ProductImages
     fields = ['file']
 
 

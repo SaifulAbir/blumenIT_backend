@@ -34,10 +34,12 @@ class SellerCreateAPIView(CreateAPIView):
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
+
 class SellerListAPIView(ListAPIView):
     queryset = Seller.objects.filter()
     permission_classes = [AllowAny]
     serializer_class = SellerDetailSerializer
+
 
 class SellerUpdateAPIView(RetrieveUpdateAPIView):
     permission_classes = [AllowAny]
@@ -48,6 +50,7 @@ class SellerUpdateAPIView(RetrieveUpdateAPIView):
 
     def put(self, request, *args, **kwargs):
         return super(SellerUpdateAPIView, self).put(request, *args, **kwargs)
+
 
 class SellerDeleteAPIView(DestroyAPIView):
     permission_classes = [AllowAny]

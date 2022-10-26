@@ -15,7 +15,7 @@ from django.utils import timezone
 # Seller Create serializer
 
 class SellerSerializer(serializers.ModelSerializer):
-    logo = serializers.ImageField(allow_null=True)
+    # logo = serializers.ImageField(allow_null=True)
 
     class Meta:
         model = Seller

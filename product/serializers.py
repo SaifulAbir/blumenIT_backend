@@ -13,8 +13,10 @@ from vendor.models import StoreSettings, Vendor, VendorReview
 from django.db.models import Avg, Count, Q, F
 from rest_framework.exceptions import ValidationError
 
-
+# text color serializer
 # User Data serializer
+
+
 class UserDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = User

@@ -105,7 +105,7 @@ class SubSubCategory(AbstractTimeStamp):
 
 class Brand(AbstractTimeStamp):
     title = models.CharField(
-        max_length=100, null=False, blank=False, default="")
+        max_length=100, null=True, blank=True)
     logo = models.ImageField(upload_to='brand', blank=True, null=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
 
@@ -115,7 +115,7 @@ class Brand(AbstractTimeStamp):
         db_table = 'brand'
 
     def __str__(self):
-        return self.title
+        return self
 
 
 class Units(AbstractTimeStamp):
@@ -669,6 +669,7 @@ class TextColor(AbstractTimeStamp):
         max_length=255, null=False, blank=False, default="")
     code = models.CharField(
         max_length=20, null=False, blank=False, default="")
+    is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
         verbose_name = 'TextColor'

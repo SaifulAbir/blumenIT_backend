@@ -4,7 +4,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from ecommerce.common.emails import send_email_without_delay
-from product.models import Brand, Category, Color, DiscountTypes, FlashDealProduct, Inventory, InventoryVariation, Product, ProductAttributeValues, ProductAttributes, ProductColor, ProductCombinations, ProductCombinationsVariants, ProductImages, ProductMedia, ProductReview, ProductTags, ProductVariation, ProductVideoProvider, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units, VariantType, VatType
+from product.models import Brand, Category, Color, DiscountTypes, FlashDealProduct, Inventory, InventoryVariation, Product, ProductAttributeValues, ProductAttributes, ProductColor, ProductCombinations, ProductCombinationsVariants, ProductImages, ProductMedia, ProductReview, ProductTags, ProductVariation, ProductVideoProvider, ShippingClass, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units, VariantType, VatType
 from user.models import User
 # from user.serializers import UserRegisterSerializer
 from vendor.models import VendorRequest, Vendor, StoreSettings,Seller
@@ -499,9 +499,10 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
     brand = serializers.PrimaryKeyRelatedField(queryset=Brand.objects.all(), many=False, write_only=True, required= False)
     unit = serializers.PrimaryKeyRelatedField(queryset=Units.objects.all(), many=False, write_only=True, required= False)
     minimum_purchase_quantity = serializers.IntegerField(required=True)
-    # price = serializers.FloatField(required=True)
-    # quantity = serializers.IntegerField(required=False, write_only=True)
-    # vat_type = VatTypeSerializer(many=False, required=False)
+    price = serializers.FloatField(required=True)
+    quantity = serializers.IntegerField(required=False, write_only=True)
+    vat_type = VatTypeSerializer(many=False, required=False)
+    shipping_class = serializers.PrimaryKeyRelatedField(queryset=ShippingClass.objects.all(), many=False, write_only=True, required= False)
 
     product_tags = serializers.ListField(
         child=serializers.CharField(), write_only=True, required=True)
@@ -511,12 +512,10 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
         child=serializers.PrimaryKeyRelatedField(queryset=Color.objects.all()), write_only=True, required=False)
     product_attributes = ProductAttributesSerializer(
         many=True, required=False)
-    # product_variants = ProductVariantsSerializer(
-    #     many=True, required=False)
-    # product_specification = ProductSpecificationSerializer(
-    #     many=True, required=False)
-    # flash_deal = FlashDealSerializer(
-    #     many=False, required=False)
+    product_variants = ProductVariantsSerializer(many=True, required=False)
+    product_specification = ProductSpecificationSerializer(
+        many=True, required=False)
+    flash_deal = FlashDealSerializer(many=False, required=False)
 
     
 
@@ -541,49 +540,49 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
             'video_link',
             'product_colors',
             'product_attributes',
-            # 'price',
-            # 'pre_payment_amount',
-            # 'discount_start_date',
-            # 'discount_end_date',
-            # 'discount_amount',
-            # 'discount_type',
-            # 'quantity',
-            # 'sku',
-            # 'external_link',
-            # 'external_link_button_text',
-            # 'product_variants',
-            # 'full_description',
-            # 'active_short_description',
-            # 'short_description',
-            # 'product_specification',
-            # 'low_stock_quantity_warning',
-            # 'show_stock_quantity',
-            # 'cash_on_delivery',
-            # 'is_featured',
-            # 'todays_deal',
-            # 'flash_deal',
-            # 'shipping_time',
-            # 'shipping_class',
-            # 'vat',
-            # 'vat_type'
+            'price',
+            'pre_payment_amount',
+            'discount_start_date',
+            'discount_end_date',
+            'discount_amount',
+            'discount_type',
+            'quantity',
+            'sku',
+            'external_link',
+            'external_link_button_text',
+            'product_variants',
+            'full_description',
+            'active_short_description',
+            'short_description',
+            'product_specification',
+            'low_stock_quantity_warning',
+            'show_stock_quantity',
+            'cash_on_delivery',
+            'is_featured',
+            'todays_deal',
+            'flash_deal',
+            'shipping_time',
+            'shipping_class',
+            'vat',
+            'vat_type'
         ]
 
         read_only_fields = ('slug', 'sell_count')
 
     def create(self, validated_data):
         # validation for sku start
-        # try:
-        #     sku = validated_data["sku"]
-        # except:
-        #     sku = ''
+        try:
+            sku = validated_data["sku"]
+        except:
+            sku = ''
 
-        # if sku:
-        #     product_check_sku = Product.objects.filter(sku=sku)
-        #     if product_check_sku:
-        #         raise ValidationError('This SKU already exist in product.')
-        #     variation_check_sku = ProductVariation.objects.filter(sku=sku)
-        #     if variation_check_sku:
-        #         raise ValidationError('This SKU already exist in product variation.')
+        if sku:
+            product_check_sku = Product.objects.filter(sku=sku)
+            if product_check_sku:
+                raise ValidationError('This SKU already exist in product.')
+            variation_check_sku = ProductVariation.objects.filter(sku=sku)
+            if variation_check_sku:
+                raise ValidationError('This SKU already exist in product variation.')
         # validation for sku end
 
         # validation for category sub category and sub sub category start
@@ -642,22 +641,22 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
             product_attributes = ''
 
         # product_variants
-        # try:
-        #     product_variants = validated_data.pop('product_variants')
-        # except:
-        #     product_variants = ''
+        try:
+            product_variants = validated_data.pop('product_variants')
+        except:
+            product_variants = ''
 
         # product_specification
-        # try:
-        #     product_specification = validated_data.pop('product_specification')
-        # except:
-        #     product_specification = ''
+        try:
+            product_specification = validated_data.pop('product_specification')
+        except:
+            product_specification = ''
 
         # flash_deal
-        # try:
-        #     flash_deal = validated_data.pop('flash_deal')
-        # except:
-        #     flash_deal = ''
+        try:
+            flash_deal = validated_data.pop('flash_deal')
+        except:
+            flash_deal = ''
 
 
         # product_instance = Product.objects.create(**validated_data, vendor=Vendor.objects.get(vendor_admin=User.objects.get(
@@ -715,73 +714,70 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
                         product_attributes_value_instance = ProductAttributeValues.objects.create(product_attribute = product_attributes_instance, value= attribute_value_value, product=product_instance)
 
             # product with out variants
-            # single_quantity = validated_data["quantity"]
-            # total_quan = 0
-            # if single_quantity:
-            #     total_quan += single_quantity
-            #     Product.objects.filter(id=product_instance.id).update(total_quantity=total_quan)
-            #     # inventory update
-            #     Inventory.objects.create(product=product_instance, initial_quantity=single_quantity, current_quantity=single_quantity)
+            single_quantity = validated_data["quantity"]
+            total_quan = 0
+            if single_quantity:
+                total_quan += single_quantity
+                Product.objects.filter(id=product_instance.id).update(total_quantity=total_quan)
+                # inventory update
+                Inventory.objects.create(product=product_instance, initial_quantity=single_quantity, current_quantity=single_quantity)
             
             # product with variants
-            # if product_variants:
-            #     variation_total_quan = 0
-            #     for product_variant in product_variants:
-            #         attribute = product_variant['attribute']
-            #         variation = product_variant['variation']
-            #         variation_price = product_variant['variation_price']
-            #         sku = product_variant['sku']
-            #         if sku:
-            #             product_check_sku = Product.objects.filter(sku=sku)
-            #             if product_check_sku:
-            #                 raise ValidationError('This SKU already exist in product.')
-            #             variation_check_sku = ProductVariation.objects.filter(sku=sku)
-            #             if variation_check_sku:
-            #                 raise ValidationError('This SKU already exist in product variation.')
+            if product_variants:
+                variation_total_quan = 0
+                for product_variant in product_variants:
+                    attribute = product_variant['attribute']
+                    variation = product_variant['variation']
+                    variation_price = product_variant['variation_price']
+                    sku = product_variant['sku']
+                    if sku:
+                        product_check_sku = Product.objects.filter(sku=sku)
+                        if product_check_sku:
+                            raise ValidationError('This SKU already exist in product.')
+                        variation_check_sku = ProductVariation.objects.filter(sku=sku)
+                        if variation_check_sku:
+                            raise ValidationError('This SKU already exist in product variation.')
 
-            #         variant_quantity = product_variant['quantity']
-            #         if variant_quantity:
-            #             variation_total_quan += variant_quantity
-            #             Product.objects.filter(id=product_instance.id).update(total_quantity=variation_total_quan)
+                    variant_quantity = product_variant['quantity']
+                    if variant_quantity:
+                        variation_total_quan += variant_quantity
+                        Product.objects.filter(id=product_instance.id).update(total_quantity=variation_total_quan)
 
 
-            #         v_image = product_variant['image']
+                    v_image = product_variant['image']
 
-            #         if attribute and variation and variation_price and sku and variant_quantity and v_image:
-            #             total_price = float(variation_price) * float(variant_quantity)
-            #             product_variation_instance = ProductVariation.objects.create(product=product_instance, attribute=attribute,
-            #             variation=variation, variation_price=variation_price, sku=sku, quantity=variant_quantity, image=v_image, total_price=total_price)
+                    if attribute and variation and variation_price and sku and variant_quantity and v_image:
+                        total_price = float(variation_price) * float(variant_quantity)
+                        product_variation_instance = ProductVariation.objects.create(product=product_instance, attribute=attribute,
+                        variation=variation, variation_price=variation_price, sku=sku, quantity=variant_quantity, image=v_image, total_price=total_price)
 
-            #             # inventory update
-            #             if variation_total_quan:
-            #                 if variation_total_quan != 0:
-            #                     inventory_instance = Inventory.objects.create(product=product_instance)
-            #                     inventory_variation_instance = InventoryVariation.objects.create(inventory=inventory_instance, variation_initial_quantity=variation_total_quan, variation_current_quantity=variation_total_quan)
+                        # inventory update
+                        if variation_total_quan:
+                            if variation_total_quan != 0:
+                                inventory_instance = Inventory.objects.create(product=product_instance)
+                                inventory_variation_instance = InventoryVariation.objects.create(inventory=inventory_instance, variation_initial_quantity=variation_total_quan, variation_current_quantity=variation_total_quan)
 
             # product_specification
-            # if product_specification:
-            #     for p_specification in product_specification:
-            #         s_title = p_specification['title']
-            #         if s_title:
-            #             specification_instance = Specification.objects.create(
-            #             title=s_title, product=product_instance)
-            #         specification_values = p_specification['specification_values']
-            #         for specification_value in specification_values:
-            #             key = specification_value['key']
-            #             value = specification_value['value']
-            #             product_specification_instance = SpecificationValue.objects.create(specification = specification_instance, key=key, value= value)
+            if product_specification:
+                for p_specification in product_specification:
+                    s_title = p_specification['title']
+                    if s_title:
+                        specification_instance = Specification.objects.create(
+                        title=s_title, product=product_instance)
+                    specification_values = p_specification['specification_values']
+                    for specification_value in specification_values:
+                        key = specification_value['key']
+                        value = specification_value['value']
+                        product_specification_instance = SpecificationValue.objects.create(specification = specification_instance, key=key, value= value)
 
             # flash_deal
-            # if flash_deal:
-            #     for f_deal in flash_deal:
-            #         flashDealInfo = f_deal['flashDealInfo']
-            #         discount_type = f_deal['discount_type']
-            #         discount_amount = f_deal['discount_amount']
-            #         if s_title:
-            #             flash_deal_product_instance = FlashDealProduct.objects.create(product=product_instance, flashDealInfo=flashDealInfo, discount_type=discount_type, discount_amount=discount_amount)
-
-
-            
+            if flash_deal:
+                for f_deal in flash_deal:
+                    flashDealInfo = f_deal['flashDealInfo']
+                    discount_type = f_deal['discount_type']
+                    discount_amount = f_deal['discount_amount']
+                    if s_title:
+                        flash_deal_product_instance = FlashDealProduct.objects.create(product=product_instance, flashDealInfo=flashDealInfo, discount_type=discount_type, discount_amount=discount_amount)
 
             return product_instance
         except:

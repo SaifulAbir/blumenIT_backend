@@ -370,7 +370,7 @@ class ProductAttributeValues(AbstractTimeStamp):
         db_table = 'product_attribute_value'
 
     def __str__(self):
-        return self.product_attribute.product.title + ' ' + self.product_attribute.title + ' ' + self.value
+        return self.product_attribute.product.title + ' ' + self.product_attribute.attribute.title + ' ' + self.value
 
 class Color(AbstractTimeStamp):
     title = models.CharField(
@@ -734,7 +734,7 @@ class Inventory(AbstractTimeStamp):
         db_table = 'inventory'
 
     def __str__(self):
-        return self.product.title + ' ' + self.initial_quantity + ' ' + self.current_quantity
+        return self.product.title + '-initial_quantity: ' + str(self.initial_quantity) + '-current_quantity: ' + str(self.current_quantity)
 
 class InventoryVariation(AbstractTimeStamp):
     inventory = models.ForeignKey(
@@ -750,4 +750,4 @@ class InventoryVariation(AbstractTimeStamp):
         db_table = 'inventory_variation'
 
     def __str__(self):
-        return self.inventory.product.title + ' ' + self.variation_initial_quantity + ' ' + self.variation_current_quantity
+        return self.inventory.product.title + '-variation_initial_quantity: ' + str(self.variation_initial_quantity) + '-variation_current_quantity ' + str(self.variation_current_quantity)

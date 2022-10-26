@@ -189,6 +189,8 @@ class OTPVerifyAPIVIEW(CreateAPIView):
                     }, status=status.HTTP_408_REQUEST_TIMEOUT)
                 try:
                     user = User.objects.get(phone=contact_number)
+                    user.is_active = True
+                    user.save()
                     token = RefreshToken.for_user(user)
                 except:
                     pass

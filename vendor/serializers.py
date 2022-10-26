@@ -494,16 +494,19 @@ class FlashDealSerializer(serializers.ModelSerializer):
 
 class VendorProductCreateSerializer(serializers.ModelSerializer):
     title = serializers.CharField(required=True)
-    category = serializers.IntegerField(required=True)
+    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=False, write_only=True, required= True)
+    sub_category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=False, write_only=True, required= False)
+    sub_sub_category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=False, write_only=True, required= False)
+    brand = serializers.PrimaryKeyRelatedField(queryset=Brand.objects.all(), many=False, write_only=True, required= False)
     minimum_purchase_quantity = serializers.IntegerField(required=True)
     # price = serializers.FloatField(required=True)
     # quantity = serializers.IntegerField(required=False, write_only=True)
     # vat_type = VatTypeSerializer(many=False, required=False)
 
     product_tags = serializers.ListField(
-        child=serializers.IntegerField(), write_only=True, required=True)
-    # product_images = serializers.ListField(
-    #     child=serializers.FileField(), write_only=True, required=False)
+        child=serializers.CharField(), write_only=True, required=True)
+    product_images = serializers.ListField(
+        child=serializers.FileField(), write_only=True, required=False)
     # product_colors = serializers.ListField(
     #     child=serializers.IntegerField(), write_only=True, required=False)
     # product_attributes = ProductAttributesSerializer(
@@ -532,8 +535,8 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
             'product_tags',
             'bar_code',
             'refundable',
-            # 'product_images',
-            # 'thumbnail',
+            'product_images',
+            'thumbnail',
             # 'video_provider',
             # 'video_link',
             # 'product_colors',
@@ -621,10 +624,12 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
             product_tags = ''
 
         # product_images
-        # try:
-        #     product_images = validated_data.pop('product_images')
-        # except:
-        #     product_images = ''
+        print('product_images')
+        print(validated_data.pop('product_images'))
+        try:
+            product_images = validated_data.pop('product_images')
+        except:
+            product_images = ''
 
         # product_colors
         # try:
@@ -682,10 +687,10 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
                             pass
 
             # product_images
-            # if product_images:
-            #     for image in product_images:
-            #         ProductImages.objects.create(
-            #             product=product_instance, image=image, status="COMPLETE")
+            if product_images:
+                for image in product_images:
+                    ProductImages.objects.create(
+                        product=product_instance, image=image, status="COMPLETE")
 
             # product_colors
             # if product_colors:

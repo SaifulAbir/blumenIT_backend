@@ -189,9 +189,9 @@ class ProductCondition(AbstractTimeStamp):
 
 class Product(AbstractTimeStamp):
     PRODUCT_STATUSES = [
-        ('PENDING', 'Pending'),
-        ('ACTIVE', 'Active'),
-        ('REMOVE', 'Remove')]
+        ('DRAFT', 'Draft'),
+        ('PUBLISH', 'Publish'),
+        ('UNPUBLISH', 'UnPublish')]
 
     title = models.CharField(max_length=800, default='')
     slug = models.SlugField(
@@ -470,8 +470,6 @@ class Tags(AbstractTimeStamp):
     title = models.CharField(
         max_length=100, null=False, blank=False, default="", unique=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
-    product = models.ForeignKey(
-        Product, on_delete=models.PROTECT, related_name='tags_product', null=True, blank=True)
 
     class Meta:
         verbose_name = 'Tag'

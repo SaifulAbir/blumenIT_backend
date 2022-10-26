@@ -1,5 +1,5 @@
 from django.contrib import admin
-from product.models import Attribute, AttributeValues, Category, Color, FlashDealInfo, SubCategory, SubSubCategory, Brand, Tags, Units, DiscountTypes, Product, ProductAttributes, ProductCombinations, VariantType, ProductCombinationsVariants, ProductTags, ProductMedia, ProductCombinationMedia, ProductReview, ProductVideoProvider, VatType
+from product.models import Attribute, AttributeValues, Category, Color, FlashDealInfo, ProductImages, SubCategory, SubSubCategory, Brand, Tags, Units, DiscountTypes, Product, ProductAttributes, ProductCombinations, VariantType, ProductCombinationsVariants, ProductTags, ProductMedia, ProductCombinationMedia, ProductReview, ProductVideoProvider, VatType
 
 admin.site.register(Category)
 admin.site.register(SubCategory)
@@ -14,7 +14,7 @@ admin.site.register(ProductCombinationsVariants)
 admin.site.register(ProductTags)
 admin.site.register(ProductReview)
 admin.site.register(ProductCombinations)
-admin.site.register(ProductMedia) 
+admin.site.register(ProductImages) 
 admin.site.register(ProductVideoProvider) 
 admin.site.register(Color) 
 admin.site.register(Attribute) 
@@ -41,8 +41,8 @@ admin.site.register(VatType)
 
 
 class ProductImageInline(admin.TabularInline):
-    model = ProductMedia
-    fields = ['file']
+    model = ProductImages
+    fields = ['image']
 
 
 class ProductTagsInline(admin.TabularInline):

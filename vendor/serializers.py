@@ -625,11 +625,12 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
 
         # product_images
         print('product_images')
-        print(validated_data.pop('product_images'))
         try:
             product_images = validated_data.pop('product_images')
+            print('if')
         except:
             product_images = ''
+            print('else')
 
         # product_colors
         # try:
@@ -688,7 +689,10 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
 
             # product_images
             if product_images:
+                print('if if')
+                print(product_images)
                 for image in product_images:
+                    print('if for')
                     ProductImages.objects.create(
                         product=product_instance, image=image, status="COMPLETE")
 
@@ -773,7 +777,7 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
             #         for specification_value in specification_values:
             #             key = specification_value['key']
             #             value = specification_value['value']
-            #             product_combination_instance = SpecificationValue.objects.create(specification = specification_instance, key=key, value= value)
+            #             product_specification_instance = SpecificationValue.objects.create(specification = specification_instance, key=key, value= value)
 
             # flash_deal
             # if flash_deal:

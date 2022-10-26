@@ -37,7 +37,7 @@ class AttributeValues(AbstractTimeStamp):
         db_table = 'attribute_attribute'
 
     def __str__(self):
-        return self.title
+        return self.value
 
 class Category(AbstractTimeStamp):
     title = models.CharField(
@@ -341,8 +341,6 @@ class SpecificationValue(AbstractTimeStamp):
         return self.key
 
 class ProductAttributes(AbstractTimeStamp):
-    title = models.CharField(
-        max_length=100, null=False, blank=False, default="")
     attribute = models.ForeignKey(
         Attribute, related_name='product_attributes_attribute', blank=True, null=True, on_delete=models.PROTECT)
     product = models.ForeignKey(
@@ -355,11 +353,11 @@ class ProductAttributes(AbstractTimeStamp):
         db_table = 'product_attributes'
 
     def __str__(self):
-        return self.product.title + ' ' + self.title
+        return self.product.title + ' ' + self.attribute.title
 
 class ProductAttributeValues(AbstractTimeStamp):
     product_attribute = models.ForeignKey(ProductAttributes, on_delete=models.PROTECT,
-                               related_name='product_attribute_values_product_attribute', blank=False, null=False)
+                               related_name='product_attribute_values_product_attribute', blank=True, null=True)
     value = models.CharField(
         max_length=255, null=False, blank=False, default="")
     product = models.ForeignKey(
@@ -533,6 +531,12 @@ class ProductMedia(AbstractTimeStamp):
         return self.product.title
 
 class ProductImages(AbstractTimeStamp):
+    CHOICES = [
+        ('COMPLETE', 'Complete'),
+        ('IN_QUEUE', 'In_Queue'),
+        ('IN_PROCESSING', 'In_Processing'),
+    ]
+
     def validate_file_extension(value):
         import os
         from django.core.exceptions import ValidationError
@@ -541,9 +545,13 @@ class ProductImages(AbstractTimeStamp):
         if not ext.lower() in valid_extensions:
             raise ValidationError('Unsupported file extension.')
 
-    image = models.FileField(upload_to='products', validators=[validate_file_extension])
     product = models.ForeignKey(
-        Product, on_delete=models.PROTECT, related_name='product_images_product', null=True, blank=True)
+        Product, on_delete=models.PROTECT, related_name='product_image_product', null=True, blank=True)
+    file = models.FileField(upload_to='products', validators=[
+                            validate_file_extension])
+    status = models.CharField(
+        max_length=20, choices=CHOICES, default=CHOICES[0][0])
+    is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
         verbose_name = 'ProductImage'

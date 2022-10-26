@@ -436,7 +436,6 @@ class ProductAttributesSerializer(serializers.ModelSerializer):
         model = ProductAttributes
         fields = [
             'id',
-            'title',
             'attribute',
             'product_attribute_values'
         ]
@@ -498,6 +497,7 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
     sub_category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=False, write_only=True, required= False)
     sub_sub_category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=False, write_only=True, required= False)
     brand = serializers.PrimaryKeyRelatedField(queryset=Brand.objects.all(), many=False, write_only=True, required= False)
+    unit = serializers.PrimaryKeyRelatedField(queryset=Units.objects.all(), many=False, write_only=True, required= False)
     minimum_purchase_quantity = serializers.IntegerField(required=True)
     # price = serializers.FloatField(required=True)
     # quantity = serializers.IntegerField(required=False, write_only=True)
@@ -507,10 +507,10 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
         child=serializers.CharField(), write_only=True, required=True)
     product_images = serializers.ListField(
         child=serializers.FileField(), write_only=True, required=False)
-    # product_colors = serializers.ListField(
-    #     child=serializers.IntegerField(), write_only=True, required=False)
-    # product_attributes = ProductAttributesSerializer(
-    #     many=True, required=False)
+    product_colors = serializers.ListField(
+        child=serializers.PrimaryKeyRelatedField(queryset=Color.objects.all()), write_only=True, required=False)
+    product_attributes = ProductAttributesSerializer(
+        many=True, required=False)
     # product_variants = ProductVariantsSerializer(
     #     many=True, required=False)
     # product_specification = ProductSpecificationSerializer(
@@ -537,10 +537,10 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
             'refundable',
             'product_images',
             'thumbnail',
-            # 'video_provider',
-            # 'video_link',
-            # 'product_colors',
-            # 'product_attributes',
+            'video_provider',
+            'video_link',
+            'product_colors',
+            'product_attributes',
             # 'price',
             # 'pre_payment_amount',
             # 'discount_start_date',
@@ -624,25 +624,22 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
             product_tags = ''
 
         # product_images
-        print('product_images')
         try:
             product_images = validated_data.pop('product_images')
-            print('if')
         except:
             product_images = ''
-            print('else')
 
         # product_colors
-        # try:
-        #     product_colors = validated_data.pop('product_colors')
-        # except:
-        #     product_colors = ''
+        try:
+            product_colors = validated_data.pop('product_colors')
+        except:
+            product_colors = ''
 
         # product_attributes
-        # try:
-        #     product_attributes = validated_data.pop('product_attributes')
-        # except:
-        #     product_attributes = ''
+        try:
+            product_attributes = validated_data.pop('product_attributes')
+        except:
+            product_attributes = ''
 
         # product_variants
         # try:
@@ -689,38 +686,33 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
 
             # product_images
             if product_images:
-                print('if if')
-                print(product_images)
-                for image in product_images:
-                    print('if for')
+                for media_file in product_images:
                     ProductImages.objects.create(
-                        product=product_instance, image=image, status="COMPLETE")
+                        product=product_instance, file=media_file, status="COMPLETE")
 
             # product_colors
-            # if product_colors:
-            #     for color in product_colors:
-            #         if Color.objects.filter(title=color).exists():
-            #             color_obj = Color.objects.get(title=color)
-            #             if color_obj:
-            #                 ProductColor.objects.create(
-            #                     color=color_obj, product=product_instance)
-            #             else:
-            #                 pass
-            #         else:
-            #             pass
+            if product_colors:
+                for color in product_colors:
+                    if Color.objects.filter(title=color).exists():
+                        color_obj = Color.objects.get(title=color)
+                        if color_obj:
+                            ProductColor.objects.create(
+                                color=color_obj, product=product_instance)
+                        else:
+                            pass
+                    else:
+                        pass
 
             # product_attributes
-            # if product_attributes:
-            #     for product_attribute in product_attributes:
-            #         attribute_title = product_attribute['title']
-            #         attribute_attribute = product_attribute['attribute']
-            #         if product_instance and attribute_title and attribute_attribute:
-            #             product_attributes_instance = ProductAttributes.objects.create(
-            #             title=attribute_title, attribute=attribute_attribute, product=product_instance)
-            #         product_attribute_values = product_attribute['product_attribute_values']
-            #         for product_attribute_value in product_attribute_values:
-            #             attribute_value_value = product_attribute_value['value']
-            #             product_combination_instance = ProductAttributeValues.objects.create(product_attribute = product_attributes_instance, value= attribute_value_value, product=product_instance)
+            if product_attributes:
+                for product_attribute in product_attributes:
+                    attribute_attribute = product_attribute['attribute']
+                    if product_instance and attribute_attribute:
+                        product_attributes_instance = ProductAttributes.objects.create(attribute=attribute_attribute, product=product_instance)
+                    product_attribute_values = product_attribute['product_attribute_values']
+                    for product_attribute_value in product_attribute_values:
+                        attribute_value_value = product_attribute_value['value']
+                        product_attributes_value_instance = ProductAttributeValues.objects.create(product_attribute = product_attributes_instance, value= attribute_value_value, product=product_instance)
 
             # product with out variants
             # single_quantity = validated_data["quantity"]

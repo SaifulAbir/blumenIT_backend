@@ -571,7 +571,6 @@ class ProductAttributeValuesSerializer(serializers.ModelSerializer):
         model = ProductAttributeValues
         fields = [
             'id',
-            'product_attribute',
             'value'
         ]
 
@@ -591,7 +590,6 @@ class ProductVariantsSerializer(serializers.ModelSerializer):
         model = ProductVariation
         fields = [
             'id',
-            'attribute',
             'variation',
             'variation_price',
             'sku',
@@ -640,8 +638,8 @@ class FlashDealSerializer(serializers.ModelSerializer):
 class VendorProductCreateSerializer(serializers.ModelSerializer):
     title = serializers.CharField(required=True)
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=False, write_only=True, required= True)
-    sub_category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=False, write_only=True, required= False)
-    sub_sub_category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=False, write_only=True, required= False)
+    sub_category = serializers.PrimaryKeyRelatedField(queryset=SubCategory.objects.all(), many=False, write_only=True, required= False)
+    sub_sub_category = serializers.PrimaryKeyRelatedField(queryset=SubSubCategory.objects.all(), many=False, write_only=True, required= False)
     brand = serializers.PrimaryKeyRelatedField(queryset=Brand.objects.all(), many=False, write_only=True, required= False)
     unit = serializers.PrimaryKeyRelatedField(queryset=Units.objects.all(), many=False, write_only=True, required= False)
     minimum_purchase_quantity = serializers.IntegerField(required=True)

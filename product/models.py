@@ -42,7 +42,7 @@ class AttributeValues(AbstractTimeStamp):
 class Category(AbstractTimeStamp):
     title = models.CharField(
         max_length=100, null=False, blank=False, default="", help_text="name")
-    ordering_number = models.IntegerField(null=True, blank=True, default=0)
+    ordering_number = models.IntegerField(null=False, blank=False, default=0)
     type = models.CharField(max_length=100, null=True, blank=True, default="")
     banner = models.ImageField(
         upload_to='product_category', blank=True, null=True)
@@ -52,7 +52,7 @@ class Category(AbstractTimeStamp):
     filtering_attributes = models.ForeignKey(Attribute, on_delete=models.PROTECT,
                                related_name='category_filtering_attributes', blank=True, null=True)
 
-    subtitle = models.TextField(null=False, blank=False, default="")
+    subtitle = models.TextField(null=True, blank=True, default="")
     logo = models.ImageField(
         upload_to='product_category', blank=True, null=True)
     cover = models.ImageField(
@@ -70,7 +70,7 @@ class Category(AbstractTimeStamp):
 class SubCategory(AbstractTimeStamp):
     title = models.CharField(
         max_length=100, null=False, blank=False, default="", help_text="name")
-    ordering_number = models.IntegerField(null=True, blank=True, default=0)
+    ordering_number = models.IntegerField(null=False, blank=False, default=0)
     is_active = models.BooleanField(null=False, blank=False, default=True)
     category = models.ForeignKey(
         Category, on_delete=models.PROTECT, related_name='sub_category_category')
@@ -87,7 +87,7 @@ class SubCategory(AbstractTimeStamp):
 class SubSubCategory(AbstractTimeStamp):
     title = models.CharField(
         max_length=100, null=False, blank=False, default="", help_text="name")
-    ordering_number = models.IntegerField(null=True, blank=True, default=0)
+    ordering_number = models.IntegerField(null=False, blank=False, default=0)
     is_active = models.BooleanField(null=False, blank=False, default=True)
     category = models.ForeignKey(
         Category, on_delete=models.PROTECT, related_name='sub_sub_category_category')
@@ -115,7 +115,7 @@ class Brand(AbstractTimeStamp):
         db_table = 'brand'
 
     def __str__(self):
-        return self
+        return self.title
 
 
 class Units(AbstractTimeStamp):

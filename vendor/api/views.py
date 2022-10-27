@@ -64,7 +64,7 @@ class SellerDeleteAPIView(DestroyAPIView):
         seller_id = self.kwargs['id']
         seller_obj = Seller.objects.filter(id=seller_id).exists()
         if seller_obj:
-            seller_obj = Product.objects.filter(id=seller_id)
+            seller_obj = Seller.objects.filter(id=seller_id)
             seller_obj.update(status='REMOVE', is_active=False)
 
             queryset = Seller.objects.filter(status='ACTIVE').order_by('-created_at')

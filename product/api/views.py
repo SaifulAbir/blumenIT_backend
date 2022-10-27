@@ -29,9 +29,30 @@ class BrandCreateAPIView(CreateAPIView):
 
 
 class BrandListAPIView(ListAPIView):
-    queryset = Brand.objects.filter(is_active=True)
     permission_classes = [AllowAny]
     serializer_class = BrandSerializer
+    queryset = Brand.objects.filter(is_active=True)
+
+
+class BrandDeleteAPIView(DestroyAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = BrandSerializer
+    queryset = Brand.objects.all()
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        seller_id = self.kwargs['id']
+        seller_obj_exist = Brand.objects.filter(id=seller_id).exists()
+        if seller_obj_exist:
+            seller_obj = Brand.objects.filter(id=seller_id)
+            seller_obj.update(is_active=False)
+
+            queryset = Brand.objects.filter(is_active=True).order_by('-created_at')
+            return queryset
+        else:
+            raise ValidationError(
+                {"msg": 'Brand does not exist!'})
 
 
 class MegaMenuDataAPIView(ListAPIView):

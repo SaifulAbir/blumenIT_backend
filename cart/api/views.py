@@ -22,7 +22,6 @@ from django.utils import timezone
 from vendor.models import Vendor
 
 
-
 class CouponCreateAPIView(CreateAPIView):
 
     permission_classes = [AllowAny]

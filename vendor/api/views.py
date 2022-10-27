@@ -11,7 +11,7 @@ from product.models import Brand, Category, DiscountTypes, Product, ProductAttri
 from user.models import CustomerProfile, User
 from vendor.models import VendorRequest, Vendor, Seller
 from vendor.serializers import VendorAddNewCategorySerializer, VendorAddNewSubCategorySerializer, VendorAddNewSubSubCategorySerializer, VendorBrandSerializer, VendorCategorySerializer, VendorProductCreateSerializer, VendorProductDetailsSerializer, VendorProductListSerializer, VendorProductUpdateSerializer, VendorProductViewSerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
-    VendorDetailSerializer, StoreSettingsSerializer, SellerDetailSerializer, VendorSubCategorySerializer, VendorSubSubCategorySerializer, VendorUnitSerializer, SellerSerializer, ProductAttributesSerializer, ProductVideoProviderSerializer, ProductVatProviderSerializer, VendorUpdateCategorySerializer, VendorUpdateSubSubCategorySerializer
+    VendorDetailSerializer, StoreSettingsSerializer, SellerCreateSerializer, VendorSubCategorySerializer, VendorSubSubCategorySerializer, VendorUnitSerializer, SellerSerializer, ProductAttributesSerializer, ProductVideoProviderSerializer, ProductVatProviderSerializer, VendorUpdateCategorySerializer, VendorUpdateSubSubCategorySerializer
 from user.models import User
 from cart.models import Coupon
 from rest_framework.exceptions import ValidationError
@@ -19,37 +19,34 @@ from rest_framework.exceptions import ValidationError
 
 class SellerCreateAPIView(CreateAPIView):
     permission_classes = [AllowAny]
-    serializer_class = SellerSerializer
+    serializer_class = SellerCreateSerializer
 
-    def post(self, request):
-        seller = SellerSerializer(data=request.data)
-
-        # validating for already existing data
-        if Seller.objects.filter(**request.data).exists():
-            raise serializers.ValidationError('This data already exists')
-
-        if seller.is_valid():
-            seller.save()
-            return Response(seller.data)
-        else:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+    def post(self, request, *args, **kwargs):
+        return super(SellerCreateAPIView, self).post(request, *args, **kwargs)
 
 
 class SellerListAPIView(ListAPIView):
     queryset = Seller.objects.filter()
     permission_classes = [AllowAny]
-    serializer_class = SellerDetailSerializer
+    serializer_class = SellerSerializer
 
 
 class SellerUpdateAPIView(RetrieveUpdateAPIView):
     permission_classes = [AllowAny]
     serializer_class = SellerSerializer
-    queryset = Seller.objects.all()
+    # queryset = Seller.objects.all()
     lookup_field = 'id'
     lookup_url_kwarg = "id"
 
-    def put(self, request, *args, **kwargs):
-        return super(SellerUpdateAPIView, self).put(request, *args, **kwargs)
+    def get_queryset(self):
+        seller_id = self.kwargs['id']
+        query = Seller.objects.filter(id=seller_id)
+        if query:
+            return query
+        else:
+            raise ValidationError(
+                {"msg": 'Seller not found'}
+            )
 
 
 class SellerDeleteAPIView(DestroyAPIView):
@@ -68,7 +65,7 @@ class SellerDeleteAPIView(DestroyAPIView):
         seller_obj = Seller.objects.filter(id=seller_id).exists()
         if seller_obj:
             seller_obj = Product.objects.filter(id=seller_id)
-            seller_obj.update(status='REMOVE', is_published=False)
+            seller_obj.update(status='REMOVE', is_active=False)
 
             queryset = Seller.objects.filter(status='ACTIVE').order_by('-created_at')
             return queryset

@@ -19,6 +19,8 @@ urlpatterns = [
     path('vendor-product-list-for-frontend/<int:vid>/',
          VendorProductListForFrondEndAPI.as_view()),
     path('brand-create/', BrandCreateAPIView.as_view()),
-]
+    path('brand-list/', BrandListAPIView.as_view()),
+    # path('brand-delete/<int:id>/', SellerDeleteAPIView.as_view()),
+    ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

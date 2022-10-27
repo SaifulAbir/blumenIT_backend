@@ -27,7 +27,7 @@ class Coupon(AbstractTimeStamp):
     min_shopping = models.FloatField()
     amount = models.FloatField()
     # discount_type = models.ForeignKey(DiscountType, on_delete=models.CASCADE, related_name='discount_type')
-    discount_type = models.CharField(max_length=255,null=False,blank=False)
+    discount_type = models.CharField(max_length=255, null=False, blank=False)
     number_of_uses = models.IntegerField(default=0, null=False, blank=False)
     start_time = models.DateTimeField(default=timezone.now)
     end_time = models.DateTimeField(default=timezone.now)

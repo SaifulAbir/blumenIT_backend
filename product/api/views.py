@@ -7,7 +7,7 @@ from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateAP
 from rest_framework.views import APIView
 from home.models import ProductView
 from product import serializers
-from product.serializers import MegaMenuDataAPIViewListSerializer, ProductDetailsSerializer, ProductListSerializer, ProductReviewCreateSerializer, BrandSerializer
+from product.serializers import MegaMenuDataAPIViewListSerializer, ProductDetailsSerializer, ProductListSerializer, ProductReviewCreateSerializer, BrandSerializer, BrandCreateSerializer
 from product.models import Category, Product, Brand
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -22,19 +22,17 @@ from vendor.models import Vendor
 class BrandCreateAPIView(CreateAPIView):
 
     permission_classes = [AllowAny]
+    serializer_class = BrandCreateSerializer
+
+    def post(self, request, *args, **kwargs):
+        return super(BrandCreateAPIView, self).post(request, *args, **kwargs)
+
+
+class BrandListAPIView(ListAPIView):
+    queryset = Brand.objects.filter(is_active=True)
+    permission_classes = [AllowAny]
     serializer_class = BrandSerializer
 
-    def post(self, request):
-        brand = BrandSerializer(data=request.data)
-
-        if Brand.objects.filter(**request.data).exists():
-            raise serializers.ValidationError('This data already exists')
-
-        if brand.is_valid():
-            brand.save()
-            return Response(brand.data)
-        else:
-            return Response(status=status.HTTP_404_NOT_FOUND)
 
 class MegaMenuDataAPIView(ListAPIView):
     permission_classes = (AllowAny,)

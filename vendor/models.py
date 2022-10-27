@@ -15,20 +15,21 @@ phone_regex = RegexValidator(regex='^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$
 
 
 class Seller(AbstractTimeStamp):
-    name = models.CharField(max_length=254, null=False, blank=False, error_messages={"null": "Field shouldn't be null"})
-    phone = models.CharField(max_length=255, validators=[phone_regex], null=False, blank=False, unique=True)
-    email = models.EmailField(max_length=50, null=False, blank=False, unique=True, validators=[validators.EmailValidator(message="Invalid Email")])
+    name = models.CharField(max_length=254, null=False, blank=False, default="")
+    phone = models.CharField(max_length=255, validators=[phone_regex], null=False, blank=False, default="")
+    email = models.EmailField(max_length=50, null=False, blank=False, default="",
+                              validators=[validators.EmailValidator(message="Invalid Email")])
     address = models.CharField(max_length=254, null=True, blank=True)
     logo = models.ImageField(null=True, blank=True, upload_to='images/logo')
     is_active = models.BooleanField(default=True)
-
-    def __str__(self):
-        return self
 
     class Meta:
         verbose_name_plural = "Sellers"
         verbose_name = "Seller"
         db_table = 'sellers'
+
+    def __str__(self):
+        return self.name
 
 
 class VendorRequest(AbstractTimeStamp):

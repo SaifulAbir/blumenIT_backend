@@ -590,7 +590,7 @@ class ProductVariantsSerializer(serializers.ModelSerializer):
     variation = serializers.CharField(required=True, write_only=True)
     variation_price = serializers.FloatField(required=True, write_only=True)
     sku = serializers.CharField(required=True, write_only=True)
-    quantity = serializers.IntegerField(required=False, write_only=True)
+    quantity = serializers.IntegerField(required=True, write_only=True)
     class Meta:
         model = ProductVariation
         fields = [
@@ -878,35 +878,39 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
             
             # product with variants
             if product_variants:
-                # print("product_variants")
-                # print(product_variants)
+                variation_total_quan = 0
                 for product_variant in product_variants:
-                    variation_total_quan = 0
                     variation = product_variant['variation']
                     variation_price = product_variant['variation_price']
-                    sku = product_variant['sku']
+                    variation_sku = product_variant['sku']
                     variant_quantity = product_variant['quantity']
-                    v_image = product_variant['image'] or ''
+                    try:
+                        v_image = product_variant['image']
+                    except:
+                        v_image = ''
 
-                    if sku:
-                        product_check_sku = Product.objects.filter(sku=sku)
+                    if variation_sku:
+                        product_check_sku = Product.objects.filter(sku=variation_sku)
                         if product_check_sku:
                             raise ValidationError('This SKU already exist in product.')
-                        variation_check_sku = ProductVariation.objects.filter(sku=sku)
+                        variation_check_sku = ProductVariation.objects.filter(sku=variation_sku)
                         if variation_check_sku:
                             raise ValidationError('This SKU already exist in product variation.')
+                    
+
+                    if variation and variation_price and variation_sku and variant_quantity:
+                        total_price = float(variation_price) * float(variant_quantity)
+                        product_variation_instance = ProductVariation.objects.create(product=product_instance,
+                        variation=variation, variation_price=variation_price, sku=variation_sku, quantity=variant_quantity, image=v_image, total_price=total_price)
+
+                        inventory_variation_instance = InventoryVariation.objects.create(product=product_instance, product_variation=product_variation_instance, variation_initial_quantity=variant_quantity, variation_current_quantity=variant_quantity)
+
 
                     if variant_quantity:
                         variation_total_quan += variant_quantity
                         Product.objects.filter(id=product_instance.id).update(total_quantity=variation_total_quan)
 
-
-                    if variation and variation_price and sku and variant_quantity:
-                        total_price = float(variation_price) * float(variant_quantity)
-                        product_variation_instance = ProductVariation.objects.create(product=product_instance,
-                        variation=variation, variation_price=variation_price, sku=sku, quantity=variant_quantity, image=v_image, total_price=total_price)
-
-                        inventory_variation_instance = InventoryVariation.objects.create(product=product_instance, product_variation=product_variation_instance, variation_initial_quantity=variant_quantity, variation_current_quantity=variant_quantity)
+                    
 
             # product_specification
             if product_specification:

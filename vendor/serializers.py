@@ -1,15 +1,11 @@
+from enum import unique
 from django.template.loader import render_to_string
-from product.serializers import BrandSerializer, CategorySerializer, DiscountTypeSerializer, ProductImageSerializer, \
-    ProductMediaSerializer, ProductReviewSerializer, ProductTagsSerializer, SubCategorySerializer, \
-    SubSubCategorySerializer, UnitSerializer
+from product.serializers import BrandSerializer, CategorySerializer, DiscountTypeSerializer, ProductImageSerializer, ProductMediaSerializer, ProductReviewSerializer, ProductTagsSerializer, SubCategorySerializer, SubSubCategorySerializer, UnitSerializer
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from ecommerce.common.emails import send_email_without_delay
-from product.models import Brand, Category, Color, DiscountTypes, FlashDealProduct, Inventory, InventoryVariation, \
-    Product, ProductAttributeValues, ProductAttributes, ProductColor, ProductCombinations, ProductCombinationsVariants, \
-    ProductImages, ProductMedia, ProductReview, ProductTags, ProductVariation, ProductVideoProvider, ShippingClass, \
-    Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units, VariantType, VatType
+from product.models import Brand, Category, Color, DiscountTypes, FlashDealInfo, FlashDealProduct, Inventory, InventoryVariation, Product, ProductAttributeValues, ProductAttributes, ProductColor, ProductCombinations, ProductCombinationsVariants, ProductImages, ProductMedia, ProductReview, ProductTags, ProductVariation, ProductVideoProvider, ShippingClass, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units, VariantType, VatType
 from user.models import User
 # from user.serializers import UserRegisterSerializer
 from vendor.models import VendorRequest, Vendor, StoreSettings, Seller
@@ -172,8 +168,6 @@ class VendorCreateSerializer(serializers.ModelSerializer):
     #         return vendor_instance
     #     else:
     #         raise ValidationError("You should verify first to create a vendor")
-
-
 # Vendor Detail serializer
 class VendorDetailSerializer(serializers.ModelSerializer):
     # vendor_request = VendorRequestSerializer(read_only=True)
@@ -181,8 +175,7 @@ class VendorDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Vendor
-        fields = ['id', 'name', 'address', 'phone', 'email', 'organization_name', 'vendor_admin', 'facebook', 'twitter',
-                  'instagram', 'youtube',
+        fields = ['id', 'name', 'address', 'phone', 'email', 'organization_name', 'vendor_admin', 'facebook', 'twitter', 'instagram', 'youtube',
                   'vendor_request', 'logo', 'banner', 'linkedin', 'bio']
         read_only_fields = ('organization_name', 'vendor_admin', 'vendor_request')
 
@@ -214,12 +207,9 @@ class VendorCategorySerializer(serializers.ModelSerializer):
         ref_name = "vendor category serializer"
         model = Category
         fields = ['id', 'title', 'ordering_number', 'type', 'banner', 'icon', 'filtering_attributes']
-
-
 class VendorAddNewCategorySerializer(serializers.ModelSerializer):
-    title = serializers.CharField(required=True)
-    ordering_number = serializers.CharField(required=True)
-
+    title = serializers.CharField(required= True)
+    ordering_number = serializers.CharField(required= True)
     class Meta:
         model = Category
         fields = ['id', 'title', 'ordering_number', 'type', 'banner', 'icon', 'filtering_attributes']
@@ -241,15 +231,11 @@ class VendorAddNewCategorySerializer(serializers.ModelSerializer):
             if ordering_number_get_for_check:
                 raise ValidationError('This category ordering number already exist in Category.')
 
-        category_instance = Category.objects.create(**validated_data, title=title_get_data,
-                                                    ordering_number=ordering_number_get_data)
+        category_instance = Category.objects.create(**validated_data, title=title_get_data, ordering_number=ordering_number_get_data )
         return category_instance
-
-
 class VendorUpdateCategorySerializer(serializers.ModelSerializer):
-    title = serializers.CharField(required=True)
-    ordering_number = serializers.CharField(required=True)
-
+    title = serializers.CharField(required= True)
+    ordering_number = serializers.CharField(required= True)
     class Meta:
         model = Category
         fields = ['id', 'title', 'ordering_number', 'type', 'banner', 'icon', 'filtering_attributes', 'is_active']
@@ -271,8 +257,7 @@ class VendorUpdateCategorySerializer(serializers.ModelSerializer):
             if ordering_number_get_for_check:
                 raise ValidationError('This category ordering number already exist in Category.')
 
-        validated_data.update(
-            {"updated_at": timezone.now(), "title": title_get_data, "ordering_number": ordering_number_get_data})
+        validated_data.update({"updated_at": timezone.now(), "title":title_get_data, "ordering_number":ordering_number_get_data})
         return super().update(instance, validated_data)
 
 
@@ -280,12 +265,9 @@ class VendorSubCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = SubCategory
         fields = ['id', 'title', 'ordering_number', 'category']
-
-
 class VendorAddNewSubCategorySerializer(serializers.ModelSerializer):
-    title = serializers.CharField(required=True)
-    ordering_number = serializers.CharField(required=True)
-
+    title = serializers.CharField(required= True)
+    ordering_number = serializers.CharField(required= True)
     class Meta:
         model = SubCategory
         fields = ['id', 'title', 'ordering_number', 'category']
@@ -307,15 +289,11 @@ class VendorAddNewSubCategorySerializer(serializers.ModelSerializer):
             if ordering_number_get_for_check:
                 raise ValidationError('This Sub category ordering number already exist in SubCategory.')
 
-        sub_category_instance = SubCategory.objects.create(**validated_data, title=title_get_data,
-                                                           ordering_number=ordering_number_get_data)
+        sub_category_instance = SubCategory.objects.create(**validated_data, title=title_get_data, ordering_number=ordering_number_get_data )
         return sub_category_instance
-
-
 class VendorUpdateSubCategorySerializer(serializers.ModelSerializer):
-    title = serializers.CharField(required=True)
-    ordering_number = serializers.CharField(required=True)
-
+    title = serializers.CharField(required= True)
+    ordering_number = serializers.CharField(required= True)
     class Meta:
         model = SubCategory
         fields = ['id', 'title', 'ordering_number', 'category', 'is_active']
@@ -337,8 +315,7 @@ class VendorUpdateSubCategorySerializer(serializers.ModelSerializer):
             if ordering_number_get_for_check:
                 raise ValidationError('This Sub category ordering number already exist in Sub Category.')
 
-        validated_data.update(
-            {"updated_at": timezone.now(), "title": title_get_data, "ordering_number": ordering_number_get_data})
+        validated_data.update({"updated_at": timezone.now(), "title":title_get_data, "ordering_number":ordering_number_get_data})
         return super().update(instance, validated_data)
 
 
@@ -346,12 +323,9 @@ class VendorSubSubCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = SubSubCategory
         fields = ['id', 'title', 'ordering_number', 'category', 'sub_category', 'is_active']
-
-
 class VendorAddNewSubSubCategorySerializer(serializers.ModelSerializer):
-    title = serializers.CharField(required=True)
-    ordering_number = serializers.CharField(required=True)
-
+    title = serializers.CharField(required= True)
+    ordering_number = serializers.CharField(required= True)
     class Meta:
         model = SubSubCategory
         fields = ['id', 'title', 'ordering_number', 'category', 'sub_category']
@@ -373,15 +347,11 @@ class VendorAddNewSubSubCategorySerializer(serializers.ModelSerializer):
             if ordering_number_get_for_check:
                 raise ValidationError('This Sub Sub category ordering number already exist in Sub Sub Category.')
 
-        sub_category_instance = SubSubCategory.objects.create(**validated_data, title=title_get_data,
-                                                              ordering_number=ordering_number_get_data)
+        sub_category_instance = SubSubCategory.objects.create(**validated_data, title=title_get_data, ordering_number=ordering_number_get_data )
         return sub_category_instance
-
-
 class VendorUpdateSubSubCategorySerializer(serializers.ModelSerializer):
-    title = serializers.CharField(required=True)
-    ordering_number = serializers.CharField(required=True)
-
+    title = serializers.CharField(required= True)
+    ordering_number = serializers.CharField(required= True)
     class Meta:
         model = SubSubCategory
         fields = ['id', 'title', 'ordering_number', 'category', 'sub_category', 'is_active']
@@ -403,10 +373,8 @@ class VendorUpdateSubSubCategorySerializer(serializers.ModelSerializer):
             if ordering_number_get_for_check:
                 raise ValidationError('This Sub Sub category ordering number already exist in Sub Sub Category.')
 
-        validated_data.update(
-            {"updated_at": timezone.now(), "title": title_get_data, "ordering_number": ordering_number_get_data})
+        validated_data.update({"updated_at": timezone.now(), "title":title_get_data, "ordering_number":ordering_number_get_data})
         return super().update(instance, validated_data)
-
 
 # Vendor Brand serializer
 class VendorBrandSerializer(serializers.ModelSerializer):
@@ -430,7 +398,7 @@ class VendorProductListSerializer(serializers.ModelSerializer):
     # review_count = serializers.SerializerMethodField()
     # discount_type = serializers.CharField()
 
-    vendor_organization_name = serializers.CharField(source="vendor.organization_name", read_only=True)
+    vendor_organization_name = serializers.CharField(source="vendor.organization_name",read_only=True)
 
     class Meta:
         model = Product
@@ -487,7 +455,6 @@ class VendorProductListSerializer(serializers.ModelSerializer):
     #         product=obj, is_active=True).count()
     #     return re_count
 
-
 # Product Combination serializer / Connect with ProductCreateSerializer
 
 
@@ -518,7 +485,6 @@ class ProductCombinationSerializer(serializers.ModelSerializer):
             'discount_type',
             'discount_amount'
         ]
-
 
 class ProductCombinationSerializerForVendorProductDetails(serializers.ModelSerializer):
     # sku = serializers.CharField(required=False)
@@ -602,7 +568,6 @@ class ProductCombinationSerializerForVendorProductDetails(serializers.ModelSeria
         except:
             return ''
 
-
 class ProductCombinationSerializerForVendorProductUpdate(serializers.ModelSerializer):
     product_attribute = serializers.SerializerMethodField()
     variant_type = serializers.SerializerMethodField()
@@ -684,7 +649,6 @@ class ProductCombinationSerializerForVendorProductUpdate(serializers.ModelSerial
         except:
             return ''
 
-
 class ProductAttributeValuesSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductAttributeValues
@@ -694,11 +658,9 @@ class ProductAttributeValuesSerializer(serializers.ModelSerializer):
             'value'
         ]
 
-
 class ProductAttributesSerializer(serializers.ModelSerializer):
     product_attribute_values = ProductAttributeValuesSerializer(
         many=True, required=False)
-
     class Meta:
         model = ProductAttributes
         fields = [
@@ -706,7 +668,6 @@ class ProductAttributesSerializer(serializers.ModelSerializer):
             'attribute',
             'product_attribute_values'
         ]
-
 
 class ProductVariantsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -721,7 +682,6 @@ class ProductVariantsSerializer(serializers.ModelSerializer):
             'image'
         ]
 
-
 class SpecificationValuesSerializer(serializers.ModelSerializer):
     class Meta:
         model = SpecificationValue
@@ -731,7 +691,6 @@ class SpecificationValuesSerializer(serializers.ModelSerializer):
             'value'
         ]
 
-
 class VatTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = VatType
@@ -740,11 +699,9 @@ class VatTypeSerializer(serializers.ModelSerializer):
             'title'
         ]
 
-
 class ProductSpecificationSerializer(serializers.ModelSerializer):
     specification_values = SpecificationValuesSerializer(
         many=True, required=False)
-
     class Meta:
         model = Specification
         fields = [
@@ -752,7 +709,6 @@ class ProductSpecificationSerializer(serializers.ModelSerializer):
             'title',
             'specification_values'
         ]
-
 
 class FlashDealSerializer(serializers.ModelSerializer):
     class Meta:
@@ -764,24 +720,18 @@ class FlashDealSerializer(serializers.ModelSerializer):
             'discount_type'
         ]
 
-
 class VendorProductCreateSerializer(serializers.ModelSerializer):
     title = serializers.CharField(required=True)
-    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=False, write_only=True,
-                                                  required=True)
-    sub_category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=False, write_only=True,
-                                                      required=False)
-    sub_sub_category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=False, write_only=True,
-                                                          required=False)
-    brand = serializers.PrimaryKeyRelatedField(queryset=Brand.objects.all(), many=False, write_only=True,
-                                               required=False)
-    unit = serializers.PrimaryKeyRelatedField(queryset=Units.objects.all(), many=False, write_only=True, required=False)
+    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=False, write_only=True, required= True)
+    sub_category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=False, write_only=True, required= False)
+    sub_sub_category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=False, write_only=True, required= False)
+    brand = serializers.PrimaryKeyRelatedField(queryset=Brand.objects.all(), many=False, write_only=True, required= False)
+    unit = serializers.PrimaryKeyRelatedField(queryset=Units.objects.all(), many=False, write_only=True, required= False)
     minimum_purchase_quantity = serializers.IntegerField(required=True)
     price = serializers.FloatField(required=True)
     quantity = serializers.IntegerField(required=False, write_only=True)
     vat_type = VatTypeSerializer(many=False, required=False)
-    shipping_class = serializers.PrimaryKeyRelatedField(queryset=ShippingClass.objects.all(), many=False,
-                                                        write_only=True, required=False)
+    shipping_class = serializers.PrimaryKeyRelatedField(queryset=ShippingClass.objects.all(), many=False, write_only=True, required= False)
 
     product_tags = serializers.ListField(
         child=serializers.CharField(), write_only=True, required=True)
@@ -795,6 +745,8 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
     product_specification = ProductSpecificationSerializer(
         many=True, required=False)
     flash_deal = FlashDealSerializer(many=False, required=False)
+
+    
 
     class Meta:
         model = Product
@@ -935,8 +887,9 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
         except:
             flash_deal = ''
 
+
         # product_instance = Product.objects.create(**validated_data, vendor=Vendor.objects.get(vendor_admin=User.objects.get(
-        # id=self.context['request'].user.id)))
+            # id=self.context['request'].user.id)))
         product_instance = Product.objects.create(**validated_data)
 
         try:
@@ -983,14 +936,11 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
                 for product_attribute in product_attributes:
                     attribute_attribute = product_attribute['attribute']
                     if product_instance and attribute_attribute:
-                        product_attributes_instance = ProductAttributes.objects.create(attribute=attribute_attribute,
-                                                                                       product=product_instance)
+                        product_attributes_instance = ProductAttributes.objects.create(attribute=attribute_attribute, product=product_instance)
                     product_attribute_values = product_attribute['product_attribute_values']
                     for product_attribute_value in product_attribute_values:
                         attribute_value_value = product_attribute_value['value']
-                        product_attributes_value_instance = ProductAttributeValues.objects.create(
-                            product_attribute=product_attributes_instance, value=attribute_value_value,
-                            product=product_instance)
+                        product_attributes_value_instance = ProductAttributeValues.objects.create(product_attribute = product_attributes_instance, value= attribute_value_value, product=product_instance)
 
             # product with out variants
             single_quantity = validated_data["quantity"]
@@ -999,9 +949,8 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
                 total_quan += single_quantity
                 Product.objects.filter(id=product_instance.id).update(total_quantity=total_quan)
                 # inventory update
-                Inventory.objects.create(product=product_instance, initial_quantity=single_quantity,
-                                         current_quantity=single_quantity)
-
+                Inventory.objects.create(product=product_instance, initial_quantity=single_quantity, current_quantity=single_quantity)
+            
             # product with variants
             if product_variants:
                 variation_total_quan = 0
@@ -1023,25 +972,7 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
                         variation_total_quan += variant_quantity
                         Product.objects.filter(id=product_instance.id).update(total_quantity=variation_total_quan)
 
-                    v_image = product_variant['image']
 
-                    if attribute and variation and variation_price and sku and variant_quantity and v_image:
-                        total_price = float(variation_price) * float(variant_quantity)
-                        product_variation_instance = ProductVariation.objects.create(product=product_instance,
-                                                                                     attribute=attribute,
-                                                                                     variation=variation,
-                                                                                     variation_price=variation_price,
-                                                                                     sku=sku, quantity=variant_quantity,
-                                                                                     image=v_image,
-                                                                                     total_price=total_price)
-
-                        # inventory update
-                        if variation_total_quan:
-                            if variation_total_quan != 0:
-                                inventory_instance = Inventory.objects.create(product=product_instance)
-                                inventory_variation_instance = InventoryVariation.objects.create(
-                                    inventory=inventory_instance, variation_initial_quantity=variation_total_quan,
-                                    variation_current_quantity=variation_total_quan)
 
             # product_specification
             if product_specification:
@@ -1049,13 +980,12 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
                     s_title = p_specification['title']
                     if s_title:
                         specification_instance = Specification.objects.create(
-                            title=s_title, product=product_instance)
+                        title=s_title, product=product_instance)
                     specification_values = p_specification['specification_values']
                     for specification_value in specification_values:
                         key = specification_value['key']
                         value = specification_value['value']
-                        product_specification_instance = SpecificationValue.objects.create(
-                            specification=specification_instance, key=key, value=value)
+                        product_specification_instance = SpecificationValue.objects.create(specification = specification_instance, key=key, value= value)
 
             # flash_deal
             if flash_deal:
@@ -1063,23 +993,23 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
                     flashDealInfo = f_deal['flashDealInfo']
                     discount_type = f_deal['discount_type']
                     discount_amount = f_deal['discount_amount']
-                    if s_title:
-                        flash_deal_product_instance = FlashDealProduct.objects.create(product=product_instance,
-                                                                                      flashDealInfo=flashDealInfo,
-                                                                                      discount_type=discount_type,
-                                                                                      discount_amount=discount_amount)
+                    if flash_deal_info:
+                        if flash_deal_add_count <= 0:
+                            flash_deal_product_instance = FlashDealProduct.objects.create(product=product_instance, flash_deal_info=flash_deal_info, discount_type=discount_type, discount_amount=discount_amount)
+                            flash_deal_add_count += 1
+                        else:
+                            pass
 
             return product_instance
         except:
             return product_instance
-
 
 class VendorProductViewSerializer(serializers.ModelSerializer):
     product_images = serializers.SerializerMethodField()
     avg_rating = serializers.SerializerMethodField()
     review_count = serializers.SerializerMethodField()
     colors = serializers.SerializerMethodField()
-    product_attributes = serializers.SerializerMethodField('get_product_attributes')
+    product_attributes =serializers.SerializerMethodField('get_product_attributes')
     product_variants = serializers.SerializerMethodField('get_product_variants')
     product_specification = serializers.SerializerMethodField('get_product_specification')
     product_reviews = serializers.SerializerMethodField()
@@ -1110,7 +1040,7 @@ class VendorProductViewSerializer(serializers.ModelSerializer):
             queryset = ProductImages.objects.filter(
                 product=obj, is_active=True).distinct()
             serializer = ProductImageSerializer(instance=queryset, many=True, context={
-                'request': self.context['request']})
+                                                'request': self.context['request']})
             return serializer.data
         except:
             return []
@@ -1136,17 +1066,17 @@ class VendorProductViewSerializer(serializers.ModelSerializer):
             return color_list
 
     def get_product_attributes(self, product):
-        queryset = ProductAttributes.objects.filter(product=product, is_active=True)
+        queryset = ProductAttributes.objects.filter(product=product, is_active = True)
         serializer = ProductAttributesSerializer(instance=queryset, many=True)
         return serializer.data
 
     def get_product_variants(self, product):
-        queryset = ProductVariation.objects.filter(product=product, is_active=True)
+        queryset = ProductVariation.objects.filter(product=product, is_active = True)
         serializer = ProductVariantsSerializer(instance=queryset, many=True)
         return serializer.data
 
     def get_product_specification(self, product):
-        queryset = Specification.objects.filter(product=product, is_active=True)
+        queryset = Specification.objects.filter(product=product, is_active = True)
         serializer = ProductSpecificationSerializer(instance=queryset, many=True)
         return serializer.data
 
@@ -1154,7 +1084,6 @@ class VendorProductViewSerializer(serializers.ModelSerializer):
         selected_product_reviews = ProductReview.objects.filter(
             product=obj, is_active=True).distinct()
         return ProductReviewSerializer(selected_product_reviews, many=True).data
-
 
 class VendorProductDetailsSerializer(serializers.ModelSerializer):
     product_tags = serializers.SerializerMethodField()
@@ -1221,15 +1150,14 @@ class VendorProductDetailsSerializer(serializers.ModelSerializer):
         queryset = ProductMedia.objects.filter(
             product=obj, is_active=True).distinct()
         serializer = ProductMediaSerializer(instance=queryset, many=True, context={
-            'request': self.context['request']})
+                                            'request': self.context['request']})
         return serializer.data
 
     def get_product_combinations(self, obj):
         selected_product_combinations = ProductCombinations.objects.filter(
             product=obj, is_active=True).distinct()
         return ProductCombinationSerializerForVendorProductDetails(selected_product_combinations, many=True).data
-
-
+    
 class VendorProductUpdateSerializer(serializers.ModelSerializer):
     product_category_name = serializers.SerializerMethodField()
     product_sub_category_name = serializers.SerializerMethodField()
@@ -1244,7 +1172,7 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
     existing_colors = serializers.SerializerMethodField()
     product_colors = serializers.ListField(
         child=serializers.IntegerField(), write_only=True, required=False)
-    existing_product_attributes = serializers.SerializerMethodField('get_product_attributes')
+    existing_product_attributes =serializers.SerializerMethodField('get_product_attributes')
     product_attributes = ProductAttributesSerializer(
         many=True, required=False)
     existing_product_variants = serializers.SerializerMethodField('get_product_variants')
@@ -1259,90 +1187,89 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
     vat_type = VatTypeSerializer(
         many=False, required=False)
     existing_flash_deal = serializers.SerializerMethodField('get_flash_deal')
-
     class Meta:
         model = Product
-        fields = [
-            'id',
-            'title',
-            'product_category_name',
-            'category',
-            'product_sub_category_name',
-            'sub_category',
-            'product_sub_sub_category_name',
-            'sub_sub_category',
-            'product_brand_name',
-            'brand',
-            'vendor',
-            'unit',
-            'minimum_purchase_quantity',
-            'existing_product_tags',
-            'product_tags',
-            'bar_code',
-            'refundable',
-            'existing_product_images',
-            'product_images',
-            'thumbnail',
-            'video_provider',
-            'video_link',
-            'existing_colors',
-            'product_colors',
-            'existing_product_attributes',
-            'product_attributes',
-            'price',
-            'pre_payment_amount',
-            'discount_start_date',
-            'discount_end_date',
-            'discount_amount',
-            'discount_type',
-            'quantity',
-            'sku',
-            'external_link',
-            'external_link_button_text',
-            'existing_product_variants',
-            'product_variants',
-            'full_description',
-            'active_short_description',
-            'short_description',
-            'existing_product_specification',
-            'product_specification',
-            'low_stock_quantity_warning',
-            'show_stock_quantity',
-            'cash_on_delivery',
-            'is_featured',
-            'todays_deal',
-            'existing_flash_deal',
-            'flash_deal',
-            'shipping_time',
-            'shipping_class',
-            'vat',
-            'vat_type'
-        ]
+        fields =[
+                    'id',
+                    'title',
+                    'product_category_name',
+                    'category',
+                    'product_sub_category_name',
+                    'sub_category',
+                    'product_sub_sub_category_name',
+                    'sub_sub_category',
+                    'product_brand_name',
+                    'brand',
+                    'vendor',
+                    'unit',
+                    'minimum_purchase_quantity',
+                    'existing_product_tags',
+                    'product_tags',
+                    'bar_code',
+                    'refundable',
+                    'existing_product_images',
+                    'product_images',
+                    'thumbnail',
+                    'video_provider',
+                    'video_link',
+                    'existing_colors',
+                    'product_colors',
+                    'existing_product_attributes',
+                    'product_attributes',
+                    'price',
+                    'pre_payment_amount',
+                    'discount_start_date',
+                    'discount_end_date',
+                    'discount_amount',
+                    'discount_type',
+                    'quantity',
+                    'sku',
+                    'external_link',
+                    'external_link_button_text',
+                    'existing_product_variants',
+                    'product_variants',
+                    'full_description',
+                    'active_short_description',
+                    'short_description',
+                    'existing_product_specification',
+                    'product_specification',
+                    'low_stock_quantity_warning',
+                    'show_stock_quantity',
+                    'cash_on_delivery',
+                    'is_featured',
+                    'todays_deal',
+                    'existing_flash_deal',
+                    'flash_deal',
+                    'shipping_time',
+                    'shipping_class',
+                    'vat',
+                    'vat_type'
+                ]
 
     def get_product_category_name(self, obj):
         try:
-            get_cat = Category.objects.get(id=obj.category.id)
+            get_cat=Category.objects.get(id= obj.category.id)
             return get_cat.title
         except:
             return ''
 
     def get_product_sub_category_name(self, obj):
         try:
-            get_sub_cat = SubCategory.objects.get(id=obj.sub_category.id)
+            get_sub_cat=SubCategory.objects.get(id= obj.sub_category.id)
             return get_sub_cat.title
         except:
             return ''
 
     def get_product_sub_sub_category_name(self, obj):
         try:
-            get_sub_sub_cat = SubSubCategory.objects.get(id=obj.sub_sub_category.id)
+            get_sub_sub_cat=SubSubCategory.objects.get(id= obj.sub_sub_category.id)
             return get_sub_sub_cat.title
         except:
             return ''
 
     def get_product_brand_name(self, obj):
         try:
-            get_brand = Brand.objects.get(id=obj.brand.id)
+            get_brand=Brand.objects.get(id= obj.brand.id)
             return get_brand.title
         except:
             return ''
@@ -1364,7 +1291,7 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
             queryset = ProductImages.objects.filter(
                 product=obj, is_active=True).distinct()
             serializer = ProductImageSerializer(instance=queryset, many=True, context={
-                'request': self.context['request']})
+                                                'request': self.context['request']})
             return serializer.data
         except:
             return []
@@ -1382,24 +1309,25 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
             return color_list
 
     def get_product_attributes(self, product):
-        queryset = ProductAttributes.objects.filter(product=product, is_active=True)
+        queryset = ProductAttributes.objects.filter(product=product, is_active = True)
         serializer = ProductAttributesSerializer(instance=queryset, many=True)
         return serializer.data
 
     def get_product_variants(self, product):
-        queryset = ProductVariation.objects.filter(product=product, is_active=True)
+        queryset = ProductVariation.objects.filter(product=product, is_active = True)
         serializer = ProductVariantsSerializer(instance=queryset, many=True)
         return serializer.data
 
     def get_product_specification(self, product):
-        queryset = Specification.objects.filter(product=product, is_active=True)
+        queryset = Specification.objects.filter(product=product, is_active = True)
         serializer = ProductSpecificationSerializer(instance=queryset, many=True)
         return serializer.data
 
     def get_flash_deal(self, product):
-        queryset = FlashDealProduct.objects.filter(product=product, is_active=True)
+        queryset = FlashDealProduct.objects.filter(product=product, is_active = True)
         serializer = FlashDealSerializer(instance=queryset, many=True)
         return serializer.data
+
 
     def update(self, instance, validated_data):
         # validation for sku start
@@ -1490,6 +1418,7 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
         except:
             flash_deal = ''
 
+
         try:
             # tags
             if product_tags:
@@ -1553,12 +1482,11 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
                     attribute_attribute = product_attribute['attribute']
                     if instance and attribute_title and attribute_attribute:
                         product_attributes_instance = ProductAttributes.objects.create(
-                            title=attribute_title, attribute=attribute_attribute, product=instance)
+                        title=attribute_title, attribute=attribute_attribute, product=instance)
                     product_attribute_values = product_attribute['product_attribute_values']
                     for product_attribute_value in product_attribute_values:
                         attribute_value_value = product_attribute_value['value']
-                        product_combination_instance = ProductAttributeValues.objects.create(
-                            product_attribute=product_attributes_instance, value=attribute_value_value)
+                        product_combination_instance = ProductAttributeValues.objects.create(product_attribute = product_attributes_instance, value= attribute_value_value)
 
             # # inventory update start
             # single_quantity = validated_data["quantity"]
@@ -1575,10 +1503,10 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
                 quan += single_quantity
                 total_quan += single_quantity
                 # inventory update
-                Inventory.objects.create(product=instance, initial_quantity=single_quantity,
-                                         current_quantity=single_quantity)
+                Inventory.objects.create(product=instance, initial_quantity=single_quantity, current_quantity=single_quantity)
 
                 Product.objects.filter(id=instance.id).update(quantity=quan, total_quantity=total_quan)
+
 
             # product with variants
             if product_variants:
@@ -1601,25 +1529,19 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
                         variation_total_quan += variant_quantity
                         Product.objects.filter(id=instance.id).update(total_quantity=variation_total_quan)
 
+
                     v_image = product_variant['image']
 
                     if attribute and variation and variation_price and sku and variant_quantity and v_image:
                         total_price = float(variation_price) * float(variant_quantity)
-                        product_variation_instance = ProductVariation.objects.create(product=instance,
-                                                                                     attribute=attribute,
-                                                                                     variation=variation,
-                                                                                     variation_price=variation_price,
-                                                                                     sku=sku, quantity=variant_quantity,
-                                                                                     image=v_image,
-                                                                                     total_price=total_price)
+                        product_variation_instance = ProductVariation.objects.create(product=instance, attribute=attribute,
+                        variation=variation, variation_price=variation_price, sku=sku, quantity=variant_quantity, image=v_image, total_price=total_price)
 
                         # inventory update
                         if variation_total_quan:
                             if variation_total_quan != 0:
                                 inventory_instance = Inventory.objects.create(product=instance)
-                                inventory_variation_instance = InventoryVariation.objects.create(
-                                    inventory=inventory_instance, variation_initial_quantity=variation_total_quan,
-                                    variation_current_quantity=variation_total_quan)
+                                inventory_variation_instance = InventoryVariation.objects.create(inventory=inventory_instance, variation_initial_quantity=variation_total_quan, variation_current_quantity=variation_total_quan)
 
             # product_specification
             if product_specification:
@@ -1628,7 +1550,7 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
                 if s:
                     Specification.objects.filter(
                         product=instance).delete()
-                s_v = SpecificationValue.objects.filter(
+                s_v= SpecificationValue.objects.filter(
                     product=instance).exists()
                 if s_v:
                     SpecificationValue.objects.filter(
@@ -1638,13 +1560,12 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
                     s_title = p_specification['title']
                     if s_title:
                         specification_instance = Specification.objects.create(
-                            title=s_title, product=instance)
+                        title=s_title, product=instance)
                     specification_values = p_specification['specification_values']
                     for specification_value in specification_values:
                         key = specification_value['key']
                         value = specification_value['value']
-                        product_combination_instance = SpecificationValue.objects.create(
-                            specification=specification_instance, key=key, value=value)
+                        product_combination_instance = SpecificationValue.objects.create(specification = specification_instance, key=key, value= value)
 
             # flash_deal
             if flash_deal:
@@ -1655,14 +1576,11 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
                         product=instance).delete()
 
                 for f_deal in flash_deal:
-                    flashDealInfo = f_deal['flashDealInfo']
+                    flash_deal_info = f_deal['flash_deal_info']
                     discount_type = f_deal['discount_type']
                     discount_amount = f_deal['discount_amount']
                     if s_title:
-                        flash_deal_product_instance = FlashDealProduct.objects.create(product=instance,
-                                                                                      flashDealInfo=flashDealInfo,
-                                                                                      discount_type=discount_type,
-                                                                                      discount_amount=discount_amount)
+                        flash_deal_product_instance = FlashDealProduct.objects.create(product=instance, flash_deal_info=flash_deal_info, discount_type=discount_type, discount_amount=discount_amount)
 
             validated_data.update(
                 {"updated_at": timezone.now()})
@@ -1671,19 +1589,19 @@ class VendorProductUpdateSerializer(serializers.ModelSerializer):
             validated_data.update({"updated_at": timezone.now()})
             return super().update(instance, validated_data)
 
-
 class ProductVideoProviderSerializer(serializers.ModelSerializer):
     class Meta:
         ref_name = "product video provider serializer"
         model = ProductVideoProvider
         fields = ['id', 'title']
 
-
 class ProductVatProviderSerializer(serializers.ModelSerializer):
     class Meta:
         ref_name = "product vat provider serializer"
         model = VatType
         fields = ['id', 'title']
+
+
 
 # class VendorProductCreateSerializer(serializers.ModelSerializer):
 #     product_tags = serializers.ListField(

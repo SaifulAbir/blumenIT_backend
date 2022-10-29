@@ -19,7 +19,7 @@ urlpatterns = [
     path('vendor-update-category/<int:ordering_number>/', VendorUpdateCategoryAPIView.as_view()),
     path('vendor-delete-category/<int:ordering_number>/', VendorDeleteCategoryAPIView.as_view()),
 
-    path('vendor-product-sub-category-list/<int:cid>/',VendorSubSubCategoryListAPIView.as_view()),
+    path('vendor-product-sub-category-list/<int:cid>/',VendorSubCategoryListAPIView.as_view()),
     path('vendor-add-new-sub-category/', VendorAddNewSubCategoryAPIView.as_view()),
     path('vendor-update-sub-category/<int:ordering_number>/', VendorUpdateSubCategoryAPIView.as_view()),
     path('vendor-delete-sub-category/<int:ordering_number>/', VendorDeleteSubCategoryAPIView.as_view()),

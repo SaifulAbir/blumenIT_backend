@@ -1,5 +1,5 @@
 from django.contrib import admin
-from product.models import TextColor, Attribute, AttributeValues, Category, Color, FlashDealInfo, Inventory, InventoryVariation, ProductAttributeValues, ProductColor, ProductImages, ShippingClass, SubCategory, SubSubCategory, Brand, Tags, Units, DiscountTypes, Product, ProductAttributes, ProductCombinations, VariantType, ProductCombinationsVariants, ProductTags, ProductMedia, ProductCombinationMedia, ProductReview, ProductVideoProvider, VatType
+from product.models import FlashDealProduct, ProductVariation, Specification, SpecificationValue, TextColor, Attribute, AttributeValues, Category, Color, FlashDealInfo, Inventory, InventoryVariation, ProductAttributeValues, ProductColor, ProductImages, ShippingClass, SubCategory, SubSubCategory, Brand, Tags, Units, DiscountTypes, Product, ProductAttributes, ProductCombinations, VariantType, ProductCombinationsVariants, ProductTags, ProductMedia, ProductCombinationMedia, ProductReview, ProductVideoProvider, VatType
 
 
 admin.site.register(Category)
@@ -26,8 +26,12 @@ admin.site.register(VatType)
 admin.site.register(ProductColor)
 admin.site.register(Inventory) 
 admin.site.register(InventoryVariation)
-admin.site.register(ShippingClass)
+admin.site.register(ShippingClass) 
 admin.site.register(TextColor)
+admin.site.register(ProductVariation)
+admin.site.register(Specification)
+admin.site.register(SpecificationValue)
+admin.site.register(FlashDealProduct)
 
 
 

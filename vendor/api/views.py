@@ -26,7 +26,7 @@ class SellerCreateAPIView(CreateAPIView):
 
 
 class SellerListAPIView(ListAPIView):
-    queryset = Seller.objects.filter()
+    queryset = Seller.objects.filter(is_active=True)
     permission_classes = [AllowAny]
     serializer_class = SellerSerializer
 
@@ -49,7 +49,7 @@ class SellerUpdateAPIView(RetrieveUpdateAPIView):
             )
 
 
-class SellerDeleteAPIView(DestroyAPIView):
+class SellerDeleteAPIView(RetrieveAPIView):
     permission_classes = [AllowAny]
     serializer_class = SellerSerializer
     queryset = Seller.objects.all()
@@ -65,13 +65,14 @@ class SellerDeleteAPIView(DestroyAPIView):
         seller_obj = Seller.objects.filter(id=seller_id).exists()
         if seller_obj:
             seller_obj = Seller.objects.filter(id=seller_id)
-            seller_obj.update(status='REMOVE', is_active=False)
+            seller_obj.update(is_active=False)
 
-            queryset = Seller.objects.filter(status='ACTIVE').order_by('-created_at')
+            queryset = Seller.objects.filter(is_active=True).order_by('-created_at')
             return queryset
         else:
             raise ValidationError(
-                {"msg": 'Product Does not exist!'})
+                {"msg": 'Seller Does not exist!'})
+
 
 class VendorRequestAPIView(CreateAPIView):
     permission_classes = [AllowAny]

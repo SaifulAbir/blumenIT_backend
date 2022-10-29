@@ -12,8 +12,11 @@ urlpatterns = [
     path('coupon-create/', CouponCreateAPIView.as_view()),
     path('coupon-list/', CouponListAPIView.as_view()),
     path('coupon-update/<int:id>/', CouponUpdateAPIView.as_view()),
+    path('coupon-delete/<int:id>/', CouponDeleteAPIView.as_view()),
     path('discount-type-create/', DiscountTypeCreateAPIView.as_view()),
-    path('discount-type-list/', DiscountTypeListAPI.as_view()),
+    path('discount-type-list/', DiscountTypeListAPIView.as_view()),
+    path('discount-type-delete/<int:id>/', DiscountTypeDeleteAPIView.as_view()),
+    path('discount-type-update/<int:id>/', DiscountTypeUpdateAPIView.as_view()),
 
     # path('active-coupon/', ActiveCouponlistView.as_view()),
     # path('add-to-cart/<str:slug>/', AddToCartAPIView.as_view()),

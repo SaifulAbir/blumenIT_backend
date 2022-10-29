@@ -13,6 +13,25 @@ from rest_framework.exceptions import ValidationError
 
 # general Serializer start
 
+class CouponCreateSerializer(serializers.ModelSerializer):
+    code = serializers.CharField(required=True)
+
+    class Meta:
+        model = Coupon
+        fields = ['id', 'code', 'coupon_type', 'amount', 'discount_type', 'start_time', 'min_shopping', 'end_time', 'is_active']
+        read_only_field = ['id']
+
+    def create(self, validated_data):
+        code_get = validated_data.pop('code')
+        code_get_data = code_get.lower()
+        if code_get:
+            code_get_for_check = Coupon.objects.filter(code=code_get.lower())
+            if code_get_for_check:
+                raise ValidationError('Coupon code already exist.')
+        coupon_instance = Coupon.objects.create(**validated_data, code=code_get_data)
+
+        return coupon_instance
+
 
 class CouponSerializer(serializers.ModelSerializer):
 

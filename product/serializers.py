@@ -159,6 +159,25 @@ class UnitSerializer(serializers.ModelSerializer):
 
 
 # Discount Types serializer / Connect with ProductDetailsSerializer
+class DiscountTypeCreateSerializer(serializers.ModelSerializer):
+    title = serializers.CharField(required=True)
+
+    class Meta:
+        model = DiscountTypes
+        fields = ['id', 'title']
+
+    def create(self, validated_data):
+        title_get = validated_data.pop('title')
+        title_get_data = title_get.lower()
+        if title_get:
+            title_get_for_check = DiscountTypes.objects.filter(title = title_get.lower())
+            if title_get_for_check:
+                raise ValidationError('Title already exists.')
+
+        discount_type_instance = DiscountTypes.objects.create(**validated_data, title=title_get_data)
+        return discount_type_instance
+
+
 class DiscountTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = DiscountTypes

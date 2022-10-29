@@ -344,6 +344,37 @@ class CustomerAddress(AbstractTimeStamp):
         return f"{self.pk}"
 
 
+class DeliveryAddress(AbstractTimeStamp):
+    order = models.ForeignKey(
+        Order, on_delete=models.CASCADE, blank=True, null=True)
+    name = models.CharField(
+        max_length=100, null=False, blank=False, default='')
+    address = models.CharField(
+        max_length=100, null=False, blank=False, default='')
+    country = models.CharField(
+        max_length=100, blank=True, null=True, default='')
+    company_name = models.CharField(
+        max_length=100, null=False, blank=False, default='')
+    street_address = models.CharField(
+        max_length=100, blank=True, null=True, default='')
+    city = models.CharField(max_length=100, blank=True, null=True, default='')
+    zip_code = models.CharField(
+        max_length=100, blank=True, null=True, default='')
+    phone = models.CharField(max_length=255, null=True, blank=True, default='')
+    email = models.CharField(max_length=255, null=True, blank=True, default='')
+    address_type = models.CharField(
+        max_length=100, null=False, blank=False, default='')
+    default = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = 'CustomerAddress'
+        verbose_name_plural = 'CustomerAddresses'
+        db_table = 'customer_addresses'
+
+    def __str__(self):
+        return f"{self.pk}"
+
+
 class Refund(AbstractTimeStamp):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_items_refund')
     reason = models.TextField()

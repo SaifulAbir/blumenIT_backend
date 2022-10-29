@@ -3,6 +3,7 @@ from hashlib import blake2b
 from itertools import product
 from statistics import mode
 from django.db import models
+from pyparsing import null_debug_action
 from ecommerce.models import AbstractTimeStamp
 from vendor.models import Vendor
 from .utils import unique_slug_generator
@@ -10,6 +11,7 @@ from django.db.models.signals import pre_save
 from user.models import User, CustomerProfile
 import string
 import random
+from django.utils import timezone
 
 class Attribute(AbstractTimeStamp):
     title = models.CharField(
@@ -238,7 +240,7 @@ class Product(AbstractTimeStamp):
         max_length=255, null=True, blank=True, default=0)
     discount_start_date = models.DateTimeField(null=True, blank=True)
     discount_end_date = models.DateTimeField(null=True, blank=True)
-    quantity = models.IntegerField(null=False, blank=False, default=0)
+    quantity = models.IntegerField(null=True, blank=True, default=0)
     total_quantity = models.IntegerField(null=False, blank=False, default=0)
     shipping_cost = models.FloatField(
         max_length=255, null=True, blank=True, default=0)
@@ -288,20 +290,6 @@ class Product(AbstractTimeStamp):
         # return self.title + '-' + self.vendor.vendor_admin.email
         return self.title
 
-    def save(self, *args, **kwargs):
-        super(Product, self).save(*args, **kwargs)
-        try:
-            if self.shipping_cost_multiply == True:
-                self.total_shipping_cost = self.shipping_cost * self.shipping_cost
-                # product.save()
-                super(Product, self).save(*args, **kwargs)
-            elif self.shipping_cost_multiply == False:
-                self.total_shipping_cost = self.shipping_cost
-                super(Product, self).save(*args, **kwargs)
-            else:
-                super(Product, self).save(*args, **kwargs)
-        except:
-            print("Error in product combination save.")
 
 
 def pre_save_product(sender, instance, *args, **kwargs):
@@ -415,17 +403,13 @@ class ProductVariation(AbstractTimeStamp):
             raise ValidationError('Unsupported file extension.')
     product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True,
                             blank=True, related_name='Product_variation_product')
-    attribute = models.ForeignKey(ProductAttributes, on_delete=models.CASCADE, null=True,
-                            blank=True, related_name='Product_variation_product_attribute')
     variation = models.CharField(
-        max_length=255, null=False, blank=False, default="")
-    variation_price = models.FloatField(null=False, blank=False, default=0)
+        max_length=255, null=True, blank=True, default="")
+    variation_price = models.FloatField(null=True, blank=True, default=0)
     sku = models.CharField(max_length=500, null=True,blank=True, default="")
-    quantity = models.IntegerField(null=False, blank=False, default=0)
-    image = models.FileField(upload_to='product_variation', validators=[validate_file_extension])
-    product_color = models.ForeignKey(ProductColor, on_delete=models.CASCADE, null=True,
-                            blank=True, related_name='Product_variation_color')
-    total_price = models.FloatField(null=False, blank=False, default=0)
+    quantity = models.IntegerField(null=True, blank=True, default=0)
+    image = models.FileField(upload_to='product_variation', validators=[validate_file_extension], null=True, blank=True)
+    total_price = models.FloatField(null=True, blank=True, default=0)
     is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
@@ -434,7 +418,7 @@ class ProductVariation(AbstractTimeStamp):
         db_table = 'product_variation'
 
     def __str__(self):
-        return self.title
+        return self.product.title + '-variation: ' + self.variation
 
 
 class ProductCombinations(AbstractTimeStamp):
@@ -690,13 +674,13 @@ class FlashDealInfo(AbstractTimeStamp):
     title = models.CharField(
         max_length=255, null=False, blank=False, default="")
     background_color = models.CharField(
-        max_length=255, null=False, blank=False, default="")
+        max_length=255, null=True, blank=True, default="")
     text_color = models.ForeignKey(
-        TextColor, on_delete=models.PROTECT, related_name='flash_deal_info_text_color')
+        TextColor, on_delete=models.PROTECT, related_name='flash_deal_info_text_color', null=True, blank=True)
     banner = models.ImageField(
         upload_to='flash_deal_info', blank=True, null=True)
-    start_date = models.DateTimeField(null=True, blank=True)
-    end_date = models.DateTimeField(null=True, blank=True)
+    start_date = models.DateTimeField(null=False, blank=False,default=timezone.now)
+    end_date = models.DateTimeField(null=False, blank=False, default=timezone.now)
     is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
@@ -708,12 +692,12 @@ class FlashDealInfo(AbstractTimeStamp):
         return self.title
 
 class FlashDealProduct(AbstractTimeStamp):
-    flashDealInfo = models.ForeignKey(
-        FlashDealInfo, on_delete=models.PROTECT, related_name='flash_deal_product_flash_deal_info')
+    flash_deal_info = models.ForeignKey(
+        FlashDealInfo, on_delete=models.PROTECT, related_name='flash_deal_product_flash_deal_info', null=True, blank=True)
     product = models.ForeignKey(
-        Product, on_delete=models.PROTECT, related_name='flash_deal_product_product')
+        Product, on_delete=models.PROTECT, related_name='flash_deal_product_product', null=False, blank=False)
     discount_type = models.ForeignKey(
-        DiscountTypes, on_delete=models.PROTECT, related_name='flash_deal_product_discount_type')
+        DiscountTypes, on_delete=models.PROTECT, related_name='flash_deal_product_discount_type', null=True, blank=True)
     discount_amount = models.FloatField(
         max_length=255, null=True, blank=True, default=0)
     is_active = models.BooleanField(null=False, blank=False, default=True)
@@ -724,12 +708,12 @@ class FlashDealProduct(AbstractTimeStamp):
         db_table = 'flash_deal_product'
 
     def __str__(self):
-        return self.title
+        return self.product.title
 
 
 class Inventory(AbstractTimeStamp):
-    initial_quantity = models.IntegerField(null=False, blank=False, default=0)
-    current_quantity = models.IntegerField(null=False, blank=False, default=0)
+    initial_quantity = models.IntegerField(null=True, blank=True, default=0)
+    current_quantity = models.IntegerField(null=True, blank=True, default=0)
     product = models.ForeignKey(
         Product, on_delete=models.PROTECT, related_name='inventory_product')
 
@@ -739,15 +723,15 @@ class Inventory(AbstractTimeStamp):
         db_table = 'inventory'
 
     def __str__(self):
-        return self.product.title + '-initial_quantity: ' + str(self.initial_quantity) + '-current_quantity: ' + str(self.current_quantity)
+        return self.product.title
 
 class InventoryVariation(AbstractTimeStamp):
-    inventory = models.ForeignKey(
-        Inventory, on_delete=models.PROTECT, related_name='inventory_variation_inventory')
     variation_initial_quantity = models.IntegerField(null=True, blank=True, default=0)
     variation_current_quantity = models.IntegerField(null=True, blank=True, default=0)
     product = models.ForeignKey(
         Product, on_delete=models.PROTECT, related_name='inventory_variation_product')
+    product_variation = models.ForeignKey(
+        ProductVariation, on_delete=models.PROTECT, related_name='inventory_variation_product_variation', null=True, blank=True)
 
     class Meta:
         verbose_name = 'InventoryVariation'
@@ -755,4 +739,4 @@ class InventoryVariation(AbstractTimeStamp):
         db_table = 'inventory_variation'
 
     def __str__(self):
-        return self.inventory.product.title + '-variation_initial_quantity: ' + str(self.variation_initial_quantity) + '-variation_current_quantity ' + str(self.variation_current_quantity)
+        return self.product_variation.product.title

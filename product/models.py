@@ -135,8 +135,7 @@ class Units(AbstractTimeStamp):
 
 
 class DiscountTypes(AbstractTimeStamp):
-    title = models.CharField(
-        max_length=100, null=False, blank=False, default="")
+    title = models.CharField(max_length=255, null=False, blank=False, default="")
     is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:

@@ -19,6 +19,12 @@ urlpatterns = [
     path('vendor-product-list-for-frontend/<int:vid>/',
          VendorProductListForFrondEndAPI.as_view()),
     path('brand-create/', BrandCreateAPIView.as_view()),
+
+    # store front api
+    path('store-fetured-product-list/', FeaturedProductListStoreFront.as_view()),
+    path('store-popular-product-list/', PopularProductListStoreFront.as_view()),
+    path('store-gaming-product-list/', GamingProductListStoreFront.as_view()),
+    path('store-product-details/<str:slug>/', StoreProductDatailsAPI.as_view()),
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

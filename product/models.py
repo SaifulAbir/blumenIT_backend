@@ -274,6 +274,7 @@ class Product(AbstractTimeStamp):
     product_condition = models.ForeignKey(
         ProductCondition, related_name="product_product_condition", null=True, blank=True, on_delete=models.PROTECT)
     is_published = models.BooleanField(null=False, blank=False, default=True)
+    is_gaming = models.BooleanField(null=True, blank=True, default=False)
 
     class Meta:
         verbose_name = 'Product'

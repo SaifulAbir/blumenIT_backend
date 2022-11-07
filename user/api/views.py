@@ -103,21 +103,29 @@ class SendOTPAPIView(CreateAPIView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
-        email = check_dict_data_rise_error("email", request_data=request.data, arrise=True)
+        is_login = check_dict_data_rise_error("is_login", request_data=request.data, arrise=True)
+        if is_login == "false":
+            email = check_dict_data_rise_error("email", request_data=request.data, arrise=True)
         phone = check_dict_data_rise_error("phone", request_data=request.data, arrise=True)
-        user_obj = User.objects.filter(Q(email=email) | Q(phone=phone))
-        for user_data in user_obj:
-            if user_data.email == email:
-                return Response({"details": "Email already exists"}, status=status.HTTP_400_BAD_REQUEST)
-            if user_data.phone == phone:
-                return Response({"details": "Phone number already exists"}, status=status.HTTP_400_BAD_REQUEST)
 
-        user = User.objects.create(
-            email=email,
-            phone=phone,
-            username=email,
-            is_customer=True
-        )
+        if is_login == "false":
+            user_obj = User.objects.filter(Q(email=email) | Q(phone=phone))
+            for user_data in user_obj:
+                if user_data.email == email:
+                    return Response({"details": "Email already exists"}, status=status.HTTP_400_BAD_REQUEST)
+                if user_data.phone == phone:
+                    return Response({"details": "Phone number already exists"}, status=status.HTTP_400_BAD_REQUEST)
+
+            user = User.objects.create(
+                email=email,
+                phone=phone,
+                username=email,
+                is_customer=True
+            )
+
+            user.is_active = False
+            user.set_password(phone)
+            user.save()
         # Generate OTP Here
         sent_otp = OTPManager().initialize_otp_and_sms_otp(phone)
         otp_sending_time = datetime.now(pytz.timezone('Asia/Dhaka'))
@@ -127,9 +135,7 @@ class SendOTPAPIView(CreateAPIView):
             expired_time=otp_sending_time
         )
         otp_model.save()
-        user.is_active = False
-        user.set_password(phone)
-        user.save()
+        user= User.objects.get(phone = phone)
         return Response(
             data={"user_id": user.id if user else None, "sent_otp": sent_otp},
             status=status.HTTP_201_CREATED)

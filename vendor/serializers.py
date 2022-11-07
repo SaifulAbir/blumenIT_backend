@@ -908,7 +908,7 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
 
                     if variant_quantity:
                         variation_total_quan += variant_quantity
-                        Product.objects.filter(id=product_instance.id).update(total_quantity=variation_total_quan)
+                        Product.objects.filter(id=product_instance.id).update(quantity=variation_total_quan, total_quantity=variation_total_quan)
 
                     
 

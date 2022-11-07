@@ -32,7 +32,7 @@ class OTPSendSerializer(serializers.ModelSerializer):
     class Meta:
         extra_kwargs = {'email': {'required': True},
                         'phone': {'required': True}}
-        fields = ('email', 'phone')
+        fields = ('email', 'phone', 'is_login')
         model = user_models.User
 
 

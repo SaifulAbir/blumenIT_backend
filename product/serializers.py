@@ -413,7 +413,9 @@ class ProductListSerializer(serializers.ModelSerializer):
             'product_tags',
             'product_reviews',
             'product_media',
-            'product_combinations'
+            'product_combinations',
+            'is_gaming'
+
         ]
 
     def get_avg_rating(self, ob):
@@ -440,6 +442,117 @@ class ProductListSerializer(serializers.ModelSerializer):
             product=obj, is_active=True).distinct()
         return ProductCombinationSerializerForProductDetails(selected_product_combinations, many=True).data
 
+# store front serializer
+
+
+class StoreProductDetailsSerializer(serializers.ModelSerializer):
+    product_tags = serializers.SerializerMethodField()
+    product_reviews = serializers.SerializerMethodField()
+    product_media = serializers.SerializerMethodField()
+    product_combinations = serializers.SerializerMethodField()
+    vendor = VendorSerializer()
+    category = CategorySerializer()
+    sub_category = SubCategorySerializer()
+    sub_sub_category = SubSubCategorySerializer()
+    brand = BrandSerializer()
+    unit = UnitSerializer()
+    discount_type = DiscountTypeSerializer()
+    avg_rating = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Product
+        fields = [
+            'id',
+            'title',
+            'slug',
+            'sku',
+            'warranty',
+            'avg_rating',
+            'full_description',
+            'short_description',
+            'status',
+            'is_featured',
+            'vendor',
+            'category',
+            'sub_category',
+            'sub_sub_category',
+            'brand',
+            'unit',
+            'price',
+            'old_price',
+            'purchase_price',
+            'tax_in_percent',
+            'discount_type',
+            'discount_amount',
+            'total_quantity',
+            'total_shipping_cost',
+            'shipping_time',
+            'thumbnail',
+            'youtube_link',
+            'product_tags',
+            'product_reviews',
+            'product_media',
+            'product_combinations',
+            'is_gaming'
+        ]
+        read_only_field = [
+            'id',
+            'title',
+            'slug',
+            'sku',
+            'warranty',
+            'avg_rating',
+            'full_description',
+            'short_description',
+            'status',
+            'is_featured',
+            'vendor',
+            'category',
+            'sub_category',
+            'sub_sub_category',
+            'brand',
+            'unit',
+            'price',
+            'old_price',
+            'purchase_price',
+            'tax_in_percent',
+            'discount_type',
+            'discount_amount',
+            'total_quantity',
+            'total_shipping_cost',
+            'shipping_time',
+            'thumbnail',
+            'youtube_link',
+            'product_tags',
+            'product_reviews',
+            'product_media',
+            'product_combinations',
+            'is_gaming'
+        ]
+
+    def get_avg_rating(self, obj):
+        return obj.product_review_product.all().aggregate(Avg('rating_number'))['rating_number__avg']
+
+    def get_product_tags(self, obj):
+        selected_product_tags = ProductTags.objects.filter(
+            product=obj).distinct()
+        return ProductTagsSerializer(selected_product_tags, many=True).data
+
+    def get_product_reviews(self, obj):
+        selected_product_reviews = ProductReview.objects.filter(
+            product=obj, is_active=True).distinct()
+        return ProductReviewSerializer(selected_product_reviews, many=True).data
+
+    def get_product_media(self, obj):
+        queryset = ProductMedia.objects.filter(product=obj).distinct()
+        serializer = ProductMediaSerializer(instance=queryset, many=True, context={
+                                            'request': self.context['request']})
+        return serializer.data
+
+    def get_product_combinations(self, obj):
+        selected_product_combinations = ProductCombinations.objects.filter(
+            product=obj, is_active=True).distinct()
+        return ProductCombinationSerializerForProductDetails(selected_product_combinations, many=True).data
 # Product create serializer
 
 

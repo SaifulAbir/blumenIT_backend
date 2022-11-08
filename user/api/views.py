@@ -202,7 +202,7 @@ class OTPVerifyAPIVIEW(CreateAPIView):
                     pass
 
                 otp_obj.save()
-                return Response({'details': 'Verified', "access_token": str(token.access_token) if token else None, "refresh_token": str(token) if token else None}, status=status.HTTP_200_OK)
+                return Response({"user_id": user.id, "email": user.email, "name": user.name, "phone": user.phone,  'details': 'Verified', "access_token": str(token.access_token) if token else None, "refresh_token": str(token) if token else None}, status=status.HTTP_200_OK)
             else:
                 return Response({'details': "Incorrect OTP"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:

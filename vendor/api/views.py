@@ -10,8 +10,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductMedia, ProductReview, ProductTags, SubCategory, SubSubCategory, Tags, Units, VariantType, ProductVideoProvider, VatType
 from user.models import CustomerProfile, User
 from vendor.models import VendorRequest, Vendor, Seller
-from vendor.serializers import VendorAddNewCategorySerializer, VendorAddNewSubCategorySerializer, VendorAddNewSubSubCategorySerializer, VendorBrandSerializer, VendorCategorySerializer, VendorProductCreateSerializer, VendorProductDetailsSerializer, VendorProductListSerializer, VendorProductUpdateSerializer, VendorProductViewSerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
-    VendorDetailSerializer, StoreSettingsSerializer, SellerDetailSerializer, VendorSubCategorySerializer, VendorSubSubCategorySerializer, VendorUnitSerializer, SellerSerializer, ProductAttributesSerializer, ProductVideoProviderSerializer, ProductVatProviderSerializer, VendorUpdateCategorySerializer, VendorUpdateSubSubCategorySerializer
+from vendor.serializers import VendorAddNewCategorySerializer, VendorAddNewSubCategorySerializer, VendorAddNewSubSubCategorySerializer, VendorBrandSerializer, VendorCategorySerializer, VendorProductDetailsSerializer, VendorProductListSerializer, VendorProductUpdateSerializer, VendorProductViewSerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
+    VendorDetailSerializer, StoreSettingsSerializer, SellerDetailSerializer, VendorSubCategorySerializer, VendorSubSubCategorySerializer, VendorUnitSerializer, SellerSerializer, ProductAttributesSerializer, ProductVideoProviderSerializer, ProductVatProviderSerializer, VendorUpdateCategorySerializer, VendorUpdateSubSubCategorySerializer, SellerProductCreateSerializer
 from user.models import User
 from cart.models import Coupon
 from rest_framework.exceptions import ValidationError
@@ -159,14 +159,14 @@ class VendorProductListAPI(ListAPIView):
     #         raise ValidationError({"msg": 'You are not a vendor.'})
 
 
-class VendorProductCreateAPIView(CreateAPIView):
+class SellerProductCreateAPIView(CreateAPIView):
     # permission_classes = [IsAuthenticated]
     permission_classes = (AllowAny,)
-    serializer_class = VendorProductCreateSerializer
+    serializer_class = SellerProductCreateSerializer
 
 
     def post(self, request, *args, **kwargs):
-        return super(VendorProductCreateAPIView, self).post(request, *args, **kwargs)
+        return super(SellerProductCreateAPIView, self).post(request, *args, **kwargs)
 
 class VendorProductUpdateAPIView(RetrieveUpdateAPIView):
     permission_classes = [AllowAny]

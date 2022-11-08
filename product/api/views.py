@@ -203,7 +203,7 @@ class VendorProductListForFrondEndAPI(ListAPIView):
 class FeaturedProductListStoreFront(ListAPIView):
     permission_classes = [AllowAny]
     serializer_class = ProductListSerializer
-    queryset = Product.objects.filter(is_featured=True, status='ACTIVE').order_by('-created_at')
+    queryset = Product.objects.filter(is_featured=True, status='PUBLISH').order_by('-created_at')
 
 
 class PopularProductListStoreFront(ListAPIView):
@@ -215,7 +215,7 @@ class PopularProductListStoreFront(ListAPIView):
 class GamingProductListStoreFront(ListAPIView):
     permission_classes = [AllowAny]
     serializer_class = ProductListSerializer
-    queryset = Product.objects.filter(is_gaming=True, status='ACTIVE').order_by('-created_at')
+    queryset = Product.objects.filter(is_gaming=True, status='PUBLISH').order_by('-created_at')
 
 
 class StoreProductDatailsAPI(RetrieveAPIView):

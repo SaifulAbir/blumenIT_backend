@@ -1,6 +1,6 @@
 from django.urls import path
 from product.api.views import ProductDetailsAPI
-from vendor.api.views import VendorAddNewCategoryAPIView, VendorAddNewSubCategoryAPIView, VendorAddNewSubSubCategoryAPIView, VendorBrandListAPIView, VendorCategoryListAPIView, VendorDeleteCategoryAPIView, VendorDeleteSubCategoryAPIView, VendorDeleteSubSubCategoryAPIView, VendorProductDeleteAPI, VendorProductUpdateAPIView, VendorProductViewAPI, VendorSubCategoryListAPIView, VendorSubSubCategoryListAPIView, VendorTagListAPIView, VendorUnitListAPIView, VendorProductListAPI, VendorDiscountListAPIView, SellerCreateAPIView,SellerListAPIView,SellerUpdateAPIView, SellerDeleteAPIView, VendorUpdateCategoryAPIView, VendorUpdateSubCategoryAPIView, VendorUpdateSubSubCategoryAPIView, VendorVatTypeListAPIView, VendorVideoProviderListAPIView, SellerProductCreateAPIView
+from vendor.api.views import VendorAddNewCategoryAPIView, VendorAddNewSubCategoryAPIView, VendorAddNewSubSubCategoryAPIView, VendorBrandListAPIView, VendorCategoryListAPIView, VendorDeleteCategoryAPIView, VendorDeleteSubCategoryAPIView, VendorDeleteSubSubCategoryAPIView, VendorProductDeleteAPI, VendorProductViewAPI, VendorSubCategoryListAPIView, VendorSubSubCategoryListAPIView, VendorTagListAPIView, VendorUnitListAPIView, VendorProductListAPI, VendorDiscountListAPIView, SellerCreateAPIView,SellerListAPIView,SellerUpdateAPIView, SellerDeleteAPIView, VendorUpdateCategoryAPIView, VendorUpdateSubCategoryAPIView, VendorUpdateSubSubCategoryAPIView, VendorVatTypeListAPIView, VendorVideoProviderListAPIView, SellerProductCreateAPIView, SellerProductUpdateAPIView
 
 urlpatterns = [
     path('create-seller/', SellerCreateAPIView.as_view()),
@@ -10,6 +10,12 @@ urlpatterns = [
 
 #     path('vendor-create-product/', VendorProductCreateAPIView.as_view()),
     path('seller-product-create/', SellerProductCreateAPIView.as_view()),
+    # path('vendor-update-product/<str:slug>/',VendorProductUpdateAPIView.as_view()),
+    path('seller-product-update/<str:slug>/',SellerProductUpdateAPIView.as_view()),
+
+
+
+
     # path('vendor-request/', VendorRequestAPIView.as_view()),
     # path('vendor-request-list/', VendorRequestListAPI.as_view()),
     # path('create-vendor/', VendorCreateAPIView.as_view()),
@@ -42,8 +48,7 @@ urlpatterns = [
     #      VendorAttributeListAPIView.as_view()),
     # path('vendor-product-variant-list/', VendorVariantListAPIView.as_view()),
     path('vendor-product-list/', VendorProductListAPI.as_view()),
-    path('vendor-update-product/<str:slug>/',
-         VendorProductUpdateAPIView.as_view()),
+    
 #     path('vendor-product-details/<str:slugi>/',
 #          VendorProductDetailsAPI.as_view()),
     # path('vendor-product-single-media-delete/<str:slug>/<int:mid>/',

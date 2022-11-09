@@ -352,8 +352,8 @@ class ProductAttributes(AbstractTimeStamp):
 class ProductAttributeValues(AbstractTimeStamp):
     product_attribute = models.ForeignKey(ProductAttributes, on_delete=models.PROTECT,
                                related_name='product_attribute_values_product_attribute', blank=True, null=True)
-    value = models.CharField(
-        max_length=255, null=False, blank=False, default="")
+    value = models.ForeignKey(AttributeValues, on_delete=models.PROTECT,
+                               related_name='product_attribute_values_value', blank=True, null=True)
     product = models.ForeignKey(
         Product, related_name='product_attributes_values_product', blank=True, null=True, on_delete=models.PROTECT)
     is_active = models.BooleanField(null=False, blank=False, default=True)
@@ -364,7 +364,7 @@ class ProductAttributeValues(AbstractTimeStamp):
         db_table = 'product_attribute_value'
 
     def __str__(self):
-        return self.product_attribute.product.title + ' ' + self.product_attribute.attribute.title + ' ' + self.value
+        return self.product_attribute.product.title + ' ' + self.product_attribute.attribute.title + ' ' + self.value.value
 
 class Color(AbstractTimeStamp):
     title = models.CharField(

@@ -200,7 +200,8 @@ class ProductMediaSerializer(serializers.ModelSerializer):
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductImages
-        fields = ['id', 'image']
+        # fields = ['id', 'image']
+        fields = ['id', 'file']
 
 
 # Product Attribute serializer

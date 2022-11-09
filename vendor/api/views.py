@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductMedia, ProductReview, ProductTags, SubCategory, SubSubCategory, Tags, Units, VariantType, ProductVideoProvider, VatType
 from user.models import CustomerProfile, User
 from vendor.models import VendorRequest, Vendor, Seller
-from vendor.serializers import VendorAddNewCategorySerializer, VendorAddNewSubCategorySerializer, VendorAddNewSubSubCategorySerializer, VendorBrandSerializer, VendorCategorySerializer, VendorProductDetailsSerializer, VendorProductListSerializer, VendorProductUpdateSerializer, VendorProductViewSerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
+from vendor.serializers import VendorAddNewCategorySerializer, VendorAddNewSubCategorySerializer, VendorAddNewSubSubCategorySerializer, VendorBrandSerializer, VendorCategorySerializer, VendorProductDetailsSerializer, VendorProductListSerializer, SellerProductUpdateSerializer, VendorProductViewSerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
     VendorDetailSerializer, StoreSettingsSerializer, SellerDetailSerializer, VendorSubCategorySerializer, VendorSubSubCategorySerializer, VendorUnitSerializer, SellerSerializer, ProductAttributesSerializer, ProductVideoProviderSerializer, ProductVatProviderSerializer, VendorUpdateCategorySerializer, VendorUpdateSubSubCategorySerializer, SellerProductCreateSerializer
 from user.models import User
 from cart.models import Coupon
@@ -168,10 +168,10 @@ class SellerProductCreateAPIView(CreateAPIView):
     def post(self, request, *args, **kwargs):
         return super(SellerProductCreateAPIView, self).post(request, *args, **kwargs)
 
-class VendorProductUpdateAPIView(RetrieveUpdateAPIView):
+class SellerProductUpdateAPIView(RetrieveUpdateAPIView):
     permission_classes = [AllowAny]
     # permission_classes = [IsAuthenticated]
-    serializer_class = VendorProductUpdateSerializer
+    serializer_class = SellerProductUpdateSerializer
     lookup_field = 'slug'
     lookup_url_kwarg = "slug"
 
@@ -278,7 +278,7 @@ class VendorProductDetailsAPI(RetrieveAPIView):
 
 class VendorProductSingleMediaDeleteAPI(RetrieveAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = VendorProductUpdateSerializer
+    serializer_class = SellerProductUpdateSerializer
     lookup_field = 'slug'
     lookup_url_kwarg = "slug"
 

@@ -846,9 +846,9 @@ class SellerProductCreateSerializer(serializers.ModelSerializer):
 
             # product_images
             if product_images:
-                for media_file in product_images:
+                for image in product_images:
                     ProductImages.objects.create(
-                        product=product_instance, file=media_file, status="COMPLETE")
+                        product=product_instance, file=image, status="COMPLETE")
 
             # product_colors
             if product_colors:
@@ -1355,6 +1355,7 @@ class SellerProductUpdateSerializer(serializers.ModelSerializer):
         except:
             product_images = ''
 
+        # product_colors
         try:
             product_colors = validated_data.pop('product_colors')
         except:
@@ -1448,16 +1449,10 @@ class SellerProductUpdateSerializer(serializers.ModelSerializer):
 
                 for product_attribute in product_attributes:
                     attribute_attribute = product_attribute['attribute']
-                    # if instance and attribute_title and attribute_attribute:
                     if attribute_attribute:
-                        # product_attributes_instance = ProductAttributes.objects.create(
-                        # title=attribute_title, attribute=attribute_attribute, product=instance)
                         product_attributes_instance = ProductAttributes.objects.create(attribute=attribute_attribute, product=instance)
                     try:
-                        # print('Try')
                         product_attribute_values = product_attribute['product_attribute_values']
-                        # print('product_attribute_values')
-                        # print(product_attribute_values)
                     except:
                         product_attribute_values = ''
 
@@ -1487,16 +1482,20 @@ class SellerProductUpdateSerializer(serializers.ModelSerializer):
             #     Product.objects.filter(id=instance.id).update(total_quantity=total_quan)
 
             # product with out variants
-            # single_quantity = validated_data["quantity"]
-            # quan = Product.objects.get(id=instance.id).quantity
-            # total_quan = Product.objects.get(id=instance.id).total_quantity
-            # if single_quantity:
-            #     quan += single_quantity
-            #     total_quan += single_quantity
-            #     # inventory update
-            #     Inventory.objects.create(product=instance, initial_quantity=single_quantity, current_quantity=single_quantity)
+            try:
+                single_quantity = validated_data["quantity"]
+            except:
+                single_quantity = ''
+            if single_quantity:
+                quan = Product.objects.get(id=instance.id).quantity
+                total_quan = Product.objects.get(id=instance.id).total_quantity
+                if single_quantity:
+                    quan += single_quantity
+                    total_quan += single_quantity
+                    # inventory update
+                    Inventory.objects.create(product=instance, initial_quantity=single_quantity, current_quantity=single_quantity)
 
-            #     Product.objects.filter(id=instance.id).update(quantity=quan, total_quantity=total_quan)
+                    Product.objects.filter(id=instance.id).update(quantity=quan, total_quantity=total_quan)
 
 
             # product with variants

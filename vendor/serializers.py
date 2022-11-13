@@ -642,7 +642,7 @@ class FlashDealSerializer(serializers.ModelSerializer):
             'discount_type'
         ]
 
-class VendorProductCreateSerializer(serializers.ModelSerializer):
+class SellerProductCreateSerializer(serializers.ModelSerializer):
     title = serializers.CharField(required=True)
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=False, write_only=True, required= True)
     sub_category = serializers.PrimaryKeyRelatedField(queryset=SubCategory.objects.all(), many=False, write_only=True, required= False)
@@ -668,8 +668,6 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
         many=True, required=False)
     flash_deal = FlashDealSerializer(many=True, required=False)
 
-    
-
     class Meta:
         model = Product
         fields = [
@@ -679,7 +677,7 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
             'sub_category',
             'sub_sub_category',
             'brand',
-            'vendor',
+            'seller',
             'unit',
             'minimum_purchase_quantity',
             'product_tags',
@@ -708,6 +706,7 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
             'product_specification',
             'low_stock_quantity_warning',
             'show_stock_quantity',
+            'in_house_product',
             'cash_on_delivery',
             'is_featured',
             'todays_deal',
@@ -875,7 +874,7 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
                 Product.objects.filter(id=product_instance.id).update(total_quantity=total_quan)
                 # inventory update
                 Inventory.objects.create(product=product_instance, initial_quantity=single_quantity, current_quantity=single_quantity)
-            
+
             # product with variants
             if product_variants:
                 variation_total_quan = 0
@@ -908,9 +907,8 @@ class VendorProductCreateSerializer(serializers.ModelSerializer):
 
                     if variant_quantity:
                         variation_total_quan += variant_quantity
-                        Product.objects.filter(id=product_instance.id).update(total_quantity=variation_total_quan)
+                        Product.objects.filter(id=product_instance.id).update(quantity=variation_total_quan, total_quantity=variation_total_quan)
 
-                    
 
             # product_specification
             if product_specification:

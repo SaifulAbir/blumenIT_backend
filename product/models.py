@@ -5,7 +5,7 @@ from statistics import mode
 from django.db import models
 from pyparsing import null_debug_action
 from ecommerce.models import AbstractTimeStamp
-from vendor.models import Vendor
+from vendor.models import Vendor, Seller
 from .utils import unique_slug_generator
 from django.db.models.signals import pre_save
 from user.models import User, CustomerProfile
@@ -214,6 +214,8 @@ class Product(AbstractTimeStamp):
     is_featured = models.BooleanField(null=False, blank=False, default=False)
     vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT,
                                related_name='product_vendor', blank=True, null=True)
+    seller = models.ForeignKey(Seller, on_delete=models.PROTECT,
+                               related_name='product_seller', blank=True, null=True)
     category = models.ForeignKey(
         Category, related_name='product_category', blank=False, null=True, on_delete=models.PROTECT)
     sub_category = models.ForeignKey(
@@ -262,7 +264,7 @@ class Product(AbstractTimeStamp):
     bar_code = models.CharField(max_length=255, blank=False, null=False, default='')
     refundable = models.BooleanField(default=False)
     digital = models.BooleanField(default=False)
-    in_house_product = models.BooleanField(default=True)
+    in_house_product = models.BooleanField(default=False)
     cash_on_delivery = models.BooleanField(default=False)
     todays_deal = models.BooleanField(default=False)
     show_stock_quantity = models.BooleanField(default=False)
@@ -274,6 +276,7 @@ class Product(AbstractTimeStamp):
     product_condition = models.ForeignKey(
         ProductCondition, related_name="product_product_condition", null=True, blank=True, on_delete=models.PROTECT)
     is_published = models.BooleanField(null=False, blank=False, default=True)
+    is_gaming = models.BooleanField(null=True, blank=True, default=False)
 
     class Meta:
         verbose_name = 'Product'
@@ -287,7 +290,6 @@ class Product(AbstractTimeStamp):
         return self.reviews.aggregate(Avg('rating'))
 
     def __str__(self):
-        # return self.title + '-' + self.vendor.vendor_admin.email
         return self.title
 
 

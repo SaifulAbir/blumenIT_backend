@@ -28,10 +28,11 @@ class SetPasswordSerializer(serializers.ModelSerializer):
 
 
 class OTPSendSerializer(serializers.ModelSerializer):
+    is_login = serializers.BooleanField(required=True, write_only=True)
     class Meta:
         extra_kwargs = {'email': {'required': True},
                         'phone': {'required': True}}
-        fields = ('email', 'phone')
+        fields = ('email', 'phone', 'is_login')
         model = user_models.User
 
 

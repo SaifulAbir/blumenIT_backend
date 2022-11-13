@@ -7,7 +7,7 @@ from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateAP
 from rest_framework.views import APIView
 from home.models import ProductView
 from product import serializers
-from product.serializers import MegaMenuDataAPIViewListSerializer, ProductDetailsSerializer, ProductListSerializer, ProductReviewCreateSerializer, BrandSerializer
+from product.serializers import MegaMenuDataAPIViewListSerializer, StoreProductDetailsSerializer, ProductDetailsSerializer, ProductListSerializer, ProductReviewCreateSerializer, BrandSerializer
 from product.models import Category, Product, Brand
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -198,3 +198,36 @@ class VendorProductListForFrondEndAPI(ListAPIView):
             queryset = Product.objects.filter(
                 status='ACTIVE').order_by('-created_at')
         return queryset
+
+
+class FeaturedProductListStoreFront(ListAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = ProductListSerializer
+    queryset = Product.objects.filter(is_featured=True, status='ACTIVE').order_by('-created_at')
+
+
+class PopularProductListStoreFront(ListAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = ProductListSerializer
+    queryset = Product.objects.filter(is_published=True).order_by('-sell_count')[:32]
+
+
+class GamingProductListStoreFront(ListAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = ProductListSerializer
+    queryset = Product.objects.filter(is_gaming=True, status='ACTIVE').order_by('-created_at')
+
+
+class StoreProductDatailsAPI(RetrieveAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = StoreProductDetailsSerializer
+    lookup_field = 'slug'
+    lookup_url_kwarg = "slug"
+
+    def get_object(self):
+        slug = self.kwargs['slug']
+        try:
+            query = Product.objects.get(slug=slug)
+            return query
+        except:
+            raise ValidationError({"details": "Product doesn't exist!"})

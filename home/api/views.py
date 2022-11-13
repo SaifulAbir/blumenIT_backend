@@ -7,8 +7,8 @@ from rest_framework.permissions import AllowAny
 from datetime import date, timedelta
 from django.db.models import Avg, Prefetch, Q, Count
 
-from product.models import Product, Category, ProductReview
-from product.serializers import ProductListSerializer
+from product.models import Product, Category, ProductReview, Brand
+from product.serializers import ProductListSerializer, BrandSerializer
 
 
 class HomeDataAPIView(APIView):
@@ -50,12 +50,16 @@ class HomeDataAPIView(APIView):
 
         # most popular
         # most_popular = Product.objects.filter(status="ACTIVE").annotate(Avg("product_review_product__rating_number")).order_by('-product_review_product__rating_number')
-        most_popular = Product.objects.filter(status="ACTIVE").annotate(count=Count('product_review_product')).order_by('-count')
+        most_popular = Product.objects.filter(status="PUBLISH").annotate(count=Count('product_review_product')).order_by('-count')
         most_popular_serializer = ProductListSerializer(most_popular, many=True, context={"request": request})
 
         # gaming product
         gaming_product = Product.objects.filter(is_gaming=True, status="PUBLISH").order_by('-created_at')
         gaming_serializer = ProductListSerializer(gaming_product, many=True, context={"request": request})
+
+        # brand list
+        brand_list = Brand.objects.filter(is_active=True).order_by('-created_at')
+        brand_list_serializer = BrandSerializer(brand_list, many=True, context={"request": request})
         return Response({
             "slider_images": slider_images_serializer.data,
             "deals_of_the_day": deals_of_the_day_serializer.data,
@@ -64,7 +68,8 @@ class HomeDataAPIView(APIView):
             "new_arrivals": new_arrivals_serializer.data,
             "featured": featured_serializer.data,
             "most_popular": most_popular_serializer.data,
-            "gaming_product": gaming_serializer.data
+            "gaming_product": gaming_serializer.data,
+            "brand_list_serializer": brand_list_serializer.data
         })
 
 # # class RecentAPIView(APIView):

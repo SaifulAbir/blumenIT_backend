@@ -201,30 +201,6 @@ class VendorProductListForFrondEndAPI(ListAPIView):
         return queryset
 
 
-class FeaturedProductListStoreFront(ListAPIView):
-    permission_classes = [AllowAny]
-    serializer_class = ProductListSerializer
-
-    def get_queryset(self):
-        try:
-            queryset = Product.objects.filter(is_featured=True, status='PUBLISH').order_by('-created_at')
-            return queryset
-        except:
-            raise ValidationError({"details": "No Featured Product.!"})
-
-
-class PopularProductListStoreFront(ListAPIView):
-    permission_classes = [AllowAny]
-    serializer_class = ProductListSerializer
-
-    def get_queryset(self):
-        try:
-            queryset = Product.objects.filter(status='PUBLISH').order_by('-sell_count')[:32]
-            return queryset
-        except:
-            raise ValidationError({"details": "No Featured Product.!"})
-
-
 class GamingProductListStoreFront(ListAPIView):
     permission_classes = [AllowAny]
     serializer_class = ProductListSerializer

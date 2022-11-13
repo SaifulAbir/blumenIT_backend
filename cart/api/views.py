@@ -4,16 +4,17 @@ from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework import serializers
 from product.serializers import DiscountTypeSerializer
-from cart.serializers import BillingAddressSerializer, CheckoutDetailsSerializer, CheckoutSerializer, \
+from cart.serializers import CheckoutDetailsSerializer, CheckoutSerializer, \
     OrderItemSerializer, OrderSerializer, PaymentTypesListSerializer, WishlistSerializer, WishListDataSerializer, \
-    ApplyCouponSerializer, CouponSerializer
+    ApplyCouponSerializer, CouponSerializer, DeliveryAddressSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.shortcuts import get_object_or_404
 from user.models import User
 from product.models import Product, DiscountTypes
-from cart.models import BillingAddress, Order, OrderItem, PaymentType, Coupon, UseRecordOfCoupon, Wishlist, VendorOrder
+from cart.models import BillingAddress, Order, OrderItem, PaymentType, Coupon, UseRecordOfCoupon, Wishlist, VendorOrder, \
+    DeliveryAddress
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 from drf_yasg.utils import swagger_auto_schema
@@ -460,29 +461,30 @@ class CheckoutAPIView(CreateAPIView):
 
 # urmi~~
 
-# class BillingAddressCreateAPIView(CreateAPIView):
-#     serializer_class = BillingAddressSerializer
+class DeliveryAddressCreateAPIView(CreateAPIView):
+    serializer_class = DeliveryAddressSerializer
 
-#     def post(self, request, *args, **kwargs):
-#         return super(BillingAddressCreateAPIView, self).post(request, *args, **kwargs)
-
-
-# class BillingAddressUpdateAPIView(RetrieveUpdateAPIView):
-#     serializer_class = BillingAddressSerializer
-#     queryset = BillingAddress.objects.all()
-#     lookup_field = 'id'
-#     lookup_url_kwarg = "id"
-
-#     def put(self, request, *args, **kwargs):
-#         return super(BillingAddressUpdateAPIView, self).put(request, *args, **kwargs)
+    def post(self, request, *args, **kwargs):
+        # request.data['user'] = request.user
+        return super(DeliveryAddressCreateAPIView, self).post(request, *args, **kwargs)
 
 
-# class BillingAddressListAPIView(ListAPIView):
-#     serializer_class = BillingAddressSerializer
+class DeliveryAddressUpdateAPIView(RetrieveUpdateAPIView):
+    serializer_class = DeliveryAddressSerializer
+    queryset = DeliveryAddress.objects.all()
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
 
-#     def get_queryset(self):
-#         queryset = BillingAddress.objects.filter(user=self.request.user)
-#         return queryset
+    def put(self, request, *args, **kwargs):
+        return super(DeliveryAddressUpdateAPIView, self).put(request, *args, **kwargs)
+
+
+class DeliveryAddressListAPIView(ListAPIView):
+    serializer_class = DeliveryAddressSerializer
+
+    def get_queryset(self):
+        queryset = DeliveryAddress.objects.filter(user=self.request.user)
+        return queryset
 
 
 # class BillingAddressDeleteAPIView(DestroyAPIView):

@@ -7,8 +7,9 @@ from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateAP
 from rest_framework.views import APIView
 from home.models import ProductView
 from product import serializers
-from product.serializers import MegaMenuDataAPIViewListSerializer, StoreProductDetailsSerializer, \
-    ProductDetailsSerializer, ProductListSerializer, ProductReviewCreateSerializer, BrandSerializer
+from product.serializers import StoreProductDetailsSerializer, \
+    ProductDetailsSerializer, ProductListSerializer, ProductReviewCreateSerializer, BrandSerializer,\
+    StoreCategoryAPIViewListSerializer
 from product.models import Category, Product, Brand
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -37,9 +38,9 @@ class BrandCreateAPIView(CreateAPIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
 
-class MegaMenuDataAPIView(ListAPIView):
+class StoreCategoryListAPIView(ListAPIView):
     permission_classes = (AllowAny,)
-    serializer_class = MegaMenuDataAPIViewListSerializer
+    serializer_class = StoreCategoryAPIViewListSerializer
 
     def get_queryset(self):
         queryset = Category.objects.filter(is_active=True)

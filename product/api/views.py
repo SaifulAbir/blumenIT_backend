@@ -209,7 +209,7 @@ class FeaturedProductListStoreFront(ListAPIView):
 class PopularProductListStoreFront(ListAPIView):
     permission_classes = [AllowAny]
     serializer_class = ProductListSerializer
-    queryset = Product.objects.filter(is_published=True).order_by('-sell_count')[:32]
+    queryset = Product.objects.filter(status='PUBLISH').order_by('-sell_count')[:32]
 
 
 class GamingProductListStoreFront(ListAPIView):

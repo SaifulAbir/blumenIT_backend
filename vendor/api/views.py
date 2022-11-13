@@ -7,7 +7,7 @@ from product.pagination import ProductCustomPagination
 from product.serializers import DiscountTypeSerializer, ProductTagsSerializer, TagsSerializer, VariantTypeSerializer
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView, RetrieveAPIView, DestroyAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductMedia, ProductReview, ProductTags, SubCategory, SubSubCategory, Tags, Units, VariantType, ProductVideoProvider, VatType
+from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductReview, ProductTags, SubCategory, SubSubCategory, Tags, Units, VariantType, ProductVideoProvider, VatType
 from user.models import CustomerProfile, User
 from vendor.models import VendorRequest, Vendor, Seller
 from vendor.serializers import VendorAddNewCategorySerializer, VendorAddNewSubCategorySerializer, VendorAddNewSubSubCategorySerializer, VendorBrandSerializer, VendorCategorySerializer, VendorProductDetailsSerializer, VendorProductListSerializer, SellerProductUpdateSerializer, VendorProductViewSerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
@@ -65,7 +65,7 @@ class SellerDeleteAPIView(DestroyAPIView):
         seller_obj = Seller.objects.filter(id=seller_id).exists()
         if seller_obj:
             seller_obj = Product.objects.filter(id=seller_id)
-            seller_obj.update(status='REMOVE', is_published=False)
+            seller_obj.update(status='UNPUBLISH')
 
             queryset = Seller.objects.filter(status='ACTIVE').order_by('-created_at')
             return queryset
@@ -276,44 +276,6 @@ class VendorProductDetailsAPI(RetrieveAPIView):
     #         raise ValidationError({"msg": 'You are not a vendor.'})
 
 
-class VendorProductSingleMediaDeleteAPI(RetrieveAPIView):
-    permission_classes = [IsAuthenticated]
-    serializer_class = SellerProductUpdateSerializer
-    lookup_field = 'slug'
-    lookup_url_kwarg = "slug"
-
-    def get_queryset(self):
-        slug = self.kwargs['slug']
-        mid = self.kwargs['mid']
-
-        if Vendor.objects.filter(vendor_admin=User.objects.get(id=self.request.user.id)).exists():
-            vid = Vendor.objects.get(
-                vendor_admin=User.objects.get(id=self.request.user.id))
-            if vid:
-                # try:
-                query_exist = Product.objects.filter(
-                    slug=slug, vendor=vid).exists()
-                if query_exist:
-                    query = Product.objects.filter(slug=slug, vendor=vid)
-                    media_obj = ProductMedia.objects.filter(
-                        id=int(mid), product=query[0].id).exists()
-                    if media_obj:
-                        media_obj_obj = ProductMedia.objects.filter(
-                            id=int(mid), product=query[0].id)
-                        media_obj_obj.update(is_active=False)
-                        return query
-                    else:
-                        raise ValidationError(
-                            {"msg": "Media doesn't found"})
-                else:
-                    raise ValidationError(
-                        {"msg": 'You are not creator of this product!'})
-                # except:
-                # raise ValidationError(
-                # {"msg": "Product doesn't exist or You are not the creator of this product!"})
-        else:
-            raise ValidationError({"msg": 'You are not a vendor.'})
-
 
 class VendorProductDeleteAPI(ListAPIView):
     permission_classes = [AllowAny]
@@ -329,7 +291,7 @@ class VendorProductDeleteAPI(ListAPIView):
             slug=slug).exists()
         if product_obj_exist:
             product_obj = Product.objects.filter(slug=slug)
-            product_obj.update(status='REMOVE', is_published=False)
+            product_obj.update(status='UNPUBLISH')
 
             queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
             return queryset

@@ -51,8 +51,7 @@ urlpatterns = [
     
 #     path('vendor-product-details/<str:slugi>/',
 #          VendorProductDetailsAPI.as_view()),
-    # path('vendor-product-single-media-delete/<str:slug>/<int:mid>/',
-    #      VendorProductSingleMediaDeleteAPI.as_view()),
+
     path('vendor-product-delete/<str:slug>/',
          VendorProductDeleteAPI.as_view()),
     path('vendor-product-view/<str:slugi>/',

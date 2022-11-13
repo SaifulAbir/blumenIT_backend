@@ -202,20 +202,6 @@ class Product(AbstractTimeStamp):
     title = models.CharField(max_length=800, default='')
     slug = models.SlugField(
         null=False, allow_unicode=True, blank=True, max_length=255)
-    sku = models.CharField(max_length=500, null=True,
-                           blank=True, default="")
-    warranty = models.CharField(
-        max_length=255, blank=True, null=True, help_text="eg: 1 year or 6 months")
-    full_description = models.TextField(default='', null=False, blank=False)
-    short_description = models.CharField(max_length=800, default='', null=False, blank=False)
-    active_short_description = models.BooleanField(default=True)
-    status = models.CharField(
-        max_length=20, choices=PRODUCT_STATUSES, default=PRODUCT_STATUSES[0][0])
-    is_featured = models.BooleanField(null=False, blank=False, default=False)
-    vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT,
-                               related_name='product_vendor', blank=True, null=True)
-    seller = models.ForeignKey(Seller, on_delete=models.PROTECT,
-                               related_name='product_seller', blank=True, null=True)
     category = models.ForeignKey(
         Category, related_name='product_category', blank=False, null=True, on_delete=models.PROTECT)
     sub_category = models.ForeignKey(
@@ -224,59 +210,56 @@ class Product(AbstractTimeStamp):
         SubSubCategory, related_name='product_sub_sub_category', blank=True, null=True, on_delete=models.PROTECT)
     brand = models.ForeignKey(Brand, related_name='product_brand',
                               blank=True, null=True, on_delete=models.PROTECT)
+    seller = models.ForeignKey(Seller, on_delete=models.PROTECT,
+                               related_name='product_seller', blank=True, null=True)
     unit = models.ForeignKey(Units, related_name="product_unit",
                              blank=True, null=True, on_delete=models.PROTECT)
+    minimum_purchase_quantity = models.IntegerField(null=True, blank=True, default=0)
+    bar_code = models.CharField(max_length=255, blank=False, null=False, default='')
+    refundable = models.BooleanField(default=False)
+    is_featured = models.BooleanField(null=False, blank=False, default=False)
+    cash_on_delivery = models.BooleanField(default=False)
+    todays_deal = models.BooleanField(default=False)
+    shipping_time = models.IntegerField(
+        null=False, blank=False, default=0, help_text="eg: Days in count.")
+    full_description = models.TextField(default='', null=False, blank=False)
+    short_description = models.CharField(max_length=800, default='', null=False, blank=False)
+    active_short_description = models.BooleanField(default=True)
     price = models.FloatField(
         max_length=255, null=False, blank=False, default=0, help_text="Unit price")
-    old_price = models.FloatField(
-        max_length=255, null=False, blank=False, default=0)
-    purchase_price = models.FloatField(
-        max_length=255, null=False, blank=False, default=0)
     pre_payment_amount = models.FloatField(
         max_length=255, null=False, blank=False, default=0)
-    tax_in_percent = models.IntegerField(null=True, blank=True, default=0)
-    vat = models.IntegerField(null=True, blank=True, default=0)
+    discount_start_date = models.DateTimeField(null=True, blank=True)
+    discount_end_date = models.DateTimeField(null=True, blank=True)
     discount_type = models.ForeignKey(
         DiscountTypes, related_name="product_discount_type", null=True, blank=True, on_delete=models.PROTECT)
     discount_amount = models.FloatField(
         max_length=255, null=True, blank=True, default=0)
-    discount_start_date = models.DateTimeField(null=True, blank=True)
-    discount_end_date = models.DateTimeField(null=True, blank=True)
     quantity = models.IntegerField(null=True, blank=True, default=0)
     total_quantity = models.IntegerField(null=False, blank=False, default=0)
-    shipping_cost = models.FloatField(
-        max_length=255, null=True, blank=True, default=0)
-    shipping_cost_multiply = models.BooleanField(
-        null=True, blank=True, default=False)
-    total_shipping_cost = models.FloatField(
-        max_length=255, null=True, blank=True, default=0)
-    shipping_time = models.IntegerField(
-        null=False, blank=False, default=0, help_text="eg: Days in count.")
-    shipping_class = models.ForeignKey(
-        ShippingClass, related_name="product_shipping_class", null=True, blank=True, on_delete=models.PROTECT)
-    thumbnail = models.FileField(upload_to='products', blank=True, null=True)
-    youtube_link = models.URLField(null=True, blank=True)
-    video_link = models.URLField(null=True, blank=True)
+    sku = models.CharField(max_length=500, null=True,blank=True, default="")
     external_link = models.URLField(null=True, blank=True)
     external_link_button_text = models.CharField(max_length=500, null=True, blank=True)
-    sell_count = models.BigIntegerField(null=True, blank=True, default=0)
-    minimum_purchase_quantity = models.IntegerField(null=True, blank=True, default=0)
-    bar_code = models.CharField(max_length=255, blank=False, null=False, default='')
-    refundable = models.BooleanField(default=False)
-    digital = models.BooleanField(default=False)
-    in_house_product = models.BooleanField(default=False)
-    cash_on_delivery = models.BooleanField(default=False)
-    todays_deal = models.BooleanField(default=False)
-    show_stock_quantity = models.BooleanField(default=False)
-    low_stock_quantity_warning = models.IntegerField(null=True, blank=True, default=0)
     video_provider = models.ForeignKey(
         ProductVideoProvider, related_name="product_video_provider", null=True, blank=True, on_delete=models.PROTECT)
+    video_link = models.URLField(null=True, blank=True)
+    thumbnail = models.FileField(upload_to='products', blank=True, null=True)
+    low_stock_quantity_warning = models.IntegerField(null=True, blank=True, default=0)
+    show_stock_quantity = models.BooleanField(default=False)
+    vat = models.IntegerField(null=True, blank=True, default=0)
     vat_type = models.ForeignKey(
         VatType, related_name="product_vat_type", null=True, blank=True, on_delete=models.PROTECT)
+    shipping_class = models.ForeignKey(
+        ShippingClass, related_name="product_shipping_class", null=True, blank=True, on_delete=models.PROTECT)
     product_condition = models.ForeignKey(
         ProductCondition, related_name="product_product_condition", null=True, blank=True, on_delete=models.PROTECT)
-    is_published = models.BooleanField(null=False, blank=False, default=True)
+    status = models.CharField(
+        max_length=20, choices=PRODUCT_STATUSES, default=PRODUCT_STATUSES[0][0])
+    digital = models.BooleanField(default=False)
+    in_house_product = models.BooleanField(default=False)
+    sell_count = models.BigIntegerField(null=True, blank=True, default=0)
     is_gaming = models.BooleanField(null=True, blank=True, default=False)
+
 
     class Meta:
         verbose_name = 'Product'
@@ -292,15 +275,9 @@ class Product(AbstractTimeStamp):
     def __str__(self):
         return self.title
 
-
-
 def pre_save_product(sender, instance, *args, **kwargs):
     if not instance.slug:
         instance.slug = unique_slug_generator(instance)
-        # chars = string.ascii_lowercase + string.digits
-        # size = 10
-        # instance.sku = ''.join(random.choice(chars) for _ in range(size))
-
 
 pre_save.connect(pre_save_product, sender=Product)
 
@@ -422,7 +399,6 @@ class ProductVariation(AbstractTimeStamp):
     def __str__(self):
         return self.product.title + '-variation: ' + self.variation
 
-
 class ProductCombinations(AbstractTimeStamp):
     product = models.ForeignKey(
         Product, on_delete=models.PROTECT, related_name='product_combinations_product')
@@ -445,15 +421,6 @@ class ProductCombinations(AbstractTimeStamp):
     def __str__(self):
         return str(self.id) + '-'+self.product.title+'-'+self.product_attribute_value
 
-    # def __str__(self):
-    #     # title = self.product.title
-    #     # combine = title + ' ' + self.product_attribute.title + \
-    #     #     ' ' + self.product_attribute_value
-
-    #     combine = self.product_attribute_value
-    #     return combine
-
-
 class Tags(AbstractTimeStamp):
     title = models.CharField(
         max_length=100, null=False, blank=False, default="", unique=True)
@@ -466,11 +433,6 @@ class Tags(AbstractTimeStamp):
 
     def __str__(self):
         return self.title
-
-    # def save(self, force_insert=False, force_update=False):
-    #     self.title = self.title.upper()
-    #     super(Tags, self).save(force_insert, force_update)
-
 
 class ProductTags(AbstractTimeStamp):
     tag = models.ForeignKey(Tags, on_delete=models.CASCADE, null=True,
@@ -486,10 +448,8 @@ class ProductTags(AbstractTimeStamp):
 
     def __str__(self):
         return self.product.title
-        # return self.product.title + ' ' + self.tag.title
 
-
-class ProductMedia(AbstractTimeStamp):
+class ProductMedia(AbstractTimeStamp):   # No more use of this table
     CHOICES = [
         ('COMPLETE', 'Complete'),
         ('IN_QUEUE', 'In_Queue'),
@@ -506,8 +466,8 @@ class ProductMedia(AbstractTimeStamp):
 
     product = models.ForeignKey(
         Product, on_delete=models.PROTECT, related_name='product_media_product', null=True, blank=True)
-    file = models.FileField(upload_to='products', validators=[
-                            validate_file_extension])
+    # file = models.FileField(upload_to='products', validators=[
+    #                         validate_file_extension])
     status = models.CharField(
         max_length=20, choices=CHOICES, default=CHOICES[0][0])
     is_active = models.BooleanField(null=False, blank=False, default=True)

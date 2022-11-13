@@ -189,11 +189,15 @@ class CartListSerializer(serializers.ModelSerializer):
 #         return ProductSerializer(selected_product, many=True).data
 
 
-class BillingAddressSerializer(serializers.ModelSerializer):
+class DeliveryAddressSerializer(serializers.ModelSerializer):
     class Meta:
-        model = BillingAddress
-        fields = ['id', 'user', 'first_name', 'last_name', 'country',
-                  'street_address', 'city', 'phone', 'zip_code', 'email', 'title', 'default']
+        model = DeliveryAddress
+        fields = ['id', 'user', 'name', 'address', 'phone',
+                  'email', 'zip_code', 'city']
+
+    def create(self, validated_data):
+        address_instance = DeliveryAddress.objects.create(**validated_data, user=self.context['request'].user)
+        return address_instance
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -540,7 +544,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ['id', 'order_items', 'product_count', 'total_price', 'cash_on_delivery', 'coupon',
-                  'coupon_discount_amount', 'tax_amount', 'payment_type', 'shipping_cost']
+                  'coupon_discount_amount', 'tax_amount', 'payment_type', 'shipping_cost', "address"]
 
     def create(self, validated_data):
         order_items = validated_data.pop('order_items')

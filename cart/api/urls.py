@@ -25,12 +25,10 @@ urlpatterns = [
     # path('check-quantity/', CheckQuantityAPIView.as_view()),
 
     # urmi
-#     path('create-billing-address/', BillingAddressCreateAPIView.as_view()),
-#     path('update-billing-address/<int:id>/',
-     #     BillingAddressUpdateAPIView.as_view()),
-#     path('billing-address-list/', BillingAddressListAPIView.as_view()),
-#     path('delete-billing-address/<int:id>/',
-     #     BillingAddressDeleteAPIView.as_view()),
+    path('create-delivery-address/', DeliveryAddressCreateAPIView.as_view()),
+    path('update-delivery-address/<int:id>/', DeliveryAddressUpdateAPIView.as_view()),
+    path('delivery-address-list/', DeliveryAddressListAPIView.as_view()),
+    # path('delete-billing-address/<int:id>/', BillingAddressDeleteAPIView.as_view()),
 #     path('user-order-list/', UserOrderListAPIView.as_view()),
     # path('vendor-order-list/', VendorOrderListAPIView.as_view()),
 #     path('user-order-detail/<int:id>/', UserOrderDetailAPIView.as_view()),

@@ -7,7 +7,8 @@ from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateAP
 from rest_framework.views import APIView
 from home.models import ProductView
 from product import serializers
-from product.serializers import MegaMenuDataAPIViewListSerializer, StoreProductDetailsSerializer, ProductDetailsSerializer, ProductListSerializer, ProductReviewCreateSerializer, BrandSerializer
+from product.serializers import MegaMenuDataAPIViewListSerializer, StoreProductDetailsSerializer, \
+    ProductDetailsSerializer, ProductListSerializer, ProductReviewCreateSerializer, BrandSerializer
 from product.models import Category, Product, Brand
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -20,7 +21,6 @@ from vendor.models import Vendor
 
 
 class BrandCreateAPIView(CreateAPIView):
-
     permission_classes = [AllowAny]
     serializer_class = BrandSerializer
 
@@ -35,6 +35,7 @@ class BrandCreateAPIView(CreateAPIView):
             return Response(brand.data)
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)
+
 
 class MegaMenuDataAPIView(ListAPIView):
     permission_classes = (AllowAny,)
@@ -203,19 +204,37 @@ class VendorProductListForFrondEndAPI(ListAPIView):
 class FeaturedProductListStoreFront(ListAPIView):
     permission_classes = [AllowAny]
     serializer_class = ProductListSerializer
-    queryset = Product.objects.filter(is_featured=True, status='PUBLISH').order_by('-created_at')
+
+    def get_queryset(self):
+        try:
+            queryset = Product.objects.filter(is_featured=True, status='PUBLISH').order_by('-created_at')
+            return queryset
+        except:
+            raise ValidationError({"details": "No Featured Product.!"})
 
 
 class PopularProductListStoreFront(ListAPIView):
     permission_classes = [AllowAny]
     serializer_class = ProductListSerializer
-    queryset = Product.objects.filter(is_published=True).order_by('-sell_count')[:32]
+
+    def get_queryset(self):
+        try:
+            queryset = Product.objects.filter(status='PUBLISH').order_by('-sell_count')[:32]
+            return queryset
+        except:
+            raise ValidationError({"details": "No Featured Product.!"})
 
 
 class GamingProductListStoreFront(ListAPIView):
     permission_classes = [AllowAny]
     serializer_class = ProductListSerializer
-    queryset = Product.objects.filter(is_gaming=True, status='PUBLISH').order_by('-created_at')
+
+    def get_queryset(self):
+        try:
+            queryset = Product.objects.filter(is_gaming=True, status="PUBLISH").order_by('-created_at')
+            return queryset
+        except:
+            raise ValidationError({"details": "No Gaming Product.!"})
 
 
 class StoreProductDatailsAPI(RetrieveAPIView):

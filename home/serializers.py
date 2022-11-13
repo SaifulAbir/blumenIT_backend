@@ -3,7 +3,6 @@ from .models import *
 from product.models import Product, Category, Brand
 from product.serializers import \
     ProductDetailsSerializer
-    # ProductMediaSerializer
 
 # # # list Serializer start
 

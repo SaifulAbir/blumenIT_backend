@@ -201,18 +201,6 @@ class VendorProductListForFrondEndAPI(ListAPIView):
         return queryset
 
 
-class GamingProductListStoreFront(ListAPIView):
-    permission_classes = [AllowAny]
-    serializer_class = ProductListSerializer
-
-    def get_queryset(self):
-        try:
-            queryset = Product.objects.filter(is_gaming=True, status="PUBLISH").order_by('-created_at')
-            return queryset
-        except:
-            raise ValidationError({"details": "No Gaming Product.!"})
-
-
 class StoreProductDatailsAPI(RetrieveAPIView):
     permission_classes = [AllowAny]
     serializer_class = StoreProductDetailsSerializer

@@ -8,13 +8,14 @@ from datetime import date, timedelta
 from django.db.models import Avg, Prefetch, Q, Count
 
 from product.models import Product, Category, ProductReview, Brand
-from product.serializers import ProductListSerializer, BrandSerializer
+from product.serializers import ProductListSerializer, BrandListSerializer
 
 
 class HomeDataAPIView(APIView):
     permission_classes = (AllowAny,)
 
     def get(self, request):
+
         # slider images
         slider_images = SliderImage.objects.filter(is_active=True)
         slider_images_serializer = SliderImagesListSerializer(slider_images, many=True, context={"request": request})
@@ -49,7 +50,8 @@ class HomeDataAPIView(APIView):
         featured_serializer = ProductListSerializer(featured, many=True, context={"request": request})
 
         # most popular
-        # most_popular = Product.objects.filter(status="ACTIVE").annotate(Avg("product_review_product__rating_number")).order_by('-product_review_product__rating_number')
+        # most_popular = Product.objects.filter(status="ACTIVE").annotate(Avg("product_review_product__rating_number")).
+        # order_by('-product_review_product__rating_number')
         most_popular = Product.objects.filter(status="PUBLISH").annotate(count=Count('product_review_product')).order_by('-count')
         most_popular_serializer = ProductListSerializer(most_popular, many=True, context={"request": request})
 
@@ -59,7 +61,7 @@ class HomeDataAPIView(APIView):
 
         # brand list
         brand_list = Brand.objects.filter(is_active=True).order_by('-created_at')
-        brand_list_serializer = BrandSerializer(brand_list, many=True, context={"request": request})
+        brand_list_serializer = BrandListSerializer(brand_list, many=True, context={"request": request})
         return Response({
             "slider_images": slider_images_serializer.data,
             "deals_of_the_day": deals_of_the_day_serializer.data,

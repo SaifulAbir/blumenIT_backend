@@ -130,6 +130,12 @@ class BrandSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'logo']
 
 
+class BrandListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Brand
+        fields = ['id', 'title', 'logo']
+
+
 # Units serializer / Connect with ProductDetailsSerializer
 class UnitSerializer(serializers.ModelSerializer):
     class Meta:

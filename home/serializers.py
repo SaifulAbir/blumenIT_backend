@@ -6,6 +6,8 @@ from product.serializers import \
     # ProductMediaSerializer
 
 # # # list Serializer start
+
+
 class SliderImagesListSerializer(serializers.ModelSerializer):
     class Meta:
         model = SliderImage
@@ -15,6 +17,7 @@ class SliderImagesListSerializer(serializers.ModelSerializer):
                 'static_img',
                 'text',
                 ]
+
 
 class DealsOfTheDayListSerializer(serializers.ModelSerializer):
     product = ProductDetailsSerializer(many=True, read_only=True)
@@ -28,6 +31,7 @@ class DealsOfTheDayListSerializer(serializers.ModelSerializer):
                 'start_date',
                 'end_date'
                 ]
+
 
 class product_catListSerializer(serializers.ModelSerializer):
     class Meta:
@@ -59,6 +63,7 @@ class product_catListSerializer(serializers.ModelSerializer):
 # # #                 ]
 
 
+
 class FaqSerializer(serializers.ModelSerializer):
     class Meta:
         model = FAQ
@@ -68,6 +73,7 @@ class FaqSerializer(serializers.ModelSerializer):
                 'answer',
                 'is_active',
                 ]
+
 
 class ContactUsSerializer(serializers.ModelSerializer):
     class Meta:

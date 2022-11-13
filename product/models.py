@@ -26,6 +26,7 @@ class Attribute(AbstractTimeStamp):
     def __str__(self):
         return self.title
 
+
 class AttributeValues(AbstractTimeStamp):
     attribute = models.ForeignKey(Attribute, on_delete=models.PROTECT,
                                related_name='attribute_values_attribute', blank=False, null=False)
@@ -40,6 +41,7 @@ class AttributeValues(AbstractTimeStamp):
 
     def __str__(self):
         return self.value
+
 
 class Category(AbstractTimeStamp):
     title = models.CharField(

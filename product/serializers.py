@@ -277,7 +277,7 @@ class ProductCombinationSerializerForProductDetails(serializers.ModelSerializer)
 
 
 # Mega Menu Data serializer
-class MegaMenuDataAPIViewListSerializer(serializers.ModelSerializer):
+class StoreCategoryAPIViewListSerializer(serializers.ModelSerializer):
     sub_category = serializers.SerializerMethodField()
 
     class Meta:

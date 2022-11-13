@@ -5,7 +5,7 @@ from django.conf.urls.static import static
 
 
 urlpatterns = [
-    path('mega-menu-data/', MegaMenuDataAPIView.as_view()),
+    path('store-category-list/', StoreCategoryListAPIView.as_view()),
     path('product-details/<str:slug>/', ProductDetailsAPI.as_view()),
     path('product-list/', ProductListAPI.as_view()),
     path('search-product/', ProductSearchAPI.as_view()),

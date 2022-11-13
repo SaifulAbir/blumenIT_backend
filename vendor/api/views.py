@@ -10,8 +10,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductReview, ProductTags, SubCategory, SubSubCategory, Tags, Units, VariantType, ProductVideoProvider, VatType
 from user.models import CustomerProfile, User
 from vendor.models import VendorRequest, Vendor, Seller
-from vendor.serializers import VendorAddNewCategorySerializer, VendorAddNewSubCategorySerializer, VendorAddNewSubSubCategorySerializer, VendorBrandSerializer, VendorCategorySerializer, VendorProductDetailsSerializer, VendorProductListSerializer, SellerProductUpdateSerializer, VendorProductViewSerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
-    VendorDetailSerializer, StoreSettingsSerializer, SellerDetailSerializer, VendorSubCategorySerializer, VendorSubSubCategorySerializer, VendorUnitSerializer, SellerSerializer, ProductAttributesSerializer, ProductVideoProviderSerializer, ProductVatProviderSerializer, VendorUpdateCategorySerializer, VendorUpdateSubSubCategorySerializer, SellerProductCreateSerializer
+from vendor.serializers import VendorAddNewSubCategorySerializer, VendorAddNewSubSubCategorySerializer, VendorBrandSerializer, VendorCategorySerializer, VendorProductDetailsSerializer, VendorProductListSerializer, SellerProductUpdateSerializer, VendorProductViewSerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
+    VendorDetailSerializer, StoreSettingsSerializer, SellerDetailSerializer, VendorSubCategorySerializer, VendorSubSubCategorySerializer, VendorUnitSerializer, SellerSerializer, ProductAttributesSerializer, ProductVideoProviderSerializer, ProductVatProviderSerializer, VendorUpdateCategorySerializer, VendorUpdateSubSubCategorySerializer, SellerProductCreateSerializer, SellerAddNewCategorySerializer
 from user.models import User
 from cart.models import Coupon
 from rest_framework.exceptions import ValidationError
@@ -72,6 +72,51 @@ class SellerDeleteAPIView(DestroyAPIView):
         else:
             raise ValidationError(
                 {"msg": 'Product Does not exist!'})
+
+class SellerProductCreateAPIView(CreateAPIView):
+    # permission_classes = [IsAuthenticated]
+    permission_classes = (AllowAny,)
+    serializer_class = SellerProductCreateSerializer
+
+
+    def post(self, request, *args, **kwargs):
+        return super(SellerProductCreateAPIView, self).post(request, *args, **kwargs)
+
+class SellerProductUpdateAPIView(RetrieveUpdateAPIView):
+    permission_classes = [AllowAny]
+    # permission_classes = [IsAuthenticated]
+    serializer_class = SellerProductUpdateSerializer
+    lookup_field = 'slug'
+    lookup_url_kwarg = "slug"
+
+    def get_queryset(self):
+        slug = self.kwargs['slug']
+        query = Product.objects.filter(slug=slug)
+        if query:
+            return query
+        else:
+            raise ValidationError(
+                {"msg": 'You Can not edit this product!'})
+
+class SellerAddNewCategoryAPIView(CreateAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = SellerAddNewCategorySerializer
+
+    # permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        return super(SellerAddNewCategoryAPIView, self).post(request, *args, **kwargs)
+
+
+
+
+
+
+
+
+
+
+
 
 class VendorRequestAPIView(CreateAPIView):
     permission_classes = [AllowAny]
@@ -147,64 +192,7 @@ class VendorProductListAPI(ListAPIView):
         else:
             raise ValidationError({"msg": 'No active product available or You are not a vendor.'})
 
-    # def get_queryset(self):
-    #     if Vendor.objects.filter(vendor_admin=User.objects.get(id=self.request.user.id)).exists():
-    #         vid = Vendor.objects.get(
-    #             vendor_admin=User.objects.get(id=self.request.user.id))
-    #         if vid:
-    #             queryset = Product.objects.filter(
-    #                 vendor=vid, status='ACTIVE').order_by('-created_at')
-    #             return queryset
-    #     else:
-    #         raise ValidationError({"msg": 'You are not a vendor.'})
 
-
-class SellerProductCreateAPIView(CreateAPIView):
-    # permission_classes = [IsAuthenticated]
-    permission_classes = (AllowAny,)
-    serializer_class = SellerProductCreateSerializer
-
-
-    def post(self, request, *args, **kwargs):
-        return super(SellerProductCreateAPIView, self).post(request, *args, **kwargs)
-
-class SellerProductUpdateAPIView(RetrieveUpdateAPIView):
-    permission_classes = [AllowAny]
-    # permission_classes = [IsAuthenticated]
-    serializer_class = SellerProductUpdateSerializer
-    lookup_field = 'slug'
-    lookup_url_kwarg = "slug"
-
-    def get_queryset(self):
-        slug = self.kwargs['slug']
-        query = Product.objects.filter(slug=slug)
-        if query:
-            return query
-        else:
-            raise ValidationError(
-                {"msg": 'You Can not edit this product!'})
-
-    # def get_queryset(self):
-    #     slug = self.kwargs['slug']
-    #     # query = Product.objects.filter(slug=slug)
-    #     # return query
-
-    #     if Vendor.objects.filter(vendor_admin=User.objects.get(id=self.request.user.id)).exists():
-    #         vid = Vendor.objects.get(
-    #             vendor_admin=User.objects.get(id=self.request.user.id))
-    #         if vid:
-    #             try:
-    #                 query = Product.objects.filter(slug=slug, vendor=vid)
-    #                 if query:
-    #                     return query
-    #                 else:
-    #                     raise ValidationError(
-    #                         {"msg": 'You are not creator of this product!'})
-    #             except:
-    #                 raise ValidationError(
-    #                     {"msg": "Product doesn't exist or You are not the creator of this product!"})
-    #     else:
-    #         raise ValidationError({"msg": 'You are not a vendor.'})
 
 class VendorProductViewAPI(RetrieveAPIView):
     permission_classes = [AllowAny]
@@ -237,46 +225,6 @@ class VendorProductDetailsAPI(RetrieveAPIView):
             raise ValidationError(
                 {"msg": 'You are not creator of this product!'})
 
-    # def get_object(self):
-    #     slug = self.kwargs['slugi']
-    #     if Vendor.objects.filter(vendor_admin=User.objects.get(id=self.request.user.id)).exists():
-    #         vid = Vendor.objects.get(
-    #             vendor_admin=User.objects.get(id=self.request.user.id))
-    #         if vid:
-    #             try:
-    #                 query = Product.objects.get(slug=slug, vendor=vid)
-    #                 if query:
-    #                     return query
-    #                 else:
-    #                     raise ValidationError(
-    #                         {"msg": 'You are not creator of this product!'})
-    #             except:
-    #                 raise ValidationError(
-    #                     {"msg": "Product doesn't exist or You are not the creator of this product!"})
-    #     else:
-    #         raise ValidationError({"msg": 'You are not a vendor.'})
-
-    # def get_object(self):
-    #     slug = self.kwargs['slugi']
-    #     if Vendor.objects.filter(vendor_admin=User.objects.get(id=self.request.user.id)).exists():
-    #         vid = Vendor.objects.get(
-    #             vendor_admin=User.objects.get(id=self.request.user.id))
-    #         if vid:
-    #             try:
-    #                 query = Product.objects.get(slug=slug, vendor=vid)
-    #                 if query:
-    #                     return query
-    #                 else:
-    #                     raise ValidationError(
-    #                         {"msg": 'You are not creator of this product!'})
-    #             except:
-    #                 raise ValidationError(
-    #                     {"msg": "Product doesn't exist or You are not the creator of this product!"})
-    #     else:
-    #         raise ValidationError({"msg": 'You are not a vendor.'})
-
-
-
 class VendorProductDeleteAPI(ListAPIView):
     permission_classes = [AllowAny]
     # permission_classes = [IsAuthenticated]
@@ -299,27 +247,6 @@ class VendorProductDeleteAPI(ListAPIView):
             raise ValidationError(
                 {"msg": 'Product Does not exist!'})
 
-    # def get_queryset(self):
-    #     slug = self.kwargs['slug']
-    #     if Vendor.objects.filter(vendor_admin=User.objects.get(id=self.request.user.id)).exists():
-    #         vid = Vendor.objects.get(
-    #             vendor_admin=User.objects.get(id=self.request.user.id))
-    #         if vid:
-    #             product_obj_exist = Product.objects.filter(
-    #                 slug=slug, vendor=vid).exists()
-    #             if product_obj_exist:
-    #                 product_obj = Product.objects.filter(slug=slug, vendor=vid)
-    #                 product_obj.update(status='REMOVE')
-
-    #                 queryset = Product.objects.filter(
-    #                     vendor=vid, status='ACTIVE').order_by('-created_at')
-    #                 return queryset
-    #             else:
-    #                 raise ValidationError(
-    #                     {"msg": 'You are not creator of this product!'})
-    #     else:
-    #         raise ValidationError({"msg": 'You are not a vendor.'})
-
 class VendorVideoProviderListAPIView(ListAPIView):
     permission_classes = [AllowAny]
     queryset = ProductVideoProvider.objects.filter(is_active=True)
@@ -337,14 +264,7 @@ class VendorCategoryListAPIView(ListAPIView):
     queryset = Category.objects.filter(is_active=True)
     serializer_class = VendorCategorySerializer
 
-class VendorAddNewCategoryAPIView(CreateAPIView):
-    permission_classes = (AllowAny,)
-    serializer_class = VendorAddNewCategorySerializer
 
-    # permission_classes = [IsAuthenticated]
-
-    def post(self, request, *args, **kwargs):
-        return super(VendorAddNewCategoryAPIView, self).post(request, *args, **kwargs)
 
 class VendorUpdateCategoryAPIView(RetrieveUpdateAPIView):
     # permission_classes = [IsAuthenticated]
@@ -383,8 +303,6 @@ class VendorDeleteCategoryAPIView(ListAPIView):
         else:
             raise ValidationError(
                 {"msg": 'Category Does not exist!'})
-
-
 
 class VendorSubCategoryListAPIView(ListAPIView):
     permission_classes = (AllowAny,)

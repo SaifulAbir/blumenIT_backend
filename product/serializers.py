@@ -288,7 +288,6 @@ class MegaMenuDataAPIViewListSerializer(serializers.ModelSerializer):
 class ProductDetailsSerializer(serializers.ModelSerializer):
     product_tags = serializers.SerializerMethodField()
     product_reviews = serializers.SerializerMethodField()
-    product_media = serializers.SerializerMethodField()
     product_combinations = serializers.SerializerMethodField()
     vendor = VendorSerializer()
     category = CategorySerializer()
@@ -351,7 +350,6 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
 class ProductListSerializer(serializers.ModelSerializer):
     product_tags = serializers.SerializerMethodField()
     product_reviews = serializers.SerializerMethodField()
-    product_media = serializers.SerializerMethodField()
     product_combinations = serializers.SerializerMethodField()
     vendor = VendorSerializer()
     category = CategorySerializer()
@@ -417,7 +415,6 @@ class ProductListSerializer(serializers.ModelSerializer):
 class StoreProductDetailsSerializer(serializers.ModelSerializer):
     product_tags = serializers.SerializerMethodField()
     product_reviews = serializers.SerializerMethodField()
-    product_media = serializers.SerializerMethodField()
     product_combinations = serializers.SerializerMethodField()
     vendor = VendorSerializer()
     category = CategorySerializer()
@@ -454,7 +451,6 @@ class StoreProductDetailsSerializer(serializers.ModelSerializer):
             'thumbnail',
             'product_tags',
             'product_reviews',
-            'product_media',
             'product_combinations',
             'is_gaming'
         ]

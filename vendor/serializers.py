@@ -5,7 +5,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from ecommerce.common.emails import send_email_without_delay
-from product.models import Brand, Category, Color, DiscountTypes, FlashDealInfo, FlashDealProduct, Inventory, InventoryVariation, Product, ProductAttributeValues, ProductAttributes, ProductColor, ProductCombinations, ProductCombinationsVariants, ProductImages, ProductReview, ProductTags, ProductVariation, ProductVideoProvider, ShippingClass, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units, VariantType, VatType, Attribute
+from product.models import Brand, Category, Color, DiscountTypes, FlashDealInfo, FlashDealProduct, Inventory, InventoryVariation, Product, ProductAttributeValues, ProductAttributes, ProductColor, ProductCombinations, ProductCombinationsVariants, ProductImages, ProductReview, ProductTags, ProductVariation, ProductVideoProvider, ShippingClass, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units, VariantType, VatType, Attribute, CategoryFilterAttributes
 from user.models import User
 # from user.serializers import UserRegisterSerializer
 from vendor.models import VendorRequest, Vendor, StoreSettings, Seller
@@ -30,6 +30,72 @@ class SellerDetailSerializer(serializers.ModelSerializer):
         model = Seller
         fields = ['id', 'name', 'email', 'address', 'phone', 'logo']
 
+
+class SellerAddNewCategorySerializer(serializers.ModelSerializer):
+    title = serializers.CharField(required= True)
+    ordering_number = serializers.CharField(required= True)
+
+    filtering_attributes = serializers.ListField(
+        child=serializers.PrimaryKeyRelatedField(queryset=Attribute.objects.all()), write_only=True, required=False)
+
+    class Meta:
+        model = Category
+        fields = ['id', 'title', 'ordering_number', 'type', 'banner', 'icon', 'filtering_attributes']
+
+    def create(self, validated_data):
+        # work with category title 
+        title_get = validated_data.pop('title')
+        title_get_data = title_get.lower()
+        if title_get:
+            title_get_for_check = Category.objects.filter(title=title_get.lower())
+            if title_get_for_check:
+                raise ValidationError('This category title already exist in Category.')
+
+        # filtering_attributes
+        try:
+            filtering_attributes = validated_data.pop('filtering_attributes')
+        except:
+            filtering_attributes = ''
+
+        # work with order number
+        ordering_number_get = validated_data.pop('ordering_number')
+        ordering_number_get_data = ordering_number_get.lower()
+        if ordering_number_get:
+            ordering_number_get_for_check = Category.objects.filter(ordering_number=ordering_number_get)
+            if ordering_number_get_for_check:
+                raise ValidationError('This category ordering number already exist in Category.')
+
+        category_instance = Category.objects.create(**validated_data, title=title_get_data, ordering_number=ordering_number_get_data )
+
+        # filtering_attributes
+        if filtering_attributes:
+            for filtering_attribute in filtering_attributes:
+                if Attribute.objects.filter(id=filtering_attribute.id).exists():
+                    attribute_obj = Attribute.objects.get(id=filtering_attribute.id)
+                    if attribute_obj:
+                        CategoryFilterAttributes.objects.create(
+                            attribute=attribute_obj, category=category_instance)
+                    else:
+                        pass
+                else:
+                    pass
+
+        return category_instance
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Vendor Request serializer
 class VendorRequestSerializer(serializers.ModelSerializer):
 
@@ -38,7 +104,6 @@ class VendorRequestSerializer(serializers.ModelSerializer):
         fields = ['id', 'first_name', 'last_name', 'organization_name',
                   'email', 'vendor_type', 'nid', 'trade_license']
         read_only_field =['first_name', 'last_name', 'organization_name', 'email', 'vendor_type', 'nid', 'trade_license']
-        # fields = ['id', 'email', 'organization_name', 'first_name', 'last_name', 'vendor_type', 'nid', 'trade_license']
 
 # Vendor Create serializer
 class VendorCreateSerializer(serializers.ModelSerializer):
@@ -51,34 +116,6 @@ class VendorCreateSerializer(serializers.ModelSerializer):
                   'vendor_request', 'phone', 'email', 'logo']
         read_only_fields = ('organization_name', 'vendor_admin', 'vendor_request')
 
-    # def create(self):
-    #
-    #
-    #     return Vendor.objects.create()
-        #     is_verified = validated_data.pop('is_verified')
-    #     request_id = validated_data.pop('request_id')
-    #     if is_verified is True:
-    #         password = User.objects.make_random_password()
-    #         vendor_request = VendorRequest.objects.get(id=request_id)
-    #         vendor_request.is_verified = True
-    #         vendor_request.save()
-    #
-    #         user = User.objects.create(username=vendor_request.email, email=vendor_request.email,
-    #                                    first_name=vendor_request.first_name, last_name=vendor_request.last_name)
-    #         user.set_password(password)
-    #         user.save()
-    #
-    #         vendor_instance = Vendor.objects.create(organization_name=vendor_request.organization_name,
-    #                                                 vendor_admin=user, vendor_request=vendor_request, password=password)
-    #         if vendor_instance:
-    #             email_list = user.email
-    #             subject = "Your Account"
-    #             html_message = render_to_string('vendor_email.html',
-    #                                             {'username': user.first_name, 'email': user.email, 'password': password})
-    #             send_email_without_delay(subject, html_message, email_list)
-    #         return vendor_instance
-    #     else:
-    #         raise ValidationError("You should verify first to create a vendor")
 # Vendor Detail serializer
 class VendorDetailSerializer(serializers.ModelSerializer):
     # vendor_request = VendorRequestSerializer(read_only=True)
@@ -115,39 +152,14 @@ class VendorCategorySerializer(serializers.ModelSerializer):
     class Meta:
         ref_name = "vendor category serializer"
         model = Category
-        fields = ['id', 'title', 'ordering_number', 'type', 'banner', 'icon', 'filtering_attributes']
-class VendorAddNewCategorySerializer(serializers.ModelSerializer):
-    title = serializers.CharField(required= True)
-    ordering_number = serializers.CharField(required= True)
-    class Meta:
-        model = Category
-        fields = ['id', 'title', 'ordering_number', 'type', 'banner', 'icon', 'filtering_attributes']
+        fields = ['id', 'title', 'ordering_number', 'type', 'banner', 'icon']
 
-    def create(self, validated_data):
-        # work with category title 
-        title_get = validated_data.pop('title')
-        title_get_data = title_get.lower()
-        if title_get:
-            title_get_for_check = Category.objects.filter(title=title_get.lower())
-            if title_get_for_check:
-                raise ValidationError('This category title already exist in Category.')
-
-        # work with order number
-        ordering_number_get = validated_data.pop('ordering_number')
-        ordering_number_get_data = ordering_number_get.lower()
-        if ordering_number_get:
-            ordering_number_get_for_check = Category.objects.filter(ordering_number=ordering_number_get)
-            if ordering_number_get_for_check:
-                raise ValidationError('This category ordering number already exist in Category.')
-
-        category_instance = Category.objects.create(**validated_data, title=title_get_data, ordering_number=ordering_number_get_data )
-        return category_instance
 class VendorUpdateCategorySerializer(serializers.ModelSerializer):
     title = serializers.CharField(required= True)
     ordering_number = serializers.CharField(required= True)
     class Meta:
         model = Category
-        fields = ['id', 'title', 'ordering_number', 'type', 'banner', 'icon', 'filtering_attributes', 'is_active']
+        fields = ['id', 'title', 'ordering_number', 'type', 'banner', 'icon', 'is_active']
 
     def update(self, instance, validated_data):
         # work with category title
@@ -289,13 +301,11 @@ class VendorBrandSerializer(serializers.ModelSerializer):
         model = Brand
         fields = ['id', 'title']
 
-
 # Vendor Unit serializer
 class VendorUnitSerializer(serializers.ModelSerializer):
     class Meta:
         model = Units
         fields = ['id', 'title']
-
 
 class VendorProductListSerializer(serializers.ModelSerializer):
     # category = CategorySerializer(read_only=True)
@@ -347,20 +357,6 @@ class VendorProductListSerializer(serializers.ModelSerializer):
 
     def get_avg_rating(self, obj):
         return obj.product_review_product.all().aggregate(Avg('rating_number'))['rating_number__avg']
-
-    # def get_brand_name(self, obj):
-    #     if obj.brand:
-    #         get_brand = Brand.objects.get(id=obj.brand.id)
-    #         return get_brand.title
-    #     else:
-    #         return obj.brand
-
-    # def get_review_count(self, obj):
-    #     re_count = ProductReview.objects.filter(
-    #         product=obj, is_active=True).count()
-    #     return re_count
-
-# Product Combination serializer / Connect with ProductCreateSerializer
 
 
 class ProductCombinationSerializer(serializers.ModelSerializer):
@@ -1034,7 +1030,6 @@ class VendorProductViewSerializer(serializers.ModelSerializer):
 class VendorProductDetailsSerializer(serializers.ModelSerializer):
     product_tags = serializers.SerializerMethodField()
     product_reviews = serializers.SerializerMethodField()
-    product_media = serializers.SerializerMethodField()
     product_combinations = serializers.SerializerMethodField()
     category = CategorySerializer()
     sub_category = SubCategorySerializer()

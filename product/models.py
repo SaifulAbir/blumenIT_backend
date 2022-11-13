@@ -51,8 +51,6 @@ class Category(AbstractTimeStamp):
     icon = models.ImageField(
         upload_to='product_category', blank=True, null=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
-    filtering_attributes = models.ForeignKey(Attribute, on_delete=models.PROTECT,
-                               related_name='category_filtering_attributes', blank=True, null=True)
 
     subtitle = models.TextField(null=True, blank=True, default="")
     logo = models.ImageField(
@@ -104,6 +102,21 @@ class SubSubCategory(AbstractTimeStamp):
     def __str__(self):
         return self.title
 
+
+class CategoryFilterAttributes(AbstractTimeStamp):
+    attribute = models.ForeignKey(
+        Attribute, related_name='category_filter_attributes_attribute', blank=True, null=True, on_delete=models.PROTECT)
+    category = models.ForeignKey(
+        Category, related_name='category_filter_attributes_category', blank=True, null=True, on_delete=models.PROTECT)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'CategoryFilterAttribute'
+        verbose_name_plural = 'CategoryFilterAttributes'
+        db_table = 'category_filter_attributes'
+
+    def __str__(self):
+        return self.category.title + ' ' + self.attribute.title
 
 class Brand(AbstractTimeStamp):
     title = models.CharField(

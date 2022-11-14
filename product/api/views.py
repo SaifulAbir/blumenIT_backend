@@ -202,7 +202,7 @@ class VendorProductListForFrondEndAPI(ListAPIView):
         return queryset
 
 
-class StoreProductDatailsAPI(RetrieveAPIView):
+class StoreProductDetailsAPI(RetrieveAPIView):
     permission_classes = [AllowAny]
     serializer_class = StoreProductDetailsSerializer
     lookup_field = 'slug'

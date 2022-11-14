@@ -10,8 +10,15 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductReview, ProductTags, SubCategory, SubSubCategory, Tags, Units, VariantType, ProductVideoProvider, VatType
 from user.models import CustomerProfile, User
 from vendor.models import VendorRequest, Vendor, Seller
-from vendor.serializers import VendorAddNewSubCategorySerializer, VendorAddNewSubSubCategorySerializer, VendorBrandSerializer, VendorCategorySerializer, VendorProductDetailsSerializer, VendorProductListSerializer, SellerProductUpdateSerializer, VendorProductViewSerializer, VendorRequestSerializer, VendorCreateSerializer, OrganizationNameSerializer, \
-    VendorDetailSerializer, StoreSettingsSerializer, SellerDetailSerializer, VendorSubCategorySerializer, VendorSubSubCategorySerializer, VendorUnitSerializer, SellerSerializer, ProductAttributesSerializer, ProductVideoProviderSerializer, ProductVatProviderSerializer, VendorUpdateCategorySerializer, VendorUpdateSubSubCategorySerializer, SellerProductCreateSerializer, SellerAddNewCategorySerializer
+from vendor.serializers import VendorAddNewSubCategorySerializer, VendorAddNewSubSubCategorySerializer,\
+    VendorBrandSerializer, VendorCategorySerializer, VendorProductDetailsSerializer, VendorProductListSerializer,\
+    SellerProductUpdateSerializer, VendorProductViewSerializer, VendorRequestSerializer, VendorCreateSerializer, \
+    OrganizationNameSerializer, \
+    VendorDetailSerializer, StoreSettingsSerializer, SellerDetailSerializer, VendorSubCategorySerializer, \
+    VendorSubSubCategorySerializer, VendorUnitSerializer, SellerSerializer, ProductAttributesSerializer, \
+    ProductVideoProviderSerializer, ProductVatProviderSerializer, VendorUpdateCategorySerializer,\
+    VendorUpdateSubSubCategorySerializer, SellerProductCreateSerializer, SellerAddNewCategorySerializer, \
+    SellerCreateSerializer
 from user.models import User
 from cart.models import Coupon
 from rest_framework.exceptions import ValidationError
@@ -19,68 +26,80 @@ from rest_framework.exceptions import ValidationError
 
 class SellerCreateAPIView(CreateAPIView):
     permission_classes = [AllowAny]
+    serializer_class = SellerCreateSerializer
+
+    def post(self, request, *args, **kwargs):
+        return super(SellerCreateAPIView, self).post(request, *args, **kwargs)
+
+
+class SellerDetailsAPIView(RetrieveAPIView):
+    permission_classes = [AllowAny]
     serializer_class = SellerSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
 
-    def post(self, request):
-        seller = SellerSerializer(data=request.data)
+    def get_object(self):
+        seller_id = self.kwargs['id']
+        try:
+            query = Seller.objects.get(id=seller_id)
+            return query
+        except:
+            raise ValidationError({"details": "Seller doesn't exist!"})
 
-        # validating for already existing data
-        if Seller.objects.filter(**request.data).exists():
-            raise serializers.ValidationError('This data already exists')
-
-        if seller.is_valid():
-            seller.save()
-            return Response(seller.data)
-        else:
-            return Response(status=status.HTTP_404_NOT_FOUND)
 
 class SellerListAPIView(ListAPIView):
-    queryset = Seller.objects.filter()
+    queryset = Seller.objects.filter(is_active=True)
     permission_classes = [AllowAny]
-    serializer_class = SellerDetailSerializer
+    serializer_class = SellerSerializer
+
 
 class SellerUpdateAPIView(RetrieveUpdateAPIView):
     permission_classes = [AllowAny]
     serializer_class = SellerSerializer
-    queryset = Seller.objects.all()
+    # queryset = Seller.objects.all()
     lookup_field = 'id'
     lookup_url_kwarg = "id"
 
-    def put(self, request, *args, **kwargs):
-        return super(SellerUpdateAPIView, self).put(request, *args, **kwargs)
+    def get_queryset(self):
+        seller_id = self.kwargs['id']
+        query = Seller.objects.filter(id=seller_id)
+        if query:
+            return query
+        else:
+            raise ValidationError(
+                {"msg": 'Seller not found'}
+            )
 
-class SellerDeleteAPIView(DestroyAPIView):
+
+class SellerDeleteAPIView(ListAPIView):
     permission_classes = [AllowAny]
     serializer_class = SellerSerializer
     queryset = Seller.objects.all()
     lookup_field = 'id'
     lookup_url_kwarg = "id"
-
-    # def get_queryset(self):
-    #     s_id = self.kwargs['id']
-    #     seller_obj = Seller.objects.filter(id=s_id)
 
     def get_queryset(self):
         seller_id = self.kwargs['id']
         seller_obj = Seller.objects.filter(id=seller_id).exists()
         if seller_obj:
-            seller_obj = Product.objects.filter(id=seller_id)
-            seller_obj.update(status='UNPUBLISH')
+            seller_obj = Seller.objects.filter(id=seller_id)
+            seller_obj.update(is_active=False)
 
-            queryset = Seller.objects.filter(status='ACTIVE').order_by('-created_at')
+            queryset = Seller.objects.filter(is_active=True).order_by('-created_at')
             return queryset
         else:
             raise ValidationError(
-                {"msg": 'Product Does not exist!'})
+                {"msg": 'Seller Does not exist!'})
+
 
 class SellerProductCreateAPIView(CreateAPIView):
     # permission_classes = [IsAuthenticated]
     permission_classes = (AllowAny,)
     serializer_class = SellerProductCreateSerializer
 
-
     def post(self, request, *args, **kwargs):
         return super(SellerProductCreateAPIView, self).post(request, *args, **kwargs)
+
 
 class SellerProductUpdateAPIView(RetrieveUpdateAPIView):
     permission_classes = [AllowAny]
@@ -97,6 +116,7 @@ class SellerProductUpdateAPIView(RetrieveUpdateAPIView):
         else:
             raise ValidationError(
                 {"msg": 'You Can not edit this product!'})
+
 
 class SellerAddNewCategoryAPIView(CreateAPIView):
     permission_classes = (AllowAny,)

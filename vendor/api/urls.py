@@ -1,12 +1,20 @@
 from django.urls import path
 from product.api.views import ProductDetailsAPI
-from vendor.api.views import VendorAddNewSubCategoryAPIView, VendorAddNewSubSubCategoryAPIView, VendorBrandListAPIView, VendorCategoryListAPIView, VendorDeleteCategoryAPIView, VendorDeleteSubCategoryAPIView, VendorDeleteSubSubCategoryAPIView, VendorProductDeleteAPI, VendorProductViewAPI, VendorSubCategoryListAPIView, VendorSubSubCategoryListAPIView, VendorTagListAPIView, VendorUnitListAPIView, VendorProductListAPI, VendorDiscountListAPIView, SellerCreateAPIView,SellerListAPIView,SellerUpdateAPIView, SellerDeleteAPIView, VendorUpdateCategoryAPIView, VendorUpdateSubCategoryAPIView, VendorUpdateSubSubCategoryAPIView, VendorVatTypeListAPIView, VendorVideoProviderListAPIView, SellerProductCreateAPIView, SellerProductUpdateAPIView, SellerAddNewCategoryAPIView
+from vendor.api.views import VendorAddNewSubCategoryAPIView, VendorAddNewSubSubCategoryAPIView, VendorBrandListAPIView,\
+    VendorCategoryListAPIView, VendorDeleteCategoryAPIView, VendorDeleteSubCategoryAPIView, \
+    VendorDeleteSubSubCategoryAPIView, VendorProductDeleteAPI, VendorProductViewAPI, VendorSubCategoryListAPIView,\
+    VendorSubSubCategoryListAPIView, VendorTagListAPIView, VendorUnitListAPIView, VendorProductListAPI,\
+    VendorDiscountListAPIView, SellerCreateAPIView,SellerListAPIView,SellerUpdateAPIView, SellerDeleteAPIView,\
+    VendorUpdateCategoryAPIView, VendorUpdateSubCategoryAPIView, VendorUpdateSubSubCategoryAPIView, \
+    VendorVatTypeListAPIView, VendorVideoProviderListAPIView, SellerProductCreateAPIView, SellerProductUpdateAPIView, \
+    SellerAddNewCategoryAPIView, SellerDetailsAPIView
 
 urlpatterns = [
     path('create-seller/', SellerCreateAPIView.as_view()),
     path('seller-list/', SellerListAPIView.as_view()),
     path('seller-update/<int:id>/', SellerUpdateAPIView.as_view()),
     path('seller-delete/<int:id>/', SellerDeleteAPIView.as_view()),
+    path('seller-details/<int:id>/', SellerDetailsAPIView.as_view()),
 
 #     path('vendor-create-product/', VendorProductCreateAPIView.as_view()),
     path('seller-product-create/', SellerProductCreateAPIView.as_view()),

@@ -308,7 +308,7 @@ class Specification(AbstractTimeStamp):
         db_table = 'specification'
 
     def __str__(self):
-        return self.title
+        return 'Product: ' + self.product.title + '-title: ' + self.title
 
 class SpecificationValue(AbstractTimeStamp):
     specification = models.ForeignKey(
@@ -324,7 +324,8 @@ class SpecificationValue(AbstractTimeStamp):
         db_table = 'specification_value'
 
     def __str__(self):
-        return self.key
+        # return self.key
+        return 'Product: ' + self.specification.product.title + '-specification title: ' + self.specification.title + '-key: ' + self.key
 
 class ProductAttributes(AbstractTimeStamp):
     attribute = models.ForeignKey(
@@ -402,6 +403,7 @@ class ProductVariation(AbstractTimeStamp):
     variation_price = models.FloatField(null=True, blank=True, default=0)
     sku = models.CharField(max_length=500, null=True,blank=True, default="")
     quantity = models.IntegerField(null=True, blank=True, default=0)
+    total_quantity = models.IntegerField(null=True, blank=True, default=0)
     image = models.FileField(upload_to='product_variation', validators=[validate_file_extension], null=True, blank=True)
     total_price = models.FloatField(null=True, blank=True, default=0)
     is_active = models.BooleanField(null=False, blank=False, default=True)
@@ -716,4 +718,4 @@ class InventoryVariation(AbstractTimeStamp):
         db_table = 'inventory_variation'
 
     def __str__(self):
-        return self.product_variation.product.title
+        return self.product_variation.product.title + '- variation name: ' + self.product_variation.variation

@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'currency',
     'home',
     'vendor_admin',
+    'website',
     # 'admin_lte',
     # 'django_countries',
 ]

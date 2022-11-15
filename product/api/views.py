@@ -9,7 +9,7 @@ from home.models import ProductView
 from product import serializers
 from product.serializers import StoreProductDetailsSerializer, \
     ProductDetailsSerializer, ProductListSerializer, ProductReviewCreateSerializer, BrandSerializer,\
-    StoreCategoryAPIViewListSerializer
+    StoreCategoryAPIViewListSerializer, PcBuilderDataListSerializer
 from product.models import Category, Product, Brand
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -215,3 +215,50 @@ class StoreProductDetailsAPI(RetrieveAPIView):
             return query
         except:
             raise ValidationError({"details": "Product doesn't exist!"})
+
+
+class PcBuilderChooseAPIView(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = PcBuilderDataListSerializer
+    # pagination_class = ProductCustomPagination
+    # lookup_field = 'subcid'
+    # lookup_url_kwarg = "subcid"
+
+    def get_queryset(self):
+        # component_id = self.kwargs['component_id']
+        # type = self.kwargs['type']
+
+        request = self.request
+        component_id = request.GET.get('component_id')
+        type = request.GET.get('type')
+        filter_price = request.GET.get('filter_price')
+        attr_value_ids = request.GET.get('attr_value_ids')
+
+        # print("component_id")
+        # print(component_id)
+        # print("type")
+        # print(type)
+        print("attr_value_ids")
+        print(attr_value_ids)
+
+        queryset = Product.objects.filter(
+            status='PUBLISH').order_by('-created_at')
+
+        if component_id and type:
+            if type == 'category':
+                queryset = queryset.filter(Q(category__id=component_id)).order_by('-created_at')
+            if type == 'sub_category':
+                queryset = queryset.filter(Q(sub_category__id=component_id)).order_by('-created_at')
+            if type == 'sub_sub_category':
+                queryset = queryset.filter(Q(sub_sub_category__id=component_id)).order_by('-created_at')
+
+        if attr_value_ids:
+            attr_value_ids_list = attr_value_ids.split(",")
+            print("attr_value_ids_list")
+            print(attr_value_ids_list)
+            for attr_value_id in attr_value_ids_list:
+                attr_value_id = int(attr_value_id)
+                print(attr_value_id)
+
+
+        return queryset

@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, re_path
 from .views import *
 from django.conf import settings
 from django.conf.urls.static import static
@@ -19,6 +19,15 @@ urlpatterns = [
     path('vendor-product-list-for-frontend/<int:vid>/',
          VendorProductListForFrondEndAPI.as_view()),
     path('brand-create/', BrandCreateAPIView.as_view()),
+
+
+     path('pc_builder/',PcBuilderChooseAPIView.as_view()),
+#     path('pc_builder/<int:component_id>/<str:type>/',PcBuilderChooseAPIView.as_view()),
+     # path('pc_builder/?component_id=<int:component_id>',PcBuilderChooseAPIView.as_view()),
+     # path('pc_builder/?component_id=<int:component_id>&type=<str:type>',PcBuilderChooseAPIView.as_view()),
+     # re_path( r'^pc_builder/(?P<component_id>[0-9]+)/$', PcBuilderChooseAPIView.as_view() ),
+     # re_path( r'^pc_builder/(?P<component_id>[0-9]+)/$', PcBuilderChooseAPIView.as_view() ),
+     # re_path(r'^pc_builder/(?P<component_id>\d+)&(?P<type>[\w.@+-]+)/$', PcBuilderChooseAPIView.as_view()),
 
     # store front api
     # path('store-fetured-product-list/', FeaturedProductListStoreFront.as_view()),

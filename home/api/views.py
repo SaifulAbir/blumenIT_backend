@@ -56,7 +56,8 @@ class HomeDataAPIView(APIView):
         most_popular_serializer = ProductListSerializer(most_popular, many=True, context={"request": request})
 
         # gaming product
-        gaming_product = Product.objects.filter(is_gaming=True, status="PUBLISH").order_by('-created_at')
+        # gaming_product = Product.objects.filter(is_gaming=True, status="PUBLISH").order_by('-created_at')
+        gaming_product = Product.objects.filter(status="PUBLISH").order_by('-created_at')
         gaming_serializer = ProductListSerializer(gaming_product, many=True, context={"request": request})
 
         # brand list

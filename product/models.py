@@ -273,7 +273,6 @@ class Product(AbstractTimeStamp):
     digital = models.BooleanField(default=False)
     in_house_product = models.BooleanField(default=False)
     sell_count = models.BigIntegerField(null=True, blank=True, default=0)
-    is_gaming = models.BooleanField(null=True, blank=True, default=False)
 
 
     class Meta:
@@ -296,10 +295,24 @@ def pre_save_product(sender, instance, *args, **kwargs):
 
 pre_save.connect(pre_save_product, sender=Product)
 
+class SpecificationTitle(AbstractTimeStamp):
+    title = models.CharField(max_length=800, default='', help_text="name")
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'SpecificationTitle'
+        verbose_name_plural = 'SpecificationTitles'
+        db_table = 'specification_title'
+
+    def __str__(self):
+        return 'title: ' + self.title
+
+
 class Specification(AbstractTimeStamp):
     product = models.ForeignKey(
         Product, on_delete=models.PROTECT, related_name='specification_product')
-    title = models.CharField(max_length=800, default='', help_text="name")
+    title = models.ForeignKey(
+        SpecificationTitle, on_delete=models.PROTECT, related_name='specification_specification_title', null=True, blank=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
@@ -308,7 +321,8 @@ class Specification(AbstractTimeStamp):
         db_table = 'specification'
 
     def __str__(self):
-        return 'Product: ' + self.product.title + '-title: ' + self.title
+        # return 'Product: ' + self.product.title
+        return 'Product: ' + self.product.title + ' - title: ' + self.title.title
 
 class SpecificationValue(AbstractTimeStamp):
     specification = models.ForeignKey(
@@ -325,7 +339,7 @@ class SpecificationValue(AbstractTimeStamp):
 
     def __str__(self):
         # return self.key
-        return 'Product: ' + self.specification.product.title + '-specification title: ' + self.specification.title + '-key: ' + self.key
+        return 'Product: ' + self.specification.product.title + '-specification title: ' + self.specification.title.title + '-key: ' + self.key
 
 class ProductAttributes(AbstractTimeStamp):
     attribute = models.ForeignKey(

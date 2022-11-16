@@ -142,7 +142,7 @@ class ProductSearchAPI(ListAPIView):
 
     def get_queryset(self):
         request = self.request
-        query = request.GET.get('query')
+        query = request.GET.get('search')
         category = request.GET.get('category_id')
 
         queryset = Product.objects.filter(

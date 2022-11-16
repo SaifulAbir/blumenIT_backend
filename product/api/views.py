@@ -25,17 +25,30 @@ class BrandCreateAPIView(CreateAPIView):
     permission_classes = [AllowAny]
     serializer_class = BrandSerializer
 
-    def post(self, request):
-        brand = BrandSerializer(data=request.data)
+    def post(self, request, *args, **kwargs):
+        return super(BrandCreateAPIView, self).post(request, *args, **kwargs)
 
-        if Brand.objects.filter(**request.data).exists():
-            raise serializers.ValidationError('This data already exists')
 
-        if brand.is_valid():
-            brand.save()
-            return Response(brand.data)
+class BrandDeleteAPIView(ListAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = BrandSerializer
+    queryset =  Brand.objects.all()
+    lookup_field = 'id'
+    lookup_url_kwarg = 'id'
+
+    def get_queryset(self):
+        brand_id = self.kwargs['id']
+        brand_obj = Brand.objects.filter(id=brand_id).exists()
+        if brand_obj:
+            brand_obj = Brand.objects.filter(id=brand_id)
+            brand_obj.update(is_active=False)
+
+            queyset = Brand.objects.filter(is_active=True).order_by('-created_at')
+            return queyset
         else:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            raise ValidationError(
+                {"msg": 'Brand Does not exist!'}
+            )
 
 
 class StoreCategoryListAPIView(ListAPIView):

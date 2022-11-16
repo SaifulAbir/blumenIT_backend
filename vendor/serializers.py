@@ -25,12 +25,6 @@ class SellerCreateSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'address', 'phone', 'email', 'logo', 'is_active']
 
     def create(self, validated_data):
-        name_get = validated_data.pop('name')
-        name_get_data = name_get.lower()
-        if name_get:
-            name_get_for_check = Seller.objects.filter(name=name_get.lower())
-            if name_get_for_check:
-                raise ValidationError('This Seller Name already exist.')
         email_get = validated_data.pop('email')
         email_get_data = email_get.lower()
         if email_get:
@@ -43,7 +37,7 @@ class SellerCreateSerializer(serializers.ModelSerializer):
             phone_get_for_check = Seller.objects.filter(phone=phone_get.lower())
             if phone_get_for_check:
                 raise ValidationError('Phone already exists')
-        seller_instance = Seller.objects.create(**validated_data, name=name_get_data, phone=phone_get_data,
+        seller_instance = Seller.objects.create(**validated_data, phone=phone_get_data,
                                                 email=email_get_data)
         return seller_instance
 
@@ -60,12 +54,6 @@ class SellerUpdateSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'address', 'phone', 'email', 'logo', 'is_active']
 
     def update(self, instance, validated_data):
-        name_get = validated_data.pop('name')
-        name_get_data = name_get.lower()
-        if name_get:
-            name_get_for_check = Seller.objects.filter(name=name_get.lower())
-            if name_get_for_check:
-                raise ValidationError('This Seller Name already exist.')
         email_get = validated_data.pop('email')
         email_get_data = email_get.lower()
         if email_get:
@@ -78,7 +66,7 @@ class SellerUpdateSerializer(serializers.ModelSerializer):
             phone_get_for_check = Seller.objects.filter(phone=phone_get.lower())
             if phone_get_for_check:
                 raise ValidationError('Phone already exists')
-        validated_data.update({"name": name_get_data, "email": email_get_data, "phone": phone_get_data})
+        validated_data.update({ "email": email_get_data, "phone": phone_get_data})
         return super().update(instance, validated_data)
 
 

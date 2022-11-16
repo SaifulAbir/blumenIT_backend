@@ -125,9 +125,23 @@ class SubCategorySerializerForMegaMenu(serializers.ModelSerializer):
 
 # Brands serializer / Connect with ProductDetailsSerializer
 class BrandSerializer(serializers.ModelSerializer):
+    title = serializers.CharField(required=True)
+
     class Meta:
         model = Brand
         fields = ['id', 'title', 'logo']
+
+    def create(self, validated_data):
+        title_get = validated_data.pop('title')
+        title_get_data = title_get.lower()
+        if title_get:
+            title_get_for_check = Brand.objects.filter(title=title_get.lower())
+            if title_get_for_check:
+                raise ValidationError('This Brand already exist.')
+
+        brand_instance = Brand.objects.create(**validated_data, title=title_get_data)
+
+        return brand_instance
 
 
 class BrandListSerializer(serializers.ModelSerializer):

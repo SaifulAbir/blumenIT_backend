@@ -220,26 +220,14 @@ class StoreProductDetailsAPI(RetrieveAPIView):
 class PcBuilderChooseAPIView(ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = PcBuilderDataListSerializer
-    # pagination_class = ProductCustomPagination
-    # lookup_field = 'subcid'
-    # lookup_url_kwarg = "subcid"
+    pagination_class = ProductCustomPagination
 
     def get_queryset(self):
-        # component_id = self.kwargs['component_id']
-        # type = self.kwargs['type']
-
         request = self.request
         component_id = request.GET.get('component_id')
         type = request.GET.get('type')
         filter_price = request.GET.get('filter_price')
         attr_value_ids = request.GET.get('attr_value_ids')
-
-        # print("component_id")
-        # print(component_id)
-        # print("type")
-        # print(type)
-        # print("attr_value_ids")
-        # print(attr_value_ids)
 
         queryset = Product.objects.filter(
             status='PUBLISH').order_by('-created_at')

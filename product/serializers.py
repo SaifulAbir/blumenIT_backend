@@ -507,7 +507,6 @@ class StoreProductDetailsSerializer(serializers.ModelSerializer):
 
 
 # work with pc builder start
-
 class PcBuilderSpecificationValuesSerializer(serializers.ModelSerializer):
     class Meta:
         model = SpecificationValue

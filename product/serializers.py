@@ -7,7 +7,7 @@ from email.policy import default
 from pyexpat import model
 from attr import fields
 from rest_framework import serializers
-from product.models import Category, ProductCombinationMedia, ProductCombinationsVariants, ProductImages, SubCategory, SubSubCategory, Product, ProductTags, ProductReview, ProductCombinations, ProductAttributes, Brand, DiscountTypes, Tags, Units, VariantType
+from product.models import Category, ProductCombinationMedia, ProductCombinationsVariants, ProductImages, SubCategory, SubSubCategory, Product, ProductTags, ProductReview, ProductCombinations, ProductAttributes, Brand, DiscountTypes, Tags, Units, VariantType, CategoryFilterAttributes, Specification, SpecificationValue, AttributeValues
 from user.models import User
 from vendor.models import StoreSettings, Vendor, VendorReview
 from django.db.models import Avg, Count, Q, F
@@ -406,8 +406,7 @@ class ProductListSerializer(serializers.ModelSerializer):
             'thumbnail',
             'product_tags',
             'product_reviews',
-            'product_combinations',
-            'is_gaming'
+            'product_combinations'
 
         ]
 
@@ -471,8 +470,7 @@ class StoreProductDetailsSerializer(serializers.ModelSerializer):
             'thumbnail',
             'product_tags',
             'product_reviews',
-            'product_combinations',
-            'is_gaming'
+            'product_combinations'
         ]
         read_only_field = [
             'id',
@@ -498,8 +496,7 @@ class StoreProductDetailsSerializer(serializers.ModelSerializer):
             'thumbnail',
             'product_tags',
             'product_reviews',
-            'product_combinations',
-            'is_gaming'
+            'product_combinations'
         ]
 
     def get_avg_rating(self, obj):
@@ -521,3 +518,87 @@ class StoreProductDetailsSerializer(serializers.ModelSerializer):
         return ProductCombinationSerializerForProductDetails(selected_product_combinations, many=True).data
 # Product create serializer
 
+
+
+# work with pc builder start
+class PcBuilderSpecificationValuesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SpecificationValue
+        fields = [
+            'id',
+            'key',
+            'value'
+        ]
+
+class PcBuilderSpecificationSerializer(serializers.ModelSerializer):
+    specification_values = serializers.SerializerMethodField('get_existing_specification_values')
+    title_name = serializers.CharField(source="title.title",read_only=True)
+    class Meta:
+        model = Specification
+        fields = [
+            'id',
+            'title',
+            'title_name',
+            'specification_values'
+        ]
+
+    def get_existing_specification_values(self, instence):
+        queryset = SpecificationValue.objects.filter(specification=instence.id, is_active = True)
+        serializer = PcBuilderSpecificationValuesSerializer(instance=queryset, many=True)
+        return serializer.data
+
+class AttributeValuesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AttributeValues
+        fields = [
+            'id',
+            'value',
+        ]
+
+class CategoryFilterAttributeSerializer(serializers.ModelSerializer):
+    attribute_values = serializers.SerializerMethodField('get_attribute_values')
+    attribute_title = serializers.CharField(source="attribute.title", read_only=True)
+    class Meta:
+        model = CategoryFilterAttributes
+        fields = [
+            'id',
+            'attribute',
+            'attribute_title',
+            'attribute_values'
+        ]
+
+    def get_attribute_values(self, instense):
+        queryset = AttributeValues.objects.filter(attribute=instense.id, is_active = True)
+        serializer = AttributeValuesSerializer(instance=queryset, many=True)
+        return serializer.data
+
+class PcBuilderDataListSerializer(serializers.ModelSerializer):
+    specification = serializers.SerializerMethodField()
+    category_filtering_attributes = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Product
+        fields = [
+            'id',
+            'thumbnail',
+            'title',
+            'specification',
+            'category_filtering_attributes',
+            'price'
+        ]
+
+    def get_specification(self, obj):
+        try:
+            queryset = Specification.objects.filter(product=obj, is_active = True)
+            serializer = PcBuilderSpecificationSerializer(instance=queryset, many=True)
+            return serializer.data
+        except:
+            return []
+
+    def get_category_filtering_attributes(self, obj):
+        try:
+            selected_category_filtering_attributes = CategoryFilterAttributes.objects.filter(
+                category=obj.category, is_active=True).distinct()
+            return CategoryFilterAttributeSerializer(selected_category_filtering_attributes, many=True).data
+        except:
+            return []

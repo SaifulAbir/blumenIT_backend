@@ -43,6 +43,7 @@ urlpatterns = [
     path('api/',include('vendor.api.urls')),
     path('api/',include('home.api.urls')),
     path('vendor/',include('vendor_admin.urls')),
+    path('api/',include('website.api.urls')),
     # path('vendor/',include('admin_lte.urls')),
     path('v1/docs/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]

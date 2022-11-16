@@ -18,7 +18,8 @@ urlpatterns = [
     path('create-product-review/', ProductReviewCreateAPIView.as_view()),
     path('vendor-product-list-for-frontend/<int:vid>/',
          VendorProductListForFrondEndAPI.as_view()),
-    path('brand-create/', BrandCreateAPIView.as_view()),
+    path('admin-brand-create/', BrandCreateAPIView.as_view()),
+    path('admin-brand-delete/<int:id>/', BrandDeleteAPIView.as_view()),
 
     # store front api
     # path('store-fetured-product-list/', FeaturedProductListStoreFront.as_view()),

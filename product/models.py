@@ -120,9 +120,10 @@ class CategoryFilterAttributes(AbstractTimeStamp):
     def __str__(self):
         return self.category.title + ' ' + self.attribute.title
 
+
 class Brand(AbstractTimeStamp):
     title = models.CharField(
-        max_length=100, null=True, blank=True)
+        max_length=100, null=False, blank=True)
     logo = models.ImageField(upload_to='brand', blank=True, null=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
 

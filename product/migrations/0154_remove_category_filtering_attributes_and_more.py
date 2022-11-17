@@ -10,10 +10,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='category',
-            name='filtering_attributes',
-        ),
         migrations.AddField(
             model_name='productvariation',
             name='total_quantity',

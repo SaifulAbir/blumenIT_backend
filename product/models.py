@@ -481,36 +481,6 @@ class ProductTags(AbstractTimeStamp):
     def __str__(self):
         return self.product.title
 
-class ProductMedia(AbstractTimeStamp):   # No more use of this table
-    CHOICES = [
-        ('COMPLETE', 'Complete'),
-        ('IN_QUEUE', 'In_Queue'),
-        ('IN_PROCESSING', 'In_Processing'),
-    ]
-
-    def validate_file_extension(value):
-        import os
-        from django.core.exceptions import ValidationError
-        ext = os.path.splitext(value.name)[1]
-        valid_extensions = ['.jpg', '.png', '.jpeg']
-        if not ext.lower() in valid_extensions:
-            raise ValidationError('Unsupported file extension.')
-
-    product = models.ForeignKey(
-        Product, on_delete=models.PROTECT, related_name='product_media_product', null=True, blank=True)
-    # file = models.FileField(upload_to='products', validators=[
-    #                         validate_file_extension])
-    status = models.CharField(
-        max_length=20, choices=CHOICES, default=CHOICES[0][0])
-    is_active = models.BooleanField(null=False, blank=False, default=True)
-
-    class Meta:
-        verbose_name = 'ProductMedia'
-        verbose_name_plural = 'ProductMedias'
-        db_table = 'product_medias'
-
-    def __str__(self):
-        return self.product.title
 
 class ProductImages(AbstractTimeStamp):
     CHOICES = [

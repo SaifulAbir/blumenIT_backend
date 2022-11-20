@@ -7,9 +7,8 @@ from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateAP
 from rest_framework.views import APIView
 from home.models import ProductView
 from product import serializers
-from product.serializers import StoreProductDetailsSerializer, \
-    ProductDetailsSerializer, ProductListSerializer, ProductReviewCreateSerializer, BrandSerializer,\
-    StoreCategoryAPIViewListSerializer, PcBuilderDataListSerializer
+from product.serializers import ProductDetailsSerializer, ProductListSerializer, ProductReviewCreateSerializer, BrandSerializer,\
+    StoreCategoryAPIViewListSerializer, PcBuilderDataListSerializer, CategoryFilterAttributeSerializer
 from product.models import Category, Product, Brand, CategoryFilterAttributes, AttributeValues
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -96,20 +95,20 @@ class ProductListAPI(ListAPIView):
 
 class ProductListByCategoryAPI(ListAPIView):
     permission_classes = (AllowAny,)
-    serializer_class = ProductListSerializer
-    pagination_class = ProductCustomPagination
-    lookup_field = 'cid'
-    lookup_url_kwarg = "cid"
 
-    def get_queryset(self):
-        cid = self.kwargs['cid']
-        if cid:
-            queryset = Product.objects.filter(
-                category=cid, status='ACTIVE').order_by('-created_at')
-        else:
-            queryset = Product.objects.filter(
-                status='ACTIVE').order_by('-created_at')
-        return queryset
+    def get(self, request, *args, **kwargs):
+        cid =kwargs.get('cid')
+
+        product_list = Product.objects.filter(category=cid, status='PUBLISH').order_by('-created_at')
+        product_list_serializer = ProductListSerializer(product_list, many=True, context={"request": request})
+
+        filtering_attribute_list = CategoryFilterAttributes.objects.filter(category=cid, is_active=True).distinct()
+        product_cat_serializer =  CategoryFilterAttributeSerializer(filtering_attribute_list, many=True)
+
+        return Response({
+            "product_list": product_list_serializer.data,
+            "filtering_attributes_list": product_cat_serializer.data,
+        })
 
 
 class ProductListBySubCategoryAPI(ListAPIView):
@@ -123,10 +122,10 @@ class ProductListBySubCategoryAPI(ListAPIView):
         subcid = self.kwargs['subcid']
         if subcid:
             queryset = Product.objects.filter(
-                sub_category=subcid, status='ACTIVE').order_by('-created_at')
+                sub_category=subcid, status='PUBLISH').order_by('-created_at')
         else:
             queryset = Product.objects.filter(
-                status='ACTIVE').order_by('-created_at')
+                status='PUBLISH').order_by('-created_at')
         return queryset
 
 
@@ -141,10 +140,10 @@ class ProductListBySubSubCategoryAPI(ListAPIView):
         subsubcid = self.kwargs['subsubcid']
         if subsubcid:
             queryset = Product.objects.filter(
-                sub_sub_category=subsubcid, status='ACTIVE').order_by('-created_at')
+                sub_sub_category=subsubcid, status='PUBLISH').order_by('-created_at')
         else:
             queryset = Product.objects.filter(
-                status='ACTIVE').order_by('-created_at')
+                status='PUBLISH').order_by('-created_at')
         return queryset
 
 
@@ -213,21 +212,6 @@ class VendorProductListForFrondEndAPI(ListAPIView):
             queryset = Product.objects.filter(
                 status='ACTIVE').order_by('-created_at')
         return queryset
-
-
-class StoreProductDetailsAPI(RetrieveAPIView):
-    permission_classes = [AllowAny]
-    serializer_class = StoreProductDetailsSerializer
-    lookup_field = 'slug'
-    lookup_url_kwarg = "slug"
-
-    def get_object(self):
-        slug = self.kwargs['slug']
-        try:
-            query = Product.objects.get(slug=slug)
-            return query
-        except:
-            raise ValidationError({"details": "Product doesn't exist!"})
 
 
 class PcBuilderChooseAPIView(ListAPIView):

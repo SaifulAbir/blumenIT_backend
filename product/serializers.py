@@ -7,7 +7,7 @@ from email.policy import default
 from pyexpat import model
 from attr import fields
 from rest_framework import serializers
-from product.models import Category, ProductCombinationMedia, ProductCombinationsVariants, ProductImages, SubCategory, SubSubCategory, Product, ProductTags, ProductReview, ProductMedia, ProductCombinations, ProductAttributes, Brand, DiscountTypes, Tags, Units, VariantType
+from product.models import Category, ProductCombinationMedia, ProductCombinationsVariants, ProductImages, SubCategory, SubSubCategory, Product, ProductTags, ProductReview, ProductCombinations, ProductAttributes, Brand, DiscountTypes, Tags, Units, VariantType, CategoryFilterAttributes, Specification, SpecificationValue, AttributeValues
 from user.models import User
 from vendor.models import StoreSettings, Vendor, VendorReview
 from django.db.models import Avg, Count, Q, F
@@ -125,6 +125,26 @@ class SubCategorySerializerForMegaMenu(serializers.ModelSerializer):
 
 # Brands serializer / Connect with ProductDetailsSerializer
 class BrandSerializer(serializers.ModelSerializer):
+    title = serializers.CharField(required=True)
+
+    class Meta:
+        model = Brand
+        fields = ['id', 'title', 'logo']
+
+    def create(self, validated_data):
+        title_get = validated_data.pop('title')
+        title_get_data = title_get.lower()
+        if title_get:
+            title_get_for_check = Brand.objects.filter(title=title_get.lower())
+            if title_get_for_check:
+                raise ValidationError('This Brand already exist.')
+
+        brand_instance = Brand.objects.create(**validated_data, title=title_get_data)
+
+        return brand_instance
+
+
+class BrandListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
         fields = ['id', 'title', 'logo']
@@ -191,16 +211,11 @@ class ProductReviewSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'rating_number', 'review_text', 'created_at']
 
 
-# Product Media serializer
-class ProductMediaSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProductMedia
-        fields = ['id', 'file']
-
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductImages
-        fields = ['id', 'image']
+        # fields = ['id', 'image']
+        fields = ['id', 'file']
 
 
 # Product Attribute serializer
@@ -276,7 +291,7 @@ class ProductCombinationSerializerForProductDetails(serializers.ModelSerializer)
 
 
 # Mega Menu Data serializer
-class MegaMenuDataAPIViewListSerializer(serializers.ModelSerializer):
+class StoreCategoryAPIViewListSerializer(serializers.ModelSerializer):
     sub_category = serializers.SerializerMethodField()
 
     class Meta:
@@ -293,7 +308,6 @@ class MegaMenuDataAPIViewListSerializer(serializers.ModelSerializer):
 class ProductDetailsSerializer(serializers.ModelSerializer):
     product_tags = serializers.SerializerMethodField()
     product_reviews = serializers.SerializerMethodField()
-    product_media = serializers.SerializerMethodField()
     product_combinations = serializers.SerializerMethodField()
     vendor = VendorSerializer()
     category = CategorySerializer()
@@ -311,7 +325,6 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             'title',
             'slug',
             'sku',
-            'warranty',
             'avg_rating',
             'full_description',
             'short_description',
@@ -324,19 +337,13 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             'brand',
             'unit',
             'price',
-            'old_price',
-            'purchase_price',
-            'tax_in_percent',
             'discount_type',
             'discount_amount',
             'total_quantity',
-            'total_shipping_cost',
             'shipping_time',
             'thumbnail',
-            'youtube_link',
             'product_tags',
             'product_reviews',
-            'product_media',
             'product_combinations'
         ]
 
@@ -353,12 +360,6 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             product=obj, is_active=True).distinct()
         return ProductReviewSerializer(selected_product_reviews, many=True).data
 
-    def get_product_media(self, obj):
-        queryset = ProductMedia.objects.filter(product=obj).distinct()
-        serializer = ProductMediaSerializer(instance=queryset, many=True, context={
-                                            'request': self.context['request']})
-        return serializer.data
-
     def get_product_combinations(self, obj):
         selected_product_combinations = ProductCombinations.objects.filter(
             product=obj, is_active=True).distinct()
@@ -369,7 +370,6 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
 class ProductListSerializer(serializers.ModelSerializer):
     product_tags = serializers.SerializerMethodField()
     product_reviews = serializers.SerializerMethodField()
-    product_media = serializers.SerializerMethodField()
     product_combinations = serializers.SerializerMethodField()
     vendor = VendorSerializer()
     category = CategorySerializer()
@@ -387,7 +387,6 @@ class ProductListSerializer(serializers.ModelSerializer):
             'title',
             'slug',
             'sku',
-            'warranty',
             'avg_rating',
             'full_description',
             'short_description',
@@ -400,21 +399,14 @@ class ProductListSerializer(serializers.ModelSerializer):
             'brand',
             'unit',
             'price',
-            'old_price',
-            'purchase_price',
-            'tax_in_percent',
             'discount_type',
             'discount_amount',
             'total_quantity',
-            'total_shipping_cost',
             'shipping_time',
             'thumbnail',
-            'youtube_link',
             'product_tags',
             'product_reviews',
-            'product_media',
-            'product_combinations',
-            'is_gaming'
+            'product_combinations'
 
         ]
 
@@ -431,12 +423,6 @@ class ProductListSerializer(serializers.ModelSerializer):
             product=obj, is_active=True).distinct()
         return ProductReviewSerializer(selected_product_reviews, many=True).data
 
-    def get_product_media(self, obj):
-        queryset = ProductMedia.objects.filter(product=obj).distinct()
-        serializer = ProductMediaSerializer(instance=queryset, many=True, context={
-                                            'request': self.context['request']})
-        return serializer.data
-
     def get_product_combinations(self, obj):
         selected_product_combinations = ProductCombinations.objects.filter(
             product=obj, is_active=True).distinct()
@@ -448,7 +434,6 @@ class ProductListSerializer(serializers.ModelSerializer):
 class StoreProductDetailsSerializer(serializers.ModelSerializer):
     product_tags = serializers.SerializerMethodField()
     product_reviews = serializers.SerializerMethodField()
-    product_media = serializers.SerializerMethodField()
     product_combinations = serializers.SerializerMethodField()
     vendor = VendorSerializer()
     category = CategorySerializer()
@@ -466,7 +451,6 @@ class StoreProductDetailsSerializer(serializers.ModelSerializer):
             'title',
             'slug',
             'sku',
-            'warranty',
             'avg_rating',
             'full_description',
             'short_description',
@@ -479,28 +463,20 @@ class StoreProductDetailsSerializer(serializers.ModelSerializer):
             'brand',
             'unit',
             'price',
-            'old_price',
-            'purchase_price',
-            'tax_in_percent',
             'discount_type',
             'discount_amount',
             'total_quantity',
-            'total_shipping_cost',
             'shipping_time',
             'thumbnail',
-            'youtube_link',
             'product_tags',
             'product_reviews',
-            'product_media',
-            'product_combinations',
-            'is_gaming'
+            'product_combinations'
         ]
         read_only_field = [
             'id',
             'title',
             'slug',
             'sku',
-            'warranty',
             'avg_rating',
             'full_description',
             'short_description',
@@ -513,21 +489,14 @@ class StoreProductDetailsSerializer(serializers.ModelSerializer):
             'brand',
             'unit',
             'price',
-            'old_price',
-            'purchase_price',
-            'tax_in_percent',
             'discount_type',
             'discount_amount',
             'total_quantity',
-            'total_shipping_cost',
             'shipping_time',
             'thumbnail',
-            'youtube_link',
             'product_tags',
             'product_reviews',
-            'product_media',
-            'product_combinations',
-            'is_gaming'
+            'product_combinations'
         ]
 
     def get_avg_rating(self, obj):
@@ -543,12 +512,6 @@ class StoreProductDetailsSerializer(serializers.ModelSerializer):
             product=obj, is_active=True).distinct()
         return ProductReviewSerializer(selected_product_reviews, many=True).data
 
-    def get_product_media(self, obj):
-        queryset = ProductMedia.objects.filter(product=obj).distinct()
-        serializer = ProductMediaSerializer(instance=queryset, many=True, context={
-                                            'request': self.context['request']})
-        return serializer.data
-
     def get_product_combinations(self, obj):
         selected_product_combinations = ProductCombinations.objects.filter(
             product=obj, is_active=True).distinct()
@@ -556,438 +519,86 @@ class StoreProductDetailsSerializer(serializers.ModelSerializer):
 # Product create serializer
 
 
-# class ProductUpdateSerializerOld(serializers.ModelSerializer):
-    # product_media = serializers.SerializerMethodField()
-    # product_media = serializers.ListField(
-    #     child=serializers.FileField(), write_only=True, required=False)
-    # product_tags = serializers.SerializerMethodField()
-    # product_tags = serializers.ListField(
-    #     child=serializers.CharField(), write_only=True, required=False)
-    # product_combinations = serializers.SerializerMethodField()
-    # product_combinations = ProductCombinationSerializer(
-    #     many=True, required=False)
 
-    # category = CategorySerializer(read_only=True)
-    # sub_category = SubCategorySerializer(read_only=True)
-    # sub_sub_category = SubSubCategorySerializer(read_only=True)
-    # brand = BrandSerializer()
-    # unit = UnitSerializer()
-    # discount_type = DiscountTypeSerializer()
+# work with pc builder start
+class PcBuilderSpecificationValuesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SpecificationValue
+        fields = [
+            'id',
+            'key',
+            'value'
+        ]
 
-    # class Meta:
-    #     model = Product
-    #     fields = [
-    #         'id',
-    #         'title',
-        # 'sku',
-        # 'warranty',
-        # 'full_description',
-        # 'short_description',
-        # 'status',
-        # 'category',
-        # 'sub_category',
-        # 'sub_sub_category',
-        # 'brand',
-        # 'unit',
-        # 'price',
-        # 'purchase_price',
-        # 'tax_in_percent',
-        # 'discount_type',
-        # 'discount_amount',
-        # 'total_quantity',
-        # 'total_shipping_cost',
-        # 'shipping_time',
-        # 'thumbnail',
-        # 'youtube_link',
-        # 'product_media',
-        # 'product_tags',
-        # 'product_combinations'
-        # ]
+class PcBuilderSpecificationSerializer(serializers.ModelSerializer):
+    specification_values = serializers.SerializerMethodField('get_existing_specification_values')
+    title_name = serializers.CharField(source="title.title",read_only=True)
+    class Meta:
+        model = Specification
+        fields = [
+            'id',
+            'title',
+            'title_name',
+            'specification_values'
+        ]
 
-    # def get_product_tags(self, obj):
-    #     selected_product_tags = ProductTags.objects.filter(
-    #         product=obj).distinct()
-    #     return ProductTagsSerializer(selected_product_tags, many=True).data
+    def get_existing_specification_values(self, instence):
+        queryset = SpecificationValue.objects.filter(specification=instence.id, is_active = True)
+        serializer = PcBuilderSpecificationValuesSerializer(instance=queryset, many=True)
+        return serializer.data
 
-    # def get_product_media(self, obj):
-    #     queryset = ProductMedia.objects.filter(product=obj).distinct()
-    #     serializer = ProductMediaSerializer(instance=queryset, many=True, context={
-    #                                         'request': self.context['request']})
-    #     return serializer.data
+class AttributeValuesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AttributeValues
+        fields = [
+            'id',
+            'value',
+        ]
 
-    # def get_product_combinations(self, obj):
-    #     selected_product_combinations = ProductCombinations.objects.filter(
-    #         product=obj, is_active=True).distinct()
-    #     return ProductCombinationSerializerForProductDetails(selected_product_combinations, many=True).data
+class CategoryFilterAttributeSerializer(serializers.ModelSerializer):
+    attribute_values = serializers.SerializerMethodField('get_attribute_values')
+    attribute_title = serializers.CharField(source="attribute.title", read_only=True)
+    class Meta:
+        model = CategoryFilterAttributes
+        fields = [
+            'id',
+            'attribute',
+            'attribute_title',
+            'attribute_values'
+        ]
 
-    # def update(self, instance, validated_data):
-    #     validated_data.update(
-    #         {"modified_by": self.context['request'].user.id, "modified_at": timezone.now()})
-    #     return super().update(instance, validated_data)
+    def get_attribute_values(self, instense):
+        queryset = AttributeValues.objects.filter(attribute=instense.id, is_active = True)
+        serializer = AttributeValuesSerializer(instance=queryset, many=True)
+        return serializer.data
 
-        #
+class PcBuilderDataListSerializer(serializers.ModelSerializer):
+    specification = serializers.SerializerMethodField()
+    category_filtering_attributes = serializers.SerializerMethodField()
 
-        # class ProductColorSerializerForProductCreate(serializers.ModelSerializer):
-        #     color = serializers.PrimaryKeyRelatedField(queryset=Colors.objects.all())
-        #     class Meta:
-        #         model = ProductColors
-        #         fields = [
-        #             'product', 'color'
-        #         ]
+    class Meta:
+        model = Product
+        fields = [
+            'id',
+            'thumbnail',
+            'title',
+            'specification',
+            'category_filtering_attributes',
+            'price'
+        ]
 
-        # class ProductAttributeSerializerForProductCreate(serializers.ModelSerializer):
-        #     attribute = serializers.PrimaryKeyRelatedField(queryset=Attributes.objects.all())
-        #     class Meta:
-        #         model = ProductAttributes
-        #         fields = [
-        #             'product', 'attribute'
-        #         ]
+    def get_specification(self, obj):
+        try:
+            queryset = Specification.objects.filter(product=obj, is_active = True)
+            serializer = PcBuilderSpecificationSerializer(instance=queryset, many=True)
+            return serializer.data
+        except:
+            return []
 
-        # class ProductAttributeValuesSerializerForProductCreate(serializers.ModelSerializer):
-        #     ProductAttributes = serializers.PrimaryKeyRelatedField(queryset=ProductAttributes.objects.all())
-        #     class Meta:
-        #         model = ProductAttributesValues
-        #         fields = [
-        #             'product', 'ProductAttributes', 'title'
-        #         ]
-        # class ProductCombinationSerializerForProductCreate(serializers.ModelSerializer):
-        #     sku = serializers.CharField(allow_blank=False, trim_whitespace=True, max_length=500)
-        #     varient = serializers.CharField(allow_blank=False, max_length=500)
-        #     varient_price = serializers.FloatField(default=0)
-        #     quantity = serializers.IntegerField(default=0)
-        #     product_color = ProductColorSerializerForProductCreate(required=False)
-        #     product_attribute = ProductAttributeSerializerForProductCreate(required=False)
-        #     product_attribute_values = ProductAttributeValuesSerializerForProductCreate(required=False)
-        #     discount_type = serializers.PrimaryKeyRelatedField(queryset=DiscountTypes.objects.all(), required=False)
-
-        #     class Meta:
-        #         model = ProductCombinations
-        #         fields = [
-        #             'sku',
-        #             'varient',
-        #             'varient_price',
-        #             'quantity',
-        #             'product_color',
-        #             'product_attribute',
-        #             'product_attribute_values',
-        #             'discount_type',
-        #             'discount_amount'
-        #         ]
-        # class ProductCreateSerializer(serializers.ModelSerializer):
-        #     # tags = serializers.PrimaryKeyRelatedField(queryset=Tags.objects.all(), many=True, write_only=True, required=False)
-        #     # colors = serializers.PrimaryKeyRelatedField(queryset=Colors.objects.all(), many=True, write_only=True, required=False)
-        #     # sizes = serializers.PrimaryKeyRelatedField(queryset=Sizes.objects.all(), many=True, write_only=True, required=False)
-        #     # media = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
-
-        #     # product_tags = ProductTagsSerializer(many=True, read_only=True)
-        #     # product_colors = ProductColorsSerializer(many=True, read_only=True)
-        #     # product_sizes = ProductSizesSerializer(many=True, read_only=True)
-        #     # product_media = ProductMediaSerializer(many=True, read_only=True)
-
-        #     # title = serializers.CharField(allow_blank=False)
-        #     product_media = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
-        #     product_tags = serializers.ListField(child=serializers.CharField(), write_only=True, required=False)
-        #     # product_colors = serializers.ListField(child=serializers.CharField(), write_only=True, required=False)
-        #     # product_attributes = serializers.ListField(child=serializers.CharField(), write_only=True, required=False)
-        #     # product_attribute_values = serializers.ListField(child=serializers.CharField(), write_only=True, required=False)
-
-        #     # prodcut_combinations
-        #     product_combination = serializers.ListField(child=ProductCombinationSerializerForProductCreate(), required=False)
-
-        #     class Meta:
-        #         model = Product
-        #         fields = [
-        #             'id',
-        #             'title',
-        #             'sku',
-        #             'warranty',
-        #             'full_description',
-        #             'short_description',
-        #             'category',
-        #             'sub_category',
-        #             'sub_sub_category',
-        #             'brand',
-        #             'unit',
-        #             'unit_price',
-        #             'purchase_price',
-        #             'tax_in_percent',
-        #             'discount_type',
-        #             'discount_amount',
-        #             'total_quantity',
-        #             'shipping_cost',
-        #             'shipping_time',
-        #             'thumbnail',
-        #             'youtube_link',
-
-        #             'product_media',
-        #             'product_tags',
-        #             # 'product_colors',
-        #             # 'product_attributes',
-        #             # 'product_attribute_values',
-        #             'product_combination'
-        #     #         'price',
-        #     #         'full_description',
-        #     #         'short_description',
-        #     #         'quantity',
-        #     #         'warranty',
-        #     #         'variation',
-        #     #         'rating',
-        #     #         'status',
-        #     #         'is_featured',
-        #     #         'product_category',
-        #     #         'product_sub_category',
-        #     #         'product_child_category',
-        #     #         'product_brand',
-        #     #         'thumbnail',
-        #     #         'vendor',
-        #     #         'tags',
-        #     #         'product_tags',
-        #     #         'colors',
-        #     #         'product_colors',
-        #     #         'sizes',
-        #     #         'product_sizes',
-        #     #         'media',
-        #     #         'product_media'
-        #         ]
-
-        #     def create(self, validated_data):
-        #         vendor = Vendor.objects.get(vendor_admin = self.context['request'].user.id)
-        #         product_instance = Product.objects.create(**validated_data, vendor=vendor)
-        #         return product_instance
-        #     #     try:
-        #     #         tags = validated_data.pop('tags')
-        #     #         colors = validated_data.pop('colors')
-        #     #         sizes = validated_data.pop('sizes')
-        #     #         media = validated_data.pop('media')
-
-        #     #         if tags:
-        #     #             for tag in tags:
-        #     #                 ProductTags.objects.create(name=tag, product=product_instance)
-
-        #     #         if colors:
-        #     #             for color in colors:
-        #     #                 ProductColors.objects.create(name=color, product=product_instance)
-
-        #     #         if sizes:
-        #     #             for size in sizes:
-        #     #                 ProductSizes.objects.create(name=size, product=product_instance)
-        #     #         if media:
-        #     #             for media_file in media:
-        #     #                 file_type = media_file.content_type.split('/')[0]
-        #     #                 ProductMedia.objects.create(product=product_instance, type=file_type, file=media_file, status="COMPLETE")
-
-        #     #         return product_instance
-        #     #     except:
-        #     #         return product_instance
-
-        # # # general Serializer start
-        # # class ProductCategoriesSerializer(serializers.ModelSerializer):
-        # #     class Meta:
-        # #         model =  ProductCategory
-        # #         fields = ['name']
-
-        # # class ProductBrandsSerializer(serializers.ModelSerializer):
-        # #     class Meta:
-        # #         model = ProductBrand
-        # #         fields = ['name']
-
-        # # class ProductTagsSerializer(serializers.ModelSerializer):
-
-        # #     class Meta:
-        # #         model = ProductTags
-        # #         fields = ['id', 'name', 'product']
-
-        # # class ProductColorsSerializer(serializers.ModelSerializer):
-        # #     # title = serializers.CharField(source="Colors.title")
-        # #     class Meta:
-        # #         model = ProductColors
-        # #         fields = ['name']
-
-        # # class ProductSizesSerializer(serializers.ModelSerializer):
-        # #     # title = serializers.CharField(source="Sizes.title")
-        # #     class Meta:
-        # #         model = ProductSizes
-        # #         fields = ['name']
-
-        # #
-
-        # #
-
-        # #
-
-        # # # general Serializer end
-
-        # # # create Serializer start
-        # #
-
-        # # class TagCreateSerializer(serializers.ModelSerializer):
-        # #     class Meta:
-        # #         model = Tags
-        # #         fields = ('id', 'name', 'is_active')
-        # #         read_only_fields = ('id', 'is_active')
-        # # # create Serializer end
-
-        # # # list Serializer start
-        # #
-
-        # # class TagListSerializer(serializers.ModelSerializer):
-        # #     class Meta:
-        # #         model = Tags
-        # #         fields = ['id', 'name']
-
-        # # class ProductCategoryListSerializer(serializers.ModelSerializer):
-        # #     class Meta:
-        # #         model = ProductCategory
-        # #         fields = ['id', 'name']
-
-        # # class ProductSubCategoryListSerializer(serializers.ModelSerializer):
-        # #     class Meta:
-        # #         model = ProductSubCategory
-        # #         fields = ['id', 'name', 'category']
-
-        # # class ProductBrandListSerializer(serializers.ModelSerializer):
-        # #     class Meta:
-        # #         model = ProductBrand
-        # #         fields = ['id', 'name']
-
-        # # class ProductSearchSerializer(serializers.Serializer):
-        # #     slug = serializers.CharField()
-        # #     title = serializers.CharField()
-        # #     price = serializers.CharField()
-        # #     img = serializers.CharField(required=False)
-
-        # #
-
-        # # # list Serializer end
-
-        # # # update Serializer start
-        # # class ProductUpdateSerializer(serializers.ModelSerializer):
-        # #     tags = serializers.PrimaryKeyRelatedField(queryset=Tags.objects.all(), many=True, write_only=True)
-        # #     colors = serializers.PrimaryKeyRelatedField(queryset=Colors.objects.all(), many=True, write_only=True)
-        # #     sizes = serializers.PrimaryKeyRelatedField(queryset=Sizes.objects.all(), many=True, write_only=True)
-        # #     media = serializers.ListField(child=serializers.FileField(), write_only=True)
-
-        # #     product_tags = ProductTagsSerializer(many=True, read_only=True)
-        # #     product_colors = ProductColorsSerializer(many=True, read_only=True)
-        # #     product_sizes = ProductSizesSerializer(many=True, read_only=True)
-        # #     product_media = ProductMediaSerializer(many=True, read_only=True)
-
-        # #     class Meta:
-        # #         model = Product
-        # #         fields = [
-        # #             'id',
-        # #             'title',
-        # #             'price',
-        # #             'full_description',
-        # #             'short_description',
-        # #             'quantity',
-        # #             'warranty',
-        # #             'variation',
-        # #             'rating',
-        # #             'status',
-        # #             'is_featured',
-        # #             'product_category',
-        # #             'product_sub_category',
-        # #             'product_child_category',
-        # #             'product_brand',
-        # #             'thumbnail',
-        # #             'vendor',
-        # #             'tags',
-        # #             'product_tags',
-        # #             'colors',
-        # #             'product_colors',
-        # #             'sizes',
-        # #             'product_sizes',
-        # #             'media',
-        # #             'product_media'
-        # #         ]
-
-        # #     def update(self, instance, validated_data):
-        # #         try:
-        # #             tags = validated_data.pop('tags')
-        # #             colors = validated_data.pop('colors')
-        # #             sizes = validated_data.pop('sizes')
-        # #             media = validated_data.pop('media')
-        # #             if tags:
-        # #                 ProductTags.objects.filter(product=instance).delete()
-        # #                 for tag in tags:
-        # #                     ProductTags.objects.create(name=tag, product=instance)
-
-        # #             if colors:
-        # #                 ProductColors.objects.filter(product=instance).delete()
-        # #                 for color in colors:
-        # #                     ProductColors.objects.create(name=color, product=instance)
-
-        # #             if sizes:
-        # #                 ProductSizes.objects.filter(product=instance).delete()
-        # #                 for size in sizes:
-        # #                     ProductSizes.objects.create(name=sizes, product=instance)
-        # #             if media:
-        # #                 for media_file in media:
-        # #                     file_type = media_file.content_type.split('/')[0]
-        # #                     ProductMedia.objects.create(product=instance, type=file_type, file=media_file, status="COMPLETE")
-
-        # #             validated_data.update({"modified_by": self.context['request'].user.id, "modified_at": timezone.now()})
-        # #             return super().update(instance, validated_data)
-        # #         except:
-        # #             validated_data.update({"modified_by": self.context['request'].user.id, "modified_at": timezone.now()})
-        # #             return super().update(instance, validated_data)
-        # # # update Serializer end
-
-        # # # vendor serializers start
-        # # class VendorProductListSerializer(serializers.ModelSerializer):
-        # #     product_media = ProductMediaSerializer(many=True, read_only=True)
-        # #     product_category_name = serializers.SerializerMethodField()
-        # #     product_brand_name = serializers.SerializerMethodField()
-        # #     class Meta:
-        # #         model = Product
-        # #         fields = [
-        # #                 'id',
-        # #                 'title',
-        # #                 'slug',
-        # #                 'price',
-        # #                 'old_price',
-        # #                 'short_description',
-        # #                 'quantity',
-        # #                 'rating',
-        # #                 'status',
-        # #                 'is_featured',
-        # #                 'product_category_name',
-        # #                 'product_brand_name',
-        # #                 'thumbnail',
-        # #                 'product_media'
-        # #                 ]
-
-        # #     def get_product_category_name(self, obj):
-        # #         try:
-        # #             if obj.product_category:
-        # #                 get_product_category=ProductCategory.objects.get(id= obj.product_category.id)
-        # #                 return get_product_category.name
-        # #             else :
-        # #                 return obj.get_product_category
-        # #         except:
-        # #             return None
-        # #     def get_product_brand_name(self, obj):
-        # #         try:
-        # #             if obj.product_category:
-        # #                 get_product_brand_name=ProductBrand.objects.get(id= obj.product_brand.id)
-        # #                 return get_product_brand_name.name
-        # #             else :
-        # #                 return obj.get_product_brand_name
-        # #         except:
-        # #             return None
-
-        # # # vendor serializers end
-
-        # # class ProductAllCategoryListSerializer(serializers.ModelSerializer):
-        # #     sub_category = serializers.SerializerMethodField()
-        # #     class Meta:
-        # #         model = Category
-        # #         fields = [
-        # #                 'id',
-        # #                 'title',
-        # #                 'sub_category'
-        # #                 ]
-        # #     def get_sub_category(self, obj):
-        # #         selected_sub_category = SubCategory.objects.filter(category=obj).distinct()
-        # #         return SubCategorySerializer(selected_sub_category, many=True).data
+    def get_category_filtering_attributes(self, obj):
+        try:
+            selected_category_filtering_attributes = CategoryFilterAttributes.objects.filter(
+                category=obj.category, is_active=True).distinct()
+            return CategoryFilterAttributeSerializer(selected_category_filtering_attributes, many=True).data
+        except:
+            return []

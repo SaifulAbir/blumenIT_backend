@@ -7,8 +7,10 @@ from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateAP
 from rest_framework.views import APIView
 from home.models import ProductView
 from product import serializers
-from product.serializers import MegaMenuDataAPIViewListSerializer, StoreProductDetailsSerializer, ProductDetailsSerializer, ProductListSerializer, ProductReviewCreateSerializer, BrandSerializer
-from product.models import Category, Product, Brand
+from product.serializers import StoreProductDetailsSerializer, \
+    ProductDetailsSerializer, ProductListSerializer, ProductReviewCreateSerializer, BrandSerializer,\
+    StoreCategoryAPIViewListSerializer, PcBuilderDataListSerializer
+from product.models import Category, Product, Brand, CategoryFilterAttributes, AttributeValues
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework import status
@@ -20,25 +22,38 @@ from vendor.models import Vendor
 
 
 class BrandCreateAPIView(CreateAPIView):
-
     permission_classes = [AllowAny]
     serializer_class = BrandSerializer
 
-    def post(self, request):
-        brand = BrandSerializer(data=request.data)
+    def post(self, request, *args, **kwargs):
+        return super(BrandCreateAPIView, self).post(request, *args, **kwargs)
 
-        if Brand.objects.filter(**request.data).exists():
-            raise serializers.ValidationError('This data already exists')
 
-        if brand.is_valid():
-            brand.save()
-            return Response(brand.data)
+class BrandDeleteAPIView(ListAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = BrandSerializer
+    queryset =  Brand.objects.all()
+    lookup_field = 'id'
+    lookup_url_kwarg = 'id'
+
+    def get_queryset(self):
+        brand_id = self.kwargs['id']
+        brand_obj = Brand.objects.filter(id=brand_id).exists()
+        if brand_obj:
+            brand_obj = Brand.objects.filter(id=brand_id)
+            brand_obj.update(is_active=False)
+
+            queyset = Brand.objects.filter(is_active=True).order_by('-created_at')
+            return queyset
         else:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            raise ValidationError(
+                {"msg": 'Brand Does not exist!'}
+            )
 
-class MegaMenuDataAPIView(ListAPIView):
+
+class StoreCategoryListAPIView(ListAPIView):
     permission_classes = (AllowAny,)
-    serializer_class = MegaMenuDataAPIViewListSerializer
+    serializer_class = StoreCategoryAPIViewListSerializer
 
     def get_queryset(self):
         queryset = Category.objects.filter(is_active=True)
@@ -140,7 +155,7 @@ class ProductSearchAPI(ListAPIView):
 
     def get_queryset(self):
         request = self.request
-        query = request.GET.get('query')
+        query = request.GET.get('search')
         category = request.GET.get('category_id')
 
         queryset = Product.objects.filter(
@@ -200,25 +215,7 @@ class VendorProductListForFrondEndAPI(ListAPIView):
         return queryset
 
 
-class FeaturedProductListStoreFront(ListAPIView):
-    permission_classes = [AllowAny]
-    serializer_class = ProductListSerializer
-    queryset = Product.objects.filter(is_featured=True, status='ACTIVE').order_by('-created_at')
-
-
-class PopularProductListStoreFront(ListAPIView):
-    permission_classes = [AllowAny]
-    serializer_class = ProductListSerializer
-    queryset = Product.objects.filter(is_published=True).order_by('-sell_count')[:32]
-
-
-class GamingProductListStoreFront(ListAPIView):
-    permission_classes = [AllowAny]
-    serializer_class = ProductListSerializer
-    queryset = Product.objects.filter(is_gaming=True, status='ACTIVE').order_by('-created_at')
-
-
-class StoreProductDatailsAPI(RetrieveAPIView):
+class StoreProductDetailsAPI(RetrieveAPIView):
     permission_classes = [AllowAny]
     serializer_class = StoreProductDetailsSerializer
     lookup_field = 'slug'
@@ -231,3 +228,47 @@ class StoreProductDatailsAPI(RetrieveAPIView):
             return query
         except:
             raise ValidationError({"details": "Product doesn't exist!"})
+
+
+class PcBuilderChooseAPIView(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = PcBuilderDataListSerializer
+    pagination_class = ProductCustomPagination
+
+    def get_queryset(self):
+        request = self.request
+        component_id = request.GET.get('component_id')
+        type = request.GET.get('type')
+        filter_price = request.GET.get('filter_price')
+        attr_value_ids = request.GET.get('attr_value_ids')
+
+        queryset = Product.objects.filter(
+            status='PUBLISH').order_by('-created_at')
+
+        if component_id and type:
+            if type == 'category':
+                queryset = queryset.filter(Q(category__id=component_id)).order_by('-created_at')
+            if type == 'sub_category':
+                queryset = queryset.filter(Q(sub_category__id=component_id)).order_by('-created_at')
+            if type == 'sub_sub_category':
+                queryset = queryset.filter(Q(sub_sub_category__id=component_id)).order_by('-created_at')
+
+        if filter_price:
+            price_list = []
+            filter_prices = filter_price.split("-")
+            for filter_price in filter_prices:
+                price_list.append(int(filter_price))
+
+            min_price = price_list[0]
+            max_price = price_list[1]
+            queryset = queryset.filter(price__range=(min_price, max_price)).order_by('-created_at')
+
+        if attr_value_ids:
+            attr_value_ids_list = attr_value_ids.split(",")
+            for attr_value_id in attr_value_ids_list:
+                attr_value_id = int(attr_value_id)
+                attr_id = AttributeValues.objects.get(id = attr_value_id).attribute
+                cat_id = CategoryFilterAttributes.objects.get(attribute = attr_id).category.id
+                queryset = queryset.filter(Q(category__id=cat_id)).order_by('-created_at')
+
+        return queryset

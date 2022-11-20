@@ -26,6 +26,7 @@ class Attribute(AbstractTimeStamp):
     def __str__(self):
         return self.title
 
+
 class AttributeValues(AbstractTimeStamp):
     attribute = models.ForeignKey(Attribute, on_delete=models.PROTECT,
                                related_name='attribute_values_attribute', blank=False, null=False)
@@ -41,6 +42,7 @@ class AttributeValues(AbstractTimeStamp):
     def __str__(self):
         return self.value
 
+
 class Category(AbstractTimeStamp):
     title = models.CharField(
         max_length=100, null=False, blank=False, default="", help_text="name")
@@ -51,8 +53,6 @@ class Category(AbstractTimeStamp):
     icon = models.ImageField(
         upload_to='product_category', blank=True, null=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
-    filtering_attributes = models.ForeignKey(Attribute, on_delete=models.PROTECT,
-                               related_name='category_filtering_attributes', blank=True, null=True)
 
     subtitle = models.TextField(null=True, blank=True, default="")
     logo = models.ImageField(
@@ -105,9 +105,25 @@ class SubSubCategory(AbstractTimeStamp):
         return self.title
 
 
+class CategoryFilterAttributes(AbstractTimeStamp):
+    attribute = models.ForeignKey(
+        Attribute, related_name='category_filter_attributes_attribute', blank=True, null=True, on_delete=models.PROTECT)
+    category = models.ForeignKey(
+        Category, related_name='category_filter_attributes_category', blank=True, null=True, on_delete=models.PROTECT)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'CategoryFilterAttribute'
+        verbose_name_plural = 'CategoryFilterAttributes'
+        db_table = 'category_filter_attributes'
+
+    def __str__(self):
+        return self.category.title + ' ' + self.attribute.title
+
+
 class Brand(AbstractTimeStamp):
     title = models.CharField(
-        max_length=100, null=True, blank=True)
+        max_length=100, null=False, blank=True)
     logo = models.ImageField(upload_to='brand', blank=True, null=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
 
@@ -202,20 +218,6 @@ class Product(AbstractTimeStamp):
     title = models.CharField(max_length=800, default='')
     slug = models.SlugField(
         null=False, allow_unicode=True, blank=True, max_length=255)
-    sku = models.CharField(max_length=500, null=True,
-                           blank=True, default="")
-    warranty = models.CharField(
-        max_length=255, blank=True, null=True, help_text="eg: 1 year or 6 months")
-    full_description = models.TextField(default='', null=False, blank=False)
-    short_description = models.CharField(max_length=800, default='', null=False, blank=False)
-    active_short_description = models.BooleanField(default=True)
-    status = models.CharField(
-        max_length=20, choices=PRODUCT_STATUSES, default=PRODUCT_STATUSES[0][0])
-    is_featured = models.BooleanField(null=False, blank=False, default=False)
-    vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT,
-                               related_name='product_vendor', blank=True, null=True)
-    seller = models.ForeignKey(Seller, on_delete=models.PROTECT,
-                               related_name='product_seller', blank=True, null=True)
     category = models.ForeignKey(
         Category, related_name='product_category', blank=False, null=True, on_delete=models.PROTECT)
     sub_category = models.ForeignKey(
@@ -224,59 +226,55 @@ class Product(AbstractTimeStamp):
         SubSubCategory, related_name='product_sub_sub_category', blank=True, null=True, on_delete=models.PROTECT)
     brand = models.ForeignKey(Brand, related_name='product_brand',
                               blank=True, null=True, on_delete=models.PROTECT)
+    seller = models.ForeignKey(Seller, on_delete=models.PROTECT,
+                               related_name='product_seller', blank=True, null=True)
     unit = models.ForeignKey(Units, related_name="product_unit",
                              blank=True, null=True, on_delete=models.PROTECT)
+    minimum_purchase_quantity = models.IntegerField(null=True, blank=True, default=0)
+    bar_code = models.CharField(max_length=255, blank=False, null=False, default='')
+    refundable = models.BooleanField(default=False)
+    is_featured = models.BooleanField(null=False, blank=False, default=False)
+    cash_on_delivery = models.BooleanField(default=False)
+    todays_deal = models.BooleanField(default=False)
+    shipping_time = models.IntegerField(
+        null=False, blank=False, default=0, help_text="eg: Days in count.")
+    full_description = models.TextField(default='', null=False, blank=False)
+    short_description = models.CharField(max_length=800, default='', null=False, blank=False)
+    active_short_description = models.BooleanField(default=True)
     price = models.FloatField(
         max_length=255, null=False, blank=False, default=0, help_text="Unit price")
-    old_price = models.FloatField(
-        max_length=255, null=False, blank=False, default=0)
-    purchase_price = models.FloatField(
-        max_length=255, null=False, blank=False, default=0)
     pre_payment_amount = models.FloatField(
         max_length=255, null=False, blank=False, default=0)
-    tax_in_percent = models.IntegerField(null=True, blank=True, default=0)
-    vat = models.IntegerField(null=True, blank=True, default=0)
+    discount_start_date = models.DateTimeField(null=True, blank=True)
+    discount_end_date = models.DateTimeField(null=True, blank=True)
     discount_type = models.ForeignKey(
         DiscountTypes, related_name="product_discount_type", null=True, blank=True, on_delete=models.PROTECT)
     discount_amount = models.FloatField(
         max_length=255, null=True, blank=True, default=0)
-    discount_start_date = models.DateTimeField(null=True, blank=True)
-    discount_end_date = models.DateTimeField(null=True, blank=True)
     quantity = models.IntegerField(null=True, blank=True, default=0)
     total_quantity = models.IntegerField(null=False, blank=False, default=0)
-    shipping_cost = models.FloatField(
-        max_length=255, null=True, blank=True, default=0)
-    shipping_cost_multiply = models.BooleanField(
-        null=True, blank=True, default=False)
-    total_shipping_cost = models.FloatField(
-        max_length=255, null=True, blank=True, default=0)
-    shipping_time = models.IntegerField(
-        null=False, blank=False, default=0, help_text="eg: Days in count.")
-    shipping_class = models.ForeignKey(
-        ShippingClass, related_name="product_shipping_class", null=True, blank=True, on_delete=models.PROTECT)
-    thumbnail = models.FileField(upload_to='products', blank=True, null=True)
-    youtube_link = models.URLField(null=True, blank=True)
-    video_link = models.URLField(null=True, blank=True)
+    sku = models.CharField(max_length=500, null=True,blank=True, default="")
     external_link = models.URLField(null=True, blank=True)
     external_link_button_text = models.CharField(max_length=500, null=True, blank=True)
-    sell_count = models.BigIntegerField(null=True, blank=True, default=0)
-    minimum_purchase_quantity = models.IntegerField(null=True, blank=True, default=0)
-    bar_code = models.CharField(max_length=255, blank=False, null=False, default='')
-    refundable = models.BooleanField(default=False)
-    digital = models.BooleanField(default=False)
-    in_house_product = models.BooleanField(default=False)
-    cash_on_delivery = models.BooleanField(default=False)
-    todays_deal = models.BooleanField(default=False)
-    show_stock_quantity = models.BooleanField(default=False)
-    low_stock_quantity_warning = models.IntegerField(null=True, blank=True, default=0)
     video_provider = models.ForeignKey(
         ProductVideoProvider, related_name="product_video_provider", null=True, blank=True, on_delete=models.PROTECT)
+    video_link = models.URLField(null=True, blank=True)
+    thumbnail = models.FileField(upload_to='products', blank=True, null=True)
+    low_stock_quantity_warning = models.IntegerField(null=True, blank=True, default=0)
+    show_stock_quantity = models.BooleanField(default=False)
+    vat = models.IntegerField(null=True, blank=True, default=0)
     vat_type = models.ForeignKey(
         VatType, related_name="product_vat_type", null=True, blank=True, on_delete=models.PROTECT)
+    shipping_class = models.ForeignKey(
+        ShippingClass, related_name="product_shipping_class", null=True, blank=True, on_delete=models.PROTECT)
     product_condition = models.ForeignKey(
         ProductCondition, related_name="product_product_condition", null=True, blank=True, on_delete=models.PROTECT)
-    is_published = models.BooleanField(null=False, blank=False, default=True)
-    is_gaming = models.BooleanField(null=True, blank=True, default=False)
+    status = models.CharField(
+        max_length=20, choices=PRODUCT_STATUSES, default=PRODUCT_STATUSES[0][0])
+    digital = models.BooleanField(default=False)
+    in_house_product = models.BooleanField(default=False)
+    sell_count = models.BigIntegerField(null=True, blank=True, default=0)
+
 
     class Meta:
         verbose_name = 'Product'
@@ -292,22 +290,30 @@ class Product(AbstractTimeStamp):
     def __str__(self):
         return self.title
 
-
-
 def pre_save_product(sender, instance, *args, **kwargs):
     if not instance.slug:
         instance.slug = unique_slug_generator(instance)
-        # chars = string.ascii_lowercase + string.digits
-        # size = 10
-        # instance.sku = ''.join(random.choice(chars) for _ in range(size))
-
 
 pre_save.connect(pre_save_product, sender=Product)
+
+class SpecificationTitle(AbstractTimeStamp):
+    title = models.CharField(max_length=800, default='', help_text="name")
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'SpecificationTitle'
+        verbose_name_plural = 'SpecificationTitles'
+        db_table = 'specification_title'
+
+    def __str__(self):
+        return 'title: ' + self.title
+
 
 class Specification(AbstractTimeStamp):
     product = models.ForeignKey(
         Product, on_delete=models.PROTECT, related_name='specification_product')
-    title = models.CharField(max_length=800, default='', help_text="name")
+    title = models.ForeignKey(
+        SpecificationTitle, on_delete=models.PROTECT, related_name='specification_specification_title', null=True, blank=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
@@ -316,7 +322,8 @@ class Specification(AbstractTimeStamp):
         db_table = 'specification'
 
     def __str__(self):
-        return self.title
+        # return 'Product: ' + self.product.title
+        return 'Product: ' + self.product.title + ' - title: ' + self.title.title
 
 class SpecificationValue(AbstractTimeStamp):
     specification = models.ForeignKey(
@@ -332,7 +339,8 @@ class SpecificationValue(AbstractTimeStamp):
         db_table = 'specification_value'
 
     def __str__(self):
-        return self.key
+        # return self.key
+        return 'Product: ' + self.specification.product.title + '-specification title: ' + self.specification.title.title + '-key: ' + self.key
 
 class ProductAttributes(AbstractTimeStamp):
     attribute = models.ForeignKey(
@@ -352,8 +360,8 @@ class ProductAttributes(AbstractTimeStamp):
 class ProductAttributeValues(AbstractTimeStamp):
     product_attribute = models.ForeignKey(ProductAttributes, on_delete=models.PROTECT,
                                related_name='product_attribute_values_product_attribute', blank=True, null=True)
-    value = models.CharField(
-        max_length=255, null=False, blank=False, default="")
+    value = models.ForeignKey(AttributeValues, on_delete=models.PROTECT,
+                               related_name='product_attribute_values_value', blank=True, null=True)
     product = models.ForeignKey(
         Product, related_name='product_attributes_values_product', blank=True, null=True, on_delete=models.PROTECT)
     is_active = models.BooleanField(null=False, blank=False, default=True)
@@ -364,7 +372,7 @@ class ProductAttributeValues(AbstractTimeStamp):
         db_table = 'product_attribute_value'
 
     def __str__(self):
-        return self.product_attribute.product.title + ' ' + self.product_attribute.attribute.title + ' ' + self.value
+        return self.product_attribute.product.title + ' ' + self.product_attribute.attribute.title + ' ' + self.value.value
 
 class Color(AbstractTimeStamp):
     title = models.CharField(
@@ -410,6 +418,7 @@ class ProductVariation(AbstractTimeStamp):
     variation_price = models.FloatField(null=True, blank=True, default=0)
     sku = models.CharField(max_length=500, null=True,blank=True, default="")
     quantity = models.IntegerField(null=True, blank=True, default=0)
+    total_quantity = models.IntegerField(null=True, blank=True, default=0)
     image = models.FileField(upload_to='product_variation', validators=[validate_file_extension], null=True, blank=True)
     total_price = models.FloatField(null=True, blank=True, default=0)
     is_active = models.BooleanField(null=False, blank=False, default=True)
@@ -421,7 +430,6 @@ class ProductVariation(AbstractTimeStamp):
 
     def __str__(self):
         return self.product.title + '-variation: ' + self.variation
-
 
 class ProductCombinations(AbstractTimeStamp):
     product = models.ForeignKey(
@@ -445,15 +453,6 @@ class ProductCombinations(AbstractTimeStamp):
     def __str__(self):
         return str(self.id) + '-'+self.product.title+'-'+self.product_attribute_value
 
-    # def __str__(self):
-    #     # title = self.product.title
-    #     # combine = title + ' ' + self.product_attribute.title + \
-    #     #     ' ' + self.product_attribute_value
-
-    #     combine = self.product_attribute_value
-    #     return combine
-
-
 class Tags(AbstractTimeStamp):
     title = models.CharField(
         max_length=100, null=False, blank=False, default="", unique=True)
@@ -466,11 +465,6 @@ class Tags(AbstractTimeStamp):
 
     def __str__(self):
         return self.title
-
-    # def save(self, force_insert=False, force_update=False):
-    #     self.title = self.title.upper()
-    #     super(Tags, self).save(force_insert, force_update)
-
 
 class ProductTags(AbstractTimeStamp):
     tag = models.ForeignKey(Tags, on_delete=models.CASCADE, null=True,
@@ -486,39 +480,7 @@ class ProductTags(AbstractTimeStamp):
 
     def __str__(self):
         return self.product.title
-        # return self.product.title + ' ' + self.tag.title
 
-
-class ProductMedia(AbstractTimeStamp):
-    CHOICES = [
-        ('COMPLETE', 'Complete'),
-        ('IN_QUEUE', 'In_Queue'),
-        ('IN_PROCESSING', 'In_Processing'),
-    ]
-
-    def validate_file_extension(value):
-        import os
-        from django.core.exceptions import ValidationError
-        ext = os.path.splitext(value.name)[1]
-        valid_extensions = ['.jpg', '.png', '.jpeg']
-        if not ext.lower() in valid_extensions:
-            raise ValidationError('Unsupported file extension.')
-
-    product = models.ForeignKey(
-        Product, on_delete=models.PROTECT, related_name='product_media_product', null=True, blank=True)
-    file = models.FileField(upload_to='products', validators=[
-                            validate_file_extension])
-    status = models.CharField(
-        max_length=20, choices=CHOICES, default=CHOICES[0][0])
-    is_active = models.BooleanField(null=False, blank=False, default=True)
-
-    class Meta:
-        verbose_name = 'ProductMedia'
-        verbose_name_plural = 'ProductMedias'
-        db_table = 'product_medias'
-
-    def __str__(self):
-        return self.product.title
 
 class ProductImages(AbstractTimeStamp):
     CHOICES = [
@@ -741,4 +703,4 @@ class InventoryVariation(AbstractTimeStamp):
         db_table = 'inventory_variation'
 
     def __str__(self):
-        return self.product_variation.product.title
+        return self.product_variation.product.title + '- variation name: ' + self.product_variation.variation

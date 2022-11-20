@@ -7,15 +7,18 @@ from email.policy import default
 from pyexpat import model
 from attr import fields
 from rest_framework import serializers
-from product.models import Category, ProductCombinationMedia, ProductCombinationsVariants, ProductImages, SubCategory, SubSubCategory, Product, ProductTags, ProductReview, ProductCombinations, ProductAttributes, Brand, DiscountTypes, Tags, Units, VariantType, CategoryFilterAttributes, Specification, SpecificationValue, AttributeValues
+from product.models import Category, ProductCombinationMedia, ProductCombinationsVariants, ProductImages, SubCategory, SubSubCategory, Product, ProductTags, ProductReview, ProductCombinations, ProductAttributes, Brand, DiscountTypes, Tags, Units, VariantType, CategoryFilterAttributes, Specification, SpecificationValue, AttributeValues, Seller
 from user.models import User
 from vendor.models import StoreSettings, Vendor, VendorReview
 from django.db.models import Avg, Count, Q, F
 from rest_framework.exceptions import ValidationError
 
-# text color serializer
-# User Data serializer
+class SellerDataSerializer(serializers.ModelSerializer):
+    logo = serializers.ImageField(allow_null=True)
 
+    class Meta:
+        model = Seller
+        fields = ['id', 'name', 'address', 'phone', 'email', 'logo', 'is_active']
 
 class UserDataSerializer(serializers.ModelSerializer):
     class Meta:
@@ -47,40 +50,6 @@ class StoreDataSerializer(serializers.ModelSerializer):
             'youtube',
             'linkedin'
         ]
-
-
-# Vendor serializer / Connect with ProductDetailsSerializer
-class VendorSerializer(serializers.ModelSerializer):
-    store_data = serializers.SerializerMethodField()
-    vendor_first_name = serializers.CharField(source="vendor_admin.first_name")
-    vendor_last_name = serializers.CharField(source="vendor_admin.last_name")
-    avg_rating = serializers.SerializerMethodField()
-    review_count = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Vendor
-        fields = [
-            'id',
-            'vendor_first_name',
-            'vendor_last_name',
-            'avg_rating',
-            'review_count',
-            'store_data'
-        ]
-
-    def get_avg_rating(self, ob):
-        return ob.vendor_review_vendor.all().aggregate(Avg('rating_number'))['rating_number__avg']
-
-    def get_review_count(self, obj):
-        re_count = VendorReview.objects.filter(
-            vendor=obj, is_active=True).count()
-        return re_count
-
-    def get_store_data(self, obj):
-        selected_store_data = StoreSettings.objects.filter(
-            vendor=obj).distinct()
-        return StoreDataSerializer(selected_store_data, many=True, context={'request': self.context['request']}).data
-
 
 # Category serializer / Connect with ProductDetailsSerializer
 class CategorySerializer(serializers.ModelSerializer):
@@ -309,7 +278,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
     product_tags = serializers.SerializerMethodField()
     product_reviews = serializers.SerializerMethodField()
     product_combinations = serializers.SerializerMethodField()
-    vendor = VendorSerializer()
+    seller = SellerDataSerializer()
     category = CategorySerializer()
     sub_category = SubCategorySerializer()
     sub_sub_category = SubSubCategorySerializer()
@@ -330,7 +299,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             'short_description',
             'status',
             'is_featured',
-            'vendor',
+            'seller',
             'category',
             'sub_category',
             'sub_sub_category',
@@ -365,13 +334,12 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             product=obj, is_active=True).distinct()
         return ProductCombinationSerializerForProductDetails(selected_product_combinations, many=True).data
 
-
 # Product List serializer
 class ProductListSerializer(serializers.ModelSerializer):
     product_tags = serializers.SerializerMethodField()
     product_reviews = serializers.SerializerMethodField()
     product_combinations = serializers.SerializerMethodField()
-    vendor = VendorSerializer()
+    seller = SellerDataSerializer()
     category = CategorySerializer()
     sub_category = SubCategorySerializer()
     sub_sub_category = SubSubCategorySerializer()
@@ -392,7 +360,7 @@ class ProductListSerializer(serializers.ModelSerializer):
             'short_description',
             'status',
             'is_featured',
-            'vendor',
+            'seller',
             'category',
             'sub_category',
             'sub_sub_category',
@@ -427,97 +395,6 @@ class ProductListSerializer(serializers.ModelSerializer):
         selected_product_combinations = ProductCombinations.objects.filter(
             product=obj, is_active=True).distinct()
         return ProductCombinationSerializerForProductDetails(selected_product_combinations, many=True).data
-
-# store front serializer
-
-
-class StoreProductDetailsSerializer(serializers.ModelSerializer):
-    product_tags = serializers.SerializerMethodField()
-    product_reviews = serializers.SerializerMethodField()
-    product_combinations = serializers.SerializerMethodField()
-    vendor = VendorSerializer()
-    category = CategorySerializer()
-    sub_category = SubCategorySerializer()
-    sub_sub_category = SubSubCategorySerializer()
-    brand = BrandSerializer()
-    unit = UnitSerializer()
-    discount_type = DiscountTypeSerializer()
-    avg_rating = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Product
-        fields = [
-            'id',
-            'title',
-            'slug',
-            'sku',
-            'avg_rating',
-            'full_description',
-            'short_description',
-            'status',
-            'is_featured',
-            'vendor',
-            'category',
-            'sub_category',
-            'sub_sub_category',
-            'brand',
-            'unit',
-            'price',
-            'discount_type',
-            'discount_amount',
-            'total_quantity',
-            'shipping_time',
-            'thumbnail',
-            'product_tags',
-            'product_reviews',
-            'product_combinations'
-        ]
-        read_only_field = [
-            'id',
-            'title',
-            'slug',
-            'sku',
-            'avg_rating',
-            'full_description',
-            'short_description',
-            'status',
-            'is_featured',
-            'vendor',
-            'category',
-            'sub_category',
-            'sub_sub_category',
-            'brand',
-            'unit',
-            'price',
-            'discount_type',
-            'discount_amount',
-            'total_quantity',
-            'shipping_time',
-            'thumbnail',
-            'product_tags',
-            'product_reviews',
-            'product_combinations'
-        ]
-
-    def get_avg_rating(self, obj):
-        return obj.product_review_product.all().aggregate(Avg('rating_number'))['rating_number__avg']
-
-    def get_product_tags(self, obj):
-        selected_product_tags = ProductTags.objects.filter(
-            product=obj).distinct()
-        return ProductTagsSerializer(selected_product_tags, many=True).data
-
-    def get_product_reviews(self, obj):
-        selected_product_reviews = ProductReview.objects.filter(
-            product=obj, is_active=True).distinct()
-        return ProductReviewSerializer(selected_product_reviews, many=True).data
-
-    def get_product_combinations(self, obj):
-        selected_product_combinations = ProductCombinations.objects.filter(
-            product=obj, is_active=True).distinct()
-        return ProductCombinationSerializerForProductDetails(selected_product_combinations, many=True).data
-# Product create serializer
-
 
 
 # work with pc builder start

@@ -1,6 +1,6 @@
 from enum import unique
 from django.template.loader import render_to_string
-from product.serializers import BrandSerializer, CategorySerializer, DiscountTypeSerializer, ProductImageSerializer, ProductReviewSerializer, ProductTagsSerializer, SubCategorySerializer, SubSubCategorySerializer, UnitSerializer
+from product.serializers import ProductImageSerializer, ProductReviewSerializer
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 

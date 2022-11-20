@@ -11,10 +11,9 @@ from product.models import Brand, Category, DiscountTypes, Product, ProductAttri
 from user.models import CustomerProfile, User
 from vendor.models import VendorRequest, Vendor, Seller
 from vendor.serializers import VendorAddNewSubCategorySerializer, VendorAddNewSubSubCategorySerializer,\
-    VendorBrandSerializer, VendorCategorySerializer, VendorProductDetailsSerializer, VendorProductListSerializer,\
-    SellerProductUpdateSerializer, VendorProductViewSerializer, VendorRequestSerializer, VendorCreateSerializer, \
-    OrganizationNameSerializer, \
-    VendorDetailSerializer, StoreSettingsSerializer, SellerDetailSerializer, VendorSubCategorySerializer, \
+    VendorBrandSerializer, VendorCategorySerializer, VendorProductListSerializer,\
+    SellerProductUpdateSerializer, VendorProductViewSerializer, \
+    SellerDetailSerializer, VendorSubCategorySerializer, \
     VendorSubSubCategorySerializer, VendorUnitSerializer, SellerSerializer, ProductAttributesSerializer, \
     ProductVideoProviderSerializer, ProductVatProviderSerializer, VendorUpdateCategorySerializer,\
     VendorUpdateSubSubCategorySerializer, SellerProductCreateSerializer, SellerAddNewCategorySerializer, \
@@ -24,15 +23,15 @@ from cart.models import Coupon
 from rest_framework.exceptions import ValidationError
 
 
-class SellerCreateAPIView(CreateAPIView):
+class AdminCreateAPIView(CreateAPIView):
     permission_classes = [AllowAny]
     serializer_class = SellerCreateSerializer
 
     def post(self, request, *args, **kwargs):
-        return super(SellerCreateAPIView, self).post(request, *args, **kwargs)
+        return super(AdminCreateAPIView, self).post(request, *args, **kwargs)
 
 
-class SellerDetailsAPIView(RetrieveAPIView):
+class AdminDetailsAPIView(RetrieveAPIView):
     permission_classes = [AllowAny]
     serializer_class = SellerSerializer
     lookup_field = 'id'
@@ -47,13 +46,13 @@ class SellerDetailsAPIView(RetrieveAPIView):
             raise ValidationError({"details": "Seller doesn't exist!"})
 
 
-class SellerListAPIView(ListAPIView):
+class AdminListAPIView(ListAPIView):
     queryset = Seller.objects.filter(is_active=True)
     permission_classes = [AllowAny]
     serializer_class = SellerSerializer
 
 
-class SellerUpdateAPIView(RetrieveUpdateAPIView):
+class AdminUpdateAPIView(RetrieveUpdateAPIView):
     permission_classes = [AllowAny]
     serializer_class = SellerSerializer
     # queryset = Seller.objects.all()
@@ -71,7 +70,7 @@ class SellerUpdateAPIView(RetrieveUpdateAPIView):
             )
 
 
-class SellerDeleteAPIView(ListAPIView):
+class AdminDeleteAPIView(ListAPIView):
     permission_classes = [AllowAny]
     serializer_class = SellerSerializer
     queryset = Seller.objects.all()
@@ -92,16 +91,16 @@ class SellerDeleteAPIView(ListAPIView):
                 {"msg": 'Seller Does not exist!'})
 
 
-class SellerProductCreateAPIView(CreateAPIView):
+class AdminProductCreateAPIView(CreateAPIView):
     # permission_classes = [IsAuthenticated]
     permission_classes = (AllowAny,)
     serializer_class = SellerProductCreateSerializer
 
     def post(self, request, *args, **kwargs):
-        return super(SellerProductCreateAPIView, self).post(request, *args, **kwargs)
+        return super(AdminProductCreateAPIView, self).post(request, *args, **kwargs)
 
 
-class SellerProductUpdateAPIView(RetrieveUpdateAPIView):
+class AdminProductUpdateAPIView(RetrieveUpdateAPIView):
     permission_classes = [AllowAny]
     # permission_classes = [IsAuthenticated]
     serializer_class = SellerProductUpdateSerializer
@@ -118,71 +117,31 @@ class SellerProductUpdateAPIView(RetrieveUpdateAPIView):
                 {"msg": 'You Can not edit this product!'})
 
 
-class SellerAddNewCategoryAPIView(CreateAPIView):
+class AdminAddNewCategoryAPIView(CreateAPIView):
     permission_classes = (AllowAny,)
     serializer_class = SellerAddNewCategorySerializer
 
     # permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        return super(SellerAddNewCategoryAPIView, self).post(request, *args, **kwargs)
+        return super(AdminAddNewCategoryAPIView, self).post(request, *args, **kwargs)
 
-
-
-
-
-
-
-
-
-
-
-
-class VendorRequestAPIView(CreateAPIView):
-    permission_classes = [AllowAny]
-    serializer_class = VendorRequestSerializer
-
-    def post(self, request, *args, **kwargs):
-        return super(VendorRequestAPIView, self).post(request, *args, **kwargs)
-
-class VendorRequestListAPI(ListAPIView):
-    queryset = VendorRequest.objects.all()
-    serializer_class = VendorRequestSerializer
-
-class VendorCreateAPIView(CreateAPIView):
-    serializer_class = VendorCreateSerializer
-
-class StoreSettingsUpdateAPIView(CreateAPIView):
-    serializer_class = StoreSettingsSerializer
-
-class OrganizationNamesListAPIView(ListAPIView):
-    permission_classes = [AllowAny]
-    queryset = VendorRequest.objects.all()
-    serializer_class = OrganizationNameSerializer
-
-class VendorDetailAPIView(RetrieveUpdateAPIView):
-    serializer_class = VendorDetailSerializer
-
-    def get_object(self):
-        vendor = Vendor.objects.get(vendor_admin=self.request.user)
-        return vendor
-
-class VendorBrandListAPIView(ListAPIView):
+class AdminBrandListAPIView(ListAPIView):
     permission_classes = [AllowAny]
     queryset = Brand.objects.filter(is_active=True)
     serializer_class = VendorBrandSerializer
 
-class VendorUnitListAPIView(ListAPIView):
+class AdminUnitListAPIView(ListAPIView):
     permission_classes = [AllowAny]
     queryset = Units.objects.filter(is_active=True)
     serializer_class = VendorUnitSerializer
 
-class VendorDiscountListAPIView(ListAPIView):
+class AdminDiscountListAPIView(ListAPIView):
     permission_classes = [AllowAny]
     queryset = DiscountTypes.objects.filter(is_active=True)
     serializer_class = DiscountTypeSerializer
 
-class VendorTagListAPIView(ListAPIView):
+class AdminTagListAPIView(ListAPIView):
     permission_classes = [AllowAny]
     # queryset = ProductTags.objects.filter(is_active=True)
     queryset = Tags.objects.filter(is_active=True)
@@ -199,7 +158,7 @@ class VendorVariantListAPIView(ListAPIView):
     queryset = VariantType.objects.filter(is_active=True)
     serializer_class = VariantTypeSerializer
 
-class VendorProductListAPI(ListAPIView):
+class AdminProductListAPI(ListAPIView):
     permission_classes = [AllowAny]
     # permission_classes = [IsAuthenticated]
     serializer_class = VendorProductListSerializer
@@ -212,9 +171,7 @@ class VendorProductListAPI(ListAPIView):
         else:
             raise ValidationError({"msg": 'No active product available or You are not a vendor.'})
 
-
-
-class VendorProductViewAPI(RetrieveAPIView):
+class AdminProductViewAPI(RetrieveAPIView):
     permission_classes = [AllowAny]
     serializer_class = VendorProductViewSerializer
     lookup_field = 'slugi'
@@ -229,23 +186,7 @@ class VendorProductViewAPI(RetrieveAPIView):
             raise ValidationError(
                 {"msg": 'You can not view this product!'})
 
-class VendorProductDetailsAPI(RetrieveAPIView):
-    # permission_classes = [IsAuthenticated]
-    permission_classes = [AllowAny]
-    serializer_class = VendorProductDetailsSerializer
-    lookup_field = 'slugi'
-    lookup_url_kwarg = "slugi"
-
-    def get_object(self):
-        slug = self.kwargs['slugi']
-        query = Product.objects.get(slug=slug)
-        if query:
-            return query
-        else:
-            raise ValidationError(
-                {"msg": 'You are not creator of this product!'})
-
-class VendorProductDeleteAPI(ListAPIView):
+class AdminProductDeleteAPI(ListAPIView):
     permission_classes = [AllowAny]
     # permission_classes = [IsAuthenticated]
     serializer_class = VendorProductListSerializer
@@ -267,26 +208,22 @@ class VendorProductDeleteAPI(ListAPIView):
             raise ValidationError(
                 {"msg": 'Product Does not exist!'})
 
-class VendorVideoProviderListAPIView(ListAPIView):
+class AdminVideoProviderListAPIView(ListAPIView):
     permission_classes = [AllowAny]
     queryset = ProductVideoProvider.objects.filter(is_active=True)
     serializer_class = ProductVideoProviderSerializer
 
-class VendorVatTypeListAPIView(ListAPIView):
+class AdminVatTypeListAPIView(ListAPIView):
     permission_classes = [AllowAny]
     queryset = VatType.objects.filter(is_active=True)
     serializer_class = ProductVatProviderSerializer
 
-
-
-class VendorCategoryListAPIView(ListAPIView):
+class AdminCategoryListAPIView(ListAPIView):
     permission_classes = [AllowAny]
     queryset = Category.objects.filter(is_active=True)
     serializer_class = VendorCategorySerializer
 
-
-
-class VendorUpdateCategoryAPIView(RetrieveUpdateAPIView):
+class AdminUpdateCategoryAPIView(RetrieveUpdateAPIView):
     # permission_classes = [IsAuthenticated]
     permission_classes = [AllowAny]
     serializer_class = VendorUpdateCategorySerializer
@@ -302,7 +239,7 @@ class VendorUpdateCategoryAPIView(RetrieveUpdateAPIView):
             raise ValidationError(
                 {"msg": 'Category does not found!'})
 
-class VendorDeleteCategoryAPIView(ListAPIView):
+class AdminDeleteCategoryAPIView(ListAPIView):
     permission_classes = [AllowAny]
     # permission_classes = [IsAuthenticated]
     serializer_class = VendorCategorySerializer
@@ -324,7 +261,7 @@ class VendorDeleteCategoryAPIView(ListAPIView):
             raise ValidationError(
                 {"msg": 'Category Does not exist!'})
 
-class VendorSubCategoryListAPIView(ListAPIView):
+class AdminSubCategoryListAPIView(ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = VendorSubCategorySerializer
     lookup_field = 'cid'
@@ -340,16 +277,16 @@ class VendorSubCategoryListAPIView(ListAPIView):
                 is_active=True).order_by('-created_at')
         return queryset
 
-class VendorAddNewSubCategoryAPIView(CreateAPIView):
+class AdminAddNewSubCategoryAPIView(CreateAPIView):
     permission_classes = (AllowAny,)
     serializer_class = VendorAddNewSubCategorySerializer
 
     # permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        return super(VendorAddNewSubCategoryAPIView, self).post(request, *args, **kwargs)
+        return super(AdminAddNewSubCategoryAPIView, self).post(request, *args, **kwargs)
 
-class VendorUpdateSubCategoryAPIView(RetrieveUpdateAPIView):
+class AdminUpdateSubCategoryAPIView(RetrieveUpdateAPIView):
     # permission_classes = [IsAuthenticated]
     permission_classes = [AllowAny]
     serializer_class = VendorUpdateCategorySerializer
@@ -365,7 +302,7 @@ class VendorUpdateSubCategoryAPIView(RetrieveUpdateAPIView):
             raise ValidationError(
                 {"msg": 'Sub Category does not found!'})
 
-class VendorDeleteSubCategoryAPIView(ListAPIView):
+class AdminDeleteSubCategoryAPIView(ListAPIView):
     permission_classes = [AllowAny]
     # permission_classes = [IsAuthenticated]
     serializer_class = VendorSubCategorySerializer
@@ -387,8 +324,7 @@ class VendorDeleteSubCategoryAPIView(ListAPIView):
             raise ValidationError(
                 {"msg": 'Sub Category Does not exist!'})
 
-
-class VendorSubSubCategoryListAPIView(ListAPIView):
+class AdminSubSubCategoryListAPIView(ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = VendorSubSubCategorySerializer
     lookup_field = 'sid'
@@ -404,16 +340,16 @@ class VendorSubSubCategoryListAPIView(ListAPIView):
                 is_active=True).order_by('-created_at')
         return queryset
 
-class VendorAddNewSubSubCategoryAPIView(CreateAPIView):
+class AdminAddNewSubSubCategoryAPIView(CreateAPIView):
     # permission_classes = [IsAuthenticated]
     permission_classes = (AllowAny,)
     serializer_class = VendorAddNewSubSubCategorySerializer
 
 
     def post(self, request, *args, **kwargs):
-        return super(VendorAddNewSubSubCategoryAPIView, self).post(request, *args, **kwargs)
+        return super(AdminAddNewSubSubCategoryAPIView, self).post(request, *args, **kwargs)
 
-class VendorUpdateSubSubCategoryAPIView(RetrieveUpdateAPIView):
+class AdminUpdateSubSubCategoryAPIView(RetrieveUpdateAPIView):
     # permission_classes = [IsAuthenticated]
     permission_classes = [AllowAny]
     serializer_class = VendorUpdateSubSubCategorySerializer
@@ -429,7 +365,7 @@ class VendorUpdateSubSubCategoryAPIView(RetrieveUpdateAPIView):
             raise ValidationError(
                 {"msg": 'Sub Sub Category does not found!'})
 
-class VendorDeleteSubSubCategoryAPIView(ListAPIView):
+class AdminDeleteSubSubCategoryAPIView(ListAPIView):
     permission_classes = [AllowAny]
     # permission_classes = [IsAuthenticated]
     serializer_class = VendorSubCategorySerializer

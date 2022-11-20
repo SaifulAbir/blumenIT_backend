@@ -4,7 +4,7 @@ from attr import fields
 from rest_framework import serializers
 
 # from user.serializers import CustomerProfileSerializer
-from vendor.serializers import VendorDetailSerializer
+# from vendor.serializers import VendorDetailSerializer
 from .models import *
 from product.models import Product
 from rest_framework.validators import UniqueTogetherValidator

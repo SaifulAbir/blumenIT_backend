@@ -138,71 +138,6 @@ class SellerAddNewCategorySerializer(serializers.ModelSerializer):
         return category_instance
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Vendor Request serializer
-class VendorRequestSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = VendorRequest
-        fields = ['id', 'first_name', 'last_name', 'organization_name',
-                  'email', 'vendor_type', 'nid', 'trade_license']
-        read_only_field =['first_name', 'last_name', 'organization_name', 'email', 'vendor_type', 'nid', 'trade_license']
-
-# Vendor Create serializer
-class VendorCreateSerializer(serializers.ModelSerializer):
-    # is_verified = serializers.BooleanField(allow_null=True)
-    # request_id = serializers.IntegerField(allow_null=True)
-
-    class Meta:
-        model = Vendor
-        fields = ['id', 'name', 'address', 'vendor_admin',
-                  'vendor_request', 'phone', 'email', 'logo']
-        read_only_fields = ('organization_name', 'vendor_admin', 'vendor_request')
-
-# Vendor Detail serializer
-class VendorDetailSerializer(serializers.ModelSerializer):
-    # vendor_request = VendorRequestSerializer(read_only=True)
-    # vendor_admin = UserRegisterSerializer(read_only=True)
-
-    class Meta:
-        model = Vendor
-        fields = ['id', 'name', 'address', 'phone', 'email', 'organization_name', 'vendor_admin', 'facebook', 'twitter', 'instagram', 'youtube',
-                  'vendor_request', 'logo', 'banner', 'linkedin', 'bio']
-        read_only_fields = ('organization_name', 'vendor_admin', 'vendor_request')
-
-# Organization Name serializer
-class OrganizationNameSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = VendorRequest
-        fields = ['organization_name']
-
-# Store Settings serializer
-class StoreSettingsSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = StoreSettings
-        fields = ['id', 'store_name', 'address', 'email', 'phone', 'logo',
-                  'banner', 'facebook', 'twitter', 'instagram', 'youtube', 'linkedin']
-
-    def create(self, validated_data):
-        user = self.context['request'].user
-        vendor = Vendor.objects.get(vendor_admin=user)
-        store_settings_instance = StoreSettings.objects.create(
-            **validated_data, vendor=vendor)
-        return store_settings_instance
-
 class VendorCategorySerializer(serializers.ModelSerializer):
     class Meta:
         ref_name = "vendor category serializer"
@@ -1121,63 +1056,6 @@ class VendorProductViewSerializer(serializers.ModelSerializer):
             product=obj, is_active=True).distinct()
         return ProductReviewSerializer(selected_product_reviews, many=True).data
 
-class VendorProductDetailsSerializer(serializers.ModelSerializer):
-    product_tags = serializers.SerializerMethodField()
-    product_reviews = serializers.SerializerMethodField()
-    product_combinations = serializers.SerializerMethodField()
-    category = CategorySerializer()
-    sub_category = SubCategorySerializer()
-    sub_sub_category = SubSubCategorySerializer()
-    brand = BrandSerializer()
-    unit = UnitSerializer()
-    discount_type = DiscountTypeSerializer()
-    avg_rating = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Product
-        fields = [
-            'id',
-            'title',
-            'slug',
-            'sku',
-            'avg_rating',
-            'full_description',
-            'short_description',
-            'status',
-            'is_featured',
-            'category',
-            'sub_category',
-            'sub_sub_category',
-            'brand',
-            'unit',
-            'price',
-            'discount_type',
-            'discount_amount',
-            'total_quantity',
-            'shipping_time',
-            'thumbnail',
-            'product_tags',
-            'product_reviews',
-            'product_combinations'
-        ]
-
-    def get_avg_rating(self, ob):
-        return ob.product_review_product.all().aggregate(Avg('rating_number'))['rating_number__avg']
-
-    def get_product_tags(self, obj):
-        selected_product_tags = ProductTags.objects.filter(
-            product=obj).distinct()
-        return ProductTagsSerializer(selected_product_tags, many=True).data
-
-    def get_product_reviews(self, obj):
-        selected_product_reviews = ProductReview.objects.filter(
-            product=obj, is_active=True).distinct()
-        return ProductReviewSerializer(selected_product_reviews, many=True).data
-
-    def get_product_combinations(self, obj):
-        selected_product_combinations = ProductCombinations.objects.filter(
-            product=obj, is_active=True).distinct()
-        return ProductCombinationSerializerForVendorProductDetails(selected_product_combinations, many=True).data
 
 class SellerProductUpdateSerializer(serializers.ModelSerializer):
     product_category_name = serializers.SerializerMethodField()

@@ -1,68 +1,56 @@
 from django.urls import path
 from product.api.views import ProductDetailsAPI
-from vendor.api.views import VendorAddNewSubCategoryAPIView, VendorAddNewSubSubCategoryAPIView, VendorBrandListAPIView,\
-    VendorCategoryListAPIView, VendorDeleteCategoryAPIView, VendorDeleteSubCategoryAPIView, \
-    VendorDeleteSubSubCategoryAPIView, VendorProductDeleteAPI, VendorProductViewAPI, VendorSubCategoryListAPIView,\
-    VendorSubSubCategoryListAPIView, VendorTagListAPIView, VendorUnitListAPIView, VendorProductListAPI,\
-    VendorDiscountListAPIView, SellerCreateAPIView,SellerListAPIView,SellerUpdateAPIView, SellerDeleteAPIView,\
-    VendorUpdateCategoryAPIView, VendorUpdateSubCategoryAPIView, VendorUpdateSubSubCategoryAPIView, \
-    VendorVatTypeListAPIView, VendorVideoProviderListAPIView, SellerProductCreateAPIView, SellerProductUpdateAPIView, \
-    SellerAddNewCategoryAPIView, SellerDetailsAPIView
+from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCategoryAPIView, AdminBrandListAPIView,\
+    AdminCategoryListAPIView, AdminDeleteCategoryAPIView, AdminDeleteSubCategoryAPIView, \
+    AdminDeleteSubSubCategoryAPIView, AdminProductDeleteAPI, AdminProductViewAPI, AdminSubCategoryListAPIView,\
+    AdminSubSubCategoryListAPIView, AdminTagListAPIView, AdminUnitListAPIView,\
+    AdminDiscountListAPIView,\
+    AdminUpdateCategoryAPIView, AdminUpdateSubCategoryAPIView, AdminUpdateSubSubCategoryAPIView, \
+    AdminVatTypeListAPIView, AdminVideoProviderListAPIView, \
+    AdminProductCreateAPIView, AdminCreateAPIView, AdminListAPIView, AdminUpdateAPIView, AdminDeleteAPIView,\
+    AdminDetailsAPIView, AdminProductUpdateAPIView, AdminAddNewCategoryAPIView, AdminProductListAPI
 
 urlpatterns = [
-    path('create-seller/', SellerCreateAPIView.as_view()),
-    path('seller-list/', SellerListAPIView.as_view()),
-    path('seller-update/<int:id>/', SellerUpdateAPIView.as_view()),
-    path('seller-delete/<int:id>/', SellerDeleteAPIView.as_view()),
-    path('seller-details/<int:id>/', SellerDetailsAPIView.as_view()),
+    path('admin/create/', AdminCreateAPIView.as_view()),
+    path('admin/list/', AdminListAPIView.as_view()),
+    path('admin/update/<int:id>/', AdminUpdateAPIView.as_view()),
+    path('admin/delete/<int:id>/', AdminDeleteAPIView.as_view()),
+    path('admin/details/<int:id>/', AdminDetailsAPIView.as_view()),
 
-#     path('vendor-create-product/', VendorProductCreateAPIView.as_view()),
-    path('seller-product-create/', SellerProductCreateAPIView.as_view()),
-    # path('vendor-update-product/<str:slug>/',VendorProductUpdateAPIView.as_view()),
-    path('seller-product-update/<str:slug>/',SellerProductUpdateAPIView.as_view()),
-    path('seller-add-new-category/', SellerAddNewCategoryAPIView.as_view()),
+    path('admin/product-create/', AdminProductCreateAPIView.as_view()),
+    path('admin/product-update/<str:slug>/',AdminProductUpdateAPIView.as_view()),
+    path('admin/add-new-category/', AdminAddNewCategoryAPIView.as_view()),
+
+    path('admin/product-list/', AdminProductListAPI.as_view()),
+
+    path('admin/product-delete/<str:slug>/',AdminProductDeleteAPI.as_view()),
+    path('admin/product-view/<str:slugi>/',AdminProductViewAPI.as_view()),
+
+    path('admin/product-category-list/', AdminCategoryListAPIView.as_view()),
+    path('admin/update-category/<int:ordering_number>/', AdminUpdateCategoryAPIView.as_view()),
+    path('admin/delete-category/<int:ordering_number>/', AdminDeleteCategoryAPIView.as_view()),
+
+    path('admin/product-sub-category-list/<int:cid>/',AdminSubCategoryListAPIView.as_view()),
+    path('admin/add-new-sub-category/', AdminAddNewSubCategoryAPIView.as_view()),
+    path('admin/update-sub-category/<int:ordering_number>/', AdminUpdateSubCategoryAPIView.as_view()),
+    path('admin/delete-sub-category/<int:ordering_number>/', AdminDeleteSubCategoryAPIView.as_view()),
+
+    path('admin/product-sub-sub-category-list/<int:sid>/',AdminSubSubCategoryListAPIView.as_view()),
+    path('admin/add-new-sub-sub-category/', AdminAddNewSubSubCategoryAPIView.as_view()),
+    path('admin/update-sub-sub-category/<int:ordering_number>/', AdminUpdateSubSubCategoryAPIView.as_view()),
+    path('admin/delete-sub-sub-category/<int:ordering_number>/', AdminDeleteSubSubCategoryAPIView.as_view()),
+
+    path('admin/product-brand-list/', AdminBrandListAPIView.as_view()),
+    path('admin/product-unit-list/', AdminUnitListAPIView.as_view()),
+    path('admin/product-discount-list/', AdminDiscountListAPIView.as_view()),
+    path('admin/product-tag-list/', AdminTagListAPIView.as_view()),
+    path('admin/product-video-provider-list/', AdminVideoProviderListAPIView.as_view()),
+    path('admin/product-vat-type-list/', AdminVatTypeListAPIView.as_view()),
 
 
-
-
-    # path('vendor-request/', VendorRequestAPIView.as_view()),
-    # path('vendor-request-list/', VendorRequestListAPI.as_view()),
-    # path('create-vendor/', VendorCreateAPIView.as_view()),
-    # # path('update-vendor/', VendorUpdateAPIView.as_view())
-    # path('organization-list/', OrganizationNamesListAPIView.as_view()),
-    # path('vendor-profile/', VendorDetailAPIView.as_view()),
-    # path('vendor-store-settings-update/', StoreSettingsUpdateAPIView.as_view()),
-    path('vendor-product-category-list/', VendorCategoryListAPIView.as_view()),
-    path('vendor-update-category/<int:ordering_number>/', VendorUpdateCategoryAPIView.as_view()),
-    path('vendor-delete-category/<int:ordering_number>/', VendorDeleteCategoryAPIView.as_view()),
-
-    path('vendor-product-sub-category-list/<int:cid>/',VendorSubCategoryListAPIView.as_view()),
-    path('vendor-add-new-sub-category/', VendorAddNewSubCategoryAPIView.as_view()),
-    path('vendor-update-sub-category/<int:ordering_number>/', VendorUpdateSubCategoryAPIView.as_view()),
-    path('vendor-delete-sub-category/<int:ordering_number>/', VendorDeleteSubCategoryAPIView.as_view()),
-
-    path('vendor-product-sub-sub-category-list/<int:sid>/',VendorSubSubCategoryListAPIView.as_view()),
-    path('vendor-add-new-sub-sub-category/', VendorAddNewSubSubCategoryAPIView.as_view()),
-    path('vendor-update-sub-sub-category/<int:ordering_number>/', VendorUpdateSubSubCategoryAPIView.as_view()),
-    path('vendor-delete-sub-sub-category/<int:ordering_number>/', VendorDeleteSubSubCategoryAPIView.as_view()),
-
-    path('vendor-product-brand-list/', VendorBrandListAPIView.as_view()),
-    path('vendor-product-unit-list/', VendorUnitListAPIView.as_view()),
-    path('vendor-product-discount-list/', VendorDiscountListAPIView.as_view()),
-    path('vendor-product-tag-list/', VendorTagListAPIView.as_view()),
-    path('vendor-product-video-provider-list/', VendorVideoProviderListAPIView.as_view()),
-    path('vendor-product-vat-type-list/', VendorVatTypeListAPIView.as_view()),
+    # # path('update-vendor/', VendorUpdateAPIView.as_view()),
     # path('vendor-product-attribute-list/',
     #      VendorAttributeListAPIView.as_view()),
     # path('vendor-product-variant-list/', VendorVariantListAPIView.as_view()),
-    path('vendor-product-list/', VendorProductListAPI.as_view()),
-    
-#     path('vendor-product-details/<str:slugi>/',
-#          VendorProductDetailsAPI.as_view()),
-
-    path('vendor-product-delete/<str:slug>/',
-         VendorProductDeleteAPI.as_view()),
-    path('vendor-product-view/<str:slugi>/',
-         VendorProductViewAPI.as_view()),
 
 ]

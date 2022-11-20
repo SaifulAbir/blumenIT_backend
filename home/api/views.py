@@ -21,15 +21,15 @@ class HomeDataAPIView(APIView):
         slider_images_serializer = SliderImagesListSerializer(slider_images, many=True, context={"request": request})
 
         # deals of the day
-        today = date.today()
-        deals_of_the_day = DealsOfTheDay.objects.filter(start_date__lte=today, end_date__gte=today, is_active=True)
-        deals_of_the_day_serializer = DealsOfTheDayListSerializer(deals_of_the_day, many=True,
-                                                                  context={"request": request})
+        # today = date.today()
+        # deals_of_the_day = DealsOfTheDay.objects.filter(start_date__lte=today, end_date__gte=today, is_active=True)
+        # deals_of_the_day_serializer = DealsOfTheDayListSerializer(deals_of_the_day, many=True,
+        #                                                           context={"request": request})
 
         # top 20 best seller
-        top_20_best_seller = Product.objects.filter(status='PUBLISH').order_by('-sell_count')[:10]
-        top_20_best_seller_serializer = ProductListSerializer(top_20_best_seller, many=True,
-                                                              context={"request": request})
+        # top_20_best_seller = Product.objects.filter(status='PUBLISH').order_by('-sell_count')[:10]
+        # top_20_best_seller_serializer = ProductListSerializer(top_20_best_seller, many=True,
+        #                                                       context={"request": request})
 
         # top category of the month
         top_best_sellers = Product.objects.filter(status='PUBLISH').order_by('-sell_count')
@@ -42,8 +42,8 @@ class HomeDataAPIView(APIView):
         product_cat_serializer = product_catListSerializer(product_cat, many=True, context={"request": request})
 
         # new arrivals
-        new_arrivals = Product.objects.filter(status='PUBLISH').order_by('-created_at')[:10]
-        new_arrivals_serializer = ProductListSerializer(new_arrivals, many=True, context={"request": request})
+        # new_arrivals = Product.objects.filter(status='PUBLISH').order_by('-created_at')[:10]
+        # new_arrivals_serializer = ProductListSerializer(new_arrivals, many=True, context={"request": request})
 
         # featured
         featured = Product.objects.filter(status='PUBLISH', is_featured=True).order_by('-created_at')
@@ -52,8 +52,8 @@ class HomeDataAPIView(APIView):
         # most popular
         # most_popular = Product.objects.filter(status="ACTIVE").annotate(Avg("product_review_product__rating_number")).
         # order_by('-product_review_product__rating_number')
-        most_popular = Product.objects.filter(status="PUBLISH").annotate(count=Count('product_review_product')).order_by('-count')
-        most_popular_serializer = ProductListSerializer(most_popular, many=True, context={"request": request})
+        popular = Product.objects.filter(status="PUBLISH").annotate(count=Count('product_review_product')).order_by('-count')
+        popular_serializer = ProductListSerializer(popular, many=True, context={"request": request})
 
         # gaming product
         # gaming_product = Product.objects.filter(is_gaming=True, status="PUBLISH").order_by('-created_at')
@@ -65,14 +65,11 @@ class HomeDataAPIView(APIView):
         brand_list_serializer = BrandListSerializer(brand_list, many=True, context={"request": request})
         return Response({
             "slider_images": slider_images_serializer.data,
-            "deals_of_the_day": deals_of_the_day_serializer.data,
-            "top_20_best_seller": top_20_best_seller_serializer.data,
-            "categories_of_the_month": product_cat_serializer.data,
-            "new_arrivals": new_arrivals_serializer.data,
-            "featured": featured_serializer.data,
-            "most_popular": most_popular_serializer.data,
+            "featured_categories": product_cat_serializer.data,
+            "featured_products": featured_serializer.data,
+            "popular_product": popular_serializer.data,
             "gaming_product": gaming_serializer.data,
-            "brand_list_serializer": brand_list_serializer.data
+            "brand_list": brand_list_serializer.data
         })
 
 # # class RecentAPIView(APIView):

@@ -515,8 +515,8 @@ class ProductImages(AbstractTimeStamp):
 class ProductReview(AbstractTimeStamp):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True,
                                 blank=True, related_name='product_review_product')
-    vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT,
-                               related_name='product_review_vendor', blank=True, null=True)
+    seller = models.ForeignKey(Seller, on_delete=models.PROTECT,
+                               related_name='product_review_seller', blank=True, null=True)
     user = models.ForeignKey(User, on_delete=models.SET_NULL,
                              related_name='product_review_user', blank=True, null=True)
     rating_number = models.IntegerField(default=0)

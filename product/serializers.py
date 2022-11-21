@@ -21,14 +21,16 @@ class SellerDataSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'address', 'phone', 'email', 'logo', 'is_active']
 
 class UserDataSerializer(serializers.ModelSerializer):
+    avatar = serializers.ImageField(source="user_customer_profile.avatar",read_only=True)
     class Meta:
         model = User
         fields = [
             'id',
-            'first_name',
-            'last_name',
-            'email'
+            'username',
+            'email',
+            'avatar'
         ]
+
 
 
 # Store Data serializer
@@ -165,19 +167,39 @@ class ProductTagsSerializer(serializers.ModelSerializer):
 
 # Product Review Create serializer
 class ProductReviewCreateSerializer(serializers.ModelSerializer):
+    # user = UserDataSerializer(read_only=True)
+    user = serializers.SerializerMethodField()
     class Meta:
         model = ProductReview
         fields = ['id', 'user', 'product', 'rating_number', 'review_text']
+
+    def get_user(self, obj):
+        try:
+            serializer = UserDataSerializer(instance=obj.user, many=False, context={
+                                                'request': self.context['request']})
+            return serializer.data
+        except:
+            return []
 
 
 # Product Review serializer
 class ProductReviewSerializer(serializers.ModelSerializer):
     user = UserDataSerializer()
+    # user = serializers.SerializerMethodField()
     created_at = serializers.DateTimeField(format="%d %B, %Y %I:%M %p")
 
     class Meta:
         model = ProductReview
         fields = ['id', 'user', 'rating_number', 'review_text', 'created_at']
+
+    # def get_user(self, obj):
+    #     # return obj.user.username
+    #     # try:
+    #         serializer = UserDataSerializer(instance=obj.user, many=True, context={
+    #                                             'request': self.context['request']})
+    #         return serializer.data
+    #     # except:
+    #     #     return []
 
 
 class ProductImageSerializer(serializers.ModelSerializer):

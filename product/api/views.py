@@ -174,8 +174,8 @@ class ProductSearchAPI(ListAPIView):
 
 
 class ProductReviewCreateAPIView(CreateAPIView):
-    # permission_classes = (AllowAny,)
-    permission_classes = [IsAuthenticated]
+    permission_classes = (AllowAny,)
+    # permission_classes = [IsAuthenticated]
     serializer_class = ProductReviewCreateSerializer
 
     def post(self, request, *args, **kwargs):

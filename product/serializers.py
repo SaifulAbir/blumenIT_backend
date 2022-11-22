@@ -356,7 +356,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             product=obj, is_active=True).distinct()
         return ProductCombinationSerializerForProductDetails(selected_product_combinations, many=True).data
 
-# Product List serializer
+
 class ProductListSerializer(serializers.ModelSerializer):
     product_tags = serializers.SerializerMethodField()
     product_reviews = serializers.SerializerMethodField()
@@ -418,6 +418,34 @@ class ProductListSerializer(serializers.ModelSerializer):
             product=obj, is_active=True).distinct()
         return ProductCombinationSerializerForProductDetails(selected_product_combinations, many=True).data
 
+class ProductListBySerializer(serializers.ModelSerializer):
+    product_tags = serializers.SerializerMethodField()
+    discount_type = DiscountTypeSerializer()
+    avg_rating = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Product
+        fields = [
+            'id',
+            'title',
+            'slug',
+            'avg_rating',
+            'status',
+            'price',
+            'discount_type',
+            'discount_amount',
+            'total_quantity',
+            'thumbnail',
+            'product_tags'
+        ]
+
+    def get_avg_rating(self, ob):
+        return ob.product_review_product.all().aggregate(Avg('rating_number'))['rating_number__avg']
+
+    def get_product_tags(self, obj):
+        selected_product_tags = ProductTags.objects.filter(
+            product=obj).distinct()
+        return ProductTagsSerializer(selected_product_tags, many=True).data
 
 # work with pc builder start
 class PcBuilderSpecificationValuesSerializer(serializers.ModelSerializer):
@@ -501,3 +529,5 @@ class PcBuilderDataListSerializer(serializers.ModelSerializer):
             return CategoryFilterAttributeSerializer(selected_category_filtering_attributes, many=True).data
         except:
             return []
+
+# work with pc builder end

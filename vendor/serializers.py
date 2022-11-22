@@ -13,8 +13,6 @@ from django.db.models import Avg
 from django.utils import timezone
 
 
-# Seller Create serializer
-
 class SellerCreateSerializer(serializers.ModelSerializer):
     name = serializers.CharField(required=True)
     email = serializers.EmailField(required=True)
@@ -41,9 +39,6 @@ class SellerCreateSerializer(serializers.ModelSerializer):
                                                 email=email_get_data)
         return seller_instance
 
-
-# seller update
-
 class SellerUpdateSerializer(serializers.ModelSerializer):
     name = serializers.CharField(required=True)
     email = serializers.EmailField(required=True)
@@ -69,7 +64,6 @@ class SellerUpdateSerializer(serializers.ModelSerializer):
         validated_data.update({ "email": email_get_data, "phone": phone_get_data})
         return super().update(instance, validated_data)
 
-
 class SellerSerializer(serializers.ModelSerializer):
     logo = serializers.ImageField(allow_null=True)
 
@@ -77,14 +71,11 @@ class SellerSerializer(serializers.ModelSerializer):
         model = Seller
         fields = ['id', 'name', 'address', 'phone', 'email', 'logo', 'is_active']
 
-
-# Seller Detail serializer
 class SellerDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Seller
         fields = ['id', 'name', 'email', 'address', 'phone', 'logo']
-
 
 class SellerAddNewCategorySerializer(serializers.ModelSerializer):
     title = serializers.CharField(required= True)
@@ -136,7 +127,6 @@ class SellerAddNewCategorySerializer(serializers.ModelSerializer):
                     pass
 
         return category_instance
-
 
 class VendorCategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -285,13 +275,11 @@ class VendorUpdateSubSubCategorySerializer(serializers.ModelSerializer):
         validated_data.update({"updated_at": timezone.now(), "title":title_get_data, "ordering_number":ordering_number_get_data})
         return super().update(instance, validated_data)
 
-# Vendor Brand serializer
 class VendorBrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
         fields = ['id', 'title']
 
-# Vendor Unit serializer
 class VendorUnitSerializer(serializers.ModelSerializer):
     class Meta:
         model = Units
@@ -347,7 +335,6 @@ class VendorProductListSerializer(serializers.ModelSerializer):
 
     def get_avg_rating(self, obj):
         return obj.product_review_product.all().aggregate(Avg('rating_number'))['rating_number__avg']
-
 
 class ProductCombinationSerializer(serializers.ModelSerializer):
     # sku = serializers.CharField(required=False)
@@ -1056,7 +1043,6 @@ class VendorProductViewSerializer(serializers.ModelSerializer):
             product=obj, is_active=True).distinct()
         return ProductReviewSerializer(selected_product_reviews, many=True).data
 
-
 class SellerProductUpdateSerializer(serializers.ModelSerializer):
     product_category_name = serializers.SerializerMethodField()
     product_sub_category_name = serializers.SerializerMethodField()
@@ -1598,3 +1584,17 @@ class ProductVatProviderSerializer(serializers.ModelSerializer):
         ref_name = "product vat provider serializer"
         model = VatType
         fields = ['id', 'title']
+
+class FlashDealCreateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = FlashDealInfo
+        fields = [
+                    'id',
+                    'title',
+                    'background_color',
+                    'text_color',
+                    'banner',
+                    'start_date',
+                    'end_date'
+                ]

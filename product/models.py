@@ -66,7 +66,7 @@ class Category(AbstractTimeStamp):
         db_table = 'category'
 
     def __str__(self):
-        return self.title
+        return 'id: ' + str(self.id) + ' title: ' + self.title
 
 
 class SubCategory(AbstractTimeStamp):
@@ -83,7 +83,7 @@ class SubCategory(AbstractTimeStamp):
         db_table = 'sub_category'
 
     def __str__(self):
-        return self.title
+        return 'id: ' + str(self.id) + ' title: ' + self.title
 
 
 class SubSubCategory(AbstractTimeStamp):
@@ -102,7 +102,7 @@ class SubSubCategory(AbstractTimeStamp):
         db_table = 'sub_sub_category'
 
     def __str__(self):
-        return self.title
+        return 'id: ' + str(self.id) + ' title: ' + self.title
 
 
 class CategoryFilterAttributes(AbstractTimeStamp):

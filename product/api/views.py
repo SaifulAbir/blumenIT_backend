@@ -120,7 +120,17 @@ class ProductListByCategoryAPI(ListAPIView):
     lookup_field = 'cid'
     lookup_url_kwarg = "cid"
 
+    
+
     def get_queryset(self):
+        # work with dynamic pagination page_size
+        try:
+            pagination = self.kwargs['pagination']
+        except:
+            pagination = 10
+        self.pagination_class.page_size = pagination
+
+
         cid = self.kwargs['cid']
         if cid:
             queryset = Product.objects.filter(category=cid, status='PUBLISH').order_by('-created_at')
@@ -176,6 +186,14 @@ class ProductListBySubCategoryAPI(ListAPIView):
     lookup_url_kwarg = "subcid"
 
     def get_queryset(self):
+        # work with dynamic pagination page_size
+        try:
+            pagination = self.kwargs['pagination']
+        except:
+            pagination = 10
+        self.pagination_class.page_size = pagination
+
+
         subcid = self.kwargs['subcid']
         if subcid:
             queryset = Product.objects.filter(
@@ -218,6 +236,14 @@ class ProductListBySubSubCategoryAPI(ListAPIView):
     lookup_url_kwarg = "subsubcid"
 
     def get_queryset(self):
+        # work with dynamic pagination page_size
+        try:
+            pagination = self.kwargs['pagination']
+        except:
+            pagination = 10
+        self.pagination_class.page_size = pagination
+
+
         subsubcid = self.kwargs['subsubcid']
         if subsubcid:
             queryset = Product.objects.filter(

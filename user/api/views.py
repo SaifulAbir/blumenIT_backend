@@ -143,10 +143,16 @@ class SendOTPAPIView(CreateAPIView):
             expired_time=otp_sending_time
         )
         otp_model.save()
-        user= User.objects.get(phone = phone)
-        return Response(
-            data={"user_id": user.id if user else None, "sent_otp": sent_otp},
-            status=status.HTTP_201_CREATED)
+        try:
+            user = User.objects.get(phone = phone)
+            return Response(
+                data={"user_id": user.id if user else None, "sent_otp": sent_otp},
+                status=status.HTTP_201_CREATED)
+        except User.DoesNotExist:
+            user = None
+            return Response(
+                data={"user_id": user.id if user else None, "sent_otp": sent_otp if user else None},
+                status=status.HTTP_404_NOT_FOUND)
 
 
 class ReSendOTPAPIView(CreateAPIView):

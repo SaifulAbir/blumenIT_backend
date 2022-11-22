@@ -9,11 +9,13 @@ urlpatterns = [
     path('product-details/<str:slug>/', ProductDetailsAPI.as_view()),
     path('product-list/', ProductListAPI.as_view()),
     path('search-product/', ProductSearchAPI.as_view()),
-    path('product-list-by-category/<int:cid>/',
+    path('product-list-by-category/<int:cid>/<int:pagination>/',
          ProductListByCategoryAPI.as_view()),
-    path('product-list-by-sub-category/<int:subcid>/',
+    path('category-filtering-attributes/<int:cid>/',
+         CategoryFilterAttributesAPI.as_view()),
+    path('product-list-by-sub-category/<int:subcid>/<int:pagination>/',
          ProductListBySubCategoryAPI.as_view()),
-    path('product-list-by-sub-sub-category/<int:subsubcid>/',
+    path('product-list-by-sub-sub-category/<int:subsubcid>/<int:pagination>/',
          ProductListBySubSubCategoryAPI.as_view()),
     path('create-product-review/', ProductReviewCreateAPIView.as_view()),
     path('vendor-product-list-for-frontend/<int:vid>/',
@@ -22,13 +24,8 @@ urlpatterns = [
     path('admin-brand-delete/<int:id>/', BrandDeleteAPIView.as_view()),
 
 
-     path('pc_builder/',PcBuilderChooseAPIView.as_view()),
-#     path('pc_builder/<int:component_id>/<str:type>/',PcBuilderChooseAPIView.as_view()),
-     # path('pc_builder/?component_id=<int:component_id>',PcBuilderChooseAPIView.as_view()),
-     # path('pc_builder/?component_id=<int:component_id>&type=<str:type>',PcBuilderChooseAPIView.as_view()),
-     # re_path( r'^pc_builder/(?P<component_id>[0-9]+)/$', PcBuilderChooseAPIView.as_view() ),
-     # re_path( r'^pc_builder/(?P<component_id>[0-9]+)/$', PcBuilderChooseAPIView.as_view() ),
-     # re_path(r'^pc_builder/(?P<component_id>\d+)&(?P<type>[\w.@+-]+)/$', PcBuilderChooseAPIView.as_view()),
+    path('pc_builder/',PcBuilderChooseAPIView.as_view()),
+
 
     # store front api
     # path('store-fetured-product-list/', FeaturedProductListStoreFront.as_view()),

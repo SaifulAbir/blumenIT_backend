@@ -21,14 +21,16 @@ class SellerDataSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'address', 'phone', 'email', 'logo', 'is_active']
 
 class UserDataSerializer(serializers.ModelSerializer):
+    avatar = serializers.ImageField(source="user_customer_profile.avatar",read_only=True)
     class Meta:
         model = User
         fields = [
             'id',
-            'first_name',
-            'last_name',
-            'email'
+            'username',
+            'email',
+            'avatar'
         ]
+
 
 
 # Store Data serializer
@@ -165,19 +167,39 @@ class ProductTagsSerializer(serializers.ModelSerializer):
 
 # Product Review Create serializer
 class ProductReviewCreateSerializer(serializers.ModelSerializer):
+    # user = UserDataSerializer(read_only=True)
+    user = serializers.SerializerMethodField()
     class Meta:
         model = ProductReview
         fields = ['id', 'user', 'product', 'rating_number', 'review_text']
+
+    def get_user(self, obj):
+        try:
+            serializer = UserDataSerializer(instance=obj.user, many=False, context={
+                                                'request': self.context['request']})
+            return serializer.data
+        except:
+            return []
 
 
 # Product Review serializer
 class ProductReviewSerializer(serializers.ModelSerializer):
     user = UserDataSerializer()
+    # user = serializers.SerializerMethodField()
     created_at = serializers.DateTimeField(format="%d %B, %Y %I:%M %p")
 
     class Meta:
         model = ProductReview
         fields = ['id', 'user', 'rating_number', 'review_text', 'created_at']
+
+    # def get_user(self, obj):
+    #     # return obj.user.username
+    #     # try:
+    #         serializer = UserDataSerializer(instance=obj.user, many=True, context={
+    #                                             'request': self.context['request']})
+    #         return serializer.data
+    #     # except:
+    #     #     return []
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
@@ -334,7 +356,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             product=obj, is_active=True).distinct()
         return ProductCombinationSerializerForProductDetails(selected_product_combinations, many=True).data
 
-# Product List serializer
+
 class ProductListSerializer(serializers.ModelSerializer):
     product_tags = serializers.SerializerMethodField()
     product_reviews = serializers.SerializerMethodField()
@@ -396,6 +418,34 @@ class ProductListSerializer(serializers.ModelSerializer):
             product=obj, is_active=True).distinct()
         return ProductCombinationSerializerForProductDetails(selected_product_combinations, many=True).data
 
+class ProductListBySerializer(serializers.ModelSerializer):
+    product_tags = serializers.SerializerMethodField()
+    discount_type = DiscountTypeSerializer()
+    avg_rating = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Product
+        fields = [
+            'id',
+            'title',
+            'slug',
+            'avg_rating',
+            'status',
+            'price',
+            'discount_type',
+            'discount_amount',
+            'total_quantity',
+            'thumbnail',
+            'product_tags'
+        ]
+
+    def get_avg_rating(self, ob):
+        return ob.product_review_product.all().aggregate(Avg('rating_number'))['rating_number__avg']
+
+    def get_product_tags(self, obj):
+        selected_product_tags = ProductTags.objects.filter(
+            product=obj).distinct()
+        return ProductTagsSerializer(selected_product_tags, many=True).data
 
 # work with pc builder start
 class PcBuilderSpecificationValuesSerializer(serializers.ModelSerializer):
@@ -479,3 +529,5 @@ class PcBuilderDataListSerializer(serializers.ModelSerializer):
             return CategoryFilterAttributeSerializer(selected_category_filtering_attributes, many=True).data
         except:
             return []
+
+# work with pc builder end

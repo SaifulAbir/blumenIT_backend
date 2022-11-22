@@ -8,8 +8,10 @@ from rest_framework.views import APIView
 from home.models import ProductView
 from product import serializers
 from product.serializers import ProductDetailsSerializer, ProductListSerializer, ProductReviewCreateSerializer, BrandSerializer,\
-    StoreCategoryAPIViewListSerializer, PcBuilderDataListSerializer, CategoryFilterAttributeSerializer
-from product.models import Category, Product, Brand, CategoryFilterAttributes, AttributeValues
+    StoreCategoryAPIViewListSerializer, PcBuilderDataListSerializer, CategoryFilterAttributeSerializer, ProductListBySerializer
+
+from product.models import Category, Product, Brand, AttributeValues
+from product.models import CategoryFilterAttributes
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework import status
@@ -93,32 +95,105 @@ class ProductListAPI(ListAPIView):
     pagination_class = ProductCustomPagination
 
 
+# class ProductListByCategoryAPI(APIView):
+#     permission_classes = (AllowAny,)
+#     pagination_class = ProductCustomPagination()
+
+#     def get(self, request, *args, **kwargs):
+#         cid =kwargs.get('cid')
+
+#         product_list = Product.objects.filter(category=cid, status='PUBLISH').order_by('-created_at')
+#         product_list_serializer = ProductListSerializer(product_list, many=True, context={"request": request})
+
+#         filtering_attribute_list = CategoryFilterAttributes.objects.filter(category=cid, is_active=True).distinct()
+#         product_cat_serializer =  CategoryFilterAttributeSerializer(filtering_attribute_list, many=True)
+
+#         return Response({
+#             "product_list": product_list_serializer.data,
+#             "filtering_attributes_list": product_cat_serializer.data,
+#         })
+
 class ProductListByCategoryAPI(ListAPIView):
     permission_classes = (AllowAny,)
+    serializer_class = ProductListBySerializer
+    pagination_class = ProductCustomPagination
+    lookup_field = 'cid'
+    lookup_url_kwarg = "cid"
 
-    def get(self, request, *args, **kwargs):
-        cid =kwargs.get('cid')
+    
 
-        product_list = Product.objects.filter(category=cid, status='PUBLISH').order_by('-created_at')
-        product_list_serializer = ProductListSerializer(product_list, many=True, context={"request": request})
+    def get_queryset(self):
+        # work with dynamic pagination page_size
+        try:
+            pagination = self.kwargs['pagination']
+        except:
+            pagination = 10
+        self.pagination_class.page_size = pagination
 
-        filtering_attribute_list = CategoryFilterAttributes.objects.filter(category=cid, is_active=True).distinct()
-        product_cat_serializer =  CategoryFilterAttributeSerializer(filtering_attribute_list, many=True)
 
-        return Response({
-            "product_list": product_list_serializer.data,
-            "filtering_attributes_list": product_cat_serializer.data,
-        })
+        cid = self.kwargs['cid']
+        if cid:
+            queryset = Product.objects.filter(category=cid, status='PUBLISH').order_by('-created_at')
+        else:
+            queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
+
+        # filtering start
+        request = self.request
+        filter_price = request.GET.get('filter_price')
+        attr_value_ids = request.GET.get('attr_value_ids')
+
+        if filter_price:
+            price_list = []
+            filter_prices = filter_price.split("-")
+            for filter_price in filter_prices:
+                price_list.append(int(filter_price))
+
+            min_price = price_list[0]
+            max_price = price_list[1]
+            queryset = queryset.filter(price__range=(min_price, max_price)).order_by('-created_at')
+
+        if attr_value_ids:
+            attr_value_ids_list = attr_value_ids.split(",")
+            for attr_value_id in attr_value_ids_list:
+                attr_value_id = int(attr_value_id)
+                attr_id = AttributeValues.objects.get(id = attr_value_id).attribute
+                cat_id = CategoryFilterAttributes.objects.get(attribute = attr_id).category.id
+                queryset = queryset.filter(Q(category__id=cat_id)).order_by('-created_at')
+
+
+        return queryset
+
+class CategoryFilterAttributesAPI(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = CategoryFilterAttributeSerializer
+    lookup_field = 'cid'
+    lookup_url_kwarg = "cid"
+
+    def get_queryset(self):
+        cid = self.kwargs['cid']
+        if cid:
+            queryset = CategoryFilterAttributes.objects.filter(category=cid, is_active=True).order_by('-created_at')
+        else:
+            queryset = CategoryFilterAttributes.objects.get(is_active=True).order_by('-created_at')
+        return queryset
 
 
 class ProductListBySubCategoryAPI(ListAPIView):
     permission_classes = (AllowAny,)
-    serializer_class = ProductListSerializer
+    serializer_class = ProductListBySerializer
     pagination_class = ProductCustomPagination
     lookup_field = 'subcid'
     lookup_url_kwarg = "subcid"
 
     def get_queryset(self):
+        # work with dynamic pagination page_size
+        try:
+            pagination = self.kwargs['pagination']
+        except:
+            pagination = 10
+        self.pagination_class.page_size = pagination
+
+
         subcid = self.kwargs['subcid']
         if subcid:
             queryset = Product.objects.filter(
@@ -126,17 +201,49 @@ class ProductListBySubCategoryAPI(ListAPIView):
         else:
             queryset = Product.objects.filter(
                 status='PUBLISH').order_by('-created_at')
+
+        # filtering start
+        request = self.request
+        filter_price = request.GET.get('filter_price')
+        attr_value_ids = request.GET.get('attr_value_ids')
+
+        if filter_price:
+            price_list = []
+            filter_prices = filter_price.split("-")
+            for filter_price in filter_prices:
+                price_list.append(int(filter_price))
+
+            min_price = price_list[0]
+            max_price = price_list[1]
+            queryset = queryset.filter(price__range=(min_price, max_price)).order_by('-created_at')
+
+        if attr_value_ids:
+            attr_value_ids_list = attr_value_ids.split(",")
+            for attr_value_id in attr_value_ids_list:
+                attr_value_id = int(attr_value_id)
+                attr_id = AttributeValues.objects.get(id = attr_value_id).attribute
+                cat_id = CategoryFilterAttributes.objects.get(attribute = attr_id).category.id
+                queryset = queryset.filter(Q(category__id=cat_id)).order_by('-created_at')
+
         return queryset
 
 
 class ProductListBySubSubCategoryAPI(ListAPIView):
     permission_classes = (AllowAny,)
-    serializer_class = ProductListSerializer
+    serializer_class = ProductListBySerializer
     pagination_class = ProductCustomPagination
     lookup_field = 'subsubcid'
     lookup_url_kwarg = "subsubcid"
 
     def get_queryset(self):
+        # work with dynamic pagination page_size
+        try:
+            pagination = self.kwargs['pagination']
+        except:
+            pagination = 10
+        self.pagination_class.page_size = pagination
+
+
         subsubcid = self.kwargs['subsubcid']
         if subsubcid:
             queryset = Product.objects.filter(
@@ -144,6 +251,30 @@ class ProductListBySubSubCategoryAPI(ListAPIView):
         else:
             queryset = Product.objects.filter(
                 status='PUBLISH').order_by('-created_at')
+
+        # filtering start
+        request = self.request
+        filter_price = request.GET.get('filter_price')
+        attr_value_ids = request.GET.get('attr_value_ids')
+
+        if filter_price:
+            price_list = []
+            filter_prices = filter_price.split("-")
+            for filter_price in filter_prices:
+                price_list.append(int(filter_price))
+
+            min_price = price_list[0]
+            max_price = price_list[1]
+            queryset = queryset.filter(price__range=(min_price, max_price)).order_by('-created_at')
+
+        if attr_value_ids:
+            attr_value_ids_list = attr_value_ids.split(",")
+            for attr_value_id in attr_value_ids_list:
+                attr_value_id = int(attr_value_id)
+                attr_id = AttributeValues.objects.get(id = attr_value_id).attribute
+                cat_id = CategoryFilterAttributes.objects.get(attribute = attr_id).category.id
+                queryset = queryset.filter(Q(category__id=cat_id)).order_by('-created_at')
+
         return queryset
 
 
@@ -174,8 +305,8 @@ class ProductSearchAPI(ListAPIView):
 
 
 class ProductReviewCreateAPIView(CreateAPIView):
-    # permission_classes = (AllowAny,)
-    permission_classes = [IsAuthenticated]
+    permission_classes = (AllowAny,)
+    # permission_classes = [IsAuthenticated]
     serializer_class = ProductReviewCreateSerializer
 
     def post(self, request, *args, **kwargs):

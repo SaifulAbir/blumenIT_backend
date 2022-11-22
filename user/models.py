@@ -92,6 +92,7 @@ class CustomerProfile(AbstractTimeStamp):
     address = models.CharField(max_length=255, null=True, blank=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, null=True, blank=True)
     birth_date = models.DateField(_("Birthday"), null=True, blank=True)
+    avatar = models.ImageField(upload_to='customerAvatar', blank=True, null=True)
 
     def __str__(self):
         return self.user.email

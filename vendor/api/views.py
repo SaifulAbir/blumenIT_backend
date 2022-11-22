@@ -17,7 +17,7 @@ from vendor.serializers import VendorAddNewSubCategorySerializer, VendorAddNewSu
     VendorSubSubCategorySerializer, VendorUnitSerializer, SellerSerializer, ProductAttributesSerializer, \
     ProductVideoProviderSerializer, ProductVatProviderSerializer, VendorUpdateCategorySerializer,\
     VendorUpdateSubSubCategorySerializer, SellerProductCreateSerializer, SellerAddNewCategorySerializer, \
-    SellerCreateSerializer
+    SellerCreateSerializer, FlashDealCreateSerializer
 from user.models import User
 from cart.models import Coupon
 from rest_framework.exceptions import ValidationError
@@ -386,3 +386,12 @@ class AdminDeleteSubSubCategoryAPIView(ListAPIView):
         else:
             raise ValidationError(
                 {"msg": 'Sub Sub Category Does not exist!'})
+
+class AdminFlashDealCreateAPIView(CreateAPIView):
+    # permission_classes = [IsAuthenticated]
+    permission_classes = (AllowAny,)
+    serializer_class = FlashDealCreateSerializer
+
+
+    def post(self, request, *args, **kwargs):
+        return super(AdminFlashDealCreateAPIView, self).post(request, *args, **kwargs)

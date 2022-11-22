@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'home',
     'vendor_admin',
     'website',
+    'blog',
     # 'admin_lte',
     # 'django_countries',
 ]

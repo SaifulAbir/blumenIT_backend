@@ -109,23 +109,31 @@ class SendOTPAPIView(CreateAPIView):
         phone = check_dict_data_rise_error("phone", request_data=request.data, arrise=True)
 
         if is_login == "false":
-            user_obj = User.objects.filter(Q(email=email) | Q(phone=phone))
-            for user_data in user_obj:
-                if user_data.email == email:
+            try:
+                user_obj = User.objects.get(Q(email=email) | Q(phone=phone))
+            except User.DoesNotExist:
+                user_obj = None
+            if user_obj and user_obj.is_active is True:
+            # for user_data in user_obj:
+                if user_obj.email == email:
                     return Response({"details": "Email already exists"}, status=status.HTTP_400_BAD_REQUEST)
-                if user_data.phone == phone:
+                if user_obj.phone == phone:
                     return Response({"details": "Phone number already exists"}, status=status.HTTP_400_BAD_REQUEST)
 
-            user = User.objects.create(
-                email=email,
-                phone=phone,
-                username=email,
-                is_customer=True
-            )
+            if not user_obj:
+                user = User.objects.create(
+                    email=email,
+                    phone=phone,
+                    username=email,
+                    is_customer=True
+                )
 
-            user.is_active = False
-            user.set_password(phone)
-            user.save()
+                user.is_active = False
+                user.set_password(phone)
+                user.save()
+            if user_obj:
+                user_obj.set_password(phone)
+                user_obj.save()
         # Generate OTP Here
         sent_otp = OTPManager().initialize_otp_and_sms_otp(phone)
         otp_sending_time = datetime.now(pytz.timezone('Asia/Dhaka'))
@@ -151,7 +159,7 @@ class ReSendOTPAPIView(CreateAPIView):
         sent_otp = OTPManager().initialize_otp_and_sms_otp(contact_number)
         otp_sending_time = datetime.now(pytz.timezone('Asia/Dhaka'))
         try:
-            otp_obj = OTPModel.objects.get(contact_number=contact_number)
+            otp_obj = OTPModel.objects.filter(contact_number=contact_number).first()
         except OTPModel.DoesNotExist:
             otp_obj = None
         if not otp_obj:

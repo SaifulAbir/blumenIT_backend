@@ -10,17 +10,9 @@ from cart.serializers import CheckoutDetailsSerializer, CheckoutSerializer, \
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from django.shortcuts import get_object_or_404
-from user.models import User
 from product.models import Product, DiscountTypes
 from cart.models import BillingAddress, Order, OrderItem, PaymentType, Coupon, UseRecordOfCoupon, Wishlist, VendorOrder, \
     DeliveryAddress
-from django.utils import timezone
-from django.core.exceptions import ObjectDoesNotExist
-from drf_yasg.utils import swagger_auto_schema
-from django.utils import timezone
-
-from vendor.models import Vendor
 
 
 
@@ -487,14 +479,14 @@ class DeliveryAddressListAPIView(ListAPIView):
         return queryset
 
 
-# class BillingAddressDeleteAPIView(DestroyAPIView):
-#     serializer_class = BillingAddressSerializer
-#     queryset = BillingAddress.objects.all()
-#     lookup_field = 'id'
-#     lookup_url_kwarg = "id"
+class BillingAddressDeleteAPIView(DestroyAPIView):
+    serializer_class = DeliveryAddressSerializer
+    queryset = BillingAddress.objects.all()
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
 
-#     def delete(self, request, *args, **kwargs):
-#         return super(BillingAddressDeleteAPIView, self).delete(request, *args, **kwargs)
+    def delete(self, request, *args, **kwargs):
+        return super(BillingAddressDeleteAPIView, self).delete(request, *args, **kwargs)
 
 
 # class UserOrderListAPIView(ListAPIView):

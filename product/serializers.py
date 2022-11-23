@@ -140,9 +140,6 @@ class TagsSerializer(serializers.ModelSerializer):
         model = Tags
         fields = ['id', 'title']
 
-# Product Tags serializer
-
-
 class ProductTagsSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
 
@@ -157,15 +154,6 @@ class ProductTagsSerializer(serializers.ModelSerializer):
             tag_title = ''
         return tag_title
 
-
-# Product Attributes serializer
-# class ProductAttributesSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = ProductAttributes
-#         fields = ['id', 'title']
-
-
-# Product Review Create serializer
 class ProductReviewCreateSerializer(serializers.ModelSerializer):
     # user = UserDataSerializer(read_only=True)
     user = serializers.SerializerMethodField()
@@ -181,8 +169,6 @@ class ProductReviewCreateSerializer(serializers.ModelSerializer):
         except:
             return []
 
-
-# Product Review serializer
 class ProductReviewSerializer(serializers.ModelSerializer):
     user = UserDataSerializer()
     # user = serializers.SerializerMethodField()
@@ -191,16 +177,6 @@ class ProductReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductReview
         fields = ['id', 'user', 'rating_number', 'review_text', 'created_at']
-
-    # def get_user(self, obj):
-    #     # return obj.user.username
-    #     # try:
-    #         serializer = UserDataSerializer(instance=obj.user, many=True, context={
-    #                                             'request': self.context['request']})
-    #         return serializer.data
-    #     # except:
-    #     #     return []
-
 
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -280,8 +256,32 @@ class ProductCombinationSerializerForProductDetails(serializers.ModelSerializer)
             product_combination=obj, is_active=True).distinct()
         return ProductCombinationsVariantsSerializer(selected_variant, many=True).data
 
+class SpecificationValuesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SpecificationValue
+        fields = [
+            'id',
+            'key',
+            'value'
+        ]
 
-# Mega Menu Data serializer
+class SpecificationSerializer(serializers.ModelSerializer):
+    specification_values = serializers.SerializerMethodField('get_existing_specification_values')
+    title_name = serializers.CharField(source="title.title", read_only=True)
+    class Meta:
+        model = Specification
+        fields = [
+            'id',
+            'title',
+            'title_name',
+            'specification_values'
+        ]
+
+    def get_existing_specification_values(self, instense):
+        queryset = SpecificationValue.objects.filter(specification=instense.id, is_active = True)
+        serializer = SpecificationValuesSerializer(instance=queryset, many=True)
+        return serializer.data
+
 class StoreCategoryAPIViewListSerializer(serializers.ModelSerializer):
     sub_category = serializers.SerializerMethodField()
 
@@ -294,20 +294,16 @@ class StoreCategoryAPIViewListSerializer(serializers.ModelSerializer):
             category=obj).distinct()
         return SubCategorySerializerForMegaMenu(selected_sub_category, many=True).data
 
-
-# Product Details serializer
 class ProductDetailsSerializer(serializers.ModelSerializer):
     product_tags = serializers.SerializerMethodField()
     product_reviews = serializers.SerializerMethodField()
-    product_combinations = serializers.SerializerMethodField()
     seller = SellerDataSerializer()
-    category = CategorySerializer()
-    sub_category = SubCategorySerializer()
-    sub_sub_category = SubSubCategorySerializer()
     brand = BrandSerializer()
     unit = UnitSerializer()
     discount_type = DiscountTypeSerializer()
     avg_rating = serializers.SerializerMethodField()
+    product_images = serializers.SerializerMethodField()
+    product_specification = serializers.SerializerMethodField('get_product_specification')
 
     class Meta:
         model = Product
@@ -319,23 +315,28 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             'avg_rating',
             'full_description',
             'short_description',
-            'status',
-            'is_featured',
+            'active_short_description',
             'seller',
-            'category',
-            'sub_category',
-            'sub_sub_category',
             'brand',
             'unit',
             'price',
             'discount_type',
             'discount_amount',
-            'total_quantity',
+            'discount_start_date',
+            'discount_end_date',
+            'quantity',
+            'minimum_purchase_quantity',
+            'bar_code',
+            'refundable',
+            'cash_on_delivery',
             'shipping_time',
-            'thumbnail',
+            'pre_payment_amount',
+            'vat',
+            'vat_type',
             'product_tags',
+            'product_images',
+            'product_specification',
             'product_reviews',
-            'product_combinations'
         ]
 
     def get_avg_rating(self, obj):
@@ -346,15 +347,26 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             product=obj).distinct()
         return ProductTagsSerializer(selected_product_tags, many=True).data
 
+    def get_product_specification(self, product):
+        queryset = Specification.objects.filter(product=product, is_active = True)
+        serializer = SpecificationSerializer(instance=queryset, many=True)
+        return serializer.data
+
+    def get_product_images(self, obj):
+        try:
+            queryset = ProductImages.objects.filter(
+                product=obj, is_active=True).distinct()
+            serializer = ProductImageSerializer(instance=queryset, many=True, context={
+                                                'request': self.context['request']})
+            return serializer.data
+        except:
+            return []
+
     def get_product_reviews(self, obj):
         selected_product_reviews = ProductReview.objects.filter(
             product=obj, is_active=True).distinct()
         return ProductReviewSerializer(selected_product_reviews, many=True).data
 
-    def get_product_combinations(self, obj):
-        selected_product_combinations = ProductCombinations.objects.filter(
-            product=obj, is_active=True).distinct()
-        return ProductCombinationSerializerForProductDetails(selected_product_combinations, many=True).data
 
 
 class ProductListSerializer(serializers.ModelSerializer):

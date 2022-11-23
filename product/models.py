@@ -231,15 +231,15 @@ class Product(AbstractTimeStamp):
     unit = models.ForeignKey(Units, related_name="product_unit",
                              blank=True, null=True, on_delete=models.PROTECT)
     minimum_purchase_quantity = models.IntegerField(null=True, blank=True, default=0)
-    bar_code = models.CharField(max_length=255, blank=False, null=False, default='')
+    bar_code = models.CharField(max_length=255, blank=True, null=True, default='')
     refundable = models.BooleanField(default=False)
     is_featured = models.BooleanField(null=False, blank=False, default=False)
     cash_on_delivery = models.BooleanField(default=False)
     todays_deal = models.BooleanField(default=False)
     shipping_time = models.IntegerField(
         null=False, blank=False, default=0, help_text="eg: Days in count.")
-    full_description = models.TextField(default='', null=False, blank=False)
-    short_description = models.CharField(max_length=800, default='', null=False, blank=False)
+    full_description = models.TextField(default='', null=True, blank=True)
+    short_description = models.CharField(max_length=800, default='', null=True, blank=True)
     active_short_description = models.BooleanField(default=True)
     price = models.FloatField(
         max_length=255, null=False, blank=False, default=0, help_text="Unit price")

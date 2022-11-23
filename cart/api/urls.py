@@ -28,7 +28,7 @@ urlpatterns = [
     path('create-delivery-address/', DeliveryAddressCreateAPIView.as_view()),
     path('update-delivery-address/<int:id>/', DeliveryAddressUpdateAPIView.as_view()),
     path('delivery-address-list/', DeliveryAddressListAPIView.as_view()),
-    # path('delete-billing-address/<int:id>/', BillingAddressDeleteAPIView.as_view()),
+    path('delete-delivery-address/<int:id>/', BillingAddressDeleteAPIView.as_view()),
 #     path('user-order-list/', UserOrderListAPIView.as_view()),
     # path('vendor-order-list/', VendorOrderListAPIView.as_view()),
 #     path('user-order-detail/<int:id>/', UserOrderDetailAPIView.as_view()),

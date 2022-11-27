@@ -1,5 +1,5 @@
 from django.contrib import admin
-from product.models import FlashDealProduct, ProductVariation, Specification, SpecificationValue, TextColor, Attribute, AttributeValues, Category, Color, FlashDealInfo, Inventory, InventoryVariation, ProductAttributeValues, ProductColor, ProductImages, ShippingClass, SubCategory, SubSubCategory, Brand, Tags, Units, DiscountTypes, Product, ProductAttributes, ProductCombinations, VariantType, ProductCombinationsVariants, ProductTags, ProductCombinationMedia, ProductReview, ProductVideoProvider, VatType, CategoryFilterAttributes, SpecificationTitle
+from product.models import FlashDealProduct, ProductVariation, Specification, SpecificationValue, TextColor, Attribute, AttributeValues, Category, Color, FlashDealInfo, Inventory, InventoryVariation, ProductAttributeValues, ProductColor, ProductImages, ShippingClass, SubCategory, SubSubCategory, Brand, Tags, Units, DiscountTypes, Product, ProductAttributes, VariantType, ProductTags, ProductCombinationMedia, ProductReview, ProductVideoProvider, VatType, SpecificationTitle, FilterAttributes
 
 
 admin.site.register(Category)
@@ -9,51 +9,29 @@ admin.site.register(Tags)
 admin.site.register(Brand)
 admin.site.register(Units)
 admin.site.register(DiscountTypes)
-admin.site.register(ProductAttributes)
-admin.site.register(ProductAttributeValues)
+# admin.site.register(ProductAttributes)
+# admin.site.register(ProductAttributeValues)
 admin.site.register(VariantType)
-admin.site.register(ProductCombinationsVariants)
 admin.site.register(ProductTags)
 admin.site.register(ProductReview)
-admin.site.register(ProductCombinations)
-admin.site.register(ProductImages) 
-admin.site.register(ProductVideoProvider) 
-admin.site.register(Color) 
-admin.site.register(Attribute) 
-admin.site.register(AttributeValues) 
-admin.site.register(FlashDealInfo) 
-admin.site.register(VatType) 
-admin.site.register(ProductColor)
-admin.site.register(Inventory) 
-admin.site.register(InventoryVariation)
-admin.site.register(ShippingClass) 
+admin.site.register(ProductImages)
+admin.site.register(ProductVideoProvider)
+# admin.site.register(Color)
+admin.site.register(Attribute)
+admin.site.register(AttributeValues)
+admin.site.register(FlashDealInfo)
+admin.site.register(VatType)
+# admin.site.register(ProductColor)
+admin.site.register(Inventory)
+# admin.site.register(InventoryVariation)
+# admin.site.register(ProductVariation)
+admin.site.register(ShippingClass)
 admin.site.register(TextColor)
-admin.site.register(ProductVariation)
 admin.site.register(Specification)
 admin.site.register(SpecificationTitle)
-admin.site.register(SpecificationValue) 
+admin.site.register(SpecificationValue)
 admin.site.register(FlashDealProduct)
-admin.site.register(CategoryFilterAttributes)
-
-
-
-
-# class ProductSubCategoryInline(admin.TabularInline):
-#     model = SubCategory
-#     fields = ['title']
-
-
-# class ProductSubSubCategoryInline(admin.TabularInline):
-#     model = SubSubCategory
-#     fields = ['title']
-
-
-# @admin.register(Category)
-# class CategoryAdmin(admin.ModelAdmin):
-#     inlines = [
-#         ProductSubCategoryInline, ProductSubSubCategoryInline
-#     ]
-
+admin.site.register(FilterAttributes)
 
 class ProductImageInline(admin.TabularInline):
     model = ProductImages
@@ -76,9 +54,3 @@ class ProductCombinationImageInline(admin.TabularInline):
     model = ProductCombinationMedia
     fields = ['file']
 
-
-# @admin.register(ProductCombinations)
-# class ProductCombinationsAdmin(admin.ModelAdmin):
-#     inlines = [
-#         ProductCombinationImageInline,
-#     ]

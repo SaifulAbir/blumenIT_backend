@@ -105,20 +105,24 @@ class SubSubCategory(AbstractTimeStamp):
         return 'id: ' + str(self.id) + ' title: ' + self.title
 
 
-class CategoryFilterAttributes(AbstractTimeStamp):
+class FilterAttributes(AbstractTimeStamp):
     attribute = models.ForeignKey(
-        Attribute, related_name='category_filter_attributes_attribute', blank=True, null=True, on_delete=models.PROTECT)
+        Attribute, related_name='filter_attributes_attribute', blank=False, null=False, on_delete=models.PROTECT)
     category = models.ForeignKey(
-        Category, related_name='category_filter_attributes_category', blank=True, null=True, on_delete=models.PROTECT)
+        Category, related_name='filter_attributes_category', blank=True, null=True, on_delete=models.PROTECT)
+    sub_category = models.ForeignKey(
+        SubCategory, related_name='filter_attributes_sub_category', blank=True, null=True, on_delete=models.PROTECT)
+    sub_sub_category = models.ForeignKey(
+        SubSubCategory, related_name='filter_attributes_sub_sub_category', blank=True, null=True, on_delete=models.PROTECT)
     is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
-        verbose_name = 'CategoryFilterAttribute'
-        verbose_name_plural = 'CategoryFilterAttributes'
-        db_table = 'category_filter_attributes'
+        verbose_name = 'FilterAttribute'
+        verbose_name_plural = 'FilterAttributes'
+        db_table = 'filter_attributes'
 
     def __str__(self):
-        return self.category.title + ' ' + self.attribute.title
+        return  'Attribute Title : '+ self.attribute.title
 
 
 class Brand(AbstractTimeStamp):

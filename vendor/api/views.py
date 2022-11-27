@@ -92,36 +92,42 @@ class AdminDeleteAPIView(ListAPIView):
 
 
 class AdminProductCreateAPIView(CreateAPIView):
-    # permission_classes = [IsAuthenticated]
-    permission_classes = (AllowAny,)
+    permission_classes = [IsAuthenticated]
     serializer_class = SellerProductCreateSerializer
 
     def post(self, request, *args, **kwargs):
-        return super(AdminProductCreateAPIView, self).post(request, *args, **kwargs)
+        if Seller.objects.filter(phone =  User.objects.get(id=self.request.user.id).phone).exists():
+            return super(AdminProductCreateAPIView, self).post(request, *args, **kwargs)
+        else:
+            raise ValidationError(
+                {"msg": 'You can not create product, because you are not a seller!'})
 
 
 class AdminProductUpdateAPIView(RetrieveUpdateAPIView):
-    permission_classes = [AllowAny]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     serializer_class = SellerProductUpdateSerializer
     lookup_field = 'slug'
     lookup_url_kwarg = "slug"
 
     def get_queryset(self):
         slug = self.kwargs['slug']
-        query = Product.objects.filter(slug=slug)
-        if query:
-            return query
+
+        if Seller.objects.filter(phone = User.objects.get(id=self.request.user.id).phone).exists():
+            seller_id = Seller.objects.get(phone = User.objects.get(id=self.request.user.id).phone)
+            query = Product.objects.filter(slug=slug, seller=seller_id)
+            if query:
+                return query
+            else:
+                raise ValidationError(
+                    {"msg": 'You Can not edit this product!'})
         else:
-            raise ValidationError(
-                {"msg": 'You Can not edit this product!'})
+            raise ValidationError({"msg": 'You are not a seller.'})
 
 
 class AdminAddNewCategoryAPIView(CreateAPIView):
-    permission_classes = (AllowAny,)
+    permission_classes = [IsAuthenticated]
     serializer_class = SellerAddNewCategorySerializer
 
-    # permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         return super(AdminAddNewCategoryAPIView, self).post(request, *args, **kwargs)

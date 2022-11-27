@@ -19,7 +19,6 @@ urlpatterns = [
 
     path('admin/product-create/', AdminProductCreateAPIView.as_view()),
     path('admin/product-update/<str:slug>/',AdminProductUpdateAPIView.as_view()),
-    path('admin/add-new-category/', AdminAddNewCategoryAPIView.as_view()),
 
     path('admin/product-list/', AdminProductListAPI.as_view()),
 
@@ -27,6 +26,7 @@ urlpatterns = [
     path('admin/product-view/<str:slugi>/',AdminProductViewAPI.as_view()),
 
     path('admin/product-category-list/', AdminCategoryListAPIView.as_view()),
+    path('admin/add-new-category/', AdminAddNewCategoryAPIView.as_view()),
     path('admin/update-category/<int:ordering_number>/', AdminUpdateCategoryAPIView.as_view()),
     path('admin/delete-category/<int:ordering_number>/', AdminDeleteCategoryAPIView.as_view()),
 

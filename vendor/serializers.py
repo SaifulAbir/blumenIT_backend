@@ -1072,7 +1072,7 @@ class SellerProductUpdateSerializer(serializers.ModelSerializer):
     update_quantity = serializers.IntegerField(required=False, write_only=True)
     vat_type = VatTypeSerializer(
         many=False, required=False)
-    
+
     class Meta:
         model = Product
         fields =[

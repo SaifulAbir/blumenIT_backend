@@ -217,9 +217,12 @@ class StoreCategoryAPIViewListSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'icon', 'banner', 'sub_category']
 
     def get_sub_category(self, obj):
-        selected_sub_category = SubCategory.objects.filter(
-            category=obj).distinct()
-        return StoreCategoryAPIViewListSerializer(selected_sub_category, many=True).data
+        try:
+            queryset = SubCategory.objects.filter(category=obj.id, is_active=True).distinct()
+            serializer = SubCategorySerializerForMegaMenu(instance=queryset, many=True)
+            return serializer.data
+        except:
+            return []
 
 class ProductDetailsSerializer(serializers.ModelSerializer):
     product_tags = serializers.SerializerMethodField()

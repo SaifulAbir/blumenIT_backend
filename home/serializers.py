@@ -38,8 +38,8 @@ class product_catListSerializer(serializers.ModelSerializer):
         fields = [
                 'id',
                 'title',
-                'logo',
-                'cover',
+                'icon',
+                'banner',
                 ]
 
 # # # list Serializer end

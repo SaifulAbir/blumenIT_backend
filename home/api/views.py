@@ -121,3 +121,4 @@ class CreateGetFaqAPIView(APIView):
         faq = FAQ.objects.all()
         faq_serializer = FaqSerializer(faq, many=True)
         return Response(faq_serializer.data)
+

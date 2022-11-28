@@ -7,17 +7,17 @@ from product.pagination import ProductCustomPagination
 from product.serializers import DiscountTypeSerializer, ProductTagsSerializer, TagsSerializer, VariantTypeSerializer
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView, RetrieveAPIView, DestroyAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductReview, ProductTags, SubCategory, SubSubCategory, Tags, Units, VariantType, ProductVideoProvider, VatType
+from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductReview, ProductTags, SubCategory, SubSubCategory, Tags, Units, VariantType, ProductVideoProvider, VatType, FilterAttributes
 from user.models import CustomerProfile, User
 from vendor.models import VendorRequest, Vendor, Seller
-from vendor.serializers import VendorAddNewSubCategorySerializer, VendorAddNewSubSubCategorySerializer,\
-    VendorBrandSerializer, VendorCategorySerializer, VendorProductListSerializer,\
-    SellerProductUpdateSerializer, VendorProductViewSerializer, \
-    SellerDetailSerializer, VendorSubCategorySerializer, \
-    VendorSubSubCategorySerializer, VendorUnitSerializer, SellerSerializer, ProductAttributesSerializer, \
-    ProductVideoProviderSerializer, ProductVatProviderSerializer, VendorUpdateCategorySerializer,\
-    VendorUpdateSubSubCategorySerializer, SellerProductCreateSerializer, SellerAddNewCategorySerializer, \
-    SellerCreateSerializer, FlashDealCreateSerializer
+from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategorySerializer,\
+    VendorBrandSerializer, AdminCategoryListSerializer, VendorProductListSerializer,\
+    ProductUpdateSerializer, VendorProductViewSerializer, \
+    SellerDetailSerializer, AdminSubCategoryListSerializer, \
+    AdminSubSubCategoryListSerializer, VendorUnitSerializer, SellerSerializer, ProductAttributesSerializer, \
+    ProductVideoProviderSerializer, ProductVatProviderSerializer, UpdateCategorySerializer,\
+    UpdateSubSubCategorySerializer, ProductCreateSerializer, AddNewCategorySerializer, \
+    SellerCreateSerializer, FlashDealCreateSerializer, UpdateSubCategorySerializer, FilteringAttributesSerializer
 from user.models import User
 from cart.models import Coupon
 from rest_framework.exceptions import ValidationError
@@ -92,39 +92,218 @@ class AdminDeleteAPIView(ListAPIView):
 
 
 class AdminProductCreateAPIView(CreateAPIView):
-    # permission_classes = [IsAuthenticated]
-    permission_classes = (AllowAny,)
-    serializer_class = SellerProductCreateSerializer
+    permission_classes = [IsAuthenticated]
+    serializer_class = ProductCreateSerializer
 
     def post(self, request, *args, **kwargs):
-        return super(AdminProductCreateAPIView, self).post(request, *args, **kwargs)
+        if Seller.objects.filter(phone =  User.objects.get(id=self.request.user.id).phone).exists():
+            return super(AdminProductCreateAPIView, self).post(request, *args, **kwargs)
+        else:
+            raise ValidationError(
+                {"msg": 'You can not create product, because you are not a Admin!'})
 
 
 class AdminProductUpdateAPIView(RetrieveUpdateAPIView):
-    permission_classes = [AllowAny]
-    # permission_classes = [IsAuthenticated]
-    serializer_class = SellerProductUpdateSerializer
+    permission_classes = [IsAuthenticated]
+    serializer_class = ProductUpdateSerializer
     lookup_field = 'slug'
     lookup_url_kwarg = "slug"
 
     def get_queryset(self):
         slug = self.kwargs['slug']
-        query = Product.objects.filter(slug=slug)
+
+        if Seller.objects.filter(phone = User.objects.get(id=self.request.user.id).phone).exists():
+            seller_id = Seller.objects.get(phone = User.objects.get(id=self.request.user.id).phone)
+            query = Product.objects.filter(slug=slug, seller=seller_id)
+            if query:
+                return query
+            else:
+                raise ValidationError(
+                    {"msg": 'You Can not edit this product!'})
+        else:
+            raise ValidationError({"msg": 'You are not a seller.'})
+
+
+class AdminFilterAttributesAPI(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = FilteringAttributesSerializer
+    def get_queryset(self):
+        id = self.kwargs['id']
+        type = self.kwargs['type']
+        if id and type:
+            if type == 'category':
+                queryset = FilterAttributes.objects.filter(Q(category__id=id) & Q(is_active=True)).order_by('-created_at')
+            if type == 'sub_category':
+                queryset = FilterAttributes.objects.filter(Q(sub_category__id=id) & Q(is_active=True)).order_by('-created_at')
+            if type == 'sub_sub_category':
+                queryset = FilterAttributes.objects.filter(Q(sub_sub_category__id=id) & Q(is_active=True)).order_by('-created_at')
+
+        if queryset:
+            return queryset
+        else:
+            raise ValidationError({"msg": 'Filter Attributes not found!'})
+
+class AdminCategoryListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Category.objects.filter(is_active=True)
+    serializer_class = AdminCategoryListSerializer
+
+class AdminAddNewCategoryAPIView(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AddNewCategorySerializer
+
+    def post(self, request, *args, **kwargs):
+        return super(AdminAddNewCategoryAPIView, self).post(request, *args, **kwargs)
+
+class AdminUpdateCategoryAPIView(RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UpdateCategorySerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        query = Category.objects.filter(id=id)
         if query:
             return query
         else:
             raise ValidationError(
-                {"msg": 'You Can not edit this product!'})
+                {"msg": 'Category does not found!'})
 
+class AdminDeleteCategoryAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminCategoryListSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
 
-class AdminAddNewCategoryAPIView(CreateAPIView):
-    permission_classes = (AllowAny,)
-    serializer_class = SellerAddNewCategorySerializer
+    def get_queryset(self):
+        id = self.kwargs['id']
+        category_obj_exist = Category.objects.filter(id=id).exists()
+        if category_obj_exist:
+            category_obj = Category.objects.filter(id=id)
+            category_obj.update(is_active=False)
+            queryset = Category.objects.filter(is_active=True).order_by('-created_at')
+            return queryset
+        else:
+            raise ValidationError(
+                {"msg": 'Category Does not exist!'})
 
-    # permission_classes = [IsAuthenticated]
+class AdminSubCategoryListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminSubCategoryListSerializer
+    lookup_field = 'cid'
+    lookup_url_kwarg = "cid"
+
+    def get_queryset(self):
+        cid = self.kwargs['cid']
+        if cid:
+            queryset = SubCategory.objects.filter(
+                category=cid, is_active=True).order_by('-created_at')
+        else:
+            queryset = SubCategory.objects.filter(
+                is_active=True).order_by('-created_at')
+        return queryset
+
+class AdminAddNewSubCategoryAPIView(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AddNewSubCategorySerializer
 
     def post(self, request, *args, **kwargs):
-        return super(AdminAddNewCategoryAPIView, self).post(request, *args, **kwargs)
+        return super(AdminAddNewSubCategoryAPIView, self).post(request, *args, **kwargs)
+
+class AdminUpdateSubCategoryAPIView(RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UpdateSubCategorySerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        query = SubCategory.objects.filter(id=id)
+        if query:
+            return query
+        else:
+            raise ValidationError(
+                {"msg": 'Sub Category does not found!'})
+
+class AdminDeleteSubCategoryAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminSubCategoryListSerializer
+    pagination_class = ProductCustomPagination
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        sub_category_obj_exist = SubCategory.objects.filter(
+            id=id).exists()
+        if sub_category_obj_exist:
+            sub_category_obj = SubCategory.objects.filter(id=id)
+            sub_category_obj.update(is_active=False)
+
+            queryset = SubCategory.objects.filter(is_active=True).order_by('-created_at')
+            return queryset
+        else:
+            raise ValidationError(
+                {"msg": 'Sub Category Does not exist!'})
+
+class AdminSubSubCategoryListAPIView(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = AdminSubSubCategoryListSerializer
+    lookup_field = 'sid'
+    lookup_url_kwarg = "sid"
+
+    def get_queryset(self):
+        sid = self.kwargs['sid']
+        if sid:
+            queryset = SubSubCategory.objects.filter(
+                sub_category=sid, is_active=True).order_by('-created_at')
+        else:
+            queryset = SubSubCategory.objects.filter(
+                is_active=True).order_by('-created_at')
+        return queryset
+
+class AdminAddNewSubSubCategoryAPIView(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AddNewSubSubCategorySerializer
+
+    def post(self, request, *args, **kwargs):
+        return super(AdminAddNewSubSubCategoryAPIView, self).post(request, *args, **kwargs)
+
+class AdminUpdateSubSubCategoryAPIView(RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UpdateSubSubCategorySerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        query = SubSubCategory.objects.filter(id=id)
+        if query:
+            return query
+        else:
+            raise ValidationError(
+                {"msg": 'Sub Sub Category does not found!'})
+
+class AdminDeleteSubSubCategoryAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminSubSubCategoryListSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        sub_sub_category_obj_exist = SubSubCategory.objects.filter(id=id).exists()
+        if sub_sub_category_obj_exist:
+            sub_sub_category_obj = SubSubCategory.objects.filter(id=id)
+            sub_sub_category_obj.update(is_active=False)
+
+            queryset = SubSubCategory.objects.filter(is_active=True).order_by('-created_at')
+            return queryset
+        else:
+            raise ValidationError(
+                {"msg": 'Sub Sub Category Does not exist!'})
+
 
 class AdminBrandListAPIView(ListAPIView):
     permission_classes = [AllowAny]
@@ -217,175 +396,6 @@ class AdminVatTypeListAPIView(ListAPIView):
     permission_classes = [AllowAny]
     queryset = VatType.objects.filter(is_active=True)
     serializer_class = ProductVatProviderSerializer
-
-class AdminCategoryListAPIView(ListAPIView):
-    permission_classes = [AllowAny]
-    queryset = Category.objects.filter(is_active=True)
-    serializer_class = VendorCategorySerializer
-
-class AdminUpdateCategoryAPIView(RetrieveUpdateAPIView):
-    # permission_classes = [IsAuthenticated]
-    permission_classes = [AllowAny]
-    serializer_class = VendorUpdateCategorySerializer
-    lookup_field = 'ordering_number'
-    lookup_url_kwarg = "ordering_number"
-
-    def get_queryset(self):
-        ordering_number = self.kwargs['ordering_number']
-        query = Category.objects.filter(ordering_number=int(ordering_number))
-        if query:
-            return query
-        else:
-            raise ValidationError(
-                {"msg": 'Category does not found!'})
-
-class AdminDeleteCategoryAPIView(ListAPIView):
-    permission_classes = [AllowAny]
-    # permission_classes = [IsAuthenticated]
-    serializer_class = VendorCategorySerializer
-    pagination_class = ProductCustomPagination
-    lookup_field = 'ordering_number'
-    lookup_url_kwarg = "ordering_number"
-
-    def get_queryset(self):
-        ordering_number = self.kwargs['ordering_number']
-        category_obj_exist = Category.objects.filter(
-            ordering_number=ordering_number).exists()
-        if category_obj_exist:
-            category_obj = Category.objects.filter(ordering_number=ordering_number)
-            category_obj.update(is_active=False)
-
-            queryset = Category.objects.filter(is_active=True).order_by('-created_at')
-            return queryset
-        else:
-            raise ValidationError(
-                {"msg": 'Category Does not exist!'})
-
-class AdminSubCategoryListAPIView(ListAPIView):
-    permission_classes = (AllowAny,)
-    serializer_class = VendorSubCategorySerializer
-    lookup_field = 'cid'
-    lookup_url_kwarg = "cid"
-
-    def get_queryset(self):
-        cid = self.kwargs['cid']
-        if cid:
-            queryset = SubCategory.objects.filter(
-                category=cid, is_active=True).order_by('-created_at')
-        else:
-            queryset = SubCategory.objects.filter(
-                is_active=True).order_by('-created_at')
-        return queryset
-
-class AdminAddNewSubCategoryAPIView(CreateAPIView):
-    permission_classes = (AllowAny,)
-    serializer_class = VendorAddNewSubCategorySerializer
-
-    # permission_classes = [IsAuthenticated]
-
-    def post(self, request, *args, **kwargs):
-        return super(AdminAddNewSubCategoryAPIView, self).post(request, *args, **kwargs)
-
-class AdminUpdateSubCategoryAPIView(RetrieveUpdateAPIView):
-    # permission_classes = [IsAuthenticated]
-    permission_classes = [AllowAny]
-    serializer_class = VendorUpdateCategorySerializer
-    lookup_field = 'ordering_number'
-    lookup_url_kwarg = "ordering_number"
-
-    def get_queryset(self):
-        ordering_number = self.kwargs['ordering_number']
-        query = SubCategory.objects.filter(ordering_number=int(ordering_number))
-        if query:
-            return query
-        else:
-            raise ValidationError(
-                {"msg": 'Sub Category does not found!'})
-
-class AdminDeleteSubCategoryAPIView(ListAPIView):
-    permission_classes = [AllowAny]
-    # permission_classes = [IsAuthenticated]
-    serializer_class = VendorSubCategorySerializer
-    pagination_class = ProductCustomPagination
-    lookup_field = 'ordering_number'
-    lookup_url_kwarg = "ordering_number"
-
-    def get_queryset(self):
-        ordering_number = self.kwargs['ordering_number']
-        category_obj_exist = SubCategory.objects.filter(
-            ordering_number=ordering_number).exists()
-        if category_obj_exist:
-            category_obj = SubCategory.objects.filter(ordering_number=ordering_number)
-            category_obj.update(is_active=False)
-
-            queryset = SubCategory.objects.filter(is_active=True).order_by('-created_at')
-            return queryset
-        else:
-            raise ValidationError(
-                {"msg": 'Sub Category Does not exist!'})
-
-class AdminSubSubCategoryListAPIView(ListAPIView):
-    permission_classes = (AllowAny,)
-    serializer_class = VendorSubSubCategorySerializer
-    lookup_field = 'sid'
-    lookup_url_kwarg = "sid"
-
-    def get_queryset(self):
-        sid = self.kwargs['sid']
-        if sid:
-            queryset = SubSubCategory.objects.filter(
-                sub_category=sid, is_active=True).order_by('-created_at')
-        else:
-            queryset = SubSubCategory.objects.filter(
-                is_active=True).order_by('-created_at')
-        return queryset
-
-class AdminAddNewSubSubCategoryAPIView(CreateAPIView):
-    # permission_classes = [IsAuthenticated]
-    permission_classes = (AllowAny,)
-    serializer_class = VendorAddNewSubSubCategorySerializer
-
-
-    def post(self, request, *args, **kwargs):
-        return super(AdminAddNewSubSubCategoryAPIView, self).post(request, *args, **kwargs)
-
-class AdminUpdateSubSubCategoryAPIView(RetrieveUpdateAPIView):
-    # permission_classes = [IsAuthenticated]
-    permission_classes = [AllowAny]
-    serializer_class = VendorUpdateSubSubCategorySerializer
-    lookup_field = 'ordering_number'
-    lookup_url_kwarg = "ordering_number"
-
-    def get_queryset(self):
-        ordering_number = self.kwargs['ordering_number']
-        query = SubSubCategory.objects.filter(ordering_number=int(ordering_number))
-        if query:
-            return query
-        else:
-            raise ValidationError(
-                {"msg": 'Sub Sub Category does not found!'})
-
-class AdminDeleteSubSubCategoryAPIView(ListAPIView):
-    permission_classes = [AllowAny]
-    # permission_classes = [IsAuthenticated]
-    serializer_class = VendorSubCategorySerializer
-    pagination_class = ProductCustomPagination
-    lookup_field = 'ordering_number'
-    lookup_url_kwarg = "ordering_number"
-
-    def get_queryset(self):
-        ordering_number = self.kwargs['ordering_number']
-        category_obj_exist = SubSubCategory.objects.filter(
-            ordering_number=ordering_number).exists()
-        if category_obj_exist:
-            category_obj = SubSubCategory.objects.filter(ordering_number=ordering_number)
-            category_obj.update(is_active=False)
-
-            queryset = SubSubCategory.objects.filter(is_active=True).order_by('-created_at')
-            return queryset
-        else:
-            raise ValidationError(
-                {"msg": 'Sub Sub Category Does not exist!'})
 
 class AdminFlashDealCreateAPIView(CreateAPIView):
     # permission_classes = [IsAuthenticated]

@@ -252,7 +252,6 @@ def pre_save_order(sender, instance, *args, **kwargs):
     if not instance.vendor_order_id:
         instance.vendor_order_id = 'vorid-' + \
             str(unique_order_id_generator_for_vendor_order(instance))
-        # instance.vendor_order_id = 'vor-' + str(unique_slug_generator_cart(instance))
 
 
 pre_save.connect(pre_save_order, sender=VendorOrder)
@@ -268,13 +267,13 @@ class OrderItem(AbstractTimeStamp):
         max_length=255, null=False, blank=False, default=0)
     total_price = models.FloatField(
         max_length=255, null=False, blank=False, default=0)
-    is_attribute = models.BooleanField(default=False)
-    is_varient = models.BooleanField(default=False)
-    attribute = models.ForeignKey(
-        ProductAttributes, on_delete=models.CASCADE, blank=True, null=True)
+    # is_attribute = models.BooleanField(default=False)
+    # is_varient = models.BooleanField(default=False)
+    # attribute = models.ForeignKey(
+    #     ProductAttributes, on_delete=models.CASCADE, blank=True, null=True)
 
-    variation = models.ForeignKey(ProductVariation, on_delete=models.PROTECT,
-                                     related_name='order_items_variation', blank=True, null=True)
+    # variation = models.ForeignKey(ProductVariation, on_delete=models.PROTECT,
+    #                                  related_name='order_items_variation', blank=True, null=True)
 
     @property
     def subtotal(self):

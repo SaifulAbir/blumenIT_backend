@@ -16,7 +16,8 @@ admin.site.register(OrderItemCombination)
 
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
-    fields = ['product', 'quantity', 'vendor_order']
+    # fields = ['product', 'quantity', 'vendor_order']
+    fields = ['product', 'quantity']
 
 
 @admin.register(Order)

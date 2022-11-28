@@ -424,8 +424,9 @@ class FilterAttributeSerializer(serializers.ModelSerializer):
             'attribute_values'
         ]
 
-    def get_attribute_values(self, instense):
-        queryset = AttributeValues.objects.filter(attribute=instense.id, is_active = True)
+    def get_attribute_values(self, instance):
+        # queryset = AttributeValues.objects.filter(attribute=instance.id, is_active = True)
+        queryset = AttributeValues.objects.filter(attribute=instance.attribute.id, is_active = True)
         serializer = AttributeValuesSerializer(instance=queryset, many=True)
         return serializer.data
 

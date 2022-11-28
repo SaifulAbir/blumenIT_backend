@@ -102,8 +102,6 @@ class ProductListByCategoryAPI(ListAPIView):
     lookup_field = 'cid'
     lookup_url_kwarg = "cid"
 
-    
-
     def get_queryset(self):
         # work with dynamic pagination page_size
         try:
@@ -154,16 +152,23 @@ class ProductListByCategoryAPI(ListAPIView):
 class FilterAttributesAPI(ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = FilterAttributeSerializer
-    lookup_field = 'cid'
-    lookup_url_kwarg = "cid"
 
     def get_queryset(self):
-        cid = self.kwargs['cid']
-        if cid:
-            queryset = FilterAttributes.objects.filter(category=cid, is_active=True).order_by('-created_at')
+        id = self.kwargs['id']
+        type = self.kwargs['type']
+
+        if id and type:
+            if type == 'category':
+                queryset = FilterAttributes.objects.filter(Q(category__id=id) & Q(is_active=True)).order_by('-created_at')
+            if type == 'sub_category':
+                queryset = FilterAttributes.objects.filter(Q(sub_category__id=id) & Q(is_active=True)).order_by('-created_at')
+            if type == 'sub_sub_category':
+                queryset = FilterAttributes.objects.filter(Q(sub_sub_category__id=id) & Q(is_active=True)).order_by('-created_at')
+
+        if queryset:
+            return queryset
         else:
-            queryset = FilterAttributes.objects.get(is_active=True).order_by('-created_at')
-        return queryset
+            raise ValidationError({"msg": 'Filter Attributes not found!'})
 
 
 class ProductListBySubCategoryAPI(ListAPIView):

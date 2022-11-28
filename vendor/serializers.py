@@ -154,20 +154,23 @@ class UpdateCategorySerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         # work with category title
-        try:
-            title_get = validated_data.pop('title')
-        except:
-            title_get = ''
+        # try:
+        #     title_get = validated_data.pop('title')
+        # except:
+        #     title_get = ''
 
-        if title_get:
-            title_get_for_check = Category.objects.filter(title=title_get.lower())
-            instance_title = instance.title.lower()
+        # if title_get:
+            # title_get_for_check = Category.objects.filter(title=title_get.lower()).exists()
+        #     instance_title = instance.title.lower()
 
-            if instance_title == title_get_for_check:
-                pass
-            else:
-                if title_get_for_check:
-                    raise ValidationError('This category title already exist in Category.')
+        #     if instance_title == title_get_for_check:
+        #         pass
+        #     else:
+                # if title_get_for_check == True:
+                #     raise ValidationError('This category title already exist in Category.')
+                # else:
+                #     pass
+
 
         # filtering_attributes
         try:
@@ -258,22 +261,6 @@ class UpdateSubCategorySerializer(serializers.ModelSerializer):
             return []
 
     def update(self, instance, validated_data):
-        # work with category title
-        try:
-            title_get = validated_data.pop('title')
-        except:
-            title_get = ''
-
-        if title_get:
-            title_get_for_check = SubCategory.objects.filter(title=title_get.lower())
-            instance_title = instance.title.lower()
-
-            if instance_title == title_get_for_check:
-                pass
-            else:
-                if title_get_for_check:
-                    raise ValidationError('This sub category title already exist in Sub Category.')
-
         # filtering_attributes
         try:
             filtering_attributes = validated_data.pop('filtering_attributes')
@@ -363,22 +350,6 @@ class UpdateSubSubCategorySerializer(serializers.ModelSerializer):
             return []
 
     def update(self, instance, validated_data):
-        # work with category title
-        try:
-            title_get = validated_data.pop('title')
-        except:
-            title_get = ''
-
-        if title_get:
-            title_get_for_check = SubSubCategory.objects.filter(title=title_get.lower())
-            instance_title = instance.title.lower()
-
-            if instance_title == title_get_for_check:
-                pass
-            else:
-                if title_get_for_check:
-                    raise ValidationError('This sub sub category title already exist in Sub Sub Category.')
-
         # filtering_attributes
         try:
             filtering_attributes = validated_data.pop('filtering_attributes')

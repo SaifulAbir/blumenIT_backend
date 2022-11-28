@@ -9,7 +9,7 @@ urlpatterns = [
      path('product-details/<str:slug>/', ProductDetailsAPI.as_view()),
      path('product-list/', ProductListAPI.as_view()),
      path('search-product/', ProductSearchAPI.as_view()),
-     path('filtering-attributes/<int:cid>/',FilterAttributesAPI.as_view()),
+     path('filtering-attributes/<int:id>/<str:type>/',FilterAttributesAPI.as_view()),
      path('product-list-by-category/<int:cid>/<int:pagination>/',
           ProductListByCategoryAPI.as_view()),
      path('product-list-by-sub-category/<int:subcid>/<int:pagination>/',

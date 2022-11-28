@@ -11,7 +11,7 @@ from product.serializers import ProductDetailsSerializer, ProductListSerializer,
 StoreCategoryAPIViewListSerializer, PcBuilderDataListSerializer, ProductListBySerializer, FilterAttributeSerializer
 
 from product.models import Category, Product, Brand, AttributeValues
-from product.models import FilterAttributes
+from product.models import FilterAttributes, ProductFilterAttributes
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework import status
@@ -20,6 +20,7 @@ from product.pagination import ProductCustomPagination
 from itertools import chain
 from user.models import CustomerProfile, User
 from vendor.models import Vendor
+
 
 
 class BrandCreateAPIView(CreateAPIView):
@@ -138,8 +139,14 @@ class ProductListByCategoryAPI(ListAPIView):
             for attr_value_id in attr_value_ids_list:
                 attr_value_id = int(attr_value_id)
                 attr_id = AttributeValues.objects.get(id = attr_value_id).attribute
-                cat_id = FilterAttributes.objects.get(attribute = attr_id).category.id
-                queryset = queryset.filter(Q(category__id=cat_id)).order_by('-created_at')
+                f_att_id = FilterAttributes.objects.get(attribute = attr_id)
+                p_f_att_id = ProductFilterAttributes.objects.get(filter_attribute = f_att_id)
+                queryset = queryset.filter(id=p_f_att_id.product.id).order_by('-created_at')
+
+                # attr_value_id = int(attr_value_id)
+                # attr_id = AttributeValues.objects.get(id = attr_value_id).attribute
+                # cat_id = FilterAttributes.objects.get(attribute = attr_id).category.id
+                # queryset = queryset.filter(Q(category__id=cat_id)).order_by('-created_at')
 
 
         return queryset
@@ -203,8 +210,9 @@ class ProductListBySubCategoryAPI(ListAPIView):
             for attr_value_id in attr_value_ids_list:
                 attr_value_id = int(attr_value_id)
                 attr_id = AttributeValues.objects.get(id = attr_value_id).attribute
-                cat_id = FilterAttributes.objects.get(attribute = attr_id).category.id
-                queryset = queryset.filter(Q(category__id=cat_id)).order_by('-created_at')
+                f_att_id = FilterAttributes.objects.get(attribute = attr_id)
+                p_f_att_id = ProductFilterAttributes.objects.get(filter_attribute = f_att_id)
+                queryset = queryset.filter(id=p_f_att_id.product.id).order_by('-created_at')
 
         return queryset
 
@@ -253,8 +261,9 @@ class ProductListBySubSubCategoryAPI(ListAPIView):
             for attr_value_id in attr_value_ids_list:
                 attr_value_id = int(attr_value_id)
                 attr_id = AttributeValues.objects.get(id = attr_value_id).attribute
-                cat_id = FilterAttributes.objects.get(attribute = attr_id).category.id
-                queryset = queryset.filter(Q(category__id=cat_id)).order_by('-created_at')
+                f_att_id = FilterAttributes.objects.get(attribute = attr_id)
+                p_f_att_id = ProductFilterAttributes.objects.get(filter_attribute = f_att_id)
+                queryset = queryset.filter(id=p_f_att_id.product.id).order_by('-created_at')
 
         return queryset
 

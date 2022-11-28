@@ -5,7 +5,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from ecommerce.common.emails import send_email_without_delay
-from product.models import Brand, Category, Color, DiscountTypes, FlashDealInfo, FlashDealProduct, Inventory, InventoryVariation, Product, ProductAttributeValues, ProductAttributes, ProductColor, ProductCombinations, ProductCombinationsVariants, ProductImages, ProductReview, ProductTags, ProductVariation, ProductVideoProvider, ShippingClass, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units, VariantType, VatType, Attribute, FilterAttributes
+from product.models import Brand, Category, Color, DiscountTypes, FlashDealInfo, FlashDealProduct, Inventory, InventoryVariation, Product, ProductAttributeValues, ProductAttributes, ProductColor, ProductCombinations, ProductCombinationsVariants, ProductImages, ProductReview, ProductTags, ProductVariation, ProductVideoProvider, ShippingClass, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units, VariantType, VatType, Attribute, FilterAttributes, ProductFilterAttributes
 from user.models import User
 # from user.serializers import UserRegisterSerializer
 from vendor.models import VendorRequest, Vendor, StoreSettings, Seller
@@ -77,16 +77,29 @@ class SellerDetailSerializer(serializers.ModelSerializer):
         model = Seller
         fields = ['id', 'name', 'email', 'address', 'phone', 'logo']
 
-class SellerAddNewCategorySerializer(serializers.ModelSerializer):
+
+
+class FilteringAttributesSerializer(serializers.ModelSerializer):
+    attribute_title = serializers.CharField(source='attribute.title',read_only=True)
+    class Meta:
+        model = FilterAttributes
+        fields = ['id', 'attribute', 'attribute_title', 'category', 'sub_category', 'sub_sub_category']
+
+class AdminCategoryListSerializer(serializers.ModelSerializer):
+    class Meta:
+        ref_name = "admin category list serializer"
+        model = Category
+        fields = ['id', 'title', 'ordering_number', 'type']
+
+class AddNewCategorySerializer(serializers.ModelSerializer):
     title = serializers.CharField(required= True)
     ordering_number = serializers.CharField(required= True)
 
-    filtering_attributes = serializers.ListField(
-        child=serializers.PrimaryKeyRelatedField(queryset=Attribute.objects.all()), write_only=True, required=False)
+    filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
 
     class Meta:
         model = Category
-        fields = ['id', 'title', 'ordering_number', 'type', 'banner', 'icon', 'filtering_attributes']
+        fields = ['id', 'title', 'ordering_number', 'type', 'icon', 'banner', 'filtering_attributes']
 
     def create(self, validated_data):
         # work with category title 
@@ -96,12 +109,6 @@ class SellerAddNewCategorySerializer(serializers.ModelSerializer):
             title_get_for_check = Category.objects.filter(title=title_get.lower())
             if title_get_for_check:
                 raise ValidationError('This category title already exist in Category.')
-
-        # filtering_attributes
-        try:
-            filtering_attributes = validated_data.pop('filtering_attributes')
-        except:
-            filtering_attributes = ''
 
         # work with order number
         ordering_number_get = validated_data.pop('ordering_number')
@@ -114,63 +121,91 @@ class SellerAddNewCategorySerializer(serializers.ModelSerializer):
         category_instance = Category.objects.create(**validated_data, title=title_get_data, ordering_number=ordering_number_get_data )
 
         # filtering_attributes
+        try:
+            filtering_attributes = validated_data.pop('filtering_attributes')
+        except:
+            filtering_attributes = ''
+
         if filtering_attributes:
-            for filtering_attribute in filtering_attributes:
-                if Attribute.objects.filter(id=filtering_attribute.id).exists():
-                    attribute_obj = Attribute.objects.get(id=filtering_attribute.id)
-                    if attribute_obj:
-                        FilterAttributes.objects.create(
-                            attribute=attribute_obj, category=category_instance)
-                    else:
-                        pass
-                else:
-                    pass
+            for f_attr in filtering_attributes:
+                attribute = f_attr['attribute']
+                if attribute:
+                    filtering_attribute_create_instance = FilterAttributes.objects.create(attribute=attribute, category=category_instance)
 
         return category_instance
 
-class VendorCategorySerializer(serializers.ModelSerializer):
+class UpdateCategorySerializer(serializers.ModelSerializer):
+    title = serializers.CharField(required= False)
+    ordering_number = serializers.CharField(required= False)
+    existing_filtering_attributes = serializers.SerializerMethodField()
+    filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
     class Meta:
-        ref_name = "vendor category serializer"
         model = Category
-        fields = ['id', 'title', 'ordering_number', 'type', 'banner', 'icon']
+        fields = ['id', 'title', 'ordering_number', 'type', 'icon', 'banner', 'subtitle', 'is_active', 'existing_filtering_attributes', 'filtering_attributes']
 
-class VendorUpdateCategorySerializer(serializers.ModelSerializer):
-    title = serializers.CharField(required= True)
-    ordering_number = serializers.CharField(required= True)
-    class Meta:
-        model = Category
-        fields = ['id', 'title', 'ordering_number', 'type', 'banner', 'icon', 'is_active']
+    def get_existing_filtering_attributes(self, obj):
+        try:
+            queryset = FilterAttributes.objects.filter(category=obj.id, is_active=True).distinct()
+            serializer = FilteringAttributesSerializer(instance=queryset, many=True, context={
+                                                'request': self.context['request']})
+            return serializer.data
+        except:
+            return []
 
     def update(self, instance, validated_data):
         # work with category title
-        title_get = validated_data.pop('title')
-        title_get_data = title_get.lower()
+        try:
+            title_get = validated_data.pop('title')
+        except:
+            title_get = ''
+
         if title_get:
             title_get_for_check = Category.objects.filter(title=title_get.lower())
-            if title_get_for_check:
-                raise ValidationError('This category title already exist in Category.')
+            instance_title = instance.title.lower()
 
-        # work with order number
-        ordering_number_get = validated_data.pop('ordering_number')
-        ordering_number_get_data = ordering_number_get.lower()
-        if ordering_number_get:
-            ordering_number_get_for_check = Category.objects.filter(ordering_number=ordering_number_get)
-            if ordering_number_get_for_check:
-                raise ValidationError('This category ordering number already exist in Category.')
+            if instance_title == title_get_for_check:
+                pass
+            else:
+                if title_get_for_check:
+                    raise ValidationError('This category title already exist in Category.')
 
-        validated_data.update({"updated_at": timezone.now(), "title":title_get_data, "ordering_number":ordering_number_get_data})
+        # filtering_attributes
+        try:
+            filtering_attributes = validated_data.pop('filtering_attributes')
+        except:
+            filtering_attributes = ''
+        if filtering_attributes:
+            f_a = FilterAttributes.objects.filter(
+                category=instance).exists()
+            if f_a == True:
+                FilterAttributes.objects.filter(
+                    category=instance).delete()
+
+            for f_attr in filtering_attributes:
+                attribute = f_attr['attribute']
+                if attribute:
+                    filter_attr_create_instance = FilterAttributes.objects.create(attribute=attribute, category=instance)
+        else:
+            f_a = FilterAttributes.objects.filter(
+                category=instance).exists()
+            if f_a == True:
+                FilterAttributes.objects.filter(category=instance).delete()
+
+        validated_data.update({"updated_at": timezone.now()})
         return super().update(instance, validated_data)
 
-class VendorSubCategorySerializer(serializers.ModelSerializer):
+class AdminSubCategoryListSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubCategory
         fields = ['id', 'title', 'ordering_number', 'category']
-class VendorAddNewSubCategorySerializer(serializers.ModelSerializer):
+
+class AddNewSubCategorySerializer(serializers.ModelSerializer):
     title = serializers.CharField(required= True)
     ordering_number = serializers.CharField(required= True)
+    filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
     class Meta:
         model = SubCategory
-        fields = ['id', 'title', 'ordering_number', 'category']
+        fields = ['id', 'title', 'ordering_number', 'category', 'filtering_attributes']
 
     def create(self, validated_data):
         # work with category title 
@@ -189,45 +224,93 @@ class VendorAddNewSubCategorySerializer(serializers.ModelSerializer):
             if ordering_number_get_for_check:
                 raise ValidationError('This Sub category ordering number already exist in SubCategory.')
 
+
         sub_category_instance = SubCategory.objects.create(**validated_data, title=title_get_data, ordering_number=ordering_number_get_data )
+
+        # filtering_attributes
+        try:
+            filtering_attributes = validated_data.pop('filtering_attributes')
+        except:
+            filtering_attributes = ''
+        if filtering_attributes:
+            for f_attr in filtering_attributes:
+                attribute = f_attr['attribute']
+                if attribute:
+                    filtering_attribute_create_instance = FilterAttributes.objects.create(attribute=attribute, sub_category=sub_category_instance)
         return sub_category_instance
-class VendorUpdateSubCategorySerializer(serializers.ModelSerializer):
-    title = serializers.CharField(required= True)
-    ordering_number = serializers.CharField(required= True)
+
+class UpdateSubCategorySerializer(serializers.ModelSerializer):
+    title = serializers.CharField(required= False)
+    ordering_number = serializers.CharField(required= False)
+    existing_filtering_attributes = serializers.SerializerMethodField()
+    filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
     class Meta:
         model = SubCategory
-        fields = ['id', 'title', 'ordering_number', 'category', 'is_active']
+        fields = ['id', 'title', 'ordering_number', 'category', 'is_active', 'existing_filtering_attributes', 'filtering_attributes']
+
+    def get_existing_filtering_attributes(self, obj):
+        try:
+            queryset = FilterAttributes.objects.filter(sub_category=obj.id, is_active=True).distinct()
+            serializer = FilteringAttributesSerializer(instance=queryset, many=True, context={
+                                                'request': self.context['request']})
+            return serializer.data
+        except:
+            return []
 
     def update(self, instance, validated_data):
         # work with category title
-        title_get = validated_data.pop('title')
-        title_get_data = title_get.lower()
+        try:
+            title_get = validated_data.pop('title')
+        except:
+            title_get = ''
+
         if title_get:
             title_get_for_check = SubCategory.objects.filter(title=title_get.lower())
-            if title_get_for_check:
-                raise ValidationError('This Sub category title already exist in Sub Category.')
+            instance_title = instance.title.lower()
 
-        # work with order number
-        ordering_number_get = validated_data.pop('ordering_number')
-        ordering_number_get_data = ordering_number_get.lower()
-        if ordering_number_get:
-            ordering_number_get_for_check = SubCategory.objects.filter(ordering_number=ordering_number_get)
-            if ordering_number_get_for_check:
-                raise ValidationError('This Sub category ordering number already exist in Sub Category.')
+            if instance_title == title_get_for_check:
+                pass
+            else:
+                if title_get_for_check:
+                    raise ValidationError('This sub category title already exist in Sub Category.')
 
-        validated_data.update({"updated_at": timezone.now(), "title":title_get_data, "ordering_number":ordering_number_get_data})
+        # filtering_attributes
+        try:
+            filtering_attributes = validated_data.pop('filtering_attributes')
+        except:
+            filtering_attributes = ''
+        if filtering_attributes:
+            f_a = FilterAttributes.objects.filter(
+                sub_category=instance).exists()
+            if f_a == True:
+                FilterAttributes.objects.filter(
+                    sub_category=instance).delete()
+
+            for f_attr in filtering_attributes:
+                attribute = f_attr['attribute']
+                if attribute:
+                    filter_attr_create_instance = FilterAttributes.objects.create(attribute=attribute, sub_category=instance)
+        else:
+            f_a = FilterAttributes.objects.filter(
+                sub_category=instance).exists()
+            if f_a == True:
+                FilterAttributes.objects.filter(sub_category=instance).delete()
+
+        validated_data.update({"updated_at": timezone.now()})
         return super().update(instance, validated_data)
 
-class VendorSubSubCategorySerializer(serializers.ModelSerializer):
+class AdminSubSubCategoryListSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubSubCategory
         fields = ['id', 'title', 'ordering_number', 'category', 'sub_category', 'is_active']
-class VendorAddNewSubSubCategorySerializer(serializers.ModelSerializer):
+
+class AddNewSubSubCategorySerializer(serializers.ModelSerializer):
     title = serializers.CharField(required= True)
     ordering_number = serializers.CharField(required= True)
+    filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
     class Meta:
         model = SubSubCategory
-        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category']
+        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category', 'filtering_attributes']
 
     def create(self, validated_data):
         # work with category title 
@@ -246,34 +329,89 @@ class VendorAddNewSubSubCategorySerializer(serializers.ModelSerializer):
             if ordering_number_get_for_check:
                 raise ValidationError('This Sub Sub category ordering number already exist in Sub Sub Category.')
 
-        sub_category_instance = SubSubCategory.objects.create(**validated_data, title=title_get_data, ordering_number=ordering_number_get_data )
-        return sub_category_instance
-class VendorUpdateSubSubCategorySerializer(serializers.ModelSerializer):
-    title = serializers.CharField(required= True)
-    ordering_number = serializers.CharField(required= True)
+        sub_sub_category_instance = SubSubCategory.objects.create(**validated_data, title=title_get_data, ordering_number=ordering_number_get_data )
+
+        # filtering_attributes
+        try:
+            filtering_attributes = validated_data.pop('filtering_attributes')
+        except:
+            filtering_attributes = ''
+        if filtering_attributes:
+            for f_attr in filtering_attributes:
+                attribute = f_attr['attribute']
+                if attribute:
+                    filtering_attribute_create_instance = FilterAttributes.objects.create(attribute=attribute, sub_sub_category=sub_sub_category_instance)
+
+        return sub_sub_category_instance
+
+class UpdateSubSubCategorySerializer(serializers.ModelSerializer):
+    title = serializers.CharField(required= False)
+    ordering_number = serializers.CharField(required= False)
+    existing_filtering_attributes = serializers.SerializerMethodField()
+    filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
     class Meta:
         model = SubSubCategory
-        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category', 'is_active']
+        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category', 'is_active', 'existing_filtering_attributes', 'filtering_attributes']
+
+    def get_existing_filtering_attributes(self, obj):
+        try:
+            queryset = FilterAttributes.objects.filter(sub_sub_category=obj.id, is_active=True).distinct()
+            serializer = FilteringAttributesSerializer(instance=queryset, many=True, context={
+                                                'request': self.context['request']})
+            return serializer.data
+        except:
+            return []
 
     def update(self, instance, validated_data):
         # work with category title
-        title_get = validated_data.pop('title')
-        title_get_data = title_get.lower()
+        try:
+            title_get = validated_data.pop('title')
+        except:
+            title_get = ''
+
         if title_get:
             title_get_for_check = SubSubCategory.objects.filter(title=title_get.lower())
-            if title_get_for_check:
-                raise ValidationError('This Sub Sub category title already exist in Sub Sub Category.')
+            instance_title = instance.title.lower()
 
-        # work with order number
-        ordering_number_get = validated_data.pop('ordering_number')
-        ordering_number_get_data = ordering_number_get.lower()
-        if ordering_number_get:
-            ordering_number_get_for_check = SubSubCategory.objects.filter(ordering_number=ordering_number_get)
-            if ordering_number_get_for_check:
-                raise ValidationError('This Sub Sub category ordering number already exist in Sub Sub Category.')
+            if instance_title == title_get_for_check:
+                pass
+            else:
+                if title_get_for_check:
+                    raise ValidationError('This sub sub category title already exist in Sub Sub Category.')
 
-        validated_data.update({"updated_at": timezone.now(), "title":title_get_data, "ordering_number":ordering_number_get_data})
+        # filtering_attributes
+        try:
+            filtering_attributes = validated_data.pop('filtering_attributes')
+        except:
+            filtering_attributes = ''
+        if filtering_attributes:
+            f_a = FilterAttributes.objects.filter(
+                sub_sub_category=instance).exists()
+            if f_a == True:
+                FilterAttributes.objects.filter(
+                    sub_sub_category=instance).delete()
+
+            for f_attr in filtering_attributes:
+                attribute = f_attr['attribute']
+                if attribute:
+                    filter_attr_create_instance = FilterAttributes.objects.create(attribute=attribute, sub_sub_category=instance)
+        else:
+            f_a = FilterAttributes.objects.filter(sub_sub_category=instance).exists()
+            if f_a == True:
+                FilterAttributes.objects.filter(sub_sub_category=instance).delete()
+
+
+        validated_data.update({"updated_at": timezone.now()})
         return super().update(instance, validated_data)
+
+
+
+
+
+
+
+
+
 
 class VendorBrandSerializer(serializers.ModelSerializer):
     class Meta:
@@ -663,7 +801,15 @@ class FlashDealExistingSerializer(serializers.ModelSerializer):
             'discount_type'
         ]
 
-class SellerProductCreateSerializer(serializers.ModelSerializer):
+class ProductFilterAttributesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductFilterAttributes
+        fields = [
+            'id',
+            'filter_attribute'
+        ]
+
+class ProductCreateSerializer(serializers.ModelSerializer):
     title = serializers.CharField(required=True)
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=False, write_only=True, required= True)
     sub_category = serializers.PrimaryKeyRelatedField(queryset=SubCategory.objects.all(), many=False, write_only=True, required= False)
@@ -688,6 +834,7 @@ class SellerProductCreateSerializer(serializers.ModelSerializer):
     product_specification = ProductSpecificationSerializer(
         many=True, required=False)
     flash_deal = FlashDealSerializer(many=True, required=False)
+    product_filter_attributes = ProductFilterAttributesSerializer(many=True, required=False)
 
     class Meta:
         model = Product
@@ -735,7 +882,8 @@ class SellerProductCreateSerializer(serializers.ModelSerializer):
             'shipping_time',
             'shipping_class',
             'vat',
-            'vat_type'
+            'vat_type',
+            'product_filter_attributes'
         ]
 
         read_only_fields = ('slug', 'sell_count')
@@ -828,6 +976,12 @@ class SellerProductCreateSerializer(serializers.ModelSerializer):
             flash_deal = validated_data.pop('flash_deal')
         except:
             flash_deal = ''
+
+        # product_filter_attributes
+        try:
+            product_filter_attributes = validated_data.pop('product_filter_attributes')
+        except:
+            product_filter_attributes = ''
 
         product_instance = Product.objects.create(**validated_data, seller= Seller.objects.get(phone =  User.objects.get(id=self.context['request'].user.id).phone))
         # product_instance = Product.objects.create(**validated_data)
@@ -956,6 +1110,13 @@ class SellerProductCreateSerializer(serializers.ModelSerializer):
                         else:
                             pass
 
+            # product_filter_attributes
+            if product_filter_attributes:
+                for product_filter_attribute in product_filter_attributes:
+                    filter_attribute = product_filter_attribute['filter_attribute']
+                    if filter_attribute:
+                        product_filter_attribute_instance = ProductFilterAttributes.objects.create(filter_attribute=filter_attribute,  product=product_instance)
+
             return product_instance
         except:
             return product_instance
@@ -1041,7 +1202,7 @@ class VendorProductViewSerializer(serializers.ModelSerializer):
             product=obj, is_active=True).distinct()
         return ProductReviewSerializer(selected_product_reviews, many=True).data
 
-class SellerProductUpdateSerializer(serializers.ModelSerializer):
+class ProductUpdateSerializer(serializers.ModelSerializer):
     product_category_name = serializers.SerializerMethodField()
     product_sub_category_name = serializers.SerializerMethodField()
     product_sub_sub_category_name = serializers.SerializerMethodField()
@@ -1067,8 +1228,9 @@ class SellerProductUpdateSerializer(serializers.ModelSerializer):
     flash_deal = FlashDealSerializer(
         many=True, required=False)
     update_quantity = serializers.IntegerField(required=False, write_only=True)
-    vat_type = VatTypeSerializer(
-        many=False, required=False)
+    vat_type = VatTypeSerializer(many=False, required=False)
+    existing_product_filter_attributes = serializers.SerializerMethodField('get_product_filter_attributes')
+    product_filter_attributes = ProductFilterAttributesSerializer(many=True, required=False)
 
     class Meta:
         model = Product
@@ -1127,7 +1289,10 @@ class SellerProductUpdateSerializer(serializers.ModelSerializer):
                     'shipping_time',
                     'shipping_class',
                     'vat',
-                    'vat_type'
+                    'vat_type',
+                    'warranty',
+                    'existing_product_filter_attributes',
+                    'product_filter_attributes'
                 ]
 
     def get_product_category_name(self, obj):
@@ -1219,6 +1384,11 @@ class SellerProductUpdateSerializer(serializers.ModelSerializer):
         serializer = FlashDealExistingSerializer(instance=queryset, many=True)
         return serializer.data
 
+    def get_product_filter_attributes(self, product):
+        queryset = ProductFilterAttributes.objects.filter(product=product, is_active = True)
+        serializer = ProductFilterAttributesSerializer(instance=queryset, many=True)
+        return serializer.data
+
 
     def update(self, instance, validated_data):
         # validation for sku start
@@ -1308,6 +1478,12 @@ class SellerProductUpdateSerializer(serializers.ModelSerializer):
             flash_deal = validated_data.pop('flash_deal')
         except:
             flash_deal = ''
+
+        # product_filter_attributes
+        try:
+            product_filter_attributes = validated_data.pop('product_filter_attributes')
+        except:
+            product_filter_attributes = ''
 
 
         try:
@@ -1549,13 +1725,32 @@ class SellerProductUpdateSerializer(serializers.ModelSerializer):
                     flash_deal_info = f_deal['flash_deal_info']
                     discount_type = f_deal['discount_type']
                     discount_amount = f_deal['discount_amount']
-                    if s_title:
+                    if flash_deal_info:
                         flash_deal_product_instance = FlashDealProduct.objects.create(product=instance, flash_deal_info=flash_deal_info, discount_type=discount_type, discount_amount=discount_amount)
             else:
                 f_p = FlashDealProduct.objects.filter(
                     product=instance).exists()
                 if f_p == True:
                     FlashDealProduct.objects.filter(
+                        product=instance).delete()
+
+            # product_filter_attributes
+            if product_filter_attributes:
+                p_f_a = ProductFilterAttributes.objects.filter(
+                    product=instance).exists()
+                if p_f_a == True:
+                    ProductFilterAttributes.objects.filter(
+                        product=instance).delete()
+
+                for product_filter_attribute in product_filter_attributes:
+                    filter_attribute = product_filter_attribute['filter_attribute']
+                    if filter_attribute:
+                        product_filter_attr = ProductFilterAttributes.objects.create(filter_attribute=filter_attribute, product=instance)
+            else:
+                p_f_a = ProductFilterAttributes.objects.filter(
+                    product=instance).exists()
+                if p_f_a == True:
+                    ProductFilterAttributes.objects.filter(
                         product=instance).delete()
 
             validated_data.update({"updated_at": timezone.now()})

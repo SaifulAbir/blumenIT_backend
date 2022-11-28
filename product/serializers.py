@@ -54,7 +54,7 @@ class StoreDataSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['id', 'title', 'subtitle', 'cover', 'logo']
+        fields = ['id', 'title', 'subtitle', 'icon', 'banner']
 
 class SubSubCategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -214,12 +214,12 @@ class StoreCategoryAPIViewListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = ['id', 'title', 'logo', 'cover', 'sub_category']
+        fields = ['id', 'title', 'icon', 'banner', 'sub_category']
 
     def get_sub_category(self, obj):
         selected_sub_category = SubCategory.objects.filter(
             category=obj).distinct()
-        return SubCategorySerializerForMegaMenu(selected_sub_category, many=True).data
+        return StoreCategoryAPIViewListSerializer(selected_sub_category, many=True).data
 
 class ProductDetailsSerializer(serializers.ModelSerializer):
     product_tags = serializers.SerializerMethodField()
@@ -264,6 +264,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             'product_images',
             'product_specification',
             'product_reviews',
+            'warranty'
         ]
 
     def get_avg_rating(self, obj):

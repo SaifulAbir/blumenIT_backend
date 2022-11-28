@@ -40,7 +40,7 @@ class AttributeValues(AbstractTimeStamp):
         db_table = 'attribute_attribute'
 
     def __str__(self):
-        return self.value
+        return 'attribute: ' + self.attribute.title + ' value: '+ self.value
 
 
 class Category(AbstractTimeStamp):
@@ -55,10 +55,6 @@ class Category(AbstractTimeStamp):
     is_active = models.BooleanField(null=False, blank=False, default=True)
 
     subtitle = models.TextField(null=True, blank=True, default="")
-    logo = models.ImageField(
-        upload_to='product_category', blank=True, null=True)
-    cover = models.ImageField(
-        upload_to='product_category', blank=True, null=True)
 
     class Meta:
         verbose_name = 'Category'
@@ -122,7 +118,7 @@ class FilterAttributes(AbstractTimeStamp):
         db_table = 'filter_attributes'
 
     def __str__(self):
-        return  'Attribute Title : '+ self.attribute.title
+        return  'id: '+ str(self.id) + ' Attribute Title : '+ self.attribute.title
 
 
 class Brand(AbstractTimeStamp):
@@ -278,6 +274,7 @@ class Product(AbstractTimeStamp):
     digital = models.BooleanField(default=False)
     in_house_product = models.BooleanField(default=False)
     sell_count = models.BigIntegerField(null=True, blank=True, default=0)
+    warranty = models.CharField(max_length=100, default='', null=True, blank=True)
 
 
     class Meta:
@@ -708,3 +705,18 @@ class InventoryVariation(AbstractTimeStamp):
 
     def __str__(self):
         return self.product_variation.product.title + '- variation name: ' + self.product_variation.variation
+
+class ProductFilterAttributes(AbstractTimeStamp):
+    filter_attribute = models.ForeignKey(
+        FilterAttributes, related_name='product_filter_attributes_filter_attribute', blank=False, null=False, on_delete=models.PROTECT)
+    product = models.ForeignKey(
+        Product, related_name='product_filter_attributes_product', blank=True, null=True, on_delete=models.PROTECT)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'ProductFilterAttribute'
+        verbose_name_plural = 'ProductFilterAttributes'
+        db_table = 'product_filter_attributes'
+
+    def __str__(self):
+        return  'Attribute Title : '+ self.filter_attribute.attribute.title + ' product: ' + self.product.title

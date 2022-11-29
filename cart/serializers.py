@@ -122,20 +122,6 @@ class CheckoutDetailsSerializer(serializers.ModelSerializer):
         order_item = OrderItem.objects.filter(order=obj)
         return CheckoutDetailsOrderItemSerializer(order_item, many=True).data
 
-
-class WishListDataSerializer(serializers.ModelSerializer):
-    product = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Wishlist
-        fields = ['id', 'product']
-
-    def get_product(self, obj):
-        selected_product = Product.objects.filter(
-            slug=obj.product.slug).distinct()
-        return ProductSerializer(selected_product, many=True).data
-
-
 class WishlistSerializer(serializers.Serializer):
     product = serializers.PrimaryKeyRelatedField(
         queryset=Product.objects.all(), many=False, write_only=True)

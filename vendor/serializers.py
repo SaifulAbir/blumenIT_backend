@@ -95,13 +95,20 @@ class AddNewCategorySerializer(serializers.ModelSerializer):
     title = serializers.CharField(required= True)
     ordering_number = serializers.CharField(required= True)
 
-    filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
+    # filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
+    category_filter_attributes = FilteringAttributesSerializer(many=True, required=False)
 
     class Meta:
         model = Category
-        fields = ['id', 'title', 'ordering_number', 'type', 'icon', 'banner', 'filtering_attributes']
+        fields = ['id', 'title', 'ordering_number', 'type', 'icon', 'banner', 'category_filter_attributes']
 
     def create(self, validated_data):
+        # filtering_attributes
+        try:
+            category_filter_attributes = validated_data.pop('category_filter_attributes')
+        except:
+            category_filter_attributes = ''
+
         # work with category title 
         title_get = validated_data.pop('title')
         title_get_data = title_get.lower()
@@ -118,16 +125,11 @@ class AddNewCategorySerializer(serializers.ModelSerializer):
             if ordering_number_get_for_check:
                 raise ValidationError('This category ordering number already exist in Category.')
 
+        # category_instance = Category.objects.create(**validated_data)
         category_instance = Category.objects.create(**validated_data, title=title_get_data, ordering_number=ordering_number_get_data )
 
-        # filtering_attributes
-        try:
-            filtering_attributes = validated_data.pop('filtering_attributes')
-        except:
-            filtering_attributes = ''
-
-        if filtering_attributes:
-            for f_attr in filtering_attributes:
+        if category_filter_attributes:
+            for f_attr in category_filter_attributes:
                 attribute = f_attr['attribute']
                 if attribute:
                     filtering_attribute_create_instance = FilterAttributes.objects.create(attribute=attribute, category=category_instance)
@@ -205,12 +207,17 @@ class AdminSubCategoryListSerializer(serializers.ModelSerializer):
 class AddNewSubCategorySerializer(serializers.ModelSerializer):
     title = serializers.CharField(required= True)
     ordering_number = serializers.CharField(required= True)
-    filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
+    sub_category_filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
     class Meta:
         model = SubCategory
-        fields = ['id', 'title', 'ordering_number', 'category', 'filtering_attributes']
+        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category_filtering_attributes']
 
     def create(self, validated_data):
+        try:
+            sub_category_filtering_attributes = validated_data.pop('sub_category_filtering_attributes')
+        except:
+            sub_category_filtering_attributes = ''
+
         # work with category title 
         title_get = validated_data.pop('title')
         title_get_data = title_get.lower()
@@ -231,12 +238,8 @@ class AddNewSubCategorySerializer(serializers.ModelSerializer):
         sub_category_instance = SubCategory.objects.create(**validated_data, title=title_get_data, ordering_number=ordering_number_get_data )
 
         # filtering_attributes
-        try:
-            filtering_attributes = validated_data.pop('filtering_attributes')
-        except:
-            filtering_attributes = ''
-        if filtering_attributes:
-            for f_attr in filtering_attributes:
+        if sub_category_filtering_attributes:
+            for f_attr in sub_category_filtering_attributes:
                 attribute = f_attr['attribute']
                 if attribute:
                     filtering_attribute_create_instance = FilterAttributes.objects.create(attribute=attribute, sub_category=sub_category_instance)
@@ -294,12 +297,17 @@ class AdminSubSubCategoryListSerializer(serializers.ModelSerializer):
 class AddNewSubSubCategorySerializer(serializers.ModelSerializer):
     title = serializers.CharField(required= True)
     ordering_number = serializers.CharField(required= True)
-    filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
+    sub_sub_category_filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
     class Meta:
         model = SubSubCategory
-        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category', 'filtering_attributes']
+        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category', 'sub_sub_category_filtering_attributes']
 
     def create(self, validated_data):
+        try:
+            sub_sub_category_filtering_attributes = validated_data.pop('sub_sub_category_filtering_attributes')
+        except:
+            sub_sub_category_filtering_attributes = ''
+    
         # work with category title 
         title_get = validated_data.pop('title')
         title_get_data = title_get.lower()
@@ -319,12 +327,8 @@ class AddNewSubSubCategorySerializer(serializers.ModelSerializer):
         sub_sub_category_instance = SubSubCategory.objects.create(**validated_data, title=title_get_data, ordering_number=ordering_number_get_data )
 
         # filtering_attributes
-        try:
-            filtering_attributes = validated_data.pop('filtering_attributes')
-        except:
-            filtering_attributes = ''
-        if filtering_attributes:
-            for f_attr in filtering_attributes:
+        if sub_sub_category_filtering_attributes:
+            for f_attr in sub_sub_category_filtering_attributes:
                 attribute = f_attr['attribute']
                 if attribute:
                     filtering_attribute_create_instance = FilterAttributes.objects.create(attribute=attribute, sub_sub_category=sub_sub_category_instance)
@@ -954,8 +958,8 @@ class ProductCreateSerializer(serializers.ModelSerializer):
         except:
             product_filter_attributes = ''
 
-        product_instance = Product.objects.create(**validated_data, seller= Seller.objects.get(phone =  User.objects.get(id=self.context['request'].user.id).phone))
-        # product_instance = Product.objects.create(**validated_data)
+        # product_instance = Product.objects.create(**validated_data, seller= Seller.objects.get(phone =  User.objects.get(id=self.context['request'].user.id).phone))
+        product_instance = Product.objects.create(**validated_data)
 
         try:
             # tags

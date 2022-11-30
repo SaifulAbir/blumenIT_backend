@@ -22,6 +22,7 @@ class CouponSerializer(serializers.ModelSerializer):
                     'coupon_type',
                     'amount',
                     'discount_type',
+                    'number_of_uses',
                     'start_time',
                     'end_time',
                     'min_shopping',
@@ -516,27 +517,33 @@ class ProductItemCheckoutSerializer(serializers.ModelSerializer):
 
 class CheckoutSerializer(serializers.ModelSerializer):
     order_items = ProductItemCheckoutSerializer(many=True, required=False)
+    coupon_status = serializers.BooleanField(write_only=True, required=False)
 
     class Meta:
         model = Order
-        fields = ['id', 'product_count', 'total_price', 'cash_on_delivery', 'coupon',
-                  'coupon_discount_amount', 'tax_amount', 'payment_type', 'shipping_cost', 'order_items']
+        fields = ['id', 'product_count', 'total_price', 'coupon', 'coupon_status',
+                  'coupon_discount_amount', 'tax_amount', 'payment_type', 'shipping_cost', 'order_items', 'delivery_address', 'comment']
 
     def create(self, validated_data):
         order_items = validated_data.pop('order_items')
-        cash_on_delivery = validated_data.get('cash_on_delivery')
+        payment_type = validated_data.get('payment_type')
         order_status = "PENDING"
         payment_status = "UN-PAID"
 
-        if not cash_on_delivery:
-            order_status = "CONFIRMED"
-            payment_status = "PAID"
+        if payment_type:
+            type_name_org = PaymentType.objects.get(id=payment_type.id).type_name
+            type_name = type_name_org.lower()
+            if type_name != 'cash on delivery':
+                order_status = "CONFIRMED"
+                payment_status = "PAID"
 
         order_instance = Order.objects.create(
             **validated_data, user=self.context['request'].user, order_status=order_status,
             payment_status=payment_status )
 
         if order_items:
+            count = 0
+
             for order_item in order_items:
                 product = order_item['product']
                 quantity = order_item['quantity']
@@ -545,13 +552,46 @@ class CheckoutSerializer(serializers.ModelSerializer):
                 order_item_instance = OrderItem.objects.create(order=order_instance, product=product, quantity=int(
                     quantity), unit_price=unit_price)
 
+                product_obj = Product.objects.get(id=product.id)
+
+                # update inventory
                 if payment_status == 'PAID':
-                    # update product and inventory
-                    product_obj = Product.objects.filter(id=product.id)
+                    product_filter_obj = Product.objects.filter(id=product.id)
                     inventory_obj = Inventory.objects.filter(product=product).latest('created_at')
                     new_update_quantity = int(inventory_obj.current_quantity) - int(quantity)
-                    product_obj.update(quantity = new_update_quantity)
+                    product_filter_obj.update(quantity = new_update_quantity)
                     inventory_obj.current_quantity = new_update_quantity
                     inventory_obj.save()
+
+                # product sell count update
+                count += 1
+                product_sell_quan = Product.objects.filter(
+                    slug=product_obj.slug)[0].sell_count
+                product_sell_quan += 1
+                Product.objects.filter(slug=product_obj.slug).update(
+                    sell_count=product_sell_quan)
+
+        # work with coupon start
+        coupon_status = validated_data.pop('coupon_status')
+
+        if coupon_status == True:
+            coupon = validated_data.pop('coupon')
+            coupon_id = Coupon.objects.get(id=coupon.id)
+            user_id = User.objects.get(id=self.context['request'].user.id)
+            coupon_obj = Coupon.objects.filter(id=coupon.id)
+            check_in_use_coupon_record = UseRecordOfCoupon.objects.filter(
+                coupon_id=coupon_obj[0].id, user_id=self.context['request'].user.id).exists()
+            if check_in_use_coupon_record:
+                pass
+            else:
+                UseRecordOfCoupon.objects.create(
+                    coupon_id=coupon_id, user_id=user_id)
+                number_of_uses = int(coupon_obj[0].number_of_uses)
+                coupon_obj.update(number_of_uses=number_of_uses - 1, is_active=True)
+                number_of_uses = Coupon.objects.get(
+                    code=coupon_obj[0].code).number_of_uses
+                if number_of_uses < 1:
+                    coupon_obj.update(is_active=False)
+        # work with coupon end
 
         return order_instance

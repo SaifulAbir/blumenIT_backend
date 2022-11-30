@@ -159,6 +159,7 @@ class Order(AbstractTimeStamp):
     coupon = models.ForeignKey(
         Coupon, on_delete=models.SET_NULL, blank=True, null=True)
     coupon_discount_amount = models.FloatField(max_length=255, null=True, blank=True)
+    coupon_status = models.BooleanField(default=False)
     tax_amount = models.FloatField(max_length=255, null=True, blank=True)
     shipping_cost = models.FloatField(max_length=255, null=True, blank=True)
     shipping_class = models.ForeignKey(
@@ -168,6 +169,7 @@ class Order(AbstractTimeStamp):
     cash_on_delivery = models.BooleanField(default=False)
     delivery_address = models.ForeignKey(
         DeliveryAddress, on_delete=models.CASCADE, blank=True, null=True)
+    comment = models.TextField(null=True, blank=True)
     # ordered = models.BooleanField(default=True)
     # being_delivered = models.BooleanField(default=False)
     # received = models.BooleanField(default=False)

@@ -7,8 +7,10 @@ urlpatterns = [
     path('coupon-create/', CouponCreateAPIView.as_view()),
     path('coupon-list/', CouponListAPIView.as_view()),
     path('coupon-update/<int:id>/', CouponUpdateAPIView.as_view()),
+    path('apply-coupon/<str:code>/<int:uid>/', ApplyCouponAPIView.as_view()),
     path('discount-type-create/', DiscountTypeCreateAPIView.as_view()),
     path('discount-type-list/', DiscountTypeListAPI.as_view()),
+    path('payment-types-list/', PaymentMethodsAPIView.as_view()),
 
     # urmi
     path('create-delivery-address/', DeliveryAddressCreateAPIView.as_view()),

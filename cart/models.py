@@ -111,6 +111,7 @@ class DeliveryAddress(AbstractTimeStamp):
     country = models.CharField(
         max_length=100, blank=True, null=True, default='')
     city = models.CharField(max_length=100, blank=True, null=True, default='')
+    state = models.CharField(max_length=100, blank=True, null=True, default='')
     zip_code = models.CharField(
         max_length=100, blank=True, null=True, default='')
     default = models.BooleanField(default=False)

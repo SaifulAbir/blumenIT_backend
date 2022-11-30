@@ -184,7 +184,7 @@ class PaymentMethodsAPIView(ListAPIView):
 # urmi~~
 
 class DeliveryAddressCreateAPIView(CreateAPIView):
-    permission_classes = (AllowAny,)
+    permission_classes = [IsAuthenticated]
     serializer_class = DeliveryAddressSerializer
 
     def post(self, request, *args, **kwargs):
@@ -193,7 +193,7 @@ class DeliveryAddressCreateAPIView(CreateAPIView):
 
 
 class DeliveryAddressUpdateAPIView(RetrieveUpdateAPIView):
-    permission_classes = (AllowAny,)
+    permission_classes = [IsAuthenticated]
     serializer_class = DeliveryAddressSerializer
     queryset = DeliveryAddress.objects.all()
     lookup_field = 'id'
@@ -204,7 +204,7 @@ class DeliveryAddressUpdateAPIView(RetrieveUpdateAPIView):
 
 
 class DeliveryAddressListAPIView(ListAPIView):
-    permission_classes = (AllowAny,)
+    permission_classes = [IsAuthenticated]
     serializer_class = DeliveryAddressSerializer
 
     def get_queryset(self):
@@ -213,7 +213,7 @@ class DeliveryAddressListAPIView(ListAPIView):
 
 
 class BillingAddressDeleteAPIView(DestroyAPIView):
-    permission_classes = (AllowAny,)
+    permission_classes = [IsAuthenticated]
     serializer_class = DeliveryAddressSerializer
     queryset = BillingAddress.objects.all()
     lookup_field = 'id'

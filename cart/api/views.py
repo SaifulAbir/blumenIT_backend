@@ -18,29 +18,32 @@ from cart.models import BillingAddress, Order, OrderItem, PaymentType, Coupon, U
 
 class CouponCreateAPIView(CreateAPIView):
 
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     serializer_class = CouponSerializer
 
-    def post(self, request):
-        coupon = CouponSerializer(data=request.data)
+    def post(self, request, *args, **kwargs):
+        return super(CouponCreateAPIView, self).post(request, *args, **kwargs)
 
-        if Coupon.objects.filter(**request.data).exists():
-            raise serializers.ValidationError('This data already exists')
+    # def post(self, request):
+    #     coupon = CouponSerializer(data=request.data)
 
-        if coupon.is_valid():
-            coupon.save()
-            return Response(coupon.data)
-        else:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+    #     if Coupon.objects.filter(**request.data).exists():
+    #         raise serializers.ValidationError('This data already exists')
+
+    #     if coupon.is_valid():
+    #         coupon.save()
+    #         return Response(coupon.data)
+    #     else:
+    #         return Response(status=status.HTTP_404_NOT_FOUND)
 
 class CouponListAPIView(ListAPIView):
 
     queryset = Coupon.objects.all()
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     serializer_class = CouponSerializer
 
 class CouponUpdateAPIView(RetrieveUpdateAPIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     serializer_class = CouponSerializer
     queryset = Coupon.objects.all()
     lookup_field = 'id'

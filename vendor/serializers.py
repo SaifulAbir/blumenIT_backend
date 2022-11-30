@@ -1238,6 +1238,7 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
                     # 'existing_product_attributes',
                     # 'product_attributes',
                     'price',
+                    'old_price',
                     'pre_payment_amount',
                     'discount_start_date',
                     'discount_end_date',

@@ -234,6 +234,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
     avg_rating = serializers.SerializerMethodField()
     product_images = serializers.SerializerMethodField()
     product_specification = serializers.SerializerMethodField('get_product_specification')
+    vat_type_title = serializers.CharField(source="vat_type.title",read_only=True)
 
     class Meta:
         model = Product
@@ -250,6 +251,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             'brand',
             'unit',
             'price',
+            'old_price',
             'discount_type',
             'discount_amount',
             'discount_start_date',
@@ -263,11 +265,14 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             'pre_payment_amount',
             'vat',
             'vat_type',
+            'vat_type_title',
             'product_tags',
             'product_images',
             'product_specification',
             'product_reviews',
-            'warranty'
+            'warranty',
+            'product_condition',
+            'video_link'
         ]
 
     def get_avg_rating(self, obj):

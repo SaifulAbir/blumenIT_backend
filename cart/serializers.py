@@ -11,15 +11,22 @@ from rest_framework.validators import UniqueTogetherValidator
 from rest_framework.exceptions import ValidationError
 
 
-# general Serializer start
-
-
 class CouponSerializer(serializers.ModelSerializer):
+    amount = serializers.FloatField(required=True)
 
     class Meta:
         model = Coupon
-        fields = ['id', 'code', 'coupon_type', 'amount', 'discount_type', 'start_time', 'min_shopping', 'end_time', 'is_active']
         read_only_field = ['id']
+        fields = [  'id',
+                    'code',
+                    'coupon_type',
+                    'amount',
+                    'discount_type',
+                    'start_time',
+                    'end_time',
+                    'min_shopping',
+                    'is_active'
+                ]
 
 
 class ProductSerializer(serializers.ModelSerializer):

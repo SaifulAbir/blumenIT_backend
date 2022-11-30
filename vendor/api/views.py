@@ -96,11 +96,13 @@ class AdminProductCreateAPIView(CreateAPIView):
     serializer_class = ProductCreateSerializer
 
     def post(self, request, *args, **kwargs):
-        if Seller.objects.filter(phone =  User.objects.get(id=self.request.user.id).phone).exists():
-            return super(AdminProductCreateAPIView, self).post(request, *args, **kwargs)
-        else:
-            raise ValidationError(
-                {"msg": 'You can not create product, because you are not a Admin!'})
+        return super(AdminProductCreateAPIView, self).post(request, *args, **kwargs)
+
+        # if Seller.objects.filter(phone =  User.objects.get(id=self.request.user.id).phone).exists():
+        #     return super(AdminProductCreateAPIView, self).post(request, *args, **kwargs)
+        # else:
+        #     raise ValidationError(
+        #         {"msg": 'You can not create product, because you are not a Admin!'})
 
 
 class AdminProductUpdateAPIView(RetrieveUpdateAPIView):
@@ -111,17 +113,23 @@ class AdminProductUpdateAPIView(RetrieveUpdateAPIView):
 
     def get_queryset(self):
         slug = self.kwargs['slug']
-
-        if Seller.objects.filter(phone = User.objects.get(id=self.request.user.id).phone).exists():
-            seller_id = Seller.objects.get(phone = User.objects.get(id=self.request.user.id).phone)
-            query = Product.objects.filter(slug=slug, seller=seller_id)
-            if query:
-                return query
-            else:
-                raise ValidationError(
-                    {"msg": 'You Can not edit this product!'})
+        query = Product.objects.filter(slug=slug)
+        if query:
+            return query
         else:
-            raise ValidationError({"msg": 'You are not a seller.'})
+            raise ValidationError(
+                {"msg": 'You Can not edit this product!'})
+
+        # if Seller.objects.filter(phone = User.objects.get(id=self.request.user.id).phone).exists():
+        #     seller_id = Seller.objects.get(phone = User.objects.get(id=self.request.user.id).phone)
+        #     query = Product.objects.filter(slug=slug, seller=seller_id)
+        #     if query:
+        #         return query
+        #     else:
+        #         raise ValidationError(
+        #             {"msg": 'You Can not edit this product!'})
+        # else:
+        #     raise ValidationError({"msg": 'You are not a seller.'})
 
 
 class AdminFilterAttributesAPI(ListAPIView):

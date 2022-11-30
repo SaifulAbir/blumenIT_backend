@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework import serializers
 from product.serializers import DiscountTypeSerializer
 from cart.serializers import CheckoutDetailsSerializer, CheckoutSerializer, \
-    OrderItemSerializer, OrderSerializer, PaymentTypesListSerializer, WishlistSerializer, WishListDataSerializer, \
+    OrderItemSerializer, OrderSerializer, PaymentTypesListSerializer, WishlistSerializer, \
     ApplyCouponSerializer, CouponSerializer, DeliveryAddressSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -18,29 +18,32 @@ from cart.models import BillingAddress, Order, OrderItem, PaymentType, Coupon, U
 
 class CouponCreateAPIView(CreateAPIView):
 
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     serializer_class = CouponSerializer
 
-    def post(self, request):
-        coupon = CouponSerializer(data=request.data)
+    def post(self, request, *args, **kwargs):
+        return super(CouponCreateAPIView, self).post(request, *args, **kwargs)
 
-        if Coupon.objects.filter(**request.data).exists():
-            raise serializers.ValidationError('This data already exists')
+    # def post(self, request):
+    #     coupon = CouponSerializer(data=request.data)
 
-        if coupon.is_valid():
-            coupon.save()
-            return Response(coupon.data)
-        else:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+    #     if Coupon.objects.filter(**request.data).exists():
+    #         raise serializers.ValidationError('This data already exists')
+
+    #     if coupon.is_valid():
+    #         coupon.save()
+    #         return Response(coupon.data)
+    #     else:
+    #         return Response(status=status.HTTP_404_NOT_FOUND)
 
 class CouponListAPIView(ListAPIView):
 
     queryset = Coupon.objects.all()
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     serializer_class = CouponSerializer
 
 class CouponUpdateAPIView(RetrieveUpdateAPIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     serializer_class = CouponSerializer
     queryset = Coupon.objects.all()
     lookup_field = 'id'
@@ -195,41 +198,6 @@ class CheckoutAPIView(CreateAPIView):
         # return Response({"data": "code"})
 
 
-# class WishListAPIView(ListCreateAPIView):
-# class WishListAPIView(APIView):
-#     permission_classes = (AllowAny,)
-
-#     def get(self, request):
-#         user = self.request.user.id
-#         wishlist = Wishlist.objects.filter(user=user, is_active=True)
-#         wishlist_serializer_data = WishListDataSerializer(wishlist, many=True)
-#         return Response({"wishlist": wishlist_serializer_data.data})
-
-#     def post(self, request):
-#         wishlist_serializer = WishlistSerializer(data=request.data)
-#         if wishlist_serializer.is_valid():
-#             product = request.POST.get("product")
-#             if product:
-#                 whishlist_exc = Wishlist.objects.filter(user=User.objects.get(
-#                     id=self.request.user.id), product=Product.objects.get(id=product), is_active=True)
-#                 if not whishlist_exc:
-#                     wishlist = Wishlist(
-#                         user=User.objects.get(id=self.request.user.id),
-#                         product=Product.objects.get(id=product)
-#                     )
-#                     wishlist.save()
-#                 else:
-#                     return Response({"status": "Already exist!"})
-#         return Response({"status": "Data uploaded!"})
-
-
-# class WishlistDeleteAPIView(DestroyAPIView):
-#     serializer_class = WishListDataSerializer
-
-#     def get_queryset(self):
-#         queryset = Wishlist.objects.filter(id=self.kwargs['id'])
-#         return queryset
-
 # class CheckoutAPIView(APIView):
     # def get(self, request):
     #     user = self.request.user.id
@@ -359,47 +327,6 @@ class CheckoutAPIView(CreateAPIView):
 #             # raise ValidationError({"status":"Out Of stock!"})
 #             return Response({"status":"Out Of stock!"})
 
-# class RemoveFromCartAPIView(APIView):
-
-#     def post(self, request, slug, format=None):
-#         slug = self.kwargs['slug']
-#         product = get_object_or_404(Product, slug=slug)
-#         order_qs = Order.objects.filter(user=self.request.user, ordered=False)
-#         if order_qs.exists():
-#             order_id = order_qs[0].id
-#             order_item_check = OrderItem.objects.filter(product=product,ordered=False,order=order_id)
-#             if order_item_check:
-#                 order_item_check.delete()
-#                 return Response({"status":"Item was removed from your cart."})
-#             else:
-#                 return Response({"status":"Item was not in your cart."})
-#         else:
-#             return Response({"status":"Don't have an active order."})
-
-# class RemoveSingleItemFromCartAPIView(APIView):
-
-#     def post(self, request, slug, format=None):
-#         slug = self.kwargs['slug']
-#         product = get_object_or_404(Product, slug=slug)
-#         product_quantity = product.quantity
-#         order_qs = Order.objects.filter(user=self.request.user, ordered=False)
-#         if order_qs.exists():
-#             order_id = order_qs[0].id
-#             order_item_check = OrderItem.objects.filter(product=product,ordered=False,order=order_id)
-#             if order_item_check:
-#                 order_item_current_quantity = order_item_check[0].quantity
-#                 if order_item_current_quantity >  1:
-#                     decrease_quantity = int(order_item_current_quantity) - 1
-#                     OrderItem_update = OrderItem.objects.filter(product=product,ordered=False,order=order_id).update(quantity = decrease_quantity)
-#                     return Response({"status":"Order Item quantity decrease!", "slug":order_qs[0].slug, "decrease_quantity":decrease_quantity})
-#                 else:
-#                     order_item_check.delete()
-#                     return Response({"status":"Item was not in your cart."})
-#             else:
-#                 return Response({"status":"Item was not in your cart."})
-#         else:
-#             return Response({"status":slug})
-
 # class CartList(ListAPIView):
 #     permission_classes = (AllowAny,)
 #     serializer_class = CartListSerializer
@@ -417,31 +344,6 @@ class CheckoutAPIView(CreateAPIView):
 
 #     def post(self, request, *args, **kwargs):
 #         return super(PaymentTypeCreateAPIView, self).post(request, *args, **kwargs)
-
-# class TotalPriceAPIView(APIView):
-#     # permission_classes = (AllowAny,)
-
-#     def get(self, request):
-#         # order = Order.objects.filter(user=self.request.user.id, ordered=False)
-#         order = Order.objects.get(user=self.request.user, ordered=False)
-#         # return Response({"order_total_price": str(order_qs)})
-#         amount = int(order.get_total_price())
-#         return Response({"order_total_price": amount})
-
-# class CheckQuantityAPIView(APIView):
-#     permission_classes = (AllowAny,)
-#     def post(self, request):
-#         slug = request.POST.get("slug")
-#         quantity = int(request.POST.get("quantity"))
-#         product = get_object_or_404(Product, slug=slug)
-#         if product:
-#             available_quantity = product.quantity
-#             if quantity <= available_quantity:
-#                 return Response({"status":'Available.'})
-#             else:
-#                 return Response({"status":'Out of stock.'})
-#         else:
-#             return Response({"status":"Product not found"})
 
 # class ActiveCouponlistView(ListAPIView):
 #     permission_classes = (AllowAny,)

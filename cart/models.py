@@ -5,7 +5,7 @@ from .utils import unique_slug_generator_cart, unique_order_id_generator_for_ord
 from django.db.models.signals import pre_save
 from user.models import CustomerProfile, User
 from django.utils.translation import gettext as _
-from product.models import Product, ProductAttributes, VariantType, ShippingClass, ProductVariation
+from product.models import Product, ProductAttributes, VariantType, ShippingClass, DiscountTypes
 from django.utils import timezone
 
 # from django_countries.fields import CountryField
@@ -24,14 +24,13 @@ from django.utils import timezone
 class Coupon(AbstractTimeStamp):
     code = models.CharField(max_length=15)
     coupon_type = models.CharField(max_length=255, null=False, blank=False)
-    min_shopping = models.FloatField()
-    amount = models.FloatField()
-    # discount_type = models.ForeignKey(DiscountType, on_delete=models.CASCADE, related_name='discount_type')
-    discount_type = models.CharField(max_length=255,null=False,blank=False)
+    min_shopping = models.IntegerField(default=0, null=True, blank=True)
+    amount = models.FloatField(max_length=255, null=True, blank=True, default=0, help_text="Amount Coupon")
+    discount_type = models.ForeignKey(DiscountTypes, on_delete=models.CASCADE, related_name='discount_type_coupon', null=True, blank=True)
     number_of_uses = models.IntegerField(default=0, null=False, blank=False)
     start_time = models.DateTimeField(default=timezone.now)
     end_time = models.DateTimeField(default=timezone.now)
-    is_active = models.BooleanField(null=False, blank=False, default=True)
+    is_active = models.BooleanField(default=True)
 
     class Meta:
         unique_together = ('code',)
@@ -252,7 +251,6 @@ def pre_save_order(sender, instance, *args, **kwargs):
     if not instance.vendor_order_id:
         instance.vendor_order_id = 'vorid-' + \
             str(unique_order_id_generator_for_vendor_order(instance))
-        # instance.vendor_order_id = 'vor-' + str(unique_slug_generator_cart(instance))
 
 
 pre_save.connect(pre_save_order, sender=VendorOrder)
@@ -268,13 +266,13 @@ class OrderItem(AbstractTimeStamp):
         max_length=255, null=False, blank=False, default=0)
     total_price = models.FloatField(
         max_length=255, null=False, blank=False, default=0)
-    is_attribute = models.BooleanField(default=False)
-    is_varient = models.BooleanField(default=False)
-    attribute = models.ForeignKey(
-        ProductAttributes, on_delete=models.CASCADE, blank=True, null=True)
+    # is_attribute = models.BooleanField(default=False)
+    # is_varient = models.BooleanField(default=False)
+    # attribute = models.ForeignKey(
+    #     ProductAttributes, on_delete=models.CASCADE, blank=True, null=True)
 
-    variation = models.ForeignKey(ProductVariation, on_delete=models.PROTECT,
-                                     related_name='order_items_variation', blank=True, null=True)
+    # variation = models.ForeignKey(ProductVariation, on_delete=models.PROTECT,
+    #                                  related_name='order_items_variation', blank=True, null=True)
 
     @property
     def subtotal(self):

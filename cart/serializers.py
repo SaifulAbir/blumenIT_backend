@@ -6,20 +6,27 @@ from rest_framework import serializers
 # from user.serializers import CustomerProfileSerializer
 # from vendor.serializers import VendorDetailSerializer
 from .models import *
-from product.models import Product
+from product.models import Product, Inventory
 from rest_framework.validators import UniqueTogetherValidator
 from rest_framework.exceptions import ValidationError
 
 
-# general Serializer start
-
-
 class CouponSerializer(serializers.ModelSerializer):
+    amount = serializers.FloatField(required=True)
 
     class Meta:
         model = Coupon
-        fields = ['id', 'code', 'coupon_type', 'amount', 'discount_type', 'start_time', 'min_shopping', 'end_time', 'is_active']
         read_only_field = ['id']
+        fields = [  'id',
+                    'code',
+                    'coupon_type',
+                    'amount',
+                    'discount_type',
+                    'start_time',
+                    'end_time',
+                    'min_shopping',
+                    'is_active'
+                ]
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -121,20 +128,6 @@ class CheckoutDetailsSerializer(serializers.ModelSerializer):
     def get_order_items(self, obj):
         order_item = OrderItem.objects.filter(order=obj)
         return CheckoutDetailsOrderItemSerializer(order_item, many=True).data
-
-
-class WishListDataSerializer(serializers.ModelSerializer):
-    product = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Wishlist
-        fields = ['id', 'product']
-
-    def get_product(self, obj):
-        selected_product = Product.objects.filter(
-            slug=obj.product.slug).distinct()
-        return ProductSerializer(selected_product, many=True).data
-
 
 class WishlistSerializer(serializers.Serializer):
     product = serializers.PrimaryKeyRelatedField(
@@ -513,38 +506,21 @@ class OrderItemSerializer(serializers.ModelSerializer):
 #         return order_instance
 
 class ProductItemCheckoutSerializer(serializers.ModelSerializer):
-    # product = serializers.IntegerField(write_only=True, required=True)
-    # quantity = serializers.IntegerField(write_only=True, required=True)
-    # price = serializers.DecimalField(
-    #     max_digits=255, decimal_places=2, required=True)
-    # product_attribute = serializers.IntegerField(
-    #     write_only=True, required=False)
-    # product_attribute_value = serializers.CharField(
-    #     write_only=True, required=False)
-    # variant_type = serializers.IntegerField(write_only=True, required=False)
-    # variant_value = serializers.CharField(write_only=True, required=False)
-
     class Meta:
         model = OrderItem
         fields = ['id',
                   'product',
                   'quantity',
-                  'unit_price',
-                  'total_price',
-                  'is_attribute',
-                  'is_varient',
-                  'attribute',
-                  'variation'
+                  'unit_price'
                   ]
 
-
 class CheckoutSerializer(serializers.ModelSerializer):
-    order_items = ProductItemCheckoutSerializer(many=True, required=True)
+    order_items = ProductItemCheckoutSerializer(many=True, required=False)
 
     class Meta:
         model = Order
-        fields = ['id', 'order_items', 'product_count', 'total_price', 'cash_on_delivery', 'coupon',
-                  'coupon_discount_amount', 'tax_amount', 'payment_type', 'shipping_cost']
+        fields = ['id', 'product_count', 'total_price', 'cash_on_delivery', 'coupon',
+                  'coupon_discount_amount', 'tax_amount', 'payment_type', 'shipping_cost', 'order_items']
 
     def create(self, validated_data):
         order_items = validated_data.pop('order_items')
@@ -558,20 +534,24 @@ class CheckoutSerializer(serializers.ModelSerializer):
 
         order_instance = Order.objects.create(
             **validated_data, user=self.context['request'].user, order_status=order_status,
-            payment_status=payment_status, )
+            payment_status=payment_status )
 
         if order_items:
             for order_item in order_items:
                 product = order_item['product']
                 quantity = order_item['quantity']
                 unit_price = order_item['unit_price']
-                total_price = order_item['total_price']
-                is_attribute = order_item['is_attribute']
-                is_varient = order_item['is_varient']
-                attribute = order_item['attribute']
-                variation = order_item['variation']
+                total_price = float(unit_price) * float(quantity)
                 order_item_instance = OrderItem.objects.create(order=order_instance, product=product, quantity=int(
-                    quantity), unit_price=unit_price, total_price=total_price, is_attribute=is_attribute,
-                    is_varient=is_varient, attribute=attribute, variation=variation)
-        print(order_items)
+                    quantity), unit_price=unit_price)
+
+                if payment_status == 'PAID':
+                    # update product and inventory
+                    product_obj = Product.objects.filter(id=product.id)
+                    inventory_obj = Inventory.objects.filter(product=product).latest('created_at')
+                    new_update_quantity = int(inventory_obj.current_quantity) - int(quantity)
+                    product_obj.update(quantity = new_update_quantity)
+                    inventory_obj.current_quantity = new_update_quantity
+                    inventory_obj.save()
+
         return order_instance

@@ -243,6 +243,8 @@ class Product(AbstractTimeStamp):
     active_short_description = models.BooleanField(default=True)
     price = models.FloatField(
         max_length=255, null=False, blank=False, default=0, help_text="Unit price")
+    old_price = models.FloatField(
+        max_length=255, null=False, blank=False, default=0, help_text="Old price")
     pre_payment_amount = models.FloatField(
         max_length=255, null=False, blank=False, default=0)
     discount_start_date = models.DateTimeField(null=True, blank=True)

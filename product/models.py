@@ -53,6 +53,7 @@ class Category(AbstractTimeStamp):
     icon = models.ImageField(
         upload_to='product_category', blank=True, null=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
+    pc_builder = models.BooleanField(null=False, blank=False, default=False)
 
     subtitle = models.TextField(null=True, blank=True, default="")
 

@@ -382,3 +382,11 @@ class PcBuilderChooseAPIView(ListAPIView):
                 queryset = queryset.filter(Q(category__id=cat_id)).order_by('-created_at')
 
         return queryset
+
+class PcBuilderCategoryAPIView(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = StoreCategoryAPIViewListSerializer
+
+    def get_queryset(self):
+        queryset = Category.objects.filter(is_active=True, pc_builder=True)
+        return queryset

@@ -23,6 +23,7 @@ urlpatterns = [
      path('admin-brand-delete/<int:id>/', BrandDeleteAPIView.as_view()),
 
 
+     path('pc_builder-categories/',PcBuilderCategoryAPIView.as_view()),
      path('pc_builder/',PcBuilderChooseAPIView.as_view()),
 
 

@@ -7,16 +7,16 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminDiscountListAPIView,\
     AdminUpdateCategoryAPIView, AdminUpdateSubCategoryAPIView, AdminUpdateSubSubCategoryAPIView, \
     AdminVatTypeListAPIView, AdminVideoProviderListAPIView, \
-    AdminProductCreateAPIView, AdminCreateAPIView, AdminListAPIView, AdminUpdateAPIView, AdminDeleteAPIView,\
-    AdminDetailsAPIView, AdminProductUpdateAPIView, AdminAddNewCategoryAPIView, AdminProductListAPI, AdminFlashDealCreateAPIView,\
-    AdminFilterAttributesAPI
+    AdminProductCreateAPIView, AdminSellerCreateAPIView, AdminSellerListAPIView, AdminSellerUpdateAPIView, AdminSellerDeleteAPIView,\
+    AdminSellerDetailsAPIView, AdminProductUpdateAPIView, AdminAddNewCategoryAPIView, AdminProductListAPI, AdminFlashDealCreateAPIView,\
+    AdminFilterAttributesAPI, AdminProfileAPIView
 
 urlpatterns = [
-    path('admin/create/', AdminCreateAPIView.as_view()),
-    path('admin/list/', AdminListAPIView.as_view()),
-    path('admin/update/<int:id>/', AdminUpdateAPIView.as_view()),
-    path('admin/delete/<int:id>/', AdminDeleteAPIView.as_view()),
-    path('admin/details/<int:id>/', AdminDetailsAPIView.as_view()),
+    path('admin/seller-create/', AdminSellerCreateAPIView.as_view()),
+    path('admin/seller-list/', AdminSellerListAPIView.as_view()),
+    path('admin/seller-update/<int:id>/', AdminSellerUpdateAPIView.as_view()),
+    path('admin/seller-delete/<int:id>/', AdminSellerDeleteAPIView.as_view()),
+    path('admin/seller-details/<int:id>/', AdminSellerDetailsAPIView.as_view()),
 
     path('admin/product-create/', AdminProductCreateAPIView.as_view()),
     path('admin/product-update/<str:slug>/',AdminProductUpdateAPIView.as_view()),
@@ -51,6 +51,8 @@ urlpatterns = [
     path('admin/product-vat-type-list/', AdminVatTypeListAPIView.as_view()),
 
     path('admin/flash-deal-create/', AdminFlashDealCreateAPIView.as_view()),
+
+    path('admin/profile/', AdminProfileAPIView.as_view()),
 
 
     # # path('update-vendor/', VendorUpdateAPIView.as_view()),

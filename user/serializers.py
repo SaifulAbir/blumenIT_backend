@@ -58,6 +58,10 @@ class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     password = serializers.CharField(required=True)
 
+class SuperAdminLoginSerializer(serializers.Serializer):
+    username = serializers.EmailField(required=True)
+    password = serializers.CharField(required=True)
+
 
 # class CustomerProfileUpdateSerializer(serializers.ModelSerializer):
 #     first_name = serializers.CharField(write_only=True)

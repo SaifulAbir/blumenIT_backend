@@ -783,7 +783,7 @@ class ProductFilterAttributesSerializer(serializers.ModelSerializer):
             'id',
             'filter_attribute'
         ]
-
+# product create serializer start
 class ProductCreateSerializer(serializers.ModelSerializer):
     title = serializers.CharField(required=True)
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=False, write_only=True, required= True)
@@ -1095,6 +1095,7 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             return product_instance
         except:
             return product_instance
+# product create serializer end
 
 class VendorProductViewSerializer(serializers.ModelSerializer):
     product_images = serializers.SerializerMethodField()
@@ -1177,6 +1178,7 @@ class VendorProductViewSerializer(serializers.ModelSerializer):
             product=obj, is_active=True).distinct()
         return ProductReviewSerializer(selected_product_reviews, many=True).data
 
+# product update serializer start
 class ProductUpdateSerializer(serializers.ModelSerializer):
     product_category_name = serializers.SerializerMethodField()
     product_sub_category_name = serializers.SerializerMethodField()
@@ -1734,6 +1736,7 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
         except:
             validated_data.update({"updated_at": timezone.now()})
             return super().update(instance, validated_data)
+# product update serializer end
 
 class ProductVideoProviderSerializer(serializers.ModelSerializer):
     class Meta:
@@ -1760,3 +1763,9 @@ class FlashDealCreateSerializer(serializers.ModelSerializer):
                     'start_date',
                     'end_date'
                 ]
+
+class AdminProfileSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ['id', 'name', 'email', 'username', 'phone', 'date_joined']

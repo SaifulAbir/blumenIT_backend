@@ -19,11 +19,9 @@ urlpatterns = [
     path('delete-delivery-address/<int:id>/', BillingAddressDeleteAPIView.as_view()),
 
     # path('active-coupon/', ActiveCouponlistView.as_view()),
-    # path('add-to-cart/<str:slug>/', AddToCartAPIView.as_view()),
     # path('cart-list/<int:uid>/', CartList.as_view()),
     # path('create-payment-type/', PaymentTypeCreateAPIView.as_view()),
     # path('checkout-details/<int:oid>/', CheckoutDetailsAPIView.as_view()),
-#     path('payment-methods/', PaymentMethodsAPIView.as_view()),
 #     path('apply-coupon/<str:code>/<int:uid>/', ApplyCouponAPIView.as_view()),
     # path('apply-coupon/', ApplyCouponAPIView.as_view()),
 #     path('user-order-list/', UserOrderListAPIView.as_view()),

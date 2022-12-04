@@ -258,6 +258,39 @@ class LoginUser(mixins.CreateModelMixin,
         else:
             return Response({"status": False, "data": {"message": "Invalid credentials", "error": serializer.errors}}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
+class SuperUserLoginUser(mixins.CreateModelMixin,
+                viewsets.GenericViewSet):
+    serializer_class = user_serializers.SuperAdminLoginSerializer
+    permission_classes = [AllowAny]
+
+    @csrf_exempt
+    def create(self, request):
+        serializer = user_serializers.SuperAdminLoginSerializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                user = authenticate(
+                    request, username=request.data["username"], password=request.data["password"])
+            except (user_models.User.DoesNotExist, Exception):
+                return Response({"status": False, "data": {"message": "Invalid credentials for super user!"}}, status=status.HTTP_404_NOT_FOUND)
+            if user:
+                user_is_super = user.is_superuser
+                if user_is_super == True:
+                    token = RefreshToken.for_user(user)
+                    data = {
+                        "user_id": user.id,
+                        "email": user.email,
+                        "name": user.name,
+                        "access_token": str(token.access_token),
+                        "refresh_token": str(token)
+                    }
+                    return Response({"status": True, "data": data}, status=status.HTTP_200_OK)
+                else:
+                    return Response({"status": False, "data": {"message": "Invalid credentials for super user!"}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            else:
+                return Response({"status": False, "data": {"message": "Invalid credentials for super user!"}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+        else:
+            return Response({"status": False, "data": {"message": "Invalid credentials for super user!", "error": serializer.errors}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+
 
 class VerifyUserAPIView(APIView):
     permission_classes = [AllowAny]

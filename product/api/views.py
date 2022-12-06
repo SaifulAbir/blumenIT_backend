@@ -10,7 +10,7 @@ from product import serializers
 from product.serializers import ProductDetailsSerializer, ProductListSerializer, ProductReviewCreateSerializer, BrandSerializer,\
 StoreCategoryAPIViewListSerializer, PcBuilderDataListSerializer, ProductListBySerializer, FilterAttributeSerializer
 
-from product.models import Category, Product, Brand, AttributeValues
+from product.models import Category, SubCategory, SubSubCategory, Product, Brand, AttributeValues
 from product.models import FilterAttributes, ProductFilterAttributes
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -29,7 +29,6 @@ class BrandCreateAPIView(CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         return super(BrandCreateAPIView, self).post(request, *args, **kwargs)
-
 
 class BrandDeleteAPIView(ListAPIView):
     permission_classes = [AllowAny]
@@ -52,7 +51,6 @@ class BrandDeleteAPIView(ListAPIView):
                 {"msg": 'Brand Does not exist!'}
             )
 
-
 class StoreCategoryListAPIView(ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = StoreCategoryAPIViewListSerializer
@@ -60,7 +58,6 @@ class StoreCategoryListAPIView(ListAPIView):
     def get_queryset(self):
         queryset = Category.objects.filter(is_active=True)
         return queryset
-
 
 class ProductDetailsAPI(RetrieveAPIView):
     permission_classes = (AllowAny,)
@@ -87,7 +84,6 @@ class ProductDetailsAPI(RetrieveAPIView):
             return query
         except:
             raise ValidationError({"details": "Product doesn't exist!"})
-
 
 class ProductListAPI(ListAPIView):
     permission_classes = (AllowAny,)
@@ -170,7 +166,6 @@ class FilterAttributesAPI(ListAPIView):
         else:
             raise ValidationError({"msg": 'Filter Attributes not found!'})
 
-
 class ProductListBySubCategoryAPI(ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = ProductListBySerializer
@@ -220,7 +215,6 @@ class ProductListBySubCategoryAPI(ListAPIView):
                 queryset = queryset.filter(id=p_f_att_id.product.id).order_by('-created_at')
 
         return queryset
-
 
 class ProductListBySubSubCategoryAPI(ListAPIView):
     permission_classes = (AllowAny,)
@@ -272,7 +266,6 @@ class ProductListBySubSubCategoryAPI(ListAPIView):
 
         return queryset
 
-
 class ProductSearchAPI(ListAPIView):
     permission_classes = ()
     pagination_class = ProductCustomPagination
@@ -298,7 +291,6 @@ class ProductSearchAPI(ListAPIView):
 
         return queryset
 
-
 class ProductReviewCreateAPIView(CreateAPIView):
     permission_classes = (AllowAny,)
     # permission_classes = [IsAuthenticated]
@@ -316,7 +308,6 @@ class ProductReviewCreateAPIView(CreateAPIView):
 
     # def post(self, request, *args, **kwargs):
     #     return super(ProductReviewCreateAPIView, self).post(request, *args, **kwargs)
-
 
 class VendorProductListForFrondEndAPI(ListAPIView):
     permission_classes = (AllowAny,)
@@ -390,3 +381,23 @@ class PcBuilderCategoryAPIView(ListAPIView):
     def get_queryset(self):
         queryset = Category.objects.filter(is_active=True, pc_builder=True)
         return queryset
+
+class OnlyTitleAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        id = request.GET.get('id')
+        type = request.GET.get('type')
+
+        if id and type:
+            title = ''
+            if type == 'category':
+                title = Category.objects.get(id=id).title
+            if type == 'sub_category':
+                title = SubCategory.objects.get(id=id).title
+            if type == 'sub_sub_category':
+                title = SubSubCategory.objects.get(id=id).title
+
+            return Response({"title": title}, status=status.HTTP_200_OK)
+        else:
+            raise ValidationError({"msg":'id or type missing!'})

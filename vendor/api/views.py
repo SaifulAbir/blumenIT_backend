@@ -32,7 +32,7 @@ class AdminSellerCreateAPIView(CreateAPIView):
             return super(AdminSellerCreateAPIView, self).post(request, *args, **kwargs)
         else:
             raise ValidationError(
-                {"msg": 'You can not create seller, because you are not a Admin!'})
+                {"msg": 'You can not create seller, because you are not an Admin!'})
 
 
 class AdminSellerDetailsAPIView(RetrieveAPIView):
@@ -51,7 +51,7 @@ class AdminSellerDetailsAPIView(RetrieveAPIView):
                 raise ValidationError({"details": "Seller doesn't exist!"})
         else:
             raise ValidationError(
-                {"msg": 'You can not see seller details, because you are not a Admin!'})
+                {"msg": 'You can not see seller details, because you are not an Admin!'})
 
 
 class AdminSellerListAPIView(ListAPIView):
@@ -67,7 +67,7 @@ class AdminSellerListAPIView(ListAPIView):
                 raise ValidationError({"msg": "No seller available! " })
         else:
             raise ValidationError(
-                {"msg": 'You can not see seller list, because you are not a Admin!'})
+                {"msg": 'You can not see seller list, because you are not an Admin!'})
 
 
 class AdminSellerUpdateAPIView(RetrieveUpdateAPIView):
@@ -86,7 +86,7 @@ class AdminSellerUpdateAPIView(RetrieveUpdateAPIView):
                 raise ValidationError({"msg": 'Seller not found'})
         else:
             raise ValidationError(
-                {"msg": 'You can not update seller, because you are not a Admin!'})
+                {"msg": 'You can not update seller, because you are not an Admin!'})
 
 class AdminSellerDeleteAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -110,7 +110,7 @@ class AdminSellerDeleteAPIView(ListAPIView):
                     {"msg": 'Seller Does not exist!'})
         else:
             raise ValidationError(
-                {"msg": 'You can not delete seller, because you are not a Admin!'})
+                {"msg": 'You can not delete seller, because you are not an Admin!'})
 
 class AdminProductCreateAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated]
@@ -121,7 +121,7 @@ class AdminProductCreateAPIView(CreateAPIView):
             return super(AdminProductCreateAPIView, self).post(request, *args, **kwargs)
         else:
             raise ValidationError(
-                {"msg": 'You can not create product, because you are not a Admin!'})
+                {"msg": 'You can not create product, because you are not an Admin!'})
 
 class AdminProductUpdateAPIView(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
@@ -139,7 +139,7 @@ class AdminProductUpdateAPIView(RetrieveUpdateAPIView):
                 raise ValidationError(
                     {"msg": 'Product does not exist!'})
         else:
-            raise ValidationError({"msg": 'You can not update this product, because you are not a Admin!'})
+            raise ValidationError({"msg": 'You can not update this product, because you are not an Admin!'})
 
 class AdminFilterAttributesAPI(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -147,18 +147,21 @@ class AdminFilterAttributesAPI(ListAPIView):
     def get_queryset(self):
         id = self.kwargs['id']
         type = self.kwargs['type']
-        if id and type:
-            if type == 'category':
-                queryset = FilterAttributes.objects.filter(Q(category__id=id) & Q(is_active=True)).order_by('-created_at')
-            if type == 'sub_category':
-                queryset = FilterAttributes.objects.filter(Q(sub_category__id=id) & Q(is_active=True)).order_by('-created_at')
-            if type == 'sub_sub_category':
-                queryset = FilterAttributes.objects.filter(Q(sub_sub_category__id=id) & Q(is_active=True)).order_by('-created_at')
+        if self.request.user.is_superuser == True:
+            if id and type:
+                if type == 'category':
+                    queryset = FilterAttributes.objects.filter(Q(category__id=id) & Q(is_active=True)).order_by('-created_at')
+                if type == 'sub_category':
+                    queryset = FilterAttributes.objects.filter(Q(sub_category__id=id) & Q(is_active=True)).order_by('-created_at')
+                if type == 'sub_sub_category':
+                    queryset = FilterAttributes.objects.filter(Q(sub_sub_category__id=id) & Q(is_active=True)).order_by('-created_at')
 
-        if queryset:
-            return queryset
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError({"msg": 'Filter Attributes not found!'})
         else:
-            raise ValidationError({"msg": 'Filter Attributes not found!'})
+            raise ValidationError({"msg": 'You can not see filtering attributes, because you are not an Admin!'})
 
 class AdminCategoryListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -173,7 +176,7 @@ class AdminCategoryListAPIView(ListAPIView):
                 raise ValidationError({"msg": "No category available!" })
         else:
             raise ValidationError(
-                {"msg": 'You can not see category list, because you are not a Admin!'})
+                {"msg": 'You can not see category list, because you are not an Admin!'})
 
 class AdminAddNewCategoryAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated]
@@ -184,7 +187,7 @@ class AdminAddNewCategoryAPIView(CreateAPIView):
             return super(AdminAddNewCategoryAPIView, self).post(request, *args, **kwargs)
         else:
             raise ValidationError(
-                {"msg": 'You can not create seller, because you are not a Admin!'})
+                {"msg": 'You can not create category, because you are not an Admin!'})
 
 class AdminUpdateCategoryAPIView(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
@@ -194,12 +197,15 @@ class AdminUpdateCategoryAPIView(RetrieveUpdateAPIView):
 
     def get_queryset(self):
         id = self.kwargs['id']
-        query = Category.objects.filter(id=id)
-        if query:
-            return query
+        if self.request.user.is_superuser == True:
+            query = Category.objects.filter(id=id)
+            if query:
+                return query
+            else:
+                raise ValidationError(
+                    {"msg": 'Category does not found!'})
         else:
-            raise ValidationError(
-                {"msg": 'Category does not found!'})
+            raise ValidationError({"msg": 'You can not update category, because you are not an Admin!'})
 
 class AdminDeleteCategoryAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -209,15 +215,18 @@ class AdminDeleteCategoryAPIView(ListAPIView):
 
     def get_queryset(self):
         id = self.kwargs['id']
-        category_obj_exist = Category.objects.filter(id=id).exists()
-        if category_obj_exist:
-            category_obj = Category.objects.filter(id=id)
-            category_obj.update(is_active=False)
-            queryset = Category.objects.filter(is_active=True).order_by('-created_at')
-            return queryset
+        if self.request.user.is_superuser == True:
+            category_obj_exist = Category.objects.filter(id=id).exists()
+            if category_obj_exist:
+                category_obj = Category.objects.filter(id=id)
+                category_obj.update(is_active=False)
+                queryset = Category.objects.filter(is_active=True).order_by('-created_at')
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'Category Does not exist!'})
         else:
-            raise ValidationError(
-                {"msg": 'Category Does not exist!'})
+            raise ValidationError({"msg": 'You can not delete category, because you are not an Admin!'})
 
 class AdminSubCategoryListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -227,20 +236,26 @@ class AdminSubCategoryListAPIView(ListAPIView):
 
     def get_queryset(self):
         cid = self.kwargs['cid']
-        if cid:
-            queryset = SubCategory.objects.filter(
-                category=cid, is_active=True).order_by('-created_at')
+        if self.request.user.is_superuser == True:
+            queryset = SubCategory.objects.filter(category=cid, is_active=True).order_by('-created_at')
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError({"msg": "No sub category available!" })
         else:
-            queryset = SubCategory.objects.filter(
-                is_active=True).order_by('-created_at')
-        return queryset
+            raise ValidationError(
+                {"msg": 'You can not see sub category list, because you are not an Admin!'})
 
 class AdminAddNewSubCategoryAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AddNewSubCategorySerializer
 
     def post(self, request, *args, **kwargs):
-        return super(AdminAddNewSubCategoryAPIView, self).post(request, *args, **kwargs)
+        if self.request.user.is_superuser == True:
+            return super(AdminAddNewSubCategoryAPIView, self).post(request, *args, **kwargs)
+        else:
+            raise ValidationError(
+                {"msg": 'You can not create sub category, because you are not an Admin!'})
 
 class AdminUpdateSubCategoryAPIView(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
@@ -250,12 +265,15 @@ class AdminUpdateSubCategoryAPIView(RetrieveUpdateAPIView):
 
     def get_queryset(self):
         id = self.kwargs['id']
-        query = SubCategory.objects.filter(id=id)
-        if query:
-            return query
+        if self.request.user.is_superuser == True:
+            query = SubCategory.objects.filter(id=id)
+            if query:
+                return query
+            else:
+                raise ValidationError(
+                    {"msg": 'Sub Category does not found!'})
         else:
-            raise ValidationError(
-                {"msg": 'Sub Category does not found!'})
+            raise ValidationError({"msg": 'You can not update sub category, because you are not an Admin!'})
 
 class AdminDeleteSubCategoryAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -266,40 +284,51 @@ class AdminDeleteSubCategoryAPIView(ListAPIView):
 
     def get_queryset(self):
         id = self.kwargs['id']
-        sub_category_obj_exist = SubCategory.objects.filter(
-            id=id).exists()
-        if sub_category_obj_exist:
-            sub_category_obj = SubCategory.objects.filter(id=id)
-            sub_category_obj.update(is_active=False)
+        if self.request.user.is_superuser == True:
+            sub_category_obj_exist = SubCategory.objects.filter(
+                id=id).exists()
+            if sub_category_obj_exist:
+                sub_category_obj = SubCategory.objects.filter(id=id)
+                sub_category_obj.update(is_active=False)
 
-            queryset = SubCategory.objects.filter(is_active=True).order_by('-created_at')
-            return queryset
+                queryset = SubCategory.objects.filter(is_active=True).order_by('-created_at')
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'Sub Category Does not exist!'})
         else:
-            raise ValidationError(
-                {"msg": 'Sub Category Does not exist!'})
+            raise ValidationError({"msg": 'You can not delete sub category, because you are not an Admin!'})
 
 class AdminSubSubCategoryListAPIView(ListAPIView):
-    permission_classes = (AllowAny,)
+    permission_classes = [IsAuthenticated]
     serializer_class = AdminSubSubCategoryListSerializer
     lookup_field = 'sid'
     lookup_url_kwarg = "sid"
 
     def get_queryset(self):
         sid = self.kwargs['sid']
-        if sid:
-            queryset = SubSubCategory.objects.filter(
-                sub_category=sid, is_active=True).order_by('-created_at')
+        if self.request.user.is_superuser == True:
+            if sid:
+                queryset = SubSubCategory.objects.filter(
+                    sub_category=sid, is_active=True).order_by('-created_at')
+            else:
+                queryset = SubSubCategory.objects.filter(
+                    is_active=True).order_by('-created_at')
+            return queryset
         else:
-            queryset = SubSubCategory.objects.filter(
-                is_active=True).order_by('-created_at')
-        return queryset
+            raise ValidationError(
+                {"msg": 'You can not see sub sub category list, because you are not an Admin!'})
 
 class AdminAddNewSubSubCategoryAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AddNewSubSubCategorySerializer
 
     def post(self, request, *args, **kwargs):
-        return super(AdminAddNewSubSubCategoryAPIView, self).post(request, *args, **kwargs)
+        if self.request.user.is_superuser == True:
+            return super(AdminAddNewSubSubCategoryAPIView, self).post(request, *args, **kwargs)
+        else:
+            raise ValidationError(
+                {"msg": 'You can not create sub sub category, because you are not an Admin!'})
 
 class AdminUpdateSubSubCategoryAPIView(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
@@ -309,12 +338,15 @@ class AdminUpdateSubSubCategoryAPIView(RetrieveUpdateAPIView):
 
     def get_queryset(self):
         id = self.kwargs['id']
-        query = SubSubCategory.objects.filter(id=id)
-        if query:
-            return query
+        if self.request.user.is_superuser == True:
+            query = SubSubCategory.objects.filter(id=id)
+            if query:
+                return query
+            else:
+                raise ValidationError(
+                    {"msg": 'Sub Sub Category does not found!'})
         else:
-            raise ValidationError(
-                {"msg": 'Sub Sub Category does not found!'})
+            raise ValidationError({"msg": 'You can not update sub sub category, because you are not an Admin!'})
 
 class AdminDeleteSubSubCategoryAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -324,16 +356,19 @@ class AdminDeleteSubSubCategoryAPIView(ListAPIView):
 
     def get_queryset(self):
         id = self.kwargs['id']
-        sub_sub_category_obj_exist = SubSubCategory.objects.filter(id=id).exists()
-        if sub_sub_category_obj_exist:
-            sub_sub_category_obj = SubSubCategory.objects.filter(id=id)
-            sub_sub_category_obj.update(is_active=False)
+        if self.request.user.is_superuser == True:
+            sub_sub_category_obj_exist = SubSubCategory.objects.filter(id=id).exists()
+            if sub_sub_category_obj_exist:
+                sub_sub_category_obj = SubSubCategory.objects.filter(id=id)
+                sub_sub_category_obj.update(is_active=False)
 
-            queryset = SubSubCategory.objects.filter(is_active=True).order_by('-created_at')
-            return queryset
+                queryset = SubSubCategory.objects.filter(is_active=True).order_by('-created_at')
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'Sub Sub Category Does not exist!'})
         else:
-            raise ValidationError(
-                {"msg": 'Sub Sub Category Does not exist!'})
+            raise ValidationError({"msg": 'You can not delete sub sub category, because you are not an Admin!'})
 
 class AdminBrandListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -348,7 +383,7 @@ class AdminBrandListAPIView(ListAPIView):
                 raise ValidationError({"msg": "No brand available! " })
         else:
             raise ValidationError(
-                {"msg": 'You can not see brand list, because you are not a Admin!'})
+                {"msg": 'You can not see brand list, because you are not an Admin!'})
 
 class AdminUnitListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -363,7 +398,7 @@ class AdminUnitListAPIView(ListAPIView):
                 raise ValidationError({"msg": "No unit available! " })
         else:
             raise ValidationError(
-                {"msg": 'You can not see unit list, because you are not a Admin!'})
+                {"msg": 'You can not see unit list, because you are not an Admin!'})
 
 class AdminDiscountListAPIView(ListAPIView):
     permission_classes = [AllowAny]
@@ -378,7 +413,7 @@ class AdminDiscountListAPIView(ListAPIView):
                 raise ValidationError({"msg": "No discount available! " })
         else:
             raise ValidationError(
-                {"msg": 'You can not see discount list, because you are not a Admin!'})
+                {"msg": 'You can not see discount list, because you are not an Admin!'})
 
 class AdminTagListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -393,7 +428,7 @@ class AdminTagListAPIView(ListAPIView):
                 raise ValidationError({"msg": "No tag available! " })
         else:
             raise ValidationError(
-                {"msg": 'You can not see tag list, because you are not a Admin!'})
+                {"msg": 'You can not see tag list, because you are not an Admin!'})
 
 class VendorAttributeListAPIView(ListAPIView):
     permission_classes = [AllowAny]
@@ -419,7 +454,7 @@ class AdminProductListAPI(ListAPIView):
                 raise ValidationError({"msg": "Product doesn't exist! " })
         else:
             raise ValidationError(
-                {"msg": 'You can not show product list, because you are not a Admin!'})
+                {"msg": 'You can not show product list, because you are not an Admin!'})
 
 class AdminProductViewAPI(RetrieveAPIView):
     permission_classes = [IsAuthenticated]
@@ -437,7 +472,7 @@ class AdminProductViewAPI(RetrieveAPIView):
                 raise ValidationError({"msg": "Product doesn't exist! " })
         else:
             raise ValidationError(
-                {"msg": 'You can not show product view, because you are not a Admin!'})
+                {"msg": 'You can not show product view, because you are not an Admin!'})
 
 class AdminProductDeleteAPI(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -462,7 +497,7 @@ class AdminProductDeleteAPI(ListAPIView):
                     {"msg": 'Product Does not exist!'})
         else:
             raise ValidationError(
-                {"msg": 'You can not delete this product, because you are not a Admin!'})
+                {"msg": 'You can not delete this product, because you are not an Admin!'})
 
 class AdminVideoProviderListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -477,7 +512,7 @@ class AdminVideoProviderListAPIView(ListAPIView):
                 raise ValidationError(
                     {"msg": 'Video provider data does not exist!'})
         else:
-            raise ValidationError({"msg": 'You can not view video provider list, because you are not a Admin!'})
+            raise ValidationError({"msg": 'You can not view video provider list, because you are not an Admin!'})
 
 class AdminVatTypeListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -492,16 +527,19 @@ class AdminVatTypeListAPIView(ListAPIView):
                 raise ValidationError(
                     {"msg": 'Vat types does not exist!'})
         else:
-            raise ValidationError({"msg": 'You can not view Vat types list, because you are not a Admin!'})
+            raise ValidationError({"msg": 'You can not view Vat types list, because you are not an Admin!'})
 
 class AdminFlashDealCreateAPIView(CreateAPIView):
-    # permission_classes = [IsAuthenticated]
-    permission_classes = (AllowAny,)
+    permission_classes = [IsAuthenticated]
     serializer_class = FlashDealCreateSerializer
 
 
     def post(self, request, *args, **kwargs):
-        return super(AdminFlashDealCreateAPIView, self).post(request, *args, **kwargs)
+        if self.request.user.is_superuser == True:
+            return super(AdminFlashDealCreateAPIView, self).post(request, *args, **kwargs)
+        else:
+            raise ValidationError(
+                {"msg": 'You can not create flash deal, because you are not an Admin!'})
 
 class AdminProfileAPIView(RetrieveAPIView):
     permission_classes = [IsAuthenticated]
@@ -516,4 +554,4 @@ class AdminProfileAPIView(RetrieveAPIView):
                 raise ValidationError(
                     {"msg": 'User does not exist!'})
         else:
-            raise ValidationError({"msg": 'You can not view your profile, because you are not a Admin!'})
+            raise ValidationError({"msg": 'You can not view your profile, because you are not an Admin!'})

@@ -162,15 +162,29 @@ class AdminFilterAttributesAPI(ListAPIView):
 
 class AdminCategoryListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
-    queryset = Category.objects.filter(is_active=True)
     serializer_class = AdminCategoryListSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = Category.objects.filter(is_active=True)
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError({"msg": "No category available!" })
+        else:
+            raise ValidationError(
+                {"msg": 'You can not see category list, because you are not a Admin!'})
 
 class AdminAddNewCategoryAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AddNewCategorySerializer
 
     def post(self, request, *args, **kwargs):
-        return super(AdminAddNewCategoryAPIView, self).post(request, *args, **kwargs)
+        if self.request.user.is_superuser == True:
+            return super(AdminAddNewCategoryAPIView, self).post(request, *args, **kwargs)
+        else:
+            raise ValidationError(
+                {"msg": 'You can not create seller, because you are not a Admin!'})
 
 class AdminUpdateCategoryAPIView(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]

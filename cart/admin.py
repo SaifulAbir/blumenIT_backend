@@ -1,5 +1,5 @@
 from django.contrib import admin
-from cart.models import BillingAddress, OrderItemCombination, PaymentType, ShippingType, Coupon, UseRecordOfCoupon, Order, VendorOrder, OrderItem
+from cart.models import BillingAddress, OrderItemCombination, PaymentType, ShippingType, Coupon, UseRecordOfCoupon, Order, VendorOrder, OrderItem, DeliveryAddress
 
 
 # Register your models here.
@@ -11,6 +11,7 @@ admin.site.register(BillingAddress)
 admin.site.register(VendorOrder)
 admin.site.register(OrderItem)
 admin.site.register(OrderItemCombination)
+admin.site.register(DeliveryAddress)
 # admin.site.register(Order)
 
 

@@ -1101,9 +1101,6 @@ class VendorProductViewSerializer(serializers.ModelSerializer):
     product_images = serializers.SerializerMethodField()
     avg_rating = serializers.SerializerMethodField()
     review_count = serializers.SerializerMethodField()
-    colors = serializers.SerializerMethodField()
-    product_attributes =serializers.SerializerMethodField('get_product_attributes')
-    product_variants = serializers.SerializerMethodField('get_product_variants')
     product_specification = serializers.SerializerMethodField('get_product_specification')
     product_reviews = serializers.SerializerMethodField()
 
@@ -1118,10 +1115,7 @@ class VendorProductViewSerializer(serializers.ModelSerializer):
             'in_house_product',
             'digital',
             'price',
-            'colors',
-            'product_attributes',
             'quantity',
-            'product_variants',
             'refundable',
             'full_description',
             'product_specification',
@@ -1145,28 +1139,6 @@ class VendorProductViewSerializer(serializers.ModelSerializer):
         re_count = ProductReview.objects.filter(
             product=obj, is_active=True).count()
         return re_count
-
-    def get_colors(self, obj):
-        color_list = []
-        try:
-            selected_colors = ProductColor.objects.filter(
-                product=obj, is_active=True).distinct()
-            for s_c in selected_colors:
-                color_title = s_c.color.title
-                color_list.append(color_title)
-            return color_list
-        except:
-            return color_list
-
-    def get_product_attributes(self, product):
-        queryset = ProductAttributes.objects.filter(product=product, is_active = True)
-        serializer = ProductAttributesSerializer(instance=queryset, many=True)
-        return serializer.data
-
-    def get_product_variants(self, product):
-        queryset = ProductVariation.objects.filter(product=product, is_active = True)
-        serializer = ProductVariantsSerializer(instance=queryset, many=True)
-        return serializer.data
 
     def get_product_specification(self, product):
         queryset = Specification.objects.filter(product=product, is_active = True)

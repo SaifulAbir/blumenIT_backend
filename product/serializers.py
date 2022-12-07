@@ -152,6 +152,10 @@ class ProductReviewCreateSerializer(serializers.ModelSerializer):
         except:
             return []
 
+    def create(self, validated_data):
+        product_review_instance = ProductReview.objects.create(**validated_data, user=self.context['request'].user )
+        return product_review_instance
+
 class ProductReviewSerializer(serializers.ModelSerializer):
     user = UserDataSerializer()
     created_at = serializers.DateTimeField(format="%d %B, %Y %I:%M %p")

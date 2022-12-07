@@ -5,7 +5,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from ecommerce.common.emails import send_email_without_delay
-from product.models import Brand, Category, Color, DiscountTypes, FlashDealInfo, FlashDealProduct, Inventory, InventoryVariation, Product, ProductAttributeValues, ProductAttributes, ProductColor, ProductCombinations, ProductCombinationsVariants, ProductImages, ProductReview, ProductTags, ProductVariation, ProductVideoProvider, ShippingClass, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units, VariantType, VatType, Attribute, FilterAttributes, ProductFilterAttributes
+from product.models import Brand, Category, Color, DiscountTypes, FlashDealInfo, FlashDealProduct, Inventory, InventoryVariation, Product, ProductAttributeValues, ProductAttributes, ProductColor, ProductCombinations, ProductCombinationsVariants, ProductImages, ProductReview, ProductTags, ProductVariation, ProductVideoProvider, ShippingClass, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units, VariantType, VatType, Attribute, FilterAttributes, ProductFilterAttributes, AttributeValues
 from user.models import User
 # from user.serializers import UserRegisterSerializer
 from vendor.models import VendorRequest, Vendor, StoreSettings, Seller
@@ -76,8 +76,6 @@ class SellerDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Seller
         fields = ['id', 'name', 'email', 'address', 'phone', 'logo']
-
-
 
 class FilteringAttributesSerializer(serializers.ModelSerializer):
     attribute_title = serializers.CharField(source='attribute.title',read_only=True)
@@ -378,14 +376,6 @@ class UpdateSubSubCategorySerializer(serializers.ModelSerializer):
 
         validated_data.update({"updated_at": timezone.now()})
         return super().update(instance, validated_data)
-
-
-
-
-
-
-
-
 
 
 class VendorBrandSerializer(serializers.ModelSerializer):
@@ -850,6 +840,7 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             'low_stock_quantity_warning',
             'show_stock_quantity',
             'in_house_product',
+            'whole_sale_product',
             'cash_on_delivery',
             'is_featured',
             'todays_deal',
@@ -1231,6 +1222,8 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
                     'product_specification',
                     'low_stock_quantity_warning',
                     'show_stock_quantity',
+                    'in_house_product',
+                    'whole_sale_product',
                     'cash_on_delivery',
                     'is_featured',
                     'todays_deal',
@@ -1741,3 +1734,21 @@ class AdminProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'name', 'email', 'username', 'phone', 'date_joined']
+
+class ReviewListSerializer(serializers.ModelSerializer):
+    product_title = serializers.CharField(source='product.title',read_only=True)
+    customer_name = serializers.CharField(source='user.username',read_only=True)
+    class Meta:
+        model = ProductReview
+        fields = ['id', 'product', 'product_title', 'user', 'customer_name', 'rating_number', 'review_text', 'is_active']
+
+class AttributeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Attribute
+        fields = ['id', 'title', 'is_active']
+
+class AttributeValuesSerializer(serializers.ModelSerializer):
+    attribute_title = serializers.CharField(source='attribute.title',read_only=True)
+    class Meta:
+        model = AttributeValues
+        fields = ['id', 'attribute', 'attribute_title', 'value', 'is_active']

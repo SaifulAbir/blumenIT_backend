@@ -9,7 +9,8 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminVatTypeListAPIView, AdminVideoProviderListAPIView, \
     AdminProductCreateAPIView, AdminSellerCreateAPIView, AdminSellerListAPIView, AdminSellerUpdateAPIView, AdminSellerDeleteAPIView,\
     AdminSellerDetailsAPIView, AdminProductUpdateAPIView, AdminAddNewCategoryAPIView, AdminProductListAPI, AdminFlashDealCreateAPIView,\
-    AdminFilterAttributesAPI, AdminProfileAPIView
+    AdminFilterAttributesAPI, AdminProfileAPIView, AdminReviewListAPIView, AdminReviewInactiveAPIView, ReviewSearchAPI, \
+    AdminAttributeListAPIView, AdminAddNewAttributeAPIView, AdminUpdateAttributeAPIView, AdminAttributeValuesListAPIView
 
 urlpatterns = [
     path('admin/seller-create/', AdminSellerCreateAPIView.as_view()),
@@ -53,6 +54,17 @@ urlpatterns = [
     path('admin/flash-deal-create/', AdminFlashDealCreateAPIView.as_view()),
 
     path('admin/profile/', AdminProfileAPIView.as_view()),
+    path('admin/review-list/', AdminReviewListAPIView.as_view()),
+    path('admin/review-inactive/<int:id>/', AdminReviewInactiveAPIView.as_view()),
+    path('admin/review-search/', ReviewSearchAPI.as_view()),
+
+    path('admin/attribute-list/', AdminAttributeListAPIView.as_view()),
+    path('admin/add-new-attribute/', AdminAddNewAttributeAPIView.as_view()),
+    path('admin/update-attribute/<int:id>/', AdminUpdateAttributeAPIView.as_view()),
+
+    path('admin/attribute-values-list/', AdminAttributeValuesListAPIView.as_view()),
+    # path('admin/add-new-attribute/', AdminAddNewAttributeAPIView.as_view()),
+    # path('admin/update-attribute/<int:id>/', AdminUpdateAttributeAPIView.as_view()),
 
 
     # # path('update-vendor/', VendorUpdateAPIView.as_view()),

@@ -10,7 +10,9 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminProductCreateAPIView, AdminSellerCreateAPIView, AdminSellerListAPIView, AdminSellerUpdateAPIView, AdminSellerDeleteAPIView,\
     AdminSellerDetailsAPIView, AdminProductUpdateAPIView, AdminAddNewCategoryAPIView, AdminProductListAPI, AdminFlashDealCreateAPIView,\
     AdminFilterAttributesAPI, AdminProfileAPIView, AdminReviewListAPIView, AdminReviewInactiveAPIView, ReviewSearchAPI, \
-    AdminAttributeListAPIView, AdminAddNewAttributeAPIView, AdminUpdateAttributeAPIView, AdminAttributeValuesListAPIView
+    AdminAttributeListAPIView, AdminAddNewAttributeAPIView, AdminUpdateAttributeAPIView, AdminAttributeValuesListAPIView, \
+    AdminAddNewAttributeValueAPIView, AdminUpdateAttributeValueAPIView, AdminFilterAttributeListAPIView, AdminAddNewFilterAttributeAPIView, \
+    AdminUpdateFilterAttributeAPIView, AdminProductListSearchAPI
 
 urlpatterns = [
     path('admin/seller-create/', AdminSellerCreateAPIView.as_view()),
@@ -23,6 +25,7 @@ urlpatterns = [
     path('admin/product-update/<str:slug>/',AdminProductUpdateAPIView.as_view()),
 
     path('admin/product-list/', AdminProductListAPI.as_view()),
+    path('admin/product-list-search/', AdminProductListSearchAPI.as_view()),
 
     path('admin/product-delete/<str:slug>/',AdminProductDeleteAPI.as_view()),
     path('admin/product-view/<str:slugi>/',AdminProductViewAPI.as_view()),
@@ -63,8 +66,12 @@ urlpatterns = [
     path('admin/update-attribute/<int:id>/', AdminUpdateAttributeAPIView.as_view()),
 
     path('admin/attribute-values-list/', AdminAttributeValuesListAPIView.as_view()),
-    # path('admin/add-new-attribute/', AdminAddNewAttributeAPIView.as_view()),
-    # path('admin/update-attribute/<int:id>/', AdminUpdateAttributeAPIView.as_view()),
+    path('admin/add-new-attribute-value/', AdminAddNewAttributeValueAPIView.as_view()),
+    path('admin/update-attribute-value/<int:id>/', AdminUpdateAttributeValueAPIView.as_view()),
+
+    path('admin/filter-attribute-list/', AdminFilterAttributeListAPIView.as_view()),
+    path('admin/add-new-filter-attribute/', AdminAddNewFilterAttributeAPIView.as_view()),
+    path('admin/update-filter-attribute/<int:id>/', AdminUpdateFilterAttributeAPIView.as_view()),
 
 
     # # path('update-vendor/', VendorUpdateAPIView.as_view()),

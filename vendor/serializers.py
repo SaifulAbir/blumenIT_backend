@@ -396,6 +396,7 @@ class VendorProductListSerializer(serializers.ModelSerializer):
     # discount_type = serializers.CharField()
 
     vendor_organization_name = serializers.CharField(source="vendor.organization_name",read_only=True)
+    seller_title = serializers.CharField(source="seller.name",read_only=True)
 
     class Meta:
         model = Product
@@ -404,6 +405,8 @@ class VendorProductListSerializer(serializers.ModelSerializer):
             'thumbnail',
             'title',
             'vendor_organization_name',
+            'seller',
+            'seller_title',
             'sell_count',
             'price',
             'avg_rating',
@@ -1752,3 +1755,12 @@ class AttributeValuesSerializer(serializers.ModelSerializer):
     class Meta:
         model = AttributeValues
         fields = ['id', 'attribute', 'attribute_title', 'value', 'is_active']
+
+class AdminFilterAttributeSerializer(serializers.ModelSerializer):
+    attribute_title = serializers.CharField(source='attribute.title',read_only=True)
+    category_title = serializers.CharField(source='category.title',read_only=True)
+    sub_category_title = serializers.CharField(source='sub_category.title',read_only=True)
+    sub_sub_category_title = serializers.CharField(source='sub_sub_category.title',read_only=True)
+    class Meta:
+        model = FilterAttributes
+        fields = ['id', 'attribute', 'attribute_title', 'category', 'category_title', 'sub_category', 'sub_category_title', 'sub_sub_category', 'sub_sub_category_title', 'is_active']

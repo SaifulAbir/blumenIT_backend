@@ -17,10 +17,14 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     AdminSubSubCategoryListSerializer, VendorUnitSerializer, SellerSerializer, ProductAttributesSerializer, \
     ProductVideoProviderSerializer, ProductVatProviderSerializer, UpdateCategorySerializer,\
     UpdateSubSubCategorySerializer, ProductCreateSerializer, AddNewCategorySerializer, \
-    SellerCreateSerializer, FlashDealCreateSerializer, UpdateSubCategorySerializer, FilteringAttributesSerializer, AdminProfileSerializer
+    SellerCreateSerializer, FlashDealCreateSerializer, UpdateSubCategorySerializer, FilteringAttributesSerializer, \
+    AdminProfileSerializer, AdminOrderViewSerializer
+from cart.models import Order
+from cart.serializers import OrderSerializer
 from user.models import User
 from cart.models import Coupon
 from rest_framework.exceptions import ValidationError
+from vendor.pagination import OrderCustomPagination
 
 
 class AdminSellerCreateAPIView(CreateAPIView):
@@ -555,3 +559,25 @@ class AdminProfileAPIView(RetrieveAPIView):
                     {"msg": 'User does not exist!'})
         else:
             raise ValidationError({"msg": 'You can not view your profile, because you are not an Admin!'})
+
+
+class AdminAllOrderList(ListAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = OrderSerializer
+    queryset = Order.objects.all().order_by('-created_at')
+    pagination_class = ProductCustomPagination
+
+
+class AdminOrderViewAPI(RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminOrderViewSerializer
+    lookup_field = 'o_id'
+    lookup_url_kwarg = "o_id"
+
+    def get_object(self):
+        id = self.kwargs['o_id']
+        try:
+            query = Order.objects.get(order_id=id)
+            return query
+        except:
+                raise ValidationError({"msg": "Order doesn't exist! " })

@@ -7,6 +7,7 @@ from rest_framework.exceptions import ValidationError
 from ecommerce.common.emails import send_email_without_delay
 from product.models import Brand, Category, Color, DiscountTypes, FlashDealInfo, FlashDealProduct, Inventory, InventoryVariation, Product, ProductAttributeValues, ProductAttributes, ProductColor, ProductCombinations, ProductCombinationsVariants, ProductImages, ProductReview, ProductTags, ProductVariation, ProductVideoProvider, ShippingClass, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units, VariantType, VatType, Attribute, FilterAttributes, ProductFilterAttributes
 from user.models import User
+from cart.models import Order
 # from user.serializers import UserRegisterSerializer
 from vendor.models import VendorRequest, Vendor, StoreSettings, Seller
 from django.db.models import Avg
@@ -1741,3 +1742,21 @@ class AdminProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'name', 'email', 'username', 'phone', 'date_joined']
+
+class AdminOrderListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['id', 'user', 'order_id', 'product_count', 'order_date', 'order_status', 'total_price']
+
+
+class AdminOrderViewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['user', 'order_id', 'product_count', 'order_date', 'order_status', 'total_price',
+                  'payment_type', 'shipping_cost', 'coupon_discount_amount']
+
+class AdminOrderUpdateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Order
+        fields = ['order_id', 'order_status', 'payment_status']

@@ -446,7 +446,18 @@ class AdminProductListAPI(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True:
+            request = self.request
+            type = request.GET.get('type')
+
             queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
+
+            if type == 'digital':
+                queryset = queryset.filter(digital=True)
+            if type == 'in_house_product':
+                queryset = queryset.filter(in_house_product=True)
+            if type == 'whole_sale_product':
+                queryset = queryset.filter(whole_sale_product=True)
+
             if queryset:
                 return queryset
             else:

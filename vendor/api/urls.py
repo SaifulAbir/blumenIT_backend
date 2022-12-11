@@ -9,7 +9,7 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminVatTypeListAPIView, AdminVideoProviderListAPIView, \
     AdminProductCreateAPIView, AdminSellerCreateAPIView, AdminSellerListAPIView, AdminSellerUpdateAPIView, AdminSellerDeleteAPIView,\
     AdminSellerDetailsAPIView, AdminProductUpdateAPIView, AdminAddNewCategoryAPIView, AdminProductListAPI, AdminFlashDealCreateAPIView,\
-    AdminFilterAttributesAPI, AdminProfileAPIView, AdminAllOrderList, AdminOrderViewAPI
+    AdminFilterAttributesAPI, AdminProfileAPIView, AdminAllOrderList, AdminOrderViewAPI, OrderListSearchAPI
 
 urlpatterns = [
     path('admin/seller-create/', AdminSellerCreateAPIView.as_view()),
@@ -56,6 +56,7 @@ urlpatterns = [
 
     path('admin/all-order-list/', AdminAllOrderList.as_view()),
     path('admin/order-view/<int:o_id>/',AdminOrderViewAPI.as_view()),
+    path('admin/order-search/',OrderListSearchAPI.as_view(),)
 
 
     # # path('update-vendor/', VendorUpdateAPIView.as_view()),

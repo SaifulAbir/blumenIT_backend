@@ -1743,9 +1743,20 @@ class AdminProfileSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'name', 'email', 'username', 'phone', 'date_joined']
 
+class AdminOrderListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['id', 'user', 'order_id', 'product_count', 'order_date', 'order_status', 'total_price']
+
 
 class AdminOrderViewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = ['order_id', 'user', 'order_id', 'product_count', 'order_date', 'order_status', 'total_price',
-             'payment_status', 'payment_type', 'shipping_cost', 'coupon_discount_amount']
+        fields = ['user', 'order_id', 'product_count', 'order_date', 'order_status', 'total_price',
+             'c', 'payment_type', 'shipping_cost', 'coupon_discount_amount']
+
+class AdminOrderUpdateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Order
+        fields = ['order_id', 'order_status', 'payment_status']

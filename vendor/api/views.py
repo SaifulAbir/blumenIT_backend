@@ -18,7 +18,7 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     ProductVideoProviderSerializer, ProductVatProviderSerializer, UpdateCategorySerializer,\
     UpdateSubSubCategorySerializer, ProductCreateSerializer, AddNewCategorySerializer, \
     SellerCreateSerializer, FlashDealCreateSerializer, UpdateSubCategorySerializer, FilteringAttributesSerializer, \
-    AdminProfileSerializer, AdminOrderViewSerializer
+    AdminProfileSerializer, AdminOrderViewSerializer, AdminOrderListSerializer
 from cart.models import Order
 from cart.serializers import OrderSerializer
 from user.models import User
@@ -562,11 +562,20 @@ class AdminProfileAPIView(RetrieveAPIView):
 
 
 class AdminAllOrderList(ListAPIView):
-    permission_classes = [AllowAny]
-    serializer_class = OrderSerializer
-    queryset = Order.objects.all().order_by('-created_at')
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminOrderListSerializer
     pagination_class = ProductCustomPagination
 
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = Order.objects.all().order_by('-created_at')
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError({"msg": "There is no order till now "})
+        else:
+            raise ValidationError(
+                {"msg": 'You can not show order list, because you are not an Admin!'})
 
 class AdminOrderViewAPI(RetrieveAPIView):
     permission_classes = [IsAuthenticated]
@@ -576,8 +585,49 @@ class AdminOrderViewAPI(RetrieveAPIView):
 
     def get_object(self):
         id = self.kwargs['o_id']
-        try:
+        if self.request.user.is_superuser == True:
             query = Order.objects.get(order_id=id)
-            return query
-        except:
-                raise ValidationError({"msg": "Order doesn't exist! " })
+            if query:
+                return query
+            else:
+                raise ValidationError({"msg": "No Order available! " })
+        else:
+            raise ValidationError(
+                {"msg": 'You can not show order, because you are not an Admin!'})
+
+
+class OrderListSearchAPI(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    pagination_class = OrderCustomPagination
+    serializer_class = AdminOrderListSerializer
+
+
+    def get_queryset(self):
+        request = self.request
+        query = request.GET.get('search')
+        orders = request.GET.get('order_status')
+        date = request.GET.get('order_date')
+        start_date = request.GET.get('start')
+        end_date = request.GET.get('end')
+        # date = Sample.objects.filter(date_created__gte=date_created_start,
+        #                       date_created__lte=date_created_end)
+
+        queryset = Order.objects.all().order_by('-created_at')
+
+        if query:
+            queryset = queryset.filter(
+                Q(order_id__icontains=query)
+            )
+        if date:
+            queryset = queryset.filter(
+                Q(order_date__gte=start_date) & Q(order_date__lte=end_date)
+            )
+        if orders:
+            queryset = queryset.filter(order_status=orders)
+
+        return queryset
+
+
+class AdminOrderUpdateAPI(RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class =

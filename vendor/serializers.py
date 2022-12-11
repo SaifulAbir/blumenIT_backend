@@ -389,12 +389,7 @@ class VendorUnitSerializer(serializers.ModelSerializer):
         fields = ['id', 'title']
 
 class VendorProductListSerializer(serializers.ModelSerializer):
-    # category = CategorySerializer(read_only=True)
-    # brand_name = serializers.SerializerMethodField()
     avg_rating = serializers.SerializerMethodField()
-    # review_count = serializers.SerializerMethodField()
-    # discount_type = serializers.CharField()
-
     vendor_organization_name = serializers.CharField(source="vendor.organization_name",read_only=True)
     seller_title = serializers.CharField(source="seller.name",read_only=True)
 
@@ -415,29 +410,6 @@ class VendorProductListSerializer(serializers.ModelSerializer):
             'todays_deal',
             'is_featured'
         ]
-
-    # class Meta:
-    #     model = Product
-    #     fields = [
-    #         'id',
-    #         'title',
-    #         'slug',
-    #         'sku',
-    #         'price',
-    #         'old_price',
-    #         'short_description',
-    #         'total_quantity',
-    #         'status',
-    #         'is_featured',
-    #         'category',
-    #         'brand_name',
-    #         'thumbnail',
-    #         'product_media',
-    #         'avg_rating',
-    #         'review_count',
-    #         'discount_type',
-    #         'discount_amount'
-    #     ]
 
     def get_avg_rating(self, obj):
         return obj.product_review_product.all().aggregate(Avg('rating_number'))['rating_number__avg']
@@ -1764,3 +1736,9 @@ class AdminFilterAttributeSerializer(serializers.ModelSerializer):
     class Meta:
         model = FilterAttributes
         fields = ['id', 'attribute', 'attribute_title', 'category', 'category_title', 'sub_category', 'sub_category_title', 'sub_sub_category', 'sub_sub_category_title', 'is_active']
+
+
+class AdminCustomerListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'name', 'email', 'phone', 'is_active']

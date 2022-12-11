@@ -18,7 +18,7 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     ProductVideoProviderSerializer, ProductVatProviderSerializer, UpdateCategorySerializer,\
     UpdateSubSubCategorySerializer, ProductCreateSerializer, AddNewCategorySerializer, \
     SellerCreateSerializer, FlashDealCreateSerializer, UpdateSubCategorySerializer, FilteringAttributesSerializer, AdminProfileSerializer, \
-    ReviewListSerializer, AttributeSerializer, AttributeValuesSerializer, AdminFilterAttributeSerializer
+    ReviewListSerializer, AttributeSerializer, AttributeValuesSerializer, AdminFilterAttributeSerializer, AdminCustomerListSerializer
 from user.models import User
 from cart.models import Coupon
 from rest_framework.exceptions import ValidationError
@@ -779,3 +779,15 @@ class AdminUpdateFilterAttributeAPIView(RetrieveUpdateAPIView):
                     {"msg": 'Filter Attribute does not found!'})
         else:
             raise ValidationError({"msg": 'You can not update filter attribute, because you are not an Admin!'})
+
+class AdminCustomerListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    pagination_class = ProductCustomPagination
+    serializer_class = AdminCustomerListSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = User.objects.filter(is_customer=True)
+            return queryset
+        else:
+            raise ValidationError({"msg": 'You can not see customer list data, because you are not an Admin!'})

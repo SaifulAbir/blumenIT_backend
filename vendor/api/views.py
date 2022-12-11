@@ -474,18 +474,12 @@ class AdminProductListSearchAPI(ListAPIView):
             if seller:
                 queryset = queryset.filter(seller__id=seller)
 
-            # q = ProductReview.objects.all().aggregate(Avg('rating_number'))['rating_number__avg']
-            # print("q")
-            # print(q)
-
             if sort_by:
-                # if sort_by == 'rating_high_low':
-                    # queryset = queryset.filter(seller__id=seller)
-                    # queryset = Product.objects.filter(id=ProductReview.objects.get(slug=slug)).order_by('-created_at')
-                    # q = ProductReview.objects.all().aggregate(Avg('rating_number'))['rating_number__avg']
-                    # print("q")
-                    # print(q)
-                # if sort_by == 'rating_low_high':
+                if sort_by == 'rating_high_low':
+                    queryset = queryset.order_by('-total_average_rating_number')
+
+                if sort_by == 'rating_low_high':
+                    queryset = queryset.order_by('total_average_rating_number')
                 if sort_by == 'num_of_sale_high_low':
                     queryset = queryset.order_by('-sell_count')
                 if sort_by == 'num_of_sale_low_high':

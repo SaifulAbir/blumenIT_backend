@@ -1753,7 +1753,7 @@ class AdminOrderViewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ['user', 'order_id', 'product_count', 'order_date', 'order_status', 'total_price',
-             'c', 'payment_type', 'shipping_cost', 'coupon_discount_amount']
+                  'payment_type', 'shipping_cost', 'coupon_discount_amount']
 
 class AdminOrderUpdateSerializer(serializers.ModelSerializer):
 

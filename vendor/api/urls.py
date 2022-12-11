@@ -76,8 +76,8 @@ urlpatterns = [
 
     path('admin/all-order-list/', AdminOrderList.as_view()),
     path('admin/order-view/<int:o_id>/',AdminOrderViewAPI.as_view()),
-    path('admin/order-search/',OrderListSearchAPI.as_view(),),
-    path('admin/order-update/<int:o_id>', AdminOrderUpdateAPI.as_view())
+    path('admin/order-search/',OrderListSearchAPI.as_view()),
+    path('admin/order-update/<int:o_id>', AdminOrderUpdateAPI.as_view()),
 
 
     path('admin/customer-list/', AdminCustomerListAPIView.as_view()),

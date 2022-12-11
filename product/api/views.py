@@ -280,11 +280,7 @@ class ProductSearchAPI(ListAPIView):
             status='PUBLISH').order_by('-created_at')
 
         if query:
-            queryset = queryset.filter(
-                Q(title__icontains=query) | Q(full_description__icontains=query) |
-                Q(short_description__icontains=query) |
-                Q(sku__icontains=query)
-            )
+            queryset = queryset.filter(Q(title__icontains=query))
 
         if category:
             queryset = queryset.filter(category__id=category)
@@ -292,22 +288,18 @@ class ProductSearchAPI(ListAPIView):
         return queryset
 
 class ProductReviewCreateAPIView(CreateAPIView):
-    permission_classes = (AllowAny,)
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     serializer_class = ProductReviewCreateSerializer
 
     def post(self, request, *args, **kwargs):
-        return super(ProductReviewCreateAPIView, self).post(request, *args, **kwargs)
-        # if User.objects.filter(id=self.request.user.id).exists():
-        #     uid = User.objects.get(id=self.request.user.id)
-        #     if uid:
-        #         return super(ProductReviewCreateAPIView, self).post(request, *args, **kwargs)
-        # else:
-        #     raise ValidationError({"msg": 'You are not a User.'})
         # return super(ProductReviewCreateAPIView, self).post(request, *args, **kwargs)
+        if User.objects.filter(id=self.request.user.id).exists():
+            uid = User.objects.get(id=self.request.user.id)
+            if uid:
+                return super(ProductReviewCreateAPIView, self).post(request, *args, **kwargs)
+        else:
+            raise ValidationError({"msg": 'You are not a User.'})
 
-    # def post(self, request, *args, **kwargs):
-    #     return super(ProductReviewCreateAPIView, self).post(request, *args, **kwargs)
 
 class VendorProductListForFrondEndAPI(ListAPIView):
     permission_classes = (AllowAny,)

@@ -276,6 +276,7 @@ class Product(AbstractTimeStamp):
         max_length=20, choices=PRODUCT_STATUSES, default=PRODUCT_STATUSES[0][0])
     digital = models.BooleanField(default=False)
     in_house_product = models.BooleanField(default=False)
+    whole_sale_product = models.BooleanField(default=False)
     sell_count = models.BigIntegerField(null=True, blank=True, default=0)
     warranty = models.CharField(max_length=100, default='', null=True, blank=True)
 
@@ -533,7 +534,7 @@ class ProductReview(AbstractTimeStamp):
         db_table = 'product_review'
 
     def __str__(self):
-        return str(self.pk)
+        return 'Product: '+ str(self.product.title)
 
 
 class ProductCombinationMedia(AbstractTimeStamp):

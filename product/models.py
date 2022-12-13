@@ -13,6 +13,8 @@ import string
 import random
 from django.utils import timezone
 
+from django.db.models import Avg
+
 class Attribute(AbstractTimeStamp):
     title = models.CharField(
         max_length=100, null=False, blank=False, default="", help_text="name")
@@ -279,6 +281,7 @@ class Product(AbstractTimeStamp):
     whole_sale_product = models.BooleanField(default=False)
     sell_count = models.BigIntegerField(null=True, blank=True, default=0)
     warranty = models.CharField(max_length=100, default='', null=True, blank=True)
+    total_average_rating_number = models.FloatField(null=True, blank=True, default=0.0)
 
 
     class Meta:
@@ -524,7 +527,7 @@ class ProductReview(AbstractTimeStamp):
                                related_name='product_review_seller', blank=True, null=True)
     user = models.ForeignKey(User, on_delete=models.SET_NULL,
                              related_name='product_review_user', blank=True, null=True)
-    rating_number = models.IntegerField(default=0)
+    rating_number = models.FloatField(null=True, blank=True, default=0.0)
     review_text = models.TextField(default='', blank=True, null=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
 
@@ -535,6 +538,13 @@ class ProductReview(AbstractTimeStamp):
 
     def __str__(self):
         return 'Product: '+ str(self.product.title)
+
+    def save(self, *args, **kwargs):
+        super(ProductReview,self).save(*args, **kwargs)
+        if self.product:
+            average_rating = ProductReview.objects.filter(product=self.product).aggregate(Avg('rating_number'))['rating_number__avg']
+            product_obj = Product.objects.filter(id=self.product.id)
+            product_obj.update(total_average_rating_number=average_rating)
 
 
 class ProductCombinationMedia(AbstractTimeStamp):

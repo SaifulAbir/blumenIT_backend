@@ -115,6 +115,7 @@ class DeliveryAddress(AbstractTimeStamp):
     zip_code = models.CharField(
         max_length=100, blank=True, null=True, default='')
     default = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
 
     class Meta:
         verbose_name = 'DeliveryAddress'
@@ -170,6 +171,7 @@ class Order(AbstractTimeStamp):
     cash_on_delivery = models.BooleanField(default=False)
     delivery_address = models.ForeignKey(
         DeliveryAddress, on_delete=models.CASCADE, blank=True, null=True)
+    delivery_date = models.DateTimeField(null=True, blank=True)
     comment = models.TextField(null=True, blank=True)
     # ordered = models.BooleanField(default=True)
     # being_delivered = models.BooleanField(default=False)

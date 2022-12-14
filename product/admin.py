@@ -46,9 +46,11 @@ class SpecificationInline(admin.TabularInline):
     model = Specification
     fields = ['title', 'is_active']
 
+
 class ProductFilterAttributesInline(admin.TabularInline):
     model = ProductFilterAttributes
     fields = ['filter_attribute', 'is_active']
+    
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):

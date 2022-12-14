@@ -4,6 +4,7 @@ from ecommerce.models import AbstractTimeStamp
 
 class BlogCategory(AbstractTimeStamp):
     title = models.CharField(max_length=100, help_text="name")
+    is_active = models.BooleanField(default=True)
 
     class Meta:
         verbose_name = 'BlogCategory'

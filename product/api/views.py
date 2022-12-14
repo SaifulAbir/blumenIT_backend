@@ -58,7 +58,7 @@ class StoreCategoryListAPIView(ListAPIView):
     serializer_class = StoreCategoryAPIViewListSerializer
 
     def get_queryset(self):
-        queryset = Category.objects.filter(is_active=True)
+        queryset = Category.objects.filter(is_active=True).order_by('ordering_number')
         return queryset
 
 

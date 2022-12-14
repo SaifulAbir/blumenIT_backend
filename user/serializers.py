@@ -94,6 +94,7 @@ class CustomerOrderListSerializer(serializers.ModelSerializer):
         model = Order
         fields = ['id', 'user', 'order_id', 'order_date', 'order_status', 'total_price']
 
+
 class CustomerOrderItemsSerializer(serializers.ModelSerializer):
     product_name = serializers.SerializerMethodField()
     product_thumb = serializers.SerializerMethodField()
@@ -118,20 +119,23 @@ class CustomerOrderItemsSerializer(serializers.ModelSerializer):
             0].price
         return product_price
 
+
 class CustomerDeliveryAddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeliveryAddress
         fields = ['id', 'user', 'name', 'address', 'phone',
                   'email', 'zip_code', 'country', 'city', 'state']
 
+
 class CustomerOrderDetailsSerializer(serializers.ModelSerializer):
     order_items = serializers.SerializerMethodField('get_order_items')
     sub_total = serializers.SerializerMethodField('get_sub_total')
     delivery_address = serializers.SerializerMethodField('get_delivery_address')
     payment_title = serializers.CharField(source='payment_type.type_name',read_only=True)
+    total_price = serializers.SerializerMethodField('get_total_price')
     class Meta:
         model = Order
-        fields = ['user', 'order_id', 'order_date', 'delivery_date', 'order_status', 'order_items', 'delivery_address', 'payment_type', 'payment_title', 'sub_total', 'shipping_cost', 'coupon_discount_amount']
+        fields = ['user', 'order_id', 'order_date', 'delivery_date', 'order_status', 'order_items', 'delivery_address', 'payment_type', 'payment_title', 'sub_total', 'shipping_cost', 'coupon_discount_amount', 'total_price']
 
     def get_order_items(self, obj):
         queryset = OrderItem.objects.filter(order=obj)
@@ -153,6 +157,28 @@ class CustomerOrderDetailsSerializer(serializers.ModelSerializer):
             prices.append(t_price)
         sub_total = sum(prices)
         return sub_total
+
+    def get_total_price(self, obj):
+        order_items = OrderItem.objects.filter(order=obj)
+        prices = []
+        total_price = 0
+        for order_item in order_items:
+            price = order_item.unit_price
+            quantity = order_item.quantity
+            t_price = float(price) * float(quantity)
+            prices.append(t_price)
+        sub_total = sum(prices)
+        if sub_total:
+            total_price += sub_total
+
+        shipping_cost = obj.shipping_cost
+        if shipping_cost:
+            total_price += shipping_cost
+
+        coupon_discount_amount = obj.coupon_discount_amount
+        if coupon_discount_amount:
+            total_price -= coupon_discount_amount
+        return total_price
 
 
 class CustomerProfileOtherDataSerializer(serializers.ModelSerializer):

@@ -145,22 +145,20 @@ class PaymentMethodsAPIView(ListAPIView):
         return queryset
 
 
+class CheckoutDetailsAPIView(RetrieveAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = CheckoutDetailsSerializer
+    lookup_field = 'o_id'
+    lookup_url_kwarg = 'o_id'
 
-
-# class CheckoutDetailsAPIView(RetrieveAPIView):
-#     permission_classes = [IsAuthenticated]
-#     serializer_class = CheckoutDetailsSerializer
-#     lookup_field = 'oid'
-#     lookup_url_kwarg = 'oid'
-
-#     def get_object(self):
-#         oid = self.kwargs['oid']
-#         try:
-#             query = Order.objects.get(id=int(oid), user=self.request.user)
-#             return query
-#         except:
-#             raise ValidationError(
-#                 {"details": "Order doesn't exist, or this is not your order."})
+    def get_object(self):
+        o_id = self.kwargs['o_id']
+        try:
+            query = Order.objects.get(order_id=o_id)
+            return query
+        except:
+            raise ValidationError(
+                {"details": "Order doesn't exist."})
 
 
 # class CartList(ListAPIView):

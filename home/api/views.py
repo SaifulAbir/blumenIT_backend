@@ -11,7 +11,7 @@ from product.models import Product, Category, Brand
 from product.serializers import ProductListBySerializer, BrandListSerializer
 
 
-class HomeDataAPIView(APIView):
+class   HomeDataAPIView(APIView):
     permission_classes = (AllowAny,)
 
     def get(self, request):
@@ -21,14 +21,18 @@ class HomeDataAPIView(APIView):
         slider_images_serializer = SliderImagesListSerializer(slider_images, many=True, context={"request": request})
 
         # top category of the month
-        top_best_sellers = Product.objects.filter(status='PUBLISH').order_by('-sell_count')
-        category_ids = top_best_sellers.values_list('category__id', flat=True).distinct()
-        final_category_ids = []
-        for category_id in category_ids:
-            if category_id not in final_category_ids:
-                final_category_ids.append(category_id)
-        product_cat = Category.objects.filter(id__in=final_category_ids)[:6]
-        product_cat_serializer = product_catListSerializer(product_cat, many=True, context={"request": request})
+        # top_best_sellers = Product.objects.filter(status='PUBLISH').order_by('-sell_count')
+        # category_ids = top_best_sellers.values_list('category__id', flat=True).distinct()
+        # final_category_ids = []
+        # for category_id in category_ids:
+        #     if category_id not in final_category_ids:
+        #         final_category_ids.append(category_id)
+        # product_cat = Category.objects.filter(id__in=final_category_ids)[:6]
+        # product_cat_serializer = product_catListSerializer(product_cat, many=True, context={"request": request})
+
+        # featured_categories
+        featured_categories = Category.objects.filter(is_featured=True, is_active=True).order_by('-created_at')
+        featured_categories_serializer = product_catListSerializer(featured_categories, many=True, context={"request": request})
 
         # featured
         featured = Product.objects.filter(status='PUBLISH', is_featured=True).order_by('-created_at')
@@ -47,7 +51,7 @@ class HomeDataAPIView(APIView):
         brand_list_serializer = BrandListSerializer(brand_list, many=True, context={"request": request})
         return Response({
             "slider_images": slider_images_serializer.data,
-            "featured_categories": product_cat_serializer.data,
+            "featured_categories": featured_categories_serializer.data,
             "featured_products": featured_serializer.data,
             "popular_product": popular_serializer.data,
             "gaming_product": gaming_serializer.data,

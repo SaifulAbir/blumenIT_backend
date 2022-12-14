@@ -2,9 +2,6 @@ from pickle import TRUE
 from pyexpat import model
 from attr import fields
 from rest_framework import serializers
-
-# from user.serializers import CustomerProfileSerializer
-# from vendor.serializers import VendorDetailSerializer
 from .models import *
 from product.models import Product, Inventory
 from rest_framework.validators import UniqueTogetherValidator
@@ -66,6 +63,7 @@ class ProductCombinationForCheckoutSerializer(serializers.ModelSerializer):
                   'variant_type',
                   'variant_value'
                   ]
+
 
 class CheckoutDetailsAddressSerializer(serializers.ModelSerializer):
     class Meta:
@@ -130,12 +128,11 @@ class CheckoutDetailsSerializer(serializers.ModelSerializer):
         order_item = OrderItem.objects.filter(order=obj)
         return CheckoutDetailsOrderItemSerializer(order_item, many=True).data
 
+
 class WishlistSerializer(serializers.Serializer):
     product = serializers.PrimaryKeyRelatedField(
         queryset=Product.objects.all(), many=False, write_only=True)
 
-
-# general Serializer end
 
 class PaymentTypesListSerializer(serializers.ModelSerializer):
     class Meta:
@@ -162,8 +159,6 @@ class ApplyCouponSerializer(serializers.ModelSerializer):
         model = Coupon
         fields = ['id', 'amount']
 
-# list Serializer start
-
 
 class CartListSerializer(serializers.ModelSerializer):
     product = serializers.SerializerMethodField()
@@ -177,10 +172,6 @@ class CartListSerializer(serializers.ModelSerializer):
             'product',
             'subtotal'
         ]
-
-#     def get_product(self, obj):
-#         selected_product = Product.objects.filter(slug=obj.product.slug).distinct()
-#         return ProductSerializer(selected_product, many=True).data
 
 
 class DeliveryAddressSerializer(serializers.ModelSerializer):

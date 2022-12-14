@@ -7,7 +7,7 @@ from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateAP
 from rest_framework.views import APIView
 from home.models import ProductView
 from product import serializers
-from product.serializers import ProductDetailsSerializer, ProductListSerializer, ProductReviewCreateSerializer, BrandSerializer,\
+from product.serializers import ProductDetailsSerializer, ProductReviewCreateSerializer, BrandSerializer,\
 StoreCategoryAPIViewListSerializer, PcBuilderDataListSerializer, ProductListBySerializer, FilterAttributeSerializer
 
 from product.models import Category, SubCategory, SubSubCategory, Product, Brand, AttributeValues
@@ -30,6 +30,7 @@ class BrandCreateAPIView(CreateAPIView):
     def post(self, request, *args, **kwargs):
         return super(BrandCreateAPIView, self).post(request, *args, **kwargs)
 
+
 class BrandDeleteAPIView(ListAPIView):
     permission_classes = [AllowAny]
     serializer_class = BrandSerializer
@@ -51,6 +52,7 @@ class BrandDeleteAPIView(ListAPIView):
                 {"msg": 'Brand Does not exist!'}
             )
 
+
 class StoreCategoryListAPIView(ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = StoreCategoryAPIViewListSerializer
@@ -58,6 +60,7 @@ class StoreCategoryListAPIView(ListAPIView):
     def get_queryset(self):
         queryset = Category.objects.filter(is_active=True)
         return queryset
+
 
 class ProductDetailsAPI(RetrieveAPIView):
     permission_classes = (AllowAny,)
@@ -85,11 +88,13 @@ class ProductDetailsAPI(RetrieveAPIView):
         except:
             raise ValidationError({"details": "Product doesn't exist!"})
 
+
 class ProductListAPI(ListAPIView):
     permission_classes = (AllowAny,)
     queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
-    serializer_class = ProductListSerializer
+    serializer_class = ProductListBySerializer
     pagination_class = ProductCustomPagination
+
 
 class ProductListByCategoryAPI(ListAPIView):
     permission_classes = (AllowAny,)
@@ -145,6 +150,33 @@ class ProductListByCategoryAPI(ListAPIView):
 
         return queryset
 
+
+class ProductListByCategoryPopularProductsAPI(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = ProductListBySerializer
+    pagination_class = ProductCustomPagination
+    lookup_field = 'cid'
+    lookup_url_kwarg = "cid"
+
+    def get_queryset(self):
+        # work with dynamic pagination page_size
+        try:
+            pagination = self.kwargs['pagination']
+        except:
+            pagination = 10
+        self.pagination_class.page_size = pagination
+
+
+        cid = self.kwargs['cid']
+        if cid:
+            queryset = Product.objects.filter(category=cid, status='PUBLISH').annotate(count=Count('product_review_product')).order_by('-count')
+        else:
+            queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
+
+
+        return queryset
+
+
 class FilterAttributesAPI(ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = FilterAttributeSerializer
@@ -165,6 +197,7 @@ class FilterAttributesAPI(ListAPIView):
             return queryset
         else:
             raise ValidationError({"msg": 'Filter Attributes not found!'})
+
 
 class ProductListBySubCategoryAPI(ListAPIView):
     permission_classes = (AllowAny,)
@@ -216,6 +249,7 @@ class ProductListBySubCategoryAPI(ListAPIView):
 
         return queryset
 
+
 class ProductListBySubSubCategoryAPI(ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = ProductListBySerializer
@@ -266,10 +300,11 @@ class ProductListBySubSubCategoryAPI(ListAPIView):
 
         return queryset
 
+
 class ProductSearchAPI(ListAPIView):
     permission_classes = ()
     pagination_class = ProductCustomPagination
-    serializer_class = ProductListSerializer
+    serializer_class = ProductListBySerializer
 
     def get_queryset(self):
         request = self.request
@@ -287,6 +322,7 @@ class ProductSearchAPI(ListAPIView):
 
         return queryset
 
+
 class ProductReviewCreateAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ProductReviewCreateSerializer
@@ -303,7 +339,7 @@ class ProductReviewCreateAPIView(CreateAPIView):
 
 class VendorProductListForFrondEndAPI(ListAPIView):
     permission_classes = (AllowAny,)
-    serializer_class = ProductListSerializer
+    serializer_class = ProductListBySerializer
     pagination_class = ProductCustomPagination
     lookup_field = 'vid'
     lookup_url_kwarg = "vid"
@@ -366,6 +402,7 @@ class PcBuilderChooseAPIView(ListAPIView):
 
         return queryset
 
+
 class PcBuilderCategoryAPIView(ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = StoreCategoryAPIViewListSerializer
@@ -373,6 +410,7 @@ class PcBuilderCategoryAPIView(ListAPIView):
     def get_queryset(self):
         queryset = Category.objects.filter(is_active=True, pc_builder=True)
         return queryset
+
 
 class OnlyTitleAPIView(APIView):
     permission_classes = [AllowAny]

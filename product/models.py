@@ -56,6 +56,7 @@ class Category(AbstractTimeStamp):
         upload_to='product_category', blank=True, null=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
     pc_builder = models.BooleanField(null=False, blank=False, default=False)
+    is_featured = models.BooleanField(null=False, blank=False, default=False)
 
     subtitle = models.TextField(null=True, blank=True, default="")
 

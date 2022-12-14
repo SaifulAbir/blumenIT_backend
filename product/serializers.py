@@ -275,6 +275,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             'short_description',
             'active_short_description',
             'seller',
+            'thumbnail',
             'brand',
             'unit',
             'price',
@@ -383,7 +384,8 @@ class ProductListBySerializer(serializers.ModelSerializer):
             'short_description',
             'review_count',
             'shipping_time',
-            'product_reviews'
+            'product_reviews',
+            'warranty'
         ]
 
     def get_avg_rating(self, ob):

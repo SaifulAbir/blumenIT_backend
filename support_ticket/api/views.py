@@ -2,7 +2,7 @@ from rest_framework.generics import ListAPIView, CreateAPIView
 from support_ticket.models import Ticket
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from vendor.pagination import OrderCustomPagination
-from support_ticket.serializers import TicketListSerializer, TicketSerializer
+from support_ticket.serializers import TicketListSerializer, CustomerTicketCreateSerializer
 from rest_framework.exceptions import ValidationError
 
 class CustomerTicketListAPI(ListAPIView):
@@ -25,7 +25,7 @@ class CustomerTicketListAPI(ListAPIView):
 
 class CustomerTicketCreateAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = TicketSerializer
+    serializer_class = CustomerTicketCreateSerializer
 
     def post(self, request, *args, **kwargs):
         if self.request.user.is_customer == True:

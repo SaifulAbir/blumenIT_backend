@@ -6,10 +6,10 @@ class TicketListSerializer(serializers.ModelSerializer):
         model = Ticket
         fields = ['id', 'ticket_id', 'created_at', 'ticket_subject', 'status']
 
-class TicketSerializer(serializers.ModelSerializer):
+class CustomerTicketCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ticket
-        fields = ['id', 'ticket_subject']
+        fields = ['id', 'ticket_subject', 'ticket_description', 'issue_photo']
 
     def create(self, validated_data):
         ticket_instance = Ticket.objects.create(**validated_data, user=self.context['request'].user)

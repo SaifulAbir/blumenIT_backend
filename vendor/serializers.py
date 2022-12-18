@@ -5,7 +5,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from ecommerce.common.emails import send_email_without_delay
-from product.models import Brand, Category, Color, DiscountTypes, FlashDealInfo, FlashDealProduct, Inventory, InventoryVariation, Product, ProductAttributeValues, ProductAttributes, ProductColor, ProductCombinations, ProductCombinationsVariants, ProductImages, ProductReview, ProductTags, ProductVariation, ProductVideoProvider, ShippingClass, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units, VariantType, VatType, Attribute, FilterAttributes, ProductFilterAttributes
+from product.models import Brand, Category, Color, DiscountTypes, FlashDealInfo, FlashDealProduct, Inventory, InventoryVariation, Product, ProductAttributeValues, ProductAttributes, ProductColor, ProductCombinations, ProductCombinationsVariants, ProductImages, ProductReview, ProductTags, ProductVariation, ProductVideoProvider, ShippingClass, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units, VariantType, VatType, Attribute, FilterAttributes, ProductFilterAttributes, AttributeValues
 from user.models import User
 from cart.models import Order
 # from user.serializers import UserRegisterSerializer
@@ -40,6 +40,7 @@ class SellerCreateSerializer(serializers.ModelSerializer):
                                                 email=email_get_data)
         return seller_instance
 
+
 class SellerUpdateSerializer(serializers.ModelSerializer):
     name = serializers.CharField(required=True)
     email = serializers.EmailField(required=True)
@@ -65,12 +66,14 @@ class SellerUpdateSerializer(serializers.ModelSerializer):
         validated_data.update({ "email": email_get_data, "phone": phone_get_data})
         return super().update(instance, validated_data)
 
+
 class SellerSerializer(serializers.ModelSerializer):
     logo = serializers.ImageField(allow_null=True)
 
     class Meta:
         model = Seller
         fields = ['id', 'name', 'address', 'phone', 'email', 'logo', 'is_active']
+
 
 class SellerDetailSerializer(serializers.ModelSerializer):
 
@@ -79,18 +82,19 @@ class SellerDetailSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'email', 'address', 'phone', 'logo']
 
 
-
 class FilteringAttributesSerializer(serializers.ModelSerializer):
     attribute_title = serializers.CharField(source='attribute.title',read_only=True)
     class Meta:
         model = FilterAttributes
         fields = ['id', 'attribute', 'attribute_title', 'category', 'sub_category', 'sub_sub_category']
 
+
 class AdminCategoryListSerializer(serializers.ModelSerializer):
     class Meta:
         ref_name = "admin category list serializer"
         model = Category
         fields = ['id', 'title', 'ordering_number', 'type']
+
 
 class AddNewCategorySerializer(serializers.ModelSerializer):
     title = serializers.CharField(required= True)
@@ -136,6 +140,7 @@ class AddNewCategorySerializer(serializers.ModelSerializer):
                     filtering_attribute_create_instance = FilterAttributes.objects.create(attribute=attribute, category=category_instance)
 
         return category_instance
+
 
 class UpdateCategorySerializer(serializers.ModelSerializer):
     title = serializers.CharField(required= False)
@@ -200,10 +205,12 @@ class UpdateCategorySerializer(serializers.ModelSerializer):
         validated_data.update({"updated_at": timezone.now()})
         return super().update(instance, validated_data)
 
+
 class AdminSubCategoryListSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubCategory
         fields = ['id', 'title', 'ordering_number', 'category']
+
 
 class AddNewSubCategorySerializer(serializers.ModelSerializer):
     title = serializers.CharField(required= True)
@@ -245,6 +252,7 @@ class AddNewSubCategorySerializer(serializers.ModelSerializer):
                 if attribute:
                     filtering_attribute_create_instance = FilterAttributes.objects.create(attribute=attribute, sub_category=sub_category_instance)
         return sub_category_instance
+
 
 class UpdateSubCategorySerializer(serializers.ModelSerializer):
     title = serializers.CharField(required= False)
@@ -290,10 +298,12 @@ class UpdateSubCategorySerializer(serializers.ModelSerializer):
         validated_data.update({"updated_at": timezone.now()})
         return super().update(instance, validated_data)
 
+
 class AdminSubSubCategoryListSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubSubCategory
         fields = ['id', 'title', 'ordering_number', 'category', 'sub_category', 'is_active']
+
 
 class AddNewSubSubCategorySerializer(serializers.ModelSerializer):
     title = serializers.CharField(required= True)
@@ -335,6 +345,7 @@ class AddNewSubSubCategorySerializer(serializers.ModelSerializer):
                     filtering_attribute_create_instance = FilterAttributes.objects.create(attribute=attribute, sub_sub_category=sub_sub_category_instance)
 
         return sub_sub_category_instance
+
 
 class UpdateSubSubCategorySerializer(serializers.ModelSerializer):
     title = serializers.CharField(required= False)
@@ -381,32 +392,22 @@ class UpdateSubSubCategorySerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-
-
-
-
-
-
-
-
 class VendorBrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
         fields = ['id', 'title']
+
 
 class VendorUnitSerializer(serializers.ModelSerializer):
     class Meta:
         model = Units
         fields = ['id', 'title']
 
-class VendorProductListSerializer(serializers.ModelSerializer):
-    # category = CategorySerializer(read_only=True)
-    # brand_name = serializers.SerializerMethodField()
-    avg_rating = serializers.SerializerMethodField()
-    # review_count = serializers.SerializerMethodField()
-    # discount_type = serializers.CharField()
 
+class VendorProductListSerializer(serializers.ModelSerializer):
+    avg_rating = serializers.SerializerMethodField()
     vendor_organization_name = serializers.CharField(source="vendor.organization_name",read_only=True)
+    seller_title = serializers.CharField(source="seller.name",read_only=True)
 
     class Meta:
         model = Product
@@ -415,6 +416,8 @@ class VendorProductListSerializer(serializers.ModelSerializer):
             'thumbnail',
             'title',
             'vendor_organization_name',
+            'seller',
+            'seller_title',
             'sell_count',
             'price',
             'avg_rating',
@@ -424,31 +427,9 @@ class VendorProductListSerializer(serializers.ModelSerializer):
             'is_featured'
         ]
 
-    # class Meta:
-    #     model = Product
-    #     fields = [
-    #         'id',
-    #         'title',
-    #         'slug',
-    #         'sku',
-    #         'price',
-    #         'old_price',
-    #         'short_description',
-    #         'total_quantity',
-    #         'status',
-    #         'is_featured',
-    #         'category',
-    #         'brand_name',
-    #         'thumbnail',
-    #         'product_media',
-    #         'avg_rating',
-    #         'review_count',
-    #         'discount_type',
-    #         'discount_amount'
-    #     ]
-
     def get_avg_rating(self, obj):
         return obj.product_review_product.all().aggregate(Avg('rating_number'))['rating_number__avg']
+
 
 class ProductCombinationSerializer(serializers.ModelSerializer):
     # sku = serializers.CharField(required=False)
@@ -477,6 +458,7 @@ class ProductCombinationSerializer(serializers.ModelSerializer):
             'discount_type',
             'discount_amount'
         ]
+
 
 class ProductCombinationSerializerForVendorProductDetails(serializers.ModelSerializer):
     # sku = serializers.CharField(required=False)
@@ -560,6 +542,7 @@ class ProductCombinationSerializerForVendorProductDetails(serializers.ModelSeria
         except:
             return ''
 
+
 class ProductCombinationSerializerForVendorProductUpdate(serializers.ModelSerializer):
     product_attribute = serializers.SerializerMethodField()
     variant_type = serializers.SerializerMethodField()
@@ -641,6 +624,7 @@ class ProductCombinationSerializerForVendorProductUpdate(serializers.ModelSerial
         except:
             return ''
 
+
 class ProductAttributeValuesSerializer(serializers.ModelSerializer):
     attribute_value_title = serializers.CharField(source="value.value",read_only=True)
     class Meta:
@@ -650,6 +634,7 @@ class ProductAttributeValuesSerializer(serializers.ModelSerializer):
             'value',
             'attribute_value_title'
         ]
+
 
 class ProductAttributesSerializer(serializers.ModelSerializer):
     attribute_title = serializers.CharField(source="attribute.title",read_only=True)
@@ -663,6 +648,7 @@ class ProductAttributesSerializer(serializers.ModelSerializer):
             'attribute_title',
             'product_attribute_values'
         ]
+
 
 class ProductExistingAttributesSerializer(serializers.ModelSerializer):
     attribute_title = serializers.CharField(source="attribute.title",read_only=True)
@@ -682,6 +668,7 @@ class ProductExistingAttributesSerializer(serializers.ModelSerializer):
         serializer = ProductAttributeValuesSerializer(instance=queryset, many=True)
         return serializer.data
 
+
 class ProductVariantsSerializer(serializers.ModelSerializer):
     variation = serializers.CharField(required=True, write_only=True)
     variation_price = serializers.FloatField(required=True, write_only=True)
@@ -700,6 +687,7 @@ class ProductVariantsSerializer(serializers.ModelSerializer):
             'image',
         ]
 
+
 class ProductExistingVariantsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductVariation
@@ -712,6 +700,7 @@ class ProductExistingVariantsSerializer(serializers.ModelSerializer):
             'image',
         ]
 
+
 class SpecificationValuesSerializer(serializers.ModelSerializer):
     class Meta:
         model = SpecificationValue
@@ -721,6 +710,7 @@ class SpecificationValuesSerializer(serializers.ModelSerializer):
             'value'
         ]
 
+
 class VatTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = VatType
@@ -728,6 +718,7 @@ class VatTypeSerializer(serializers.ModelSerializer):
             'id',
             'title'
         ]
+
 
 class ProductSpecificationSerializer(serializers.ModelSerializer):
     specification_values = SpecificationValuesSerializer(
@@ -739,6 +730,7 @@ class ProductSpecificationSerializer(serializers.ModelSerializer):
             'title',
             'specification_values'
         ]
+
 
 class ProductExistingSpecificationSerializer(serializers.ModelSerializer):
     specification_values = serializers.SerializerMethodField('get_existing_specification_values')
@@ -755,6 +747,7 @@ class ProductExistingSpecificationSerializer(serializers.ModelSerializer):
         serializer = SpecificationValuesSerializer(instance=queryset, many=True)
         return serializer.data
 
+
 class FlashDealSerializer(serializers.ModelSerializer):
     flash_deal_info = serializers.PrimaryKeyRelatedField(queryset=FlashDealInfo.objects.all(), many=False, write_only=True, required= False)
     discount_type = serializers.PrimaryKeyRelatedField(queryset=DiscountTypes.objects.all(), many=False, write_only=True, required= False)
@@ -767,6 +760,7 @@ class FlashDealSerializer(serializers.ModelSerializer):
             'discount_type'
         ]
 
+
 class FlashDealExistingSerializer(serializers.ModelSerializer):
     class Meta:
         model = FlashDealProduct
@@ -777,6 +771,7 @@ class FlashDealExistingSerializer(serializers.ModelSerializer):
             'discount_type'
         ]
 
+
 class ProductFilterAttributesSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductFilterAttributes
@@ -784,6 +779,8 @@ class ProductFilterAttributesSerializer(serializers.ModelSerializer):
             'id',
             'filter_attribute'
         ]
+
+
 # product create serializer start
 class ProductCreateSerializer(serializers.ModelSerializer):
     title = serializers.CharField(required=True)
@@ -851,6 +848,7 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             'low_stock_quantity_warning',
             'show_stock_quantity',
             'in_house_product',
+            'whole_sale_product',
             'cash_on_delivery',
             'is_featured',
             'todays_deal',
@@ -1098,6 +1096,8 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             return product_instance
 # product create serializer end
 
+
+
 class VendorProductViewSerializer(serializers.ModelSerializer):
     product_images = serializers.SerializerMethodField()
     avg_rating = serializers.SerializerMethodField()
@@ -1150,6 +1150,7 @@ class VendorProductViewSerializer(serializers.ModelSerializer):
         selected_product_reviews = ProductReview.objects.filter(
             product=obj, is_active=True).distinct()
         return ProductReviewSerializer(selected_product_reviews, many=True).data
+
 
 # product update serializer start
 class ProductUpdateSerializer(serializers.ModelSerializer):
@@ -1232,6 +1233,8 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
                     'product_specification',
                     'low_stock_quantity_warning',
                     'show_stock_quantity',
+                    'in_house_product',
+                    'whole_sale_product',
                     'cash_on_delivery',
                     'is_featured',
                     'todays_deal',
@@ -1711,17 +1714,20 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
             return super().update(instance, validated_data)
 # product update serializer end
 
+
 class ProductVideoProviderSerializer(serializers.ModelSerializer):
     class Meta:
         ref_name = "product video provider serializer"
         model = ProductVideoProvider
         fields = ['id', 'title']
 
+
 class ProductVatProviderSerializer(serializers.ModelSerializer):
     class Meta:
         ref_name = "product vat provider serializer"
         model = VatType
         fields = ['id', 'title']
+
 
 class FlashDealCreateSerializer(serializers.ModelSerializer):
 
@@ -1737,11 +1743,44 @@ class FlashDealCreateSerializer(serializers.ModelSerializer):
                     'end_date'
                 ]
 
+
 class AdminProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
         fields = ['id', 'name', 'email', 'username', 'phone', 'date_joined']
+
+
+class ReviewListSerializer(serializers.ModelSerializer):
+    product_title = serializers.CharField(source='product.title',read_only=True)
+    customer_name = serializers.CharField(source='user.username',read_only=True)
+    class Meta:
+        model = ProductReview
+        fields = ['id', 'product', 'product_title', 'user', 'customer_name', 'rating_number', 'review_text', 'is_active']
+
+
+class AttributeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Attribute
+        fields = ['id', 'title', 'is_active']
+
+
+class AttributeValuesSerializer(serializers.ModelSerializer):
+    attribute_title = serializers.CharField(source='attribute.title',read_only=True)
+    class Meta:
+        model = AttributeValues
+        fields = ['id', 'attribute', 'attribute_title', 'value', 'is_active']
+
+
+class AdminFilterAttributeSerializer(serializers.ModelSerializer):
+    attribute_title = serializers.CharField(source='attribute.title',read_only=True)
+    category_title = serializers.CharField(source='category.title',read_only=True)
+    sub_category_title = serializers.CharField(source='sub_category.title',read_only=True)
+    sub_sub_category_title = serializers.CharField(source='sub_sub_category.title',read_only=True)
+    class Meta:
+        model = FilterAttributes
+        fields = ['id', 'attribute', 'attribute_title', 'category', 'category_title', 'sub_category', 'sub_category_title', 'sub_sub_category', 'sub_sub_category_title', 'is_active']
+
 
 class AdminOrderListSerializer(serializers.ModelSerializer):
     class Meta:
@@ -1755,8 +1794,15 @@ class AdminOrderViewSerializer(serializers.ModelSerializer):
         fields = ['user', 'order_id', 'product_count', 'order_date', 'order_status', 'total_price',
                   'payment_type', 'shipping_cost', 'coupon_discount_amount']
 
+
 class AdminOrderUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
         fields = ['order_id', 'order_status', 'payment_status']
+
+
+class AdminCustomerListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'name', 'email', 'phone', 'is_active']

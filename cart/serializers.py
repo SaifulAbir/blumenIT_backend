@@ -2,11 +2,9 @@ from pickle import TRUE
 from pyexpat import model
 from attr import fields
 from rest_framework import serializers
-
-# from user.serializers import CustomerProfileSerializer
-# from vendor.serializers import VendorDetailSerializer
 from .models import *
-from product.models import Product, Inventory
+from product.models import Product, Inventory, Specification
+from product.serializers import SpecificationSerializer
 from rest_framework.validators import UniqueTogetherValidator
 from rest_framework.exceptions import ValidationError
 
@@ -67,75 +65,119 @@ class ProductCombinationForCheckoutSerializer(serializers.ModelSerializer):
                   'variant_value'
                   ]
 
-class CheckoutDetailsAddressSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomerAddress
-        fields = "__all__"
-
 
 class CheckoutDetailsOrderItemSerializer(serializers.ModelSerializer):
-    product_name = serializers.SerializerMethodField()
+    product_title = serializers.CharField(source='product.title',read_only=True)
+    product_sku = serializers.CharField(source='product.sku',read_only=True)
+    product_thumb = serializers.SerializerMethodField()
     product_price = serializers.SerializerMethodField()
-    vendor_name = serializers.SerializerMethodField()
+    product_specification = serializers.SerializerMethodField('get_product_specification')
 
     class Meta:
         model = OrderItem
-        fields = ['id', 'quantity', 'product_name',
-                  'product_price', 'vendor_name']
+        fields = ['id', 'product_title', 'product_thumb', 'quantity', 'product_price', 'product_sku', 'product_specification']
 
-    def get_product_name(self, obj):
-        product_name = Product.objects.filter(id=obj.product.id)[
-            0].title
-        return product_name
+    def get_product_thumb(self, obj):
+        product_thumb = Product.objects.filter(id=obj.product.id)[
+            0].thumbnail.url
+        return product_thumb
 
     def get_product_price(self, obj):
         product_price = Product.objects.filter(id=obj.product.id)[
             0].price
         return product_price
 
-    def get_vendor_name(self, obj):
-        vendor_name = Product.objects.filter(id=obj.product.id)[
-            0].vendor.vendor_admin.first_name
-        return vendor_name
+    def get_product_specification(self, obj):
+        queryset = Specification.objects.filter(product=obj.product.id, is_active = True)
+        serializer = SpecificationSerializer(instance=queryset, many=True)
+        return serializer.data
+
+
+class CheckoutDetailsDeliveryAddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DeliveryAddress
+        fields = ['id', 'user', 'name', 'address', 'phone',
+                  'email', 'zip_code', 'country', 'city', 'state']
 
 
 class CheckoutDetailsSerializer(serializers.ModelSerializer):
-    payment_type_name = serializers.SerializerMethodField()
-    billing_address = serializers.SerializerMethodField()
-    shipping_address = serializers.SerializerMethodField()
-    order_items = serializers.SerializerMethodField()
-
+    order_items = serializers.SerializerMethodField('get_order_items')
+    sub_total = serializers.SerializerMethodField('get_sub_total')
+    delivery_address = serializers.SerializerMethodField('get_delivery_address')
+    payment_title = serializers.CharField(source='payment_type.type_name',read_only=True)
+    user_email = serializers.EmailField(source='user.email',read_only=True)
+    user_phone = serializers.CharField(source='user.phone',read_only=True)
+    product_price = serializers.SerializerMethodField('get_product_price')
+    total_price = serializers.SerializerMethodField('get_total_price')
     class Meta:
         model = Order
-        # fields = "__all__"
-        fields = ['id', 'order_status', 'ordered_date',
-                  'total_price', 'discounted_price', 'payment_type_name', 'order_items', 'billing_address', 'shipping_address']
-
-    def get_payment_type_name(self, obj):
-        payment_type_name = PaymentType.objects.filter(id=obj.payment_type.id)[
-            0].type_name
-        return payment_type_name
-
-    def get_billing_address(self, obj):
-        billing_address = CustomerAddress.objects.filter(
-            order=obj, address_type='Billing')
-        return CheckoutDetailsAddressSerializer(billing_address, many=True).data
-
-    def get_shipping_address(self, obj):
-        shipping_address = CustomerAddress.objects.filter(
-            order=obj, address_type='Shipping')
-        return CheckoutDetailsAddressSerializer(shipping_address, many=True).data
+        fields = ['user', 'user_email', 'user_phone', 'order_id', 'order_date', 'delivery_date', 'order_status', 'order_items', 'delivery_address', 'payment_type',
+        'payment_title', 'product_price', 'coupon_discount_amount', 'sub_total', 'shipping_cost', 'total_price']
 
     def get_order_items(self, obj):
-        order_item = OrderItem.objects.filter(order=obj)
-        return CheckoutDetailsOrderItemSerializer(order_item, many=True).data
+        queryset = OrderItem.objects.filter(order=obj)
+        serializer = CheckoutDetailsOrderItemSerializer(instance=queryset, many=True)
+        return serializer.data
+
+    def get_delivery_address(self, obj):
+        try:
+            if obj.delivery_address:
+                queryset = DeliveryAddress.objects.filter(id=obj.delivery_address.id)
+                serializer = CheckoutDetailsDeliveryAddressSerializer(instance=queryset, many=True)
+                return serializer.data
+            else:
+                return ''
+        except:
+            return ''
+
+    def get_sub_total(self, obj):
+        order_items = OrderItem.objects.filter(order=obj)
+        prices = []
+        for order_item in order_items:
+            price = order_item.unit_price
+            quantity = order_item.quantity
+            t_price = float(price) * float(quantity)
+            prices.append(t_price)
+        sub_total = sum(prices)
+        return sub_total
+
+    def get_product_price(self, obj):
+        order_items = OrderItem.objects.filter(order=obj)
+        prices = []
+        for order_item in order_items:
+            price = order_item.unit_price
+            prices.append(price)
+        product_price_total = sum(prices)
+        return product_price_total
+
+    def get_total_price(self, obj):
+        order_items = OrderItem.objects.filter(order=obj)
+        prices = []
+        total_price = 0
+        for order_item in order_items:
+            price = order_item.unit_price
+            quantity = order_item.quantity
+            t_price = float(price) * float(quantity)
+            prices.append(t_price)
+        sub_total = sum(prices)
+        if sub_total:
+            total_price += sub_total
+
+        shipping_cost = obj.shipping_cost
+        if shipping_cost:
+            total_price += shipping_cost
+
+        coupon_discount_amount = obj.coupon_discount_amount
+        if coupon_discount_amount:
+            total_price -= coupon_discount_amount
+        return total_price
+
+
 
 class WishlistSerializer(serializers.Serializer):
     product = serializers.PrimaryKeyRelatedField(
         queryset=Product.objects.all(), many=False, write_only=True)
 
-
-# general Serializer end
 
 class PaymentTypesListSerializer(serializers.ModelSerializer):
     class Meta:
@@ -162,8 +204,6 @@ class ApplyCouponSerializer(serializers.ModelSerializer):
         model = Coupon
         fields = ['id', 'amount']
 
-# list Serializer start
-
 
 class CartListSerializer(serializers.ModelSerializer):
     product = serializers.SerializerMethodField()
@@ -177,10 +217,6 @@ class CartListSerializer(serializers.ModelSerializer):
             'product',
             'subtotal'
         ]
-
-#     def get_product(self, obj):
-#         selected_product = Product.objects.filter(slug=obj.product.slug).distinct()
-#         return ProductSerializer(selected_product, many=True).data
 
 
 class DeliveryAddressSerializer(serializers.ModelSerializer):

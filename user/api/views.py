@@ -8,7 +8,7 @@ from datetime import datetime
 from rest_framework import viewsets, mixins, status, generics
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import ValidationError
-from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView, ListAPIView
+from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView, ListAPIView, RetrieveAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
@@ -27,48 +27,12 @@ from user import serializers as user_serializers
 from user.models import CustomerProfile, User, OTPModel
 from rest_framework.views import APIView
 from user.serializers import  SubscriptionSerializer,  \
-    ChangePasswordSerializer, OTPSendSerializer, OTPVerifySerializer, OTPReSendSerializer, SetPasswordSerializer
+    ChangePasswordSerializer, OTPSendSerializer, OTPVerifySerializer, OTPReSendSerializer, SetPasswordSerializer, CustomerOrderListSerializer, \
+    CustomerOrderDetailsSerializer, CustomerProfileSerializer, CustomerAddressListSerializer, CustomerAddressSerializer
 
+from vendor.pagination import OrderCustomPagination
+from cart.models import Order, DeliveryAddress
 
-# class RegisterUser(mixins.CreateModelMixin,
-#                    mixins.RetrieveModelMixin,
-#                    viewsets.GenericViewSet):
-#     queryset = user_models.User.objects.all()
-#     serializer_class = user_serializers.UserRegisterSerializer
-#     permission_classes = [AllowAny]
-#
-#     def create(self, request):
-#         serializer = user_serializers.UserRegisterSerializer(data=request.data)
-#
-#         if serializer.is_valid():
-#             serializer.save()
-#             user = user_models.User.objects.none()
-#             try:
-#                 user = user_models.User.objects.get(
-#                     email=request.data["email"])
-#
-#                 token = RefreshToken.for_user(user)
-#
-#                 exp = time() + 1200 #20 minutes
-#                 email_list = request.data["email"]
-#                 subject = "Verify Your Account"
-#                 token = jwt.encode({'email': email_list, 'exp': exp, 'scope': subject},
-#                                    settings.JWT_SECRET, algorithm='HS256')
-#                 html_message = render_to_string('verification_email.html', {'token': token, 'domain': settings.EMAIL_DOMAIN_NAME})
-#                 send_email_without_delay(subject, html_message, email_list)
-#                 CustomerProfile.objects.create(user=user)
-#                 data = {
-#                     "user_id": user.id,
-#                     "email": user.email,
-#                     "full_name": user.first_name + " " + user.last_name
-#                 }
-#                 return Response({"status": True, "data": data}, status=status.HTTP_200_OK)
-#             except (user_models.User.DoesNotExist):
-#                 if user:
-#                     user.delete()
-#                 return Response({"status": False, "data": {"message": "User not registered. Please try again."}}, status=status.HTTP_409_CONFLICT)
-#         else:
-#             return Response({"status": False, "data": {"message": "User not registered. Please try again.", "errors": serializer.errors}}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
 
 class SetPasswordAPIView(CreateAPIView):
@@ -309,6 +273,180 @@ class VerifyUserAPIView(APIView):
             return Response({"message": "Token expired. Get new one"}, status=status.HTTP_401_UNAUTHORIZED)
 
 
+class SubscriptionAPIView(CreateAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = SubscriptionSerializer
+
+    def post(self, request, *args, **kwargs):
+        return super(SubscriptionAPIView, self).post(request, *args, **kwargs)
+
+
+class ChangePasswordView(generics.UpdateAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ChangePasswordSerializer
+
+    def get_object(self):
+        return self.request.user
+
+
+class CustomerOrdersList(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = CustomerOrderListSerializer
+    pagination_class = OrderCustomPagination
+
+    def get_queryset(self):
+        if self.request.user.is_customer == True:
+            queryset = Order.objects.filter(user=self.request.user).order_by('-created_at')
+
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError({"msg": "There is no orders for you."})
+        else:
+            raise ValidationError(
+                {"msg": 'You can not show order list, because you are not an User!'})
+
+
+class CustomerOrderDetails(RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = CustomerOrderDetailsSerializer
+    lookup_field = 'o_id'
+    lookup_url_kwarg = "o_id"
+
+    def get_object(self):
+        id = self.kwargs['o_id']
+        if self.request.user.is_customer == True:
+            query = Order.objects.get(order_id=id)
+            if query:
+                return query
+            else:
+                raise ValidationError({"msg": "No Order available! " })
+        else:
+            raise ValidationError(
+                {"msg": 'You can not show order details, because you are not an User!'})
+
+
+class CustomerProfile(RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = CustomerProfileSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        user_id = self.kwargs['id']
+        if self.request.user.is_customer == True:
+            query = User.objects.filter(id=user_id)
+            if query:
+                return query
+            else:
+                raise ValidationError(
+                    {"msg": 'User data does not exist!'})
+        else:
+            raise ValidationError({"msg": 'You can not update show or update profile, because you are not an Customer!'})
+
+
+class CustomerAddressListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = CustomerAddressListSerializer
+    pagination_class = OrderCustomPagination
+
+    def get_queryset(self):
+        if self.request.user.is_customer == True:
+            queryset = DeliveryAddress.objects.filter(user=self.request.user, is_active=True).order_by('-created_at')
+
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError({"msg": "There is no orders for you."})
+        else:
+            raise ValidationError(
+                {"msg": 'You can not show address list, because you are not an Customer!'})
+
+
+class CustomerAddressAddAPIView(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = CustomerAddressSerializer
+
+    def post(self, request, *args, **kwargs):
+        if self.request.user.is_customer == True:
+            return super(CustomerAddressAddAPIView, self).post(request, *args, **kwargs)
+        else:
+            raise ValidationError(
+                {"msg": 'You can not add address, because you are not an Customer!'})
+
+
+class CustomerAddressUpdateAPIView(RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = CustomerAddressSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        addr_id = self.kwargs['id']
+        if self.request.user.is_customer == True:
+            query = DeliveryAddress.objects.filter(id=addr_id)
+            if query:
+                return query
+            else:
+                raise ValidationError(
+                    {"msg": 'Address data does not exist!'})
+        else:
+            raise ValidationError({"msg": 'You can not update show or update address, because you are not an Customer!'})
+
+
+class CustomerAddressDeleteAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = CustomerAddressListSerializer
+    pagination_class = OrderCustomPagination
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        if self.request.user.is_customer == True:
+            address_obj_exist = DeliveryAddress.objects.filter(id=id).exists()
+            if address_obj_exist:
+                address_obj = DeliveryAddress.objects.filter(id=id)
+                address_obj.update(is_active=False)
+
+                queryset = DeliveryAddress.objects.filter(user=self.request.user, is_active = True).order_by('-created_at')
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'Address Does not exist!'})
+        else:
+            raise ValidationError(
+                {"msg": 'You can not delete this address, because you are not an Customer!'})
+
+
+class DashboardDataAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if self.request.user.is_customer == True:
+            customer_profile = User.objects.filter(id=self.request.user.id)
+            customer_profile_serializer = CustomerProfileSerializer(customer_profile, many=True, context={"request": request})
+
+            all_orders_count = Order.objects.filter(user=self.request.user.id).count()
+            awaiting_payments_count = Order.objects.filter(Q(user=self.request.user.id), Q(payment_status='UN-PAID')).count()
+            awaiting_shipment_count = Order.objects.filter(Q(user=self.request.user.id), Q(order_status='PENDING') | Q(order_status='CONFIRMED')).count()
+            awaiting_delivery_count = Order.objects.filter(Q(user=self.request.user.id), Q(order_status='PICKED-UP')).count()
+
+            return Response({
+                "customer_profile": customer_profile_serializer.data,
+                "all_orders_count": all_orders_count,
+                "awaiting_payments_count": awaiting_payments_count,
+                'awaiting_shipment_count':awaiting_shipment_count,
+                "awaiting_delivery_count": awaiting_delivery_count
+            })
+
+        else:
+            raise ValidationError(
+                {"msg": 'You can not get dashboard data, because you are not an Customer!'})
+
+
+
+
 # class CustomerRetrieveUpdateAPIView(RetrieveUpdateAPIView):
 #     serializer_class = CustomerProfileUpdateSerializer
 #
@@ -318,15 +456,6 @@ class VerifyUserAPIView(APIView):
 #
 #     # def put(self, request, *args, **kwargs):
 #     #     return self.update(request, *args, **kwargs)
-
-
-class SubscriptionAPIView(CreateAPIView):
-    permission_classes = [AllowAny]
-    serializer_class = SubscriptionSerializer
-
-    def post(self, request, *args, **kwargs):
-        return super(SubscriptionAPIView, self).post(request, *args, **kwargs)
-
 
 # @api_view(["POST"])
 # def change_password(request):
@@ -386,9 +515,42 @@ class SubscriptionAPIView(CreateAPIView):
 #     serializer_class = UserRegisterSerializer
 
 
-class ChangePasswordView(generics.UpdateAPIView):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = ChangePasswordSerializer
-
-    def get_object(self):
-        return self.request.user
+# class RegisterUser(mixins.CreateModelMixin,
+#                    mixins.RetrieveModelMixin,
+#                    viewsets.GenericViewSet):
+#     queryset = user_models.User.objects.all()
+#     serializer_class = user_serializers.UserRegisterSerializer
+#     permission_classes = [AllowAny]
+#
+#     def create(self, request):
+#         serializer = user_serializers.UserRegisterSerializer(data=request.data)
+#
+#         if serializer.is_valid():
+#             serializer.save()
+#             user = user_models.User.objects.none()
+#             try:
+#                 user = user_models.User.objects.get(
+#                     email=request.data["email"])
+#
+#                 token = RefreshToken.for_user(user)
+#
+#                 exp = time() + 1200 #20 minutes
+#                 email_list = request.data["email"]
+#                 subject = "Verify Your Account"
+#                 token = jwt.encode({'email': email_list, 'exp': exp, 'scope': subject},
+#                                    settings.JWT_SECRET, algorithm='HS256')
+#                 html_message = render_to_string('verification_email.html', {'token': token, 'domain': settings.EMAIL_DOMAIN_NAME})
+#                 send_email_without_delay(subject, html_message, email_list)
+#                 CustomerProfile.objects.create(user=user)
+#                 data = {
+#                     "user_id": user.id,
+#                     "email": user.email,
+#                     "full_name": user.first_name + " " + user.last_name
+#                 }
+#                 return Response({"status": True, "data": data}, status=status.HTTP_200_OK)
+#             except (user_models.User.DoesNotExist):
+#                 if user:
+#                     user.delete()
+#                 return Response({"status": False, "data": {"message": "User not registered. Please try again."}}, status=status.HTTP_409_CONFLICT)
+#         else:
+#             return Response({"status": False, "data": {"message": "User not registered. Please try again.", "errors": serializer.errors}}, status=status.HTTP_406_NOT_ACCEPTABLE)

@@ -13,6 +13,8 @@ import string
 import random
 from django.utils import timezone
 
+from django.db.models import Avg
+
 class Attribute(AbstractTimeStamp):
     title = models.CharField(
         max_length=100, null=False, blank=False, default="", help_text="name")
@@ -54,6 +56,7 @@ class Category(AbstractTimeStamp):
         upload_to='product_category', blank=True, null=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
     pc_builder = models.BooleanField(null=False, blank=False, default=False)
+    is_featured = models.BooleanField(null=False, blank=False, default=False)
 
     subtitle = models.TextField(null=True, blank=True, default="")
 
@@ -70,7 +73,10 @@ class SubCategory(AbstractTimeStamp):
     title = models.CharField(
         max_length=100, null=False, blank=False, default="", help_text="name")
     ordering_number = models.IntegerField(null=False, blank=False, default=0)
+    icon = models.ImageField(
+        upload_to='product_sub_category', blank=True, null=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
+    pc_builder = models.BooleanField(null=False, blank=False, default=False)
     category = models.ForeignKey(
         Category, on_delete=models.PROTECT, related_name='sub_category_category')
 
@@ -87,7 +93,10 @@ class SubSubCategory(AbstractTimeStamp):
     title = models.CharField(
         max_length=100, null=False, blank=False, default="", help_text="name")
     ordering_number = models.IntegerField(null=False, blank=False, default=0)
+    icon = models.ImageField(
+        upload_to='product_sub_sub_category', blank=True, null=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
+    pc_builder = models.BooleanField(null=False, blank=False, default=False)
     category = models.ForeignKey(
         Category, on_delete=models.PROTECT, related_name='sub_sub_category_category')
     sub_category = models.ForeignKey(
@@ -276,8 +285,10 @@ class Product(AbstractTimeStamp):
         max_length=20, choices=PRODUCT_STATUSES, default=PRODUCT_STATUSES[0][0])
     digital = models.BooleanField(default=False)
     in_house_product = models.BooleanField(default=False)
+    whole_sale_product = models.BooleanField(default=False)
     sell_count = models.BigIntegerField(null=True, blank=True, default=0)
     warranty = models.CharField(max_length=100, default='', null=True, blank=True)
+    total_average_rating_number = models.FloatField(null=True, blank=True, default=0.0)
 
 
     class Meta:
@@ -523,7 +534,7 @@ class ProductReview(AbstractTimeStamp):
                                related_name='product_review_seller', blank=True, null=True)
     user = models.ForeignKey(User, on_delete=models.SET_NULL,
                              related_name='product_review_user', blank=True, null=True)
-    rating_number = models.IntegerField(default=0)
+    rating_number = models.FloatField(null=True, blank=True, default=0.0)
     review_text = models.TextField(default='', blank=True, null=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
 
@@ -533,7 +544,14 @@ class ProductReview(AbstractTimeStamp):
         db_table = 'product_review'
 
     def __str__(self):
-        return str(self.pk)
+        return 'Product: '+ str(self.product.title)
+
+    def save(self, *args, **kwargs):
+        super(ProductReview,self).save(*args, **kwargs)
+        if self.product:
+            average_rating = ProductReview.objects.filter(product=self.product).aggregate(Avg('rating_number'))['rating_number__avg']
+            product_obj = Product.objects.filter(id=self.product.id)
+            product_obj.update(total_average_rating_number=average_rating)
 
 
 class ProductCombinationMedia(AbstractTimeStamp):

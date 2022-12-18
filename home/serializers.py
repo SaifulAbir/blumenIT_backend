@@ -12,23 +12,9 @@ class SliderImagesListSerializer(serializers.ModelSerializer):
         model = SliderImage
         fields = [
                 'id',
-                'background_img',
-                'static_img',
-                'text',
-                ]
-
-
-class DealsOfTheDayListSerializer(serializers.ModelSerializer):
-    product = ProductDetailsSerializer(many=True, read_only=True)
-    class Meta:
-        model = DealsOfTheDay
-        fields = [
-                'id',
-                'product',
-                'discount_price',
-                'discount_price_type',
-                'start_date',
-                'end_date'
+                'image',
+                'bold_text',
+                'small_text',
                 ]
 
 
@@ -41,26 +27,6 @@ class product_catListSerializer(serializers.ModelSerializer):
                 'icon',
                 'banner',
                 ]
-
-# # # list Serializer end
-
-
-
-
-# # # class mostPopularProductListSerializer(serializers.ModelSerializer):
-# # #     average_rating = serializers.CharField(read_only=True)
-# # #     class Meta:
-# # #         model = Product
-# # #         fields = [
-# # #                 'id',
-# # #                 'title',
-# # #                 'slug',
-# # #                 'price',
-# # #                 'rating',
-# # #                 'thumbnail',
-# # #                 'average_rating'
-# # #                 ]
-
 
 
 class FaqSerializer(serializers.ModelSerializer):

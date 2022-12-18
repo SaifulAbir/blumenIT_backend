@@ -1,14 +1,12 @@
 from datetime import datetime
-from django.db.models.functions import Concat, text, Coalesce
 from django.db.models import Q, Count, Value, F, CharField, Prefetch, Subquery, Max, Min, ExpressionWrapper, \
     IntegerField, Sum, DecimalField
 from ecommerce.settings import MEDIA_URL
 from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateAPIView, RetrieveAPIView, DestroyAPIView
 from rest_framework.views import APIView
 from home.models import ProductView
-from product import serializers
-from product.serializers import ProductDetailsSerializer, ProductListSerializer, ProductReviewCreateSerializer, BrandSerializer,\
-StoreCategoryAPIViewListSerializer, PcBuilderDataListSerializer, ProductListBySerializer, FilterAttributeSerializer
+from product.serializers import ProductDetailsSerializer, ProductReviewCreateSerializer, BrandSerializer,\
+StoreCategoryAPIViewListSerializer, PcBuilderDataListSerializer, ProductListBySerializer, FilterAttributeSerializer, PcBuilderCategoryListSerializer, PcBuilderSubCategoryListSerializer, PcBuilderSubSubCategoryListSerializer
 
 from product.models import Category, SubCategory, SubSubCategory, Product, Brand, AttributeValues
 from product.models import FilterAttributes, ProductFilterAttributes
@@ -29,6 +27,7 @@ class BrandCreateAPIView(CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         return super(BrandCreateAPIView, self).post(request, *args, **kwargs)
+
 
 class BrandDeleteAPIView(ListAPIView):
     permission_classes = [AllowAny]
@@ -51,13 +50,15 @@ class BrandDeleteAPIView(ListAPIView):
                 {"msg": 'Brand Does not exist!'}
             )
 
+
 class StoreCategoryListAPIView(ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = StoreCategoryAPIViewListSerializer
 
     def get_queryset(self):
-        queryset = Category.objects.filter(is_active=True)
+        queryset = Category.objects.filter(is_active=True).order_by('ordering_number')
         return queryset
+
 
 class ProductDetailsAPI(RetrieveAPIView):
     permission_classes = (AllowAny,)
@@ -85,11 +86,13 @@ class ProductDetailsAPI(RetrieveAPIView):
         except:
             raise ValidationError({"details": "Product doesn't exist!"})
 
+
 class ProductListAPI(ListAPIView):
     permission_classes = (AllowAny,)
     queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
-    serializer_class = ProductListSerializer
+    serializer_class = ProductListBySerializer
     pagination_class = ProductCustomPagination
+
 
 class ProductListByCategoryAPI(ListAPIView):
     permission_classes = (AllowAny,)
@@ -145,6 +148,33 @@ class ProductListByCategoryAPI(ListAPIView):
 
         return queryset
 
+
+class ProductListByCategoryPopularProductsAPI(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = ProductListBySerializer
+    pagination_class = ProductCustomPagination
+    lookup_field = 'cid'
+    lookup_url_kwarg = "cid"
+
+    def get_queryset(self):
+        # work with dynamic pagination page_size
+        try:
+            pagination = self.kwargs['pagination']
+        except:
+            pagination = 10
+        self.pagination_class.page_size = pagination
+
+
+        cid = self.kwargs['cid']
+        if cid:
+            queryset = Product.objects.filter(category=cid, status='PUBLISH').annotate(count=Count('product_review_product')).order_by('-count')
+        else:
+            queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
+
+
+        return queryset
+
+
 class FilterAttributesAPI(ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = FilterAttributeSerializer
@@ -165,6 +195,7 @@ class FilterAttributesAPI(ListAPIView):
             return queryset
         else:
             raise ValidationError({"msg": 'Filter Attributes not found!'})
+
 
 class ProductListBySubCategoryAPI(ListAPIView):
     permission_classes = (AllowAny,)
@@ -216,6 +247,7 @@ class ProductListBySubCategoryAPI(ListAPIView):
 
         return queryset
 
+
 class ProductListBySubSubCategoryAPI(ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = ProductListBySerializer
@@ -266,10 +298,11 @@ class ProductListBySubSubCategoryAPI(ListAPIView):
 
         return queryset
 
+
 class ProductSearchAPI(ListAPIView):
     permission_classes = ()
     pagination_class = ProductCustomPagination
-    serializer_class = ProductListSerializer
+    serializer_class = ProductListBySerializer
 
     def get_queryset(self):
         request = self.request
@@ -280,38 +313,31 @@ class ProductSearchAPI(ListAPIView):
             status='PUBLISH').order_by('-created_at')
 
         if query:
-            queryset = queryset.filter(
-                Q(title__icontains=query) | Q(full_description__icontains=query) |
-                Q(short_description__icontains=query) |
-                Q(sku__icontains=query)
-            )
+            queryset = queryset.filter(Q(title__icontains=query))
 
         if category:
             queryset = queryset.filter(category__id=category)
 
         return queryset
 
+
 class ProductReviewCreateAPIView(CreateAPIView):
-    permission_classes = (AllowAny,)
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     serializer_class = ProductReviewCreateSerializer
 
     def post(self, request, *args, **kwargs):
-        return super(ProductReviewCreateAPIView, self).post(request, *args, **kwargs)
-        # if User.objects.filter(id=self.request.user.id).exists():
-        #     uid = User.objects.get(id=self.request.user.id)
-        #     if uid:
-        #         return super(ProductReviewCreateAPIView, self).post(request, *args, **kwargs)
-        # else:
-        #     raise ValidationError({"msg": 'You are not a User.'})
         # return super(ProductReviewCreateAPIView, self).post(request, *args, **kwargs)
+        if User.objects.filter(id=self.request.user.id).exists():
+            uid = User.objects.get(id=self.request.user.id)
+            if uid:
+                return super(ProductReviewCreateAPIView, self).post(request, *args, **kwargs)
+        else:
+            raise ValidationError({"msg": 'You are not a User.'})
 
-    # def post(self, request, *args, **kwargs):
-    #     return super(ProductReviewCreateAPIView, self).post(request, *args, **kwargs)
 
 class VendorProductListForFrondEndAPI(ListAPIView):
     permission_classes = (AllowAny,)
-    serializer_class = ProductListSerializer
+    serializer_class = ProductListBySerializer
     pagination_class = ProductCustomPagination
     lookup_field = 'vid'
     lookup_url_kwarg = "vid"
@@ -374,13 +400,32 @@ class PcBuilderChooseAPIView(ListAPIView):
 
         return queryset
 
-class PcBuilderCategoryAPIView(ListAPIView):
-    permission_classes = (AllowAny,)
-    serializer_class = StoreCategoryAPIViewListSerializer
 
-    def get_queryset(self):
-        queryset = Category.objects.filter(is_active=True, pc_builder=True)
-        return queryset
+class PcBuilderCategoryAPIView(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, request):
+        data_list = []
+        category_queryset = Category.objects.filter(is_active=True, pc_builder=True).order_by('ordering_number')
+        category_serializer = PcBuilderCategoryListSerializer(category_queryset, many=True, context={"request": request})
+
+        for cat_data_l in category_serializer.data:
+            data_list.append(cat_data_l)
+
+        sub_category_queryset = SubCategory.objects.filter(is_active=True, pc_builder=True).order_by('ordering_number')
+        sub_category_serializer = PcBuilderSubCategoryListSerializer(sub_category_queryset, many=True, context={"request": request})
+
+        for sub_cat_data_l in sub_category_serializer.data:
+            data_list.append(sub_cat_data_l)
+
+        sub_sub_category_queryset = SubSubCategory.objects.filter(is_active=True, pc_builder=True).order_by('ordering_number')
+        sub_sub_category_serializer = PcBuilderSubSubCategoryListSerializer(sub_sub_category_queryset, many=True, context={"request": request})
+
+        for sub_sub_cat_data_l in sub_sub_category_serializer.data:
+            data_list.append(sub_sub_cat_data_l)
+
+        return Response(data_list)
+
 
 class OnlyTitleAPIView(APIView):
     permission_classes = [AllowAny]

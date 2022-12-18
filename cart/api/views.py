@@ -17,8 +17,6 @@ from cart.models import BillingAddress, Order, OrderItem, PaymentType, Coupon, U
 from user.models import User
 
 
-
-
 class CouponCreateAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = CouponSerializer
@@ -29,6 +27,7 @@ class CouponCreateAPIView(CreateAPIView):
         else:
             raise ValidationError(
                 {"msg": 'You can not create coupon, because you are not an Admin!'})
+
 
 class CouponListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -45,6 +44,7 @@ class CouponListAPIView(ListAPIView):
         else:
             raise ValidationError({"msg": 'You can not view coupon list, because you are not an Admin!'})
 
+
 class CouponUpdateAPIView(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = CouponSerializer
@@ -58,6 +58,7 @@ class CouponUpdateAPIView(RetrieveUpdateAPIView):
         else:
             raise ValidationError(
                 {"msg": 'You can not update coupon, because you are not an Admin!'})
+
 
 class DiscountTypeCreateAPIView(CreateAPIView):
 
@@ -76,6 +77,7 @@ class DiscountTypeCreateAPIView(CreateAPIView):
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
+
 class DiscountTypeListAPI(ListAPIView):
 
     permission_classes = [AllowAny]
@@ -89,6 +91,7 @@ class CheckoutAPIView(CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         return super(CheckoutAPIView, self).post(request, *args, **kwargs)
+
 
 class ApplyCouponAPIView(APIView):
     permission_classes = (AllowAny,)
@@ -132,6 +135,7 @@ class ApplyCouponAPIView(APIView):
         except:
             return Response({"status": "Something went wrong, contact with developer!"})
 
+
 class PaymentMethodsAPIView(ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = PaymentTypesListSerializer
@@ -141,22 +145,20 @@ class PaymentMethodsAPIView(ListAPIView):
         return queryset
 
 
+class CheckoutDetailsAPIView(RetrieveAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = CheckoutDetailsSerializer
+    lookup_field = 'o_id'
+    lookup_url_kwarg = 'o_id'
 
-
-# class CheckoutDetailsAPIView(RetrieveAPIView):
-#     permission_classes = [IsAuthenticated]
-#     serializer_class = CheckoutDetailsSerializer
-#     lookup_field = 'oid'
-#     lookup_url_kwarg = 'oid'
-
-#     def get_object(self):
-#         oid = self.kwargs['oid']
-#         try:
-#             query = Order.objects.get(id=int(oid), user=self.request.user)
-#             return query
-#         except:
-#             raise ValidationError(
-#                 {"details": "Order doesn't exist, or this is not your order."})
+    def get_object(self):
+        o_id = self.kwargs['o_id']
+        try:
+            query = Order.objects.get(order_id=o_id)
+            return query
+        except:
+            raise ValidationError(
+                {"details": "Order doesn't exist."})
 
 
 # class CartList(ListAPIView):

@@ -21,6 +21,7 @@ class SellerDataSerializer(serializers.ModelSerializer):
         model = Seller
         fields = ['id', 'name', 'address', 'phone', 'email', 'logo', 'is_active']
 
+
 class UserDataSerializer(serializers.ModelSerializer):
     avatar = serializers.ImageField(source="user_customer_profile.avatar",read_only=True)
     class Meta:
@@ -31,6 +32,7 @@ class UserDataSerializer(serializers.ModelSerializer):
             'email',
             'avatar'
         ]
+
 
 class StoreDataSerializer(serializers.ModelSerializer):
     class Meta:
@@ -51,15 +53,18 @@ class StoreDataSerializer(serializers.ModelSerializer):
             'linkedin'
         ]
 
+
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ['id', 'title', 'subtitle', 'icon', 'banner']
 
+
 class SubSubCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = SubSubCategory
         fields = ['id', 'title']
+
 
 class SubCategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -68,6 +73,7 @@ class SubCategorySerializer(serializers.ModelSerializer):
             'id',
             'title',
         ]
+
 
 class SubCategorySerializerForMegaMenu(serializers.ModelSerializer):
     sub_sub_category = serializers.SerializerMethodField()
@@ -84,6 +90,7 @@ class SubCategorySerializerForMegaMenu(serializers.ModelSerializer):
         selected_sub_sub_category = SubSubCategory.objects.filter(
             sub_category=obj).distinct()
         return SubSubCategorySerializer(selected_sub_sub_category, many=True).data
+
 
 class BrandSerializer(serializers.ModelSerializer):
     title = serializers.CharField(required=True)
@@ -104,25 +111,30 @@ class BrandSerializer(serializers.ModelSerializer):
 
         return brand_instance
 
+
 class BrandListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
         fields = ['id', 'title', 'logo']
+
 
 class UnitSerializer(serializers.ModelSerializer):
     class Meta:
         model = Units
         fields = ['id', 'title']
 
+
 class DiscountTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = DiscountTypes
         fields = ['id', 'title']
 
+
 class TagsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tags
         fields = ['id', 'title']
+
 
 class ProductTagsSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
@@ -138,6 +150,7 @@ class ProductTagsSerializer(serializers.ModelSerializer):
             tag_title = ''
         return tag_title
 
+
 class ProductReviewCreateSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
     class Meta:
@@ -152,6 +165,11 @@ class ProductReviewCreateSerializer(serializers.ModelSerializer):
         except:
             return []
 
+    def create(self, validated_data):
+        product_review_instance = ProductReview.objects.create(**validated_data, user=self.context['request'].user )
+        return product_review_instance
+
+
 class ProductReviewSerializer(serializers.ModelSerializer):
     user = UserDataSerializer()
     created_at = serializers.DateTimeField(format="%d %B, %Y %I:%M %p")
@@ -160,20 +178,24 @@ class ProductReviewSerializer(serializers.ModelSerializer):
         model = ProductReview
         fields = ['id', 'user', 'rating_number', 'review_text', 'created_at']
 
+
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductImages
         fields = ['id', 'file']
+
 
 class ProductAttributeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductAttributes
         fields = ['id', 'title']
 
+
 class ProductCombinationMediaSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductCombinationMedia
         fields = ['id', 'file']
+
 
 class VariantTypeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -183,6 +205,7 @@ class VariantTypeSerializer(serializers.ModelSerializer):
             'title'
         ]
 
+
 class SpecificationValuesSerializer(serializers.ModelSerializer):
     class Meta:
         model = SpecificationValue
@@ -191,6 +214,7 @@ class SpecificationValuesSerializer(serializers.ModelSerializer):
             'key',
             'value'
         ]
+
 
 class SpecificationSerializer(serializers.ModelSerializer):
     specification_values = serializers.SerializerMethodField('get_existing_specification_values')
@@ -209,6 +233,7 @@ class SpecificationSerializer(serializers.ModelSerializer):
         serializer = SpecificationValuesSerializer(instance=queryset, many=True)
         return serializer.data
 
+
 class StoreCategoryAPIViewListSerializer(serializers.ModelSerializer):
     sub_category = serializers.SerializerMethodField()
 
@@ -224,6 +249,7 @@ class StoreCategoryAPIViewListSerializer(serializers.ModelSerializer):
         except:
             return []
 
+
 class ProductDetailsSerializer(serializers.ModelSerializer):
     product_tags = serializers.SerializerMethodField()
     product_reviews = serializers.SerializerMethodField()
@@ -235,6 +261,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
     product_images = serializers.SerializerMethodField()
     product_specification = serializers.SerializerMethodField('get_product_specification')
     vat_type_title = serializers.CharField(source="vat_type.title",read_only=True)
+    related_products = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -248,6 +275,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             'short_description',
             'active_short_description',
             'seller',
+            'thumbnail',
             'brand',
             'unit',
             'price',
@@ -272,7 +300,8 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             'product_reviews',
             'warranty',
             'product_condition',
-            'video_link'
+            'video_link',
+            'related_products'
         ]
 
     def get_avg_rating(self, obj):
@@ -303,8 +332,21 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             product=obj, is_active=True).distinct()
         return ProductReviewSerializer(selected_product_reviews, many=True).data
 
-class ProductListSerializer(serializers.ModelSerializer):
+    def get_related_products(self, obj):
+        selected_related_products = Product.objects.filter(
+            category=obj.category.id, status='PUBLISH').exclude(id=obj.id).order_by('-sell_count')
+        print(selected_related_products)
+        return ProductListBySerializer(selected_related_products, many=True).data
+
+
+class ProductListBySerializer(serializers.ModelSerializer):
+    product_specification = serializers.SerializerMethodField('get_product_specification')
     product_tags = serializers.SerializerMethodField()
+    discount_type = DiscountTypeSerializer()
+    avg_rating = serializers.SerializerMethodField()
+    brand_title= serializers.CharField(source="brand.title",read_only=True)
+    product_condition_title= serializers.CharField(source="product_condition.title",read_only=True)
+    review_count = serializers.SerializerMethodField('get_review_count')
     product_reviews = serializers.SerializerMethodField()
     seller = SellerDataSerializer()
     category = CategorySerializer()
@@ -312,8 +354,6 @@ class ProductListSerializer(serializers.ModelSerializer):
     sub_sub_category = SubSubCategorySerializer()
     brand = BrandSerializer()
     unit = UnitSerializer()
-    discount_type = DiscountTypeSerializer()
-    avg_rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -323,24 +363,29 @@ class ProductListSerializer(serializers.ModelSerializer):
             'slug',
             'sku',
             'avg_rating',
-            'full_description',
-            'short_description',
             'status',
             'is_featured',
             'seller',
             'category',
             'sub_category',
             'sub_sub_category',
-            'brand',
-            'unit',
             'price',
             'discount_type',
             'discount_amount',
             'total_quantity',
-            'shipping_time',
             'thumbnail',
             'product_tags',
-            'product_reviews'
+            'product_specification',
+            'brand',
+            'unit',
+            'brand_title',
+            'product_condition',
+            'product_condition_title',
+            'short_description',
+            'review_count',
+            'shipping_time',
+            'product_reviews',
+            'warranty'
         ]
 
     def get_avg_rating(self, ob):
@@ -350,40 +395,21 @@ class ProductListSerializer(serializers.ModelSerializer):
         selected_product_tags = ProductTags.objects.filter(
             product=obj).distinct()
         return ProductTagsSerializer(selected_product_tags, many=True).data
+
+    def get_product_specification(self, product):
+        queryset = Specification.objects.filter(product=product, is_active = True)
+        serializer = SpecificationSerializer(instance=queryset, many=True)
+        return serializer.data
+
+    def get_review_count(self, product):
+        review_count = ProductReview.objects.filter(product=product, is_active = True).count()
+        return review_count
 
     def get_product_reviews(self, obj):
         selected_product_reviews = ProductReview.objects.filter(
             product=obj, is_active=True).distinct()
         return ProductReviewSerializer(selected_product_reviews, many=True).data
 
-class ProductListBySerializer(serializers.ModelSerializer):
-    product_tags = serializers.SerializerMethodField()
-    discount_type = DiscountTypeSerializer()
-    avg_rating = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Product
-        fields = [
-            'id',
-            'title',
-            'slug',
-            'avg_rating',
-            'status',
-            'price',
-            'discount_type',
-            'discount_amount',
-            'total_quantity',
-            'thumbnail',
-            'product_tags'
-        ]
-
-    def get_avg_rating(self, ob):
-        return ob.product_review_product.all().aggregate(Avg('rating_number'))['rating_number__avg']
-
-    def get_product_tags(self, obj):
-        selected_product_tags = ProductTags.objects.filter(
-            product=obj).distinct()
-        return ProductTagsSerializer(selected_product_tags, many=True).data
 
 # work with pc builder start
 class PcBuilderSpecificationValuesSerializer(serializers.ModelSerializer):
@@ -394,6 +420,7 @@ class PcBuilderSpecificationValuesSerializer(serializers.ModelSerializer):
             'key',
             'value'
         ]
+
 
 class PcBuilderSpecificationSerializer(serializers.ModelSerializer):
     specification_values = serializers.SerializerMethodField('get_existing_specification_values')
@@ -412,6 +439,7 @@ class PcBuilderSpecificationSerializer(serializers.ModelSerializer):
         serializer = PcBuilderSpecificationValuesSerializer(instance=queryset, many=True)
         return serializer.data
 
+
 class AttributeValuesSerializer(serializers.ModelSerializer):
     class Meta:
         model = AttributeValues
@@ -419,6 +447,7 @@ class AttributeValuesSerializer(serializers.ModelSerializer):
             'id',
             'value',
         ]
+
 
 class FilterAttributeSerializer(serializers.ModelSerializer):
     attribute_values = serializers.SerializerMethodField('get_attribute_values')
@@ -437,6 +466,7 @@ class FilterAttributeSerializer(serializers.ModelSerializer):
         queryset = AttributeValues.objects.filter(attribute=instance.attribute.id, is_active = True)
         serializer = AttributeValuesSerializer(instance=queryset, many=True)
         return serializer.data
+
 
 class PcBuilderDataListSerializer(serializers.ModelSerializer):
     specification = serializers.SerializerMethodField()
@@ -468,5 +498,35 @@ class PcBuilderDataListSerializer(serializers.ModelSerializer):
             return FilterAttributeSerializer(selected_category_filtering_attributes, many=True).data
         except:
             return []
+
+
+class PcBuilderCategoryListSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField()
+    class Meta:
+        model = Category
+        fields = ['id', 'title', 'icon', 'type']
+
+    def get_type(self, obj):
+        return 'category'
+
+
+class PcBuilderSubCategoryListSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField()
+    class Meta:
+        model = SubCategory
+        fields = ['id', 'title', 'icon', 'type']
+
+    def get_type(self, obj):
+        return 'sub_category'
+
+
+class PcBuilderSubSubCategoryListSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField()
+    class Meta:
+        model = SubSubCategory
+        fields = ['id', 'title', 'icon', 'type']
+
+    def get_type(self, obj):
+        return 'sub_sub_category'
 
 # work with pc builder end

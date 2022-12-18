@@ -401,24 +401,30 @@ class PcBuilderChooseAPIView(ListAPIView):
         return queryset
 
 
-class PcBuilderCategoryAPIView(ListAPIView):
+class PcBuilderCategoryAPIView(APIView):
     permission_classes = (AllowAny,)
 
     def get(self, request):
+        data_list = []
         category_queryset = Category.objects.filter(is_active=True, pc_builder=True).order_by('ordering_number')
         category_serializer = PcBuilderCategoryListSerializer(category_queryset, many=True, context={"request": request})
+
+        for cat_data_l in category_serializer.data:
+            data_list.append(cat_data_l)
 
         sub_category_queryset = SubCategory.objects.filter(is_active=True, pc_builder=True).order_by('ordering_number')
         sub_category_serializer = PcBuilderSubCategoryListSerializer(sub_category_queryset, many=True, context={"request": request})
 
+        for sub_cat_data_l in sub_category_serializer.data:
+            data_list.append(sub_cat_data_l)
+
         sub_sub_category_queryset = SubSubCategory.objects.filter(is_active=True, pc_builder=True).order_by('ordering_number')
         sub_sub_category_serializer = PcBuilderSubSubCategoryListSerializer(sub_sub_category_queryset, many=True, context={"request": request})
 
-        return Response({
-            "category_serializer": category_serializer.data,
-            "sub_category_serializer": sub_category_serializer.data,
-            "sub_sub_category_serializer": sub_sub_category_serializer.data
-        })
+        for sub_sub_cat_data_l in sub_sub_category_serializer.data:
+            data_list.append(sub_sub_cat_data_l)
+
+        return Response(data_list)
 
 
 class OnlyTitleAPIView(APIView):

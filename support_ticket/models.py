@@ -12,7 +12,9 @@ class Ticket(AbstractTimeStamp):
     ticket_id = models.SlugField(null=False, blank=False)
     user = models.ForeignKey(User, on_delete=models.PROTECT,related_name='ticket_creator_user', blank=True, null=True)
     ticket_subject = models.CharField(max_length=255, null=False, blank=False)
+    ticket_description = models.TextField(null=True, blank=True)
     issue_photo = models.FileField(upload_to='ticket_photo', blank=True, null=True)
+    solution_photo = models.FileField(upload_to='ticket_photo', blank=True, null=True)
     is_active = models.BooleanField(default=True)
     status = models.CharField(
         max_length=20, choices=TICKET_STATUSES, default=TICKET_STATUSES[0][0])

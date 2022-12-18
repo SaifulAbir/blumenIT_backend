@@ -501,20 +501,32 @@ class PcBuilderDataListSerializer(serializers.ModelSerializer):
 
 
 class PcBuilderCategoryListSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField()
     class Meta:
         model = Category
-        fields = ['id', 'title', 'subtitle', 'icon']
+        fields = ['id', 'title', 'icon', 'type']
+
+    def get_type(self, obj):
+        return 'category'
 
 
 class PcBuilderSubCategoryListSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField()
     class Meta:
         model = SubCategory
-        fields = ['id', 'title', 'icon']
+        fields = ['id', 'title', 'icon', 'type']
+
+    def get_type(self, obj):
+        return 'sub_category'
 
 
 class PcBuilderSubSubCategoryListSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField()
     class Meta:
         model = SubSubCategory
-        fields = ['id', 'title', 'icon']
+        fields = ['id', 'title', 'icon', 'type']
+
+    def get_type(self, obj):
+        return 'sub_sub_category'
 
 # work with pc builder end

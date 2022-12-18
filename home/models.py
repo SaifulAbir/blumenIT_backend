@@ -15,9 +15,9 @@ class SliderImage(AbstractTimeStamp):
         valid_extensions = ['.jpg', '.png', '.jpeg']
         if not ext.lower() in valid_extensions:
             raise ValidationError('Unsupported file extension.')
-    background_img = models.ImageField(upload_to='sliderImage', validators=[validate_file_extension], default="")
-    static_img = models.ImageField(upload_to='sliderImage', validators=[validate_file_extension], default="")
-    text = models.TextField(null=True, blank=True)
+    image = models.ImageField(upload_to='sliderImage', validators=[validate_file_extension], default="")
+    bold_text = models.TextField(null=True, blank=True)
+    small_text = models.TextField(null=True, blank=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:

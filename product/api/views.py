@@ -44,8 +44,8 @@ class BrandDeleteAPIView(ListAPIView):
             brand_obj = Brand.objects.filter(id=brand_id)
             brand_obj.update(is_active=False)
 
-            queyset = Brand.objects.filter(is_active=True).order_by('-created_at')
-            return queyset
+            queryset = Brand.objects.filter(is_active=True).order_by('-created_at')
+            return queryset
         else:
             raise ValidationError(
                 {"msg": 'Brand Does not exist!'}

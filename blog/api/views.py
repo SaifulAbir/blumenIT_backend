@@ -9,8 +9,8 @@ from blog.pagination import BlogCustomPagination
 
 
 
-from blog.models import BlogCategory
-from blog.serializers import BlogCategorySerializer
+from blog.models import BlogCategory, Blog
+from blog.serializers import BlogCategorySerializer, BlogSerializer
 
 
 class BlogCategoryCreateAPIView(CreateAPIView):
@@ -69,3 +69,122 @@ class BlogCategoryUpdateAPIView(RetrieveUpdateAPIView):
             else:
                 raise ValidationError(
                     {"msg": 'You can not update coupon, because you are not an Admin!'})
+
+class BlogCategoryDeleteAPIView(ListAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = BlogCategorySerializer
+    queryset =  BlogCategory.objects.all()
+    lookup_field = 'id'
+    lookup_url_kwarg = 'id'
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            bcat_id = self.kwargs['id']
+            brand_obj = BlogCategory.objects.filter(id=bcat_id).exists()
+            if brand_obj:
+                brand_obj = BlogCategory.objects.filter(id=bcat_id)
+                brand_obj.update(is_active=False)
+
+                queryset = BlogCategory.objects.filter(is_active=True).order_by('-created_at')
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'Blog Category Does not exist!'}
+                )
+        else:
+            raise ValidationError(
+                {"msg": 'You can not update coupon, because you are not an Admin!'})
+
+class AdminBlogCreateAPIView(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = BlogSerializer
+
+    def post(self, request, *args, **kwargs):
+        if self.request.user.is_superuser == True:
+            return super(AdminBlogCreateAPIView, self).post(request, *args, **kwargs)
+        else:
+            raise ValidationError(
+                {"msg": 'You can not create seller, because you are not an Admin!'}
+            )
+
+class AdminBlogDetailAPIView(RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = BlogSerializer
+    lookup_field = 'slug'
+    lookup_url_kwarg = 'slug'
+
+    def get_object(self):
+        slug = self.kwargs['slug']
+        if self.request.user.is_superuser == True:
+            try:
+                query = Blog.objects.get(slug=slug)
+                return query
+            except:
+                raise ValidationError(
+                    {"details": "Blog doesn't exist!"}
+                )
+        else:
+            raise ValidationError(
+                {"msg": 'You can not see Blog details, because you are not an Admin!'}
+            )
+
+
+class AdminBlogListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = BlogSerializer
+    pagination_class = BlogCustomPagination
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = Blog.objects.filter(is_active=True)
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError({"msg": "No Blog available! " })
+        else:
+            raise ValidationError(
+                {"msg": 'You can not see Blog list, because you are not an Admin!'})
+
+
+class AdminBlogUpdateAPIView(RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = BlogSerializer
+    lookup_field = 'slug'
+    lookup_url_kwarg = "slug"
+
+    def get_queryset(self):
+        slug = self.kwargs['slug']
+        if self.request.user.is_superuser == True:
+            query = Blog.objects.filter(slug=slug)
+            if query:
+                return query
+            else:
+                raise ValidationError({"msg": 'Blog not found'})
+        else:
+            raise ValidationError(
+                {"msg": 'You can not update blog, because you are not an Admin!'})
+
+class AdminBlogDeleteAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = BlogSerializer
+    pagination_class = BlogCustomPagination
+    lookup_field = 'slug'
+    lookup_url_kwarg = "slug"
+
+    def get_queryset(self):
+        slug = self.kwargs['slug']
+        if self.request.user.is_superuser == True:
+            blog_obj_exist = Blog.objects.filter(
+                slug=slug).exists()
+            if blog_obj_exist:
+                product_obj = Blog.objects.filter(slug=slug)
+                product_obj.update(is_active=False)
+
+                queryset = Blog.objects.filter(is_active=True).order_by('-created_at')
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'Blog Does not exist!'})
+        else:
+            raise ValidationError(
+                {"msg": 'You can not delete this blog, because you are not an Admin!'})

@@ -1,14 +1,12 @@
 from datetime import datetime
-from django.db.models.functions import Concat, text, Coalesce
 from django.db.models import Q, Count, Value, F, CharField, Prefetch, Subquery, Max, Min, ExpressionWrapper, \
     IntegerField, Sum, DecimalField
 from ecommerce.settings import MEDIA_URL
 from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateAPIView, RetrieveAPIView, DestroyAPIView
 from rest_framework.views import APIView
 from home.models import ProductView
-from product import serializers
 from product.serializers import ProductDetailsSerializer, ProductReviewCreateSerializer, BrandSerializer,\
-StoreCategoryAPIViewListSerializer, PcBuilderDataListSerializer, ProductListBySerializer, FilterAttributeSerializer
+StoreCategoryAPIViewListSerializer, PcBuilderDataListSerializer, ProductListBySerializer, FilterAttributeSerializer, PcBuilderCategoryListSerializer, PcBuilderSubCategoryListSerializer, PcBuilderSubSubCategoryListSerializer
 
 from product.models import Category, SubCategory, SubSubCategory, Product, Brand, AttributeValues
 from product.models import FilterAttributes, ProductFilterAttributes
@@ -405,11 +403,22 @@ class PcBuilderChooseAPIView(ListAPIView):
 
 class PcBuilderCategoryAPIView(ListAPIView):
     permission_classes = (AllowAny,)
-    serializer_class = StoreCategoryAPIViewListSerializer
 
-    def get_queryset(self):
-        queryset = Category.objects.filter(is_active=True, pc_builder=True)
-        return queryset
+    def get(self, request):
+        category_queryset = Category.objects.filter(is_active=True, pc_builder=True).order_by('ordering_number')
+        category_serializer = PcBuilderCategoryListSerializer(category_queryset, many=True, context={"request": request})
+
+        sub_category_queryset = SubCategory.objects.filter(is_active=True, pc_builder=True).order_by('ordering_number')
+        sub_category_serializer = PcBuilderSubCategoryListSerializer(sub_category_queryset, many=True, context={"request": request})
+
+        sub_sub_category_queryset = SubSubCategory.objects.filter(is_active=True, pc_builder=True).order_by('ordering_number')
+        sub_sub_category_serializer = PcBuilderSubSubCategoryListSerializer(sub_sub_category_queryset, many=True, context={"request": request})
+
+        return Response({
+            "category_serializer": category_serializer.data,
+            "sub_category_serializer": sub_category_serializer.data,
+            "sub_sub_category_serializer": sub_sub_category_serializer.data
+        })
 
 
 class OnlyTitleAPIView(APIView):

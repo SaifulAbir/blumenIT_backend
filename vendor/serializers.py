@@ -777,7 +777,7 @@ class ProductFilterAttributesSerializer(serializers.ModelSerializer):
         model = ProductFilterAttributes
         fields = [
             'id',
-            'filter_attribute'
+            'attribute_value'
         ]
 
 
@@ -1087,9 +1087,9 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             # product_filter_attributes
             if product_filter_attributes:
                 for product_filter_attribute in product_filter_attributes:
-                    filter_attribute = product_filter_attribute['filter_attribute']
-                    if filter_attribute:
-                        product_filter_attribute_instance = ProductFilterAttributes.objects.create(filter_attribute=filter_attribute,  product=product_instance)
+                    attribute_value = product_filter_attribute['attribute_value']
+                    if attribute_value:
+                        product_filter_attribute_instance = ProductFilterAttributes.objects.create(attribute_value=attribute_value,  product=product_instance)
 
             return product_instance
         except:
@@ -1697,9 +1697,9 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
                         product=instance).delete()
 
                 for product_filter_attribute in product_filter_attributes:
-                    filter_attribute = product_filter_attribute['filter_attribute']
-                    if filter_attribute:
-                        product_filter_attr = ProductFilterAttributes.objects.create(filter_attribute=filter_attribute, product=instance)
+                    attribute_value = product_filter_attribute['attribute_value']
+                    if attribute_value:
+                        product_filter_attr = ProductFilterAttributes.objects.create(attribute_value=attribute_value, product=instance)
             else:
                 p_f_a = ProductFilterAttributes.objects.filter(
                     product=instance).exists()

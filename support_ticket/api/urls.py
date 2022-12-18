@@ -5,4 +5,5 @@ from support_ticket.api.views import CustomerTicketListAPI, CustomerTicketCreate
 urlpatterns = [
     path('customer-ticket-list/', CustomerTicketListAPI.as_view()),
     path('customer-ticket-create/', CustomerTicketCreateAPIView.as_view()),
+    # path('customer-ticket-details/', CustomerTicketCreateAPIView.as_view()),
 ]

@@ -499,4 +499,22 @@ class PcBuilderDataListSerializer(serializers.ModelSerializer):
         except:
             return []
 
+
+class PcBuilderCategoryListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id', 'title', 'subtitle', 'icon']
+
+
+class PcBuilderSubCategoryListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubCategory
+        fields = ['id', 'title', 'icon']
+
+
+class PcBuilderSubSubCategoryListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubSubCategory
+        fields = ['id', 'title', 'icon']
+
 # work with pc builder end

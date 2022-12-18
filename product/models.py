@@ -73,7 +73,10 @@ class SubCategory(AbstractTimeStamp):
     title = models.CharField(
         max_length=100, null=False, blank=False, default="", help_text="name")
     ordering_number = models.IntegerField(null=False, blank=False, default=0)
+    icon = models.ImageField(
+        upload_to='product_sub_category', blank=True, null=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
+    pc_builder = models.BooleanField(null=False, blank=False, default=False)
     category = models.ForeignKey(
         Category, on_delete=models.PROTECT, related_name='sub_category_category')
 
@@ -90,7 +93,10 @@ class SubSubCategory(AbstractTimeStamp):
     title = models.CharField(
         max_length=100, null=False, blank=False, default="", help_text="name")
     ordering_number = models.IntegerField(null=False, blank=False, default=0)
+    icon = models.ImageField(
+        upload_to='product_sub_sub_category', blank=True, null=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
+    pc_builder = models.BooleanField(null=False, blank=False, default=False)
     category = models.ForeignKey(
         Category, on_delete=models.PROTECT, related_name='sub_sub_category_category')
     sub_category = models.ForeignKey(

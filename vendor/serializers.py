@@ -12,6 +12,7 @@ from cart.models import Order
 from vendor.models import VendorRequest, Vendor, StoreSettings, Seller
 from django.db.models import Avg
 from django.utils import timezone
+from support_ticket.models import Ticket, TicketConversation
 
 
 class SellerCreateSerializer(serializers.ModelSerializer):
@@ -1097,7 +1098,6 @@ class ProductCreateSerializer(serializers.ModelSerializer):
 # product create serializer end
 
 
-
 class VendorProductViewSerializer(serializers.ModelSerializer):
     product_images = serializers.SerializerMethodField()
     avg_rating = serializers.SerializerMethodField()
@@ -1806,3 +1806,46 @@ class AdminCustomerListSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'name', 'email', 'phone', 'is_active']
+
+
+class AdminTicketListSerializer(serializers.ModelSerializer):
+    created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
+    user_name = serializers.CharField(source='ticket.user.username',read_only=True)
+    last_reply = serializers.SerializerMethodField()
+    class Meta:
+        model = Ticket
+        fields = ['id', 'ticket_id', 'created_at', 'ticket_subject', 'user_name', 'status', 'last_reply']
+
+    def get_last_reply(self, obj):
+        selected_last_ticket_conversation = TicketConversation.objects.filter(
+            ticket=obj).order_by('-created_at').latest('id').created_at
+        data = selected_last_ticket_conversation.strftime("%Y-%m-%d, %H:%M:%S")
+        return data
+
+
+class AdminTicketConversationSerializer(serializers.ModelSerializer):
+    created_at = serializers.DateTimeField(read_only=True)
+    user_name = serializers.CharField(source='ticket.user.username',read_only=True)
+    class Meta:
+        model = TicketConversation
+        fields = ['id', 'conversation_text', 'conversation_photo', 'created_at', 'user_name' ]
+
+
+class AdminTicketDataSerializer(serializers.ModelSerializer):
+    user_name = serializers.CharField(source='user.username',read_only=True)
+    ticket_conversation = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Ticket
+        fields = ['id', 'ticket_id', 'user_name', 'created_at', 'status', 'ticket_subject', 'ticket_conversation']
+
+    def get_ticket_conversation(self, obj):
+        selected_ticket_conversation = TicketConversation.objects.filter(
+            ticket=obj, is_active=True).order_by('-created_at')
+        return AdminTicketConversationSerializer(selected_ticket_conversation, many=True).data
+
+
+class TicketStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ticket
+        fields = ['id', 'status']

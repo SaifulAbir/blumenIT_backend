@@ -6,6 +6,7 @@ from rest_framework import status
 from product.pagination import ProductCustomPagination
 from product.serializers import DiscountTypeSerializer, ProductTagsSerializer, TagsSerializer, VariantTypeSerializer
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView, RetrieveAPIView, DestroyAPIView
+from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductReview, ProductTags, SubCategory, SubSubCategory, Tags, Units, VariantType, ProductVideoProvider, VatType, FilterAttributes, Attribute, AttributeValues
 from user.models import CustomerProfile, User
@@ -20,7 +21,8 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     SellerCreateSerializer, FlashDealCreateSerializer, UpdateSubCategorySerializer, FilteringAttributesSerializer, AdminProfileSerializer, \
     ReviewListSerializer, AttributeSerializer, AttributeValuesSerializer, AdminFilterAttributeSerializer, \
     SellerCreateSerializer, FlashDealCreateSerializer, UpdateSubCategorySerializer, FilteringAttributesSerializer, \
-    AdminProfileSerializer, AdminOrderViewSerializer, AdminOrderListSerializer, AdminOrderUpdateSerializer, AdminCustomerListSerializer
+    AdminProfileSerializer, AdminOrderViewSerializer, AdminOrderListSerializer, AdminOrderUpdateSerializer, AdminCustomerListSerializer, \
+        AdminTicketListSerializer, AdminTicketDataSerializer, TicketStatusSerializer
 from cart.models import Order
 from cart.serializers import OrderSerializer
 from user.models import User
@@ -28,6 +30,7 @@ from cart.models import Coupon
 from rest_framework.exceptions import ValidationError
 from django.db.models import Avg
 from vendor.pagination import OrderCustomPagination
+from support_ticket.models import Ticket
 
 
 class AdminSellerCreateAPIView(CreateAPIView):
@@ -94,6 +97,9 @@ class AdminSellerUpdateAPIView(RetrieveUpdateAPIView):
         else:
             raise ValidationError(
                 {"msg": 'You can not update seller, because you are not an Admin!'})
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
 
 
 class AdminSellerDeleteAPIView(ListAPIView):
@@ -955,4 +961,49 @@ class AdminCustomerListAPIView(ListAPIView):
             return queryset
         else:
             raise ValidationError({"msg": 'You can not see customer list data, because you are not an Admin!'})
+
+
+class AdminTicketListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    pagination_class = ProductCustomPagination
+    serializer_class = AdminTicketListSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = Ticket.objects.all().order_by('-created_at')
+            return queryset
+        else:
+            raise ValidationError({"msg": 'You can not see ticket list data, because you are not an Admin!'})
+
+
+class AdminTicketDetailsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        if self.request.user.is_superuser == True:
+            ticket_id = self.kwargs['id']
+            ticket_details_data = Ticket.objects.filter(id =ticket_id)
+            serializer = AdminTicketDataSerializer(ticket_details_data, many=True)
+            return Response(serializer.data)
+        else:
+            raise ValidationError({"msg": 'You can not see ticket details data, because you are not an Admin!'})
+
+
+class AdminUpdateTicketStatusAPIView(RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = TicketStatusSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            ticket_id = self.kwargs['id']
+            query = Ticket.objects.filter(id =ticket_id)
+            if query:
+                return query
+            else:
+                raise ValidationError(
+                    {"msg": 'Ticket does not found!'})
+        else:
+            raise ValidationError({"msg": 'You can not update ticket status, because you are not an Admin!'})
 

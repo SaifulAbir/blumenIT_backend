@@ -1,9 +1,12 @@
 from rest_framework.generics import ListAPIView, CreateAPIView
+from rest_framework.views import APIView
 from support_ticket.models import Ticket
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from vendor.pagination import OrderCustomPagination
-from support_ticket.serializers import TicketListSerializer, CustomerTicketCreateSerializer
+from support_ticket.serializers import TicketListSerializer, CustomerTicketCreateSerializer, TicketDataSerializer, \
+    TicketConversationReplySerializer
 from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
 
 class CustomerTicketListAPI(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -32,4 +35,30 @@ class CustomerTicketCreateAPIView(CreateAPIView):
             return super(CustomerTicketCreateAPIView, self).post(request, *args, **kwargs)
         else:
             raise ValidationError(
-                {"msg": 'You can not show ticket list, because you are not an User!'})
+                {"msg": 'You can not create ticket, because you are not an User!'})
+
+
+class CustomerTicketDetailsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        if self.request.user.is_customer == True:
+            ticket_id = self.kwargs['id']
+            ticket_details_data = Ticket.objects.filter(id =ticket_id, user=self.request.user)
+            serializer = TicketDataSerializer(ticket_details_data, many=True)
+            return Response(serializer.data)
+        else:
+            raise ValidationError(
+                {"msg": 'You can not show ticket details, because you are not an User!'})
+
+
+class CustomerTicketReplyAPIView(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = TicketConversationReplySerializer
+
+    def post(self, request, *args, **kwargs):
+        if self.request.user.is_customer == True:
+            return super(CustomerTicketReplyAPIView, self).post(request, *args, **kwargs)
+        else:
+            raise ValidationError(
+                {"msg": 'You can not create ticket reply, because you are not an User!'})

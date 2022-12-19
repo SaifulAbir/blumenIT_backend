@@ -18,10 +18,10 @@ def unique_slug_generator_ticket(instance, new_ticket_id=None):
         qs_exists = Klass.objects.filter(ticket_id=ticket_id).exists()
 
     if qs_exists:
-        new_ticket_id = '#'+ "{ticket_id}-{randstr}".format(ticket_id=ticket_id, randstr=random_string_generator(size=8))
+        new_ticket_id = 's_'+ "{ticket_id}-{randstr}".format(ticket_id=ticket_id, randstr=random_string_generator(size=8))
         return unique_slug_generator_ticket(instance, new_ticket_id=new_ticket_id)
     else:
-        new_ticket_id = '#'+ "{ticket_id}-{randstr}".format(ticket_id=ticket_id,randstr=random_string_generator(size=8))
+        new_ticket_id = 's_'+ "{ticket_id}-{randstr}".format(ticket_id=ticket_id,randstr=random_string_generator(size=8))
 
 
     return new_ticket_id

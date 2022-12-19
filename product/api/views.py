@@ -400,60 +400,7 @@ class PcBuilderChooseAPIView(ListAPIView):
             attr_value_ids_list = attr_value_ids.split(",")
             for attr_value_id in attr_value_ids_list:
                 attr_value_id = int(attr_value_id)
-
                 queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id=attr_value_id)).order_by('-created_at')
-
-                # if AttributeValues.objects.filter(id = attr_value_id).exists():
-                #     print('if 1')
-                #     attribute_id = AttributeValues.objects.get(id = attr_value_id).attribute.id
-                #     print('attribute_id')
-                #     print(attribute_id)
-                #     if FilterAttributes.objects.filter(attribute=attribute_id).exists():
-                #         print('if 2')
-                #         filter_attributes_objs = FilterAttributes.objects.filter(attribute=attribute_id)
-                #         print('filter_attributes_objs')
-                #         print(filter_attributes_objs)
-                #         for filter_attributes_obj in filter_attributes_objs:
-                #             filter_attribute_id = filter_attributes_obj.id
-                #             print('filter_attribute_id')
-                #             print(filter_attribute_id)
-                #             if ProductFilterAttributes.objects.filter(filter_attribute=filter_attribute_id).exists():
-                #                 print('if 3')
-                #                 product_id = ProductFilterAttributes.objects.get(filter_attribute=filter_attribute_id).product.id
-                #                 queryset = queryset.filter(id=product_id).order_by('-created_at')
-
-
-
-
-
-
-                # queryset = Product.objects.filter(Q(product_filter_attributes_product__=attr_value_id)).order_by('-created_at')
-                # queryset = queryset.filter(id=product_id).order_by('-created_at')
-
-
-                # if FilterAttributes.objects.filter(attribute = attr_value_id).exists():
-                #     fa_ids = FilterAttributes.objects.filter(attribute = attr_value_id, is_active=True)
-                #     for fa_id in fa_ids:
-                #         # print('fa_id')
-                #         # print(fa_id)
-
-                #         if ProductFilterAttributes.objects.filter(filter_attribute = fa_id.id).exists():
-                #             print('if')
-                #             # p_f_att_id = ProductFilterAttributes.objects.get(filter_attribute = fa_id)
-                #             p_f_att_ids = ProductFilterAttributes.objects.filter(filter_attribute = fa_id.id)
-                #             print(p_f_att_ids)
-                #             # print('0')
-
-                #             if p_f_att_ids:
-                #                 for p_f_att_id in p_f_att_ids:
-                #             #     print('if p_f_att_id')
-                #                     queryset = queryset.filter(id=p_f_att_id.product.id).order_by('-created_at')
-                #             # else:
-                #             #     print('else p_f_att_id')
-                #         else:
-                #             print('else')
-
-
         return queryset
 
 

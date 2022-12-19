@@ -742,5 +742,4 @@ class ProductFilterAttributes(AbstractTimeStamp):
         db_table = 'product_filter_attributes'
 
     def __str__(self):
-        return  'Attribute Value : '+ self.attribute_value.value + ' product: ' + self.product.title
-        # return  'Attribute Title : '+ self.filter_attribute.attribute.title + ' product: ' + self.product.title
+        return  'Product: ' + self.product.title

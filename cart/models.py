@@ -263,9 +263,9 @@ pre_save.connect(pre_save_order, sender=VendorOrder)
 
 class OrderItem(AbstractTimeStamp):
     order = models.ForeignKey(
-        Order, on_delete=models.CASCADE, blank=True, null=True)
+        Order, on_delete=models.CASCADE, related_name='order_item_order', blank=True, null=True)
     product = models.ForeignKey(
-        Product, on_delete=models.CASCADE, null=False, blank=False)
+        Product, on_delete=models.CASCADE, null=False, blank=False, related_name='order_item_product')
     quantity = models.IntegerField(default=1)
     unit_price = models.FloatField(
         max_length=255, null=False, blank=False, default=0)

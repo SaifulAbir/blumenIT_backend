@@ -4,7 +4,7 @@ from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework import status
 from product.pagination import ProductCustomPagination
-from product.serializers import DiscountTypeSerializer, ProductTagsSerializer, TagsSerializer, VariantTypeSerializer
+from product.serializers import DiscountTypeSerializer, ProductTagsSerializer, TagsSerializer, VariantTypeSerializer, ProductListBySerializer
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView, RetrieveAPIView, DestroyAPIView
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -22,7 +22,8 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     ReviewListSerializer, AttributeSerializer, AttributeValuesSerializer, AdminFilterAttributeSerializer, \
     SellerCreateSerializer, FlashDealCreateSerializer, UpdateSubCategorySerializer, FilteringAttributesSerializer, \
     AdminProfileSerializer, AdminOrderViewSerializer, AdminOrderListSerializer, AdminOrderUpdateSerializer, AdminCustomerListSerializer, \
-        AdminTicketListSerializer, AdminTicketDataSerializer, TicketStatusSerializer
+    AdminTicketListSerializer, AdminTicketDataSerializer, TicketStatusSerializer, CategoryWiseProductSaleSerializer, \
+    CategoryWiseProductStockSerializer
 from cart.models import Order
 from cart.serializers import OrderSerializer
 from user.models import User
@@ -1007,3 +1008,100 @@ class AdminUpdateTicketStatusAPIView(RetrieveUpdateAPIView):
         else:
             raise ValidationError({"msg": 'You can not update ticket status, because you are not an Admin!'})
 
+
+class AdminDashboardDataAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if self.request.user.is_superuser == True:
+            # total customer
+            if User.objects.filter(is_customer=True).exists():
+                customer_count = User.objects.filter(is_customer=True).count()
+            else:
+                customer_count = 0
+
+            # total order
+            if Order.objects.all().exists():
+                order_count = Order.objects.all().count()
+            else:
+                order_count = 0
+
+            # total category
+            if Category.objects.all().exists():
+                category_count = Category.objects.all().count()
+            else:
+                category_count = 0
+
+            # total Brand
+            if Brand.objects.all().exists():
+                brand_count = Brand.objects.all().count()
+            else:
+                brand_count = 0
+
+            # total published Product
+            if Product.objects.filter(status = 'PUBLISH').exists():
+                published_product_count = Product.objects.filter(status = 'PUBLISH').count()
+            else:
+                published_product_count = 0
+
+            # total seller Product
+            if Product.objects.filter(~Q(in_house_product = True)).exists():
+                seller_product_count = Product.objects.filter(~Q(in_house_product = True)).count()
+            else:
+                seller_product_count = 0
+
+             # total admin Product
+            if Product.objects.filter(in_house_product = True).exists():
+                admin_product_count = Product.objects.filter(in_house_product = True).count()
+            else:
+                admin_product_count = 0
+
+            # total sellers
+            if Seller.objects.all().exists():
+                seller_count = Seller.objects.all().count()
+            else:
+                seller_count = 0
+
+            # total approved sellers
+            if Seller.objects.filter(status='APPROVED').exists():
+                approved_seller_count = Seller.objects.filter(status='APPROVED').count()
+            else:
+                approved_seller_count = 0
+
+            # total pending sellers
+            if Seller.objects.filter(status='PENDING').exists():
+                pending_seller_count = Seller.objects.filter(status='PENDING').count()
+            else:
+                pending_seller_count = 0
+
+            # Category wise product sale
+            categories = Category.objects.all()
+            category_wise_product_sale = CategoryWiseProductSaleSerializer(categories, many=True, context={"request": request})
+
+            # Category wise product stock
+            category_wise_product_stock = CategoryWiseProductStockSerializer(categories, many=True, context={"request": request})
+
+            # Top products
+            if Product.objects.filter(status='PUBLISH').exists():
+                products = Product.objects.filter(status='PUBLISH').order_by('-sell_count')
+                products_data = ProductListBySerializer(products, many=True, context={"request": request})
+
+
+            return Response({
+                "customer_count": customer_count,
+                "order_count": order_count,
+                "category_count": category_count,
+                "brand_count": brand_count,
+                "published_product_count": published_product_count,
+                "seller_product_count": seller_product_count,
+                "admin_product_count": admin_product_count,
+                "seller_count": seller_count,
+                "approved_seller_count": approved_seller_count,
+                "pending_seller_count": pending_seller_count,
+                "category_wise_product_sale": category_wise_product_sale.data,
+                "category_wise_product_stock": category_wise_product_stock.data,
+                "top_products": products_data.data
+            })
+
+        else:
+            raise ValidationError({"msg": 'You can not see dashboard data, because you are not an Admin!'})

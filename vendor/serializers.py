@@ -7,7 +7,7 @@ from rest_framework.exceptions import ValidationError
 from ecommerce.common.emails import send_email_without_delay
 from product.models import Brand, Category, Color, DiscountTypes, FlashDealInfo, FlashDealProduct, Inventory, InventoryVariation, Product, ProductAttributeValues, ProductAttributes, ProductColor, ProductCombinations, ProductCombinationsVariants, ProductImages, ProductReview, ProductTags, ProductVariation, ProductVideoProvider, ShippingClass, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units, VariantType, VatType, Attribute, FilterAttributes, ProductFilterAttributes, AttributeValues
 from user.models import User
-from cart.models import Order
+from cart.models import Order, OrderItem
 # from user.serializers import UserRegisterSerializer
 from vendor.models import VendorRequest, Vendor, StoreSettings, Seller
 from django.db.models import Avg
@@ -1849,3 +1849,28 @@ class TicketStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ticket
         fields = ['id', 'status']
+
+
+class CategoryWiseProductSaleSerializer(serializers.ModelSerializer):
+    sale_count = serializers.SerializerMethodField()
+    class Meta:
+        model = Category
+        fields = ['id', 'title', 'sale_count']
+
+    def get_sale_count(self, obj):
+        sell_count = Order.objects.filter(order_item_order__product__category = obj).count()
+        return sell_count
+
+
+class CategoryWiseProductStockSerializer(serializers.ModelSerializer):
+    stock_count = serializers.SerializerMethodField()
+    class Meta:
+        model = Category
+        fields = ['id', 'title', 'stock_count']
+
+    def get_stock_count(self, obj):
+        products = Product.objects.filter(category = obj)
+        total_quantity = 0
+        for product in products:
+            total_quantity += product.total_quantity
+        return total_quantity

@@ -15,11 +15,19 @@ phone_regex = RegexValidator(regex='^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$
 
 
 class Seller(AbstractTimeStamp):
+    SELLER_STATUSES = [
+        ('PENDING', 'Pending'),
+        ('APPROVED', 'Approved'),
+        ('FREEZE', 'Freeze')
+    ]
+
     name = models.CharField(max_length=254, null=False, blank=False)
     phone = models.CharField(max_length=255, validators=[phone_regex], null=False, blank=False, unique=True)
     email = models.EmailField(max_length=50, null=False, blank=False, unique=True, validators=[validators.EmailValidator(message="Invalid Email")])
     address = models.CharField(max_length=254, null=True, blank=True)
     logo = models.ImageField(null=True, blank=True, upload_to='images/logo')
+    status = models.CharField(
+        max_length=20, choices=SELLER_STATUSES, default=SELLER_STATUSES[0][0])
     is_active = models.BooleanField(default=True)
 
     def __str__(self):

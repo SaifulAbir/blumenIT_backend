@@ -14,7 +14,7 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminAddNewAttributeValueAPIView, AdminUpdateAttributeValueAPIView, AdminFilterAttributeListAPIView, AdminAddNewFilterAttributeAPIView, \
     AdminProductListSearchAPI, AdminOrderList, AdminOrderViewAPI, OrderListSearchAPI, AdminOrderUpdateAPI, \
     AdminUpdateFilterAttributeAPIView, AdminCustomerListAPIView, AdminTicketListAPIView, AdminTicketDetailsAPIView, \
-        AdminUpdateTicketStatusAPIView
+        AdminUpdateTicketStatusAPIView, AdminDashboardDataAPIView
 
 urlpatterns = [
     path('admin/seller-create/', AdminSellerCreateAPIView.as_view()),
@@ -80,11 +80,12 @@ urlpatterns = [
     path('admin/order-search/',OrderListSearchAPI.as_view()),
     path('admin/order-update/<int:o_id>', AdminOrderUpdateAPI.as_view()),
 
-
     path('admin/customer-list/', AdminCustomerListAPIView.as_view()),
     path('admin/ticket-list/', AdminTicketListAPIView.as_view()),
     path('admin/ticket-details/<int:id>/', AdminTicketDetailsAPIView.as_view()),
     path('admin/ticket-status-update/<int:id>/', AdminUpdateTicketStatusAPIView.as_view()),
+
+    path('admin/dashboard-data/', AdminDashboardDataAPIView.as_view()),
 
 
     # # path('update-vendor/', VendorUpdateAPIView.as_view()),

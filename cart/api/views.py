@@ -154,7 +154,7 @@ class CheckoutDetailsAPIView(RetrieveAPIView):
     def get_object(self):
         o_id = self.kwargs['o_id']
         try:
-            query = Order.objects.get(order_id=o_id)
+            query = Order.objects.get(id=o_id)
             return query
         except:
             raise ValidationError(

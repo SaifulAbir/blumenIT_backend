@@ -111,7 +111,7 @@ class CheckoutDetailsSerializer(serializers.ModelSerializer):
     total_price = serializers.SerializerMethodField('get_total_price')
     class Meta:
         model = Order
-        fields = ['user', 'user_email', 'user_phone', 'order_id', 'order_date', 'delivery_date', 'order_status', 'order_items', 'delivery_address', 'payment_type',
+        fields = ['id', 'user', 'user_email', 'user_phone', 'order_id', 'order_date', 'delivery_date', 'order_status', 'order_items', 'delivery_address', 'payment_type',
         'payment_title', 'product_price', 'coupon_discount_amount', 'sub_total', 'shipping_cost', 'total_price']
 
     def get_order_items(self, obj):

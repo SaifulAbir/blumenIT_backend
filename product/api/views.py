@@ -457,3 +457,12 @@ class OnlyTitleAPIView(APIView):
             return Response({"title": title}, status=status.HTTP_200_OK)
         else:
             raise ValidationError({"msg":'id or type missing!'})
+
+
+class GamingCategoryListAPIView(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = StoreCategoryAPIViewListSerializer
+
+    def get_queryset(self):
+        queryset = Category.objects.filter(is_gaming=True, is_active=True).order_by('ordering_number')
+        return queryset

@@ -56,6 +56,7 @@ class Category(AbstractTimeStamp):
         upload_to='product_category', blank=True, null=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
     pc_builder = models.BooleanField(null=False, blank=False, default=False)
+    is_gaming = models.BooleanField(null=False, blank=False, default=False)
     is_featured = models.BooleanField(null=False, blank=False, default=False)
 
     subtitle = models.TextField(null=True, blank=True, default="")
@@ -286,6 +287,7 @@ class Product(AbstractTimeStamp):
     digital = models.BooleanField(default=False)
     in_house_product = models.BooleanField(default=False)
     whole_sale_product = models.BooleanField(default=False)
+    is_gaming = models.BooleanField(null=False, blank=False, default=False)
     sell_count = models.BigIntegerField(null=True, blank=True, default=0)
     warranty = models.CharField(max_length=100, default='', null=True, blank=True)
     total_average_rating_number = models.FloatField(null=True, blank=True, default=0.0)

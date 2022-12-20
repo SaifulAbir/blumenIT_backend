@@ -29,6 +29,8 @@ urlpatterns = [
      path('pc_builder-categories/',PcBuilderCategoryAPIView.as_view()),
      path('pc_builder/',PcBuilderChooseAPIView.as_view()),
 
+     path('gaming-category-list/', GamingCategoryListAPIView.as_view()),
+
 
     # store front api
     # path('store-fetured-product-list/', FeaturedProductListStoreFront.as_view()),

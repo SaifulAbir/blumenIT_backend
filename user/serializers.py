@@ -97,7 +97,7 @@ class CustomerOrderListSerializer(serializers.ModelSerializer):
 
 class CustomerOrderItemsSerializer(serializers.ModelSerializer):
     product_name = serializers.SerializerMethodField()
-    product_thumb = serializers.SerializerMethodField()
+    product_thumb = serializers.ImageField(source='product.thumbnail',read_only=True)
     product_price = serializers.SerializerMethodField()
 
     class Meta:
@@ -108,11 +108,6 @@ class CustomerOrderItemsSerializer(serializers.ModelSerializer):
         product_name = Product.objects.filter(id=obj.product.id)[
             0].title
         return product_name
-
-    def get_product_thumb(self, obj):
-        product_thumb = Product.objects.filter(id=obj.product.id)[
-            0].thumbnail.url
-        return product_thumb
 
     def get_product_price(self, obj):
         product_price = Product.objects.filter(id=obj.product.id)[
@@ -139,7 +134,7 @@ class CustomerOrderDetailsSerializer(serializers.ModelSerializer):
 
     def get_order_items(self, obj):
         queryset = OrderItem.objects.filter(order=obj)
-        serializer = CustomerOrderItemsSerializer(instance=queryset, many=True)
+        serializer = CustomerOrderItemsSerializer(instance=queryset, many=True, context={'request': self.context['request']})
         return serializer.data
 
     def get_delivery_address(self, obj):

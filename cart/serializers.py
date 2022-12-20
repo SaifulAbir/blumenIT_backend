@@ -69,18 +69,13 @@ class ProductCombinationForCheckoutSerializer(serializers.ModelSerializer):
 class CheckoutDetailsOrderItemSerializer(serializers.ModelSerializer):
     product_title = serializers.CharField(source='product.title',read_only=True)
     product_sku = serializers.CharField(source='product.sku',read_only=True)
-    product_thumb = serializers.SerializerMethodField()
+    product_thumb = serializers.ImageField(source='product.thumbnail',read_only=True)
     product_price = serializers.SerializerMethodField()
     product_specification = serializers.SerializerMethodField('get_product_specification')
 
     class Meta:
         model = OrderItem
         fields = ['id', 'product_title', 'product_thumb', 'quantity', 'product_price', 'product_sku', 'product_specification']
-
-    def get_product_thumb(self, obj):
-        product_thumb = Product.objects.filter(id=obj.product.id)[
-            0].thumbnail.url
-        return product_thumb
 
     def get_product_price(self, obj):
         product_price = Product.objects.filter(id=obj.product.id)[
@@ -115,8 +110,8 @@ class CheckoutDetailsSerializer(serializers.ModelSerializer):
         'payment_title', 'product_price', 'coupon_discount_amount', 'sub_total', 'shipping_cost', 'total_price']
 
     def get_order_items(self, obj):
-        queryset = OrderItem.objects.filter(order=obj)
-        serializer = CheckoutDetailsOrderItemSerializer(instance=queryset, many=True)
+        queryset = OrderItem.objects.filter(order=obj) 
+        serializer = CheckoutDetailsOrderItemSerializer(instance=queryset, many=True, context={'request': self.context['request']})
         return serializer.data
 
     def get_delivery_address(self, obj):

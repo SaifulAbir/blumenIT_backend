@@ -6,7 +6,7 @@ from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateAP
 from rest_framework.views import APIView
 from home.models import ProductView
 from product.serializers import ProductDetailsSerializer, ProductReviewCreateSerializer, BrandSerializer,\
-StoreCategoryAPIViewListSerializer, PcBuilderDataListSerializer, ProductListBySerializer, FilterAttributeSerializer, PcBuilderCategoryListSerializer, PcBuilderSubCategoryListSerializer, PcBuilderSubSubCategoryListSerializer
+StoreCategoryAPIViewListSerializer, PcBuilderDataListSerializer, ProductListBySerializer, FilterAttributeSerializer, PcBuilderCategoryListSerializer, PcBuilderSubCategoryListSerializer, PcBuilderSubSubCategoryListSerializer, BrandListSerializer
 
 from product.models import Category, SubCategory, SubSubCategory, Product, Brand, AttributeValues
 from product.models import FilterAttributes, ProductFilterAttributes
@@ -155,8 +155,8 @@ class ProductListByCategoryPopularProductsAPI(ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = ProductListBySerializer
     pagination_class = ProductCustomPagination
-    lookup_field = 'cid'
-    lookup_url_kwarg = "cid"
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
 
     def get_queryset(self):
         # work with dynamic pagination page_size
@@ -166,12 +166,24 @@ class ProductListByCategoryPopularProductsAPI(ListAPIView):
             pagination = 10
         self.pagination_class.page_size = pagination
 
+        id = self.kwargs['id']
+        type = self.kwargs['type']
 
-        cid = self.kwargs['cid']
-        if cid:
-            queryset = Product.objects.filter(category=cid, status='PUBLISH').annotate(count=Count('product_review_product')).order_by('-count')
+        queryset = Product.objects.filter(status='PUBLISH').annotate(count=Count('product_review_product')).order_by('-count')
+
+        if id and type:
+            if type == 'category':
+                queryset = queryset.filter(Q(category=id))
+
+            if type == 'sub_category':
+                queryset = queryset.filter(Q(sub_category=id))
+
+            if type == 'sub_sub_category':
+                queryset = queryset.filter(Q(sub_sub_category=id))
+
         else:
-            queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
+            queryset = Product.objects.filter(status='PUBLISH').annotate(count=Count('product_review_product')).order_by('-count')
+
 
 
         return queryset
@@ -464,5 +476,72 @@ class GamingCategoryListAPIView(ListAPIView):
     serializer_class = StoreCategoryAPIViewListSerializer
 
     def get_queryset(self):
-        queryset = Category.objects.filter(is_gaming=True, is_active=True).order_by('ordering_number')
+        queryset = Category.objects.filter(title__icontains='gaming', is_active=True).order_by('ordering_number')
         return queryset
+
+
+class ProductListByCategoryGamingPopularProductsAPI(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = ProductListBySerializer
+    pagination_class = ProductCustomPagination
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        # work with dynamic pagination page_size
+        try:
+            pagination = self.kwargs['pagination']
+        except:
+            pagination = 10
+        self.pagination_class.page_size = pagination
+
+
+        id = self.kwargs['id']
+        type = self.kwargs['type']
+
+        queryset = Product.objects.filter(category__title__icontains='gaming', status='PUBLISH').annotate(count=Count('product_review_product')).order_by('-count')
+
+        if id and type:
+            if type == 'category':
+                queryset = queryset.filter(Q(category=id))
+
+            if type == 'sub_category':
+                queryset = queryset.filter(Q(sub_category=id))
+
+            if type == 'sub_sub_category':
+                queryset = queryset.filter(Q(sub_sub_category=id))
+
+        else:
+            queryset = Product.objects.filter(category__title__icontains='gaming', status='PUBLISH').annotate(count=Count('product_review_product')).order_by('-count')
+
+        return queryset
+
+
+class GamingFeaturedProductListAPI(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = ProductListBySerializer
+    pagination_class = ProductCustomPagination
+
+    def get_queryset(self):
+        # work with dynamic pagination page_size
+        try:
+            pagination = self.kwargs['pagination']
+        except:
+            pagination = 10
+        self.pagination_class.page_size = pagination
+
+        queryset = Product.objects.filter(category__title__icontains='gaming', is_featured=True, status='PUBLISH').order_by('-created_at')
+
+        return queryset
+
+
+class BrandListAPIView(ListAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = BrandListSerializer
+
+    def get_queryset(self):
+        queryset = Brand.objects.filter(is_active=True)
+        if queryset:
+            return queryset
+        else:
+            raise ValidationError({"msg": "No brand available! " })

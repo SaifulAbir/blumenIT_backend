@@ -530,3 +530,9 @@ class PcBuilderSubSubCategoryListSerializer(serializers.ModelSerializer):
         return 'sub_sub_category'
 
 # work with pc builder end
+
+
+class BrandListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Brand
+        fields = ['id', 'title', 'logo']

@@ -99,10 +99,11 @@ class CustomerOrderItemsSerializer(serializers.ModelSerializer):
     product_name = serializers.SerializerMethodField()
     product_thumb = serializers.ImageField(source='product.thumbnail',read_only=True)
     product_price = serializers.SerializerMethodField()
+    product_slug = serializers.CharField(source='product.slug',read_only=True)
 
     class Meta:
         model = OrderItem
-        fields = ['id', 'product_name', 'product_thumb', 'quantity', 'product_price']
+        fields = ['id', 'product_name', 'product_thumb', 'product_slug', 'quantity', 'product_price']
 
     def get_product_name(self, obj):
         product_name = Product.objects.filter(id=obj.product.id)[

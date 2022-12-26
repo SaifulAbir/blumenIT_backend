@@ -3,7 +3,7 @@ from vendor.models import StoreSettings, VendorRequest, Vendor, VendorReview, Se
 
 # admin.site.register(VendorRequest)
 # admin.site.register(Vendor)
-# admin.site.register(StoreSettings)
 # admin.site.register(VendorReview)
 admin.site.register(Seller)
+admin.site.register(StoreSettings)
 

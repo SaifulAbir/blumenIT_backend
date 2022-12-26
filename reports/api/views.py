@@ -1,13 +1,15 @@
 from rest_framework.generics import ListAPIView, CreateAPIView
 from rest_framework.views import APIView
 from cart.models import Order, OrderItem
+from product.models import Product
+from vendor.models import Seller
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from product.pagination import ProductCustomPagination
-from reports.serializers import SalesReportSerializer, VendorProductReportSerializer
+from reports.serializers import SalesReportSerializer, VendorProductReportSerializer, InHouseProductSerializer, SellerProductSaleSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from django.db.models import Q
-import datetime
+# import datetime
 
 class SalesReportAPI(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -127,7 +129,7 @@ class VendorProductReportSearchAPI(ListAPIView):
             order_status = request.GET.get('order_status')
             start_date = request.GET.get('start_date')
             end_date = request.GET.get('end_date')
-            seller = request.GET.get('seller')
+            seller_id = request.GET.get('seller_id')
 
             queryset = OrderItem.objects.all().order_by('-created_at')
 
@@ -138,8 +140,8 @@ class VendorProductReportSearchAPI(ListAPIView):
             if start_date:
                 queryset = queryset.filter(Q(order__order_date__range=(start_date,end_date)) | Q(order__order_date__icontains=start_date))
 
-            if seller:
-                queryset = queryset.filter(Q(order_id__icontains=seller))
+            if seller_id:
+                queryset = queryset.filter(Q(order__vendor__exact=seller_id))
 
             return queryset
 
@@ -147,3 +149,82 @@ class VendorProductReportSearchAPI(ListAPIView):
             raise ValidationError(
                 {"msg": 'You can not search in sale report list, because you are not an Admin!'})
 
+
+class InHouseProductReportAPI(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = InHouseProductSerializer
+    pagination_class = ProductCustomPagination
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            # work with dynamic pagination page_size
+            try:
+                pagination = self.kwargs['pagination']
+            except:
+                pagination = 10
+            self.pagination_class.page_size = pagination
+
+            queryset = Product.objects.filter(in_house_product=True).order_by('-created_at')
+
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError({"msg": "There is no in-house product available."})
+        else:
+            raise ValidationError(
+                {"msg": 'You can not see in-house product list, because you are not an Admin!'})
+
+
+class InHouseProductReportSearchAPI(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = InHouseProductSerializer
+    pagination_class = ProductCustomPagination
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            # work with dynamic pagination page_size
+            try:
+                pagination = self.kwargs['pagination']
+            except:
+                pagination = 10
+            self.pagination_class.page_size = pagination
+
+
+            request = self.request
+            category_id = request.GET.get('category_id')
+
+            queryset = Product.objects.all().order_by('-created_at')
+
+            if category_id:
+                queryset = queryset.filter(Q(category__exact=category_id))
+
+            return queryset
+
+        else:
+            raise ValidationError(
+                {"msg": 'You can not search in sale report list, because you are not an Admin!'})
+
+
+class SellerProductsSaleReportAPI(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = SellerProductSaleSerializer
+    pagination_class = ProductCustomPagination
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            # work with dynamic pagination page_size
+            try:
+                pagination = self.kwargs['pagination']
+            except:
+                pagination = 10
+            self.pagination_class.page_size = pagination
+
+            queryset = Seller.objects.all().order_by('-created_at')
+
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError({"msg": "There is no seller product sale available."})
+        else:
+            raise ValidationError(
+                {"msg": 'You can not see seller product sale list, because you are not an Admin!'})

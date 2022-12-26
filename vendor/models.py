@@ -106,8 +106,8 @@ class StoreSettings(AbstractTimeStamp):
         max_length=254, null=True, blank=True, verbose_name=_('Address'))
     email = models.EmailField(
         max_length=255, null=False, blank=False, unique=True)
-    vendor = models.ForeignKey(
-        Vendor, on_delete=models.PROTECT, blank=False, null=False, related_name="vendor_settings",
+    seller = models.ForeignKey(
+        Seller, on_delete=models.PROTECT, blank=True, null=True, related_name="seller_store_setting",
         verbose_name=_('Vendor'))
     logo = models.ImageField(upload_to='images/store_logo')
     banner = models.ImageField(upload_to='images/banner')

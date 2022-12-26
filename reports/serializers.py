@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from cart.models import Order, OrderItem
-from cart.models import Order
+from product.models import Product
+from vendor.models import Seller, StoreSettings
+from django.db.models import Q
 
 class SalesReportSerializer(serializers.ModelSerializer):
     num_of_product = serializers.SerializerMethodField()
@@ -29,3 +31,49 @@ class VendorProductReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
         fields = ['id', 'order_id', 'product_title', 'product_price', 'quantity', 'order_date', 'order_status', 'seller']
+
+
+class InHouseProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ['id', 'title', 'sell_count', 'category']
+
+
+class SellerProductSaleSerializer(serializers.ModelSerializer):
+    shop_name =  serializers.SerializerMethodField()
+    number_of_product_sale =  serializers.SerializerMethodField()
+    order_amount =  serializers.SerializerMethodField()
+    class Meta:
+        model = Seller
+        fields = ['id', 'name', 'shop_name', 'number_of_product_sale', 'order_amount', 'status']
+
+    def get_shop_name(self, obj):
+        store_name_obj = StoreSettings.objects.filter(Q(seller = obj.id )).exists()
+        if store_name_obj:
+            store_name_ob = StoreSettings.objects.get(seller = obj.id)
+            store_name = store_name_ob.store_name
+        else:
+            store_name = ''
+        return store_name
+
+    def get_number_of_product_sale(self, obj):
+        order_item_obj = OrderItem.objects.filter(Q(product__seller = obj.id)).exists()
+        if order_item_obj:
+            order_item_ob = OrderItem.objects.filter(Q(product__seller = obj.id)).count()
+            # print(order_item_ob)
+        else:
+            order_item_ob = 0
+
+        return order_item_ob
+
+    def get_order_amount(self, obj):
+        order_item_obj = OrderItem.objects.filter(Q(product__seller = obj.id)).exists()
+        order_amount = 0
+        if order_item_obj:
+            order_item_ob_l = OrderItem.objects.filter(Q(product__seller = obj.id))
+            for i in order_item_ob_l:
+                order_amount += float(i.quantity * i.unit_price)
+        else:
+            order_amount = 0
+
+        return order_amount

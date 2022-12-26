@@ -136,6 +136,15 @@ class Order(AbstractTimeStamp):
         ('CANCEL', 'Cancel'),
     ]
 
+    DELIVERY_STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('PICKED', 'Picked'),
+        ('DELIVERED', 'Delivered'),
+        ('DELIVERED', 'Delivered'),
+        ('RETURN', 'Return'),
+        ('CANCEL', 'Cancel'),
+    ]
+
     PAYMENT_STATUSES = [
         ('UN-PAID', 'Un-Paid'),
         ('PAID', 'Paid'),
@@ -153,9 +162,6 @@ class Order(AbstractTimeStamp):
         max_length=255, null=False, blank=False, default=0)
     order_status = models.CharField(
         max_length=20, null=False, blank=False, choices=ORDER_CHOICES, default=ORDER_CHOICES[1][1])
-    payment_status = models.CharField(
-        max_length=20, null=False, blank=False, choices=PAYMENT_STATUSES, default=PAYMENT_STATUSES[1][1])
-    delivery_agent = models.CharField(max_length=100, null=True, blank=True)
     refund = models.BooleanField(default=False)
     order_date = models.DateTimeField(auto_now_add=True)
     coupon = models.ForeignKey(
@@ -166,11 +172,16 @@ class Order(AbstractTimeStamp):
     shipping_cost = models.FloatField(max_length=255, null=True, blank=True)
     shipping_class = models.ForeignKey(
         ShippingClass, on_delete=models.SET_NULL, blank=True, null=True)
+    payment_status = models.CharField(
+        max_length=20, null=False, blank=False, choices=PAYMENT_STATUSES, default=PAYMENT_STATUSES[1][1])
     payment_type = models.ForeignKey(
         PaymentType, on_delete=models.SET_NULL, blank=True, null=True)
     cash_on_delivery = models.BooleanField(default=False)
+    delivery_status = models.CharField(
+        max_length=20, null=False, blank=False, choices=DELIVERY_STATUS_CHOICES, default=DELIVERY_STATUS_CHOICES[0][0])
     delivery_address = models.ForeignKey(
         DeliveryAddress, on_delete=models.CASCADE, blank=True, null=True)
+    delivery_agent = models.CharField(max_length=100, null=True, blank=True)
     delivery_date = models.DateTimeField(null=True, blank=True)
     comment = models.TextField(null=True, blank=True)
     # ordered = models.BooleanField(default=True)

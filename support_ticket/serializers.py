@@ -38,7 +38,11 @@ class CustomerTicketCreateSerializer(serializers.ModelSerializer):
         if ticket_conversations:
             for ticket_conversation in ticket_conversations:
                 conversation_text = ticket_conversation['conversation_text']
-                conversation_photo = ticket_conversation['conversation_photo']
+                try:
+                    conversation_photo = ticket_conversation['conversation_photo']
+                except:
+                    conversation_photo = ''
+
                 if conversation_text:
                     ticket_conversation_instance = TicketConversation.objects.create(conversation_text=conversation_text,  conversation_photo=conversation_photo, ticket=ticket_instance)
 

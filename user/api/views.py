@@ -28,10 +28,11 @@ from user.models import CustomerProfile, User, OTPModel
 from rest_framework.views import APIView
 from user.serializers import  SubscriptionSerializer,  \
     ChangePasswordSerializer, OTPSendSerializer, OTPVerifySerializer, OTPReSendSerializer, SetPasswordSerializer, CustomerOrderListSerializer, \
-    CustomerOrderDetailsSerializer, CustomerProfileSerializer, CustomerAddressListSerializer, CustomerAddressSerializer
+    CustomerOrderDetailsSerializer, CustomerProfileSerializer, CustomerAddressListSerializer, CustomerAddressSerializer, WishlistDataSerializer
 
 from vendor.pagination import OrderCustomPagination
-from cart.models import Order, DeliveryAddress
+from cart.models import Order, DeliveryAddress, Wishlist
+
 
 
 
@@ -445,6 +446,24 @@ class DashboardDataAPIView(APIView):
                 {"msg": 'You can not get dashboard data, because you are not an Customer!'})
 
 
+class WishlistDataAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = WishlistDataSerializer
+    pagination_class = OrderCustomPagination
+
+    def get_queryset(self):
+    # def get(self, request):
+        if self.request.user.is_customer == True:
+            wishlist_obj_exist = Wishlist.objects.filter(Q(user=self.request.user)).exists()
+            if wishlist_obj_exist:
+                queryset = Wishlist.objects.filter(Q(user=self.request.user)).order_by('-created_at')
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'Wishlist data does not exist!'})
+        else:
+            raise ValidationError(
+                {"msg": 'You can not see Wishlist data, because you are not an Customer!'})
 
 
 # class CustomerRetrieveUpdateAPIView(RetrieveUpdateAPIView):

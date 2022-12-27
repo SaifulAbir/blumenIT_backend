@@ -391,8 +391,16 @@ class Refund(AbstractTimeStamp):
 class Wishlist(AbstractTimeStamp):
     user = models.ForeignKey(User, on_delete=models.PROTECT,
                              related_name='wishlist_user', blank=True, null=True)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='wishlist_product')
     is_active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = 'Wishlist'
+        verbose_name_plural = 'Wishlists'
+        db_table = 'wishlist'
+
+    def __str__(self):
+        return str(self.user.email) + ' Product: ' + str(self.product.title)
 
 
 class BillingAddress(AbstractTimeStamp):

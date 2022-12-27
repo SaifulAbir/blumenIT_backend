@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from cart.models import Order, OrderItem
+from cart.models import Order, OrderItem, Wishlist
 from product.models import Product, Inventory
 from vendor.models import Seller, StoreSettings
 from django.db.models import Q
@@ -94,3 +94,19 @@ class ProductStockSerializer(serializers.ModelSerializer):
             stock_count = 0
 
         return stock_count
+
+
+class ProductWishlistSerializer(serializers.ModelSerializer):
+    count =  serializers.SerializerMethodField()
+    class Meta:
+        model = Product
+        fields = ['id', 'title', 'count']
+
+    def get_count(self, obj):
+        wishlist_obj = Wishlist.objects.filter(Q(product = obj.id)).exists()
+        if wishlist_obj:
+            wishlist_count = Wishlist.objects.filter(Q(product = obj.id)).count()
+        else:
+            wishlist_count = 0
+
+        return wishlist_count

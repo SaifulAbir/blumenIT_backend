@@ -3,7 +3,7 @@ from django.views.decorators.csrf import csrf_exempt
 from user.api.views import LoginUser, VerifyUserAPIView,  \
     SubscriptionAPIView,  ChangePasswordView, SendOTPAPIView, OTPVerifyAPIVIEW, ReSendOTPAPIView, \
     SetPasswordAPIView, SuperUserLoginUser, CustomerOrdersList, CustomerOrderDetails, CustomerProfile, CustomerAddressListAPIView, \
-         CustomerAddressAddAPIView, CustomerAddressUpdateAPIView, CustomerAddressDeleteAPIView, DashboardDataAPIView
+         CustomerAddressAddAPIView, CustomerAddressUpdateAPIView, CustomerAddressDeleteAPIView, DashboardDataAPIView, WishlistDataAPIView
 
 urlpatterns = [
     path('login/', LoginUser.as_view({'post': 'create'}), name='login_user'),
@@ -23,6 +23,7 @@ urlpatterns = [
     path('customer/address-update/<int:id>/', CustomerAddressUpdateAPIView.as_view()),
     path('customer/address-delete/<int:id>/', CustomerAddressDeleteAPIView.as_view()),
     path('customer/dashboard-data/', DashboardDataAPIView.as_view()),
+    path('customer/wishlist-data/', WishlistDataAPIView.as_view()),
 
     # path('user-list/', UserListAPIView.as_view()),
     # path('change-password/', change_password),

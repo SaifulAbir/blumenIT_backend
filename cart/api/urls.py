@@ -19,6 +19,8 @@ urlpatterns = [
     path('delivery-address-list/', DeliveryAddressListAPIView.as_view()),
     path('delete-delivery-address/<int:id>/', BillingAddressDeleteAPIView.as_view()),
 
+    path('wishlist-add-remove/<int:product_id>/', WishlistAddRemoveAPIView.as_view()),
+
     # path('active-coupon/', ActiveCouponlistView.as_view()),
     # path('cart-list/<int:uid>/', CartList.as_view()),
     # path('create-payment-type/', PaymentTypeCreateAPIView.as_view()),

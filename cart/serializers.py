@@ -170,8 +170,12 @@ class CheckoutDetailsSerializer(serializers.ModelSerializer):
 
 
 class WishlistSerializer(serializers.Serializer):
-    product = serializers.PrimaryKeyRelatedField(
-        queryset=Product.objects.all(), many=False, write_only=True)
+    # product = serializers.PrimaryKeyRelatedField(
+    #     queryset=Product.objects.all(), many=False, write_only=True)
+
+    class Meta:
+        model = Wishlist
+        fields = ['id', 'user', 'product', 'is_active']
 
 
 class PaymentTypesListSerializer(serializers.ModelSerializer):

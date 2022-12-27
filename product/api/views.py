@@ -147,7 +147,6 @@ class ProductListByCategoryAPI(ListAPIView):
                 # cat_id = FilterAttributes.objects.get(attribute = attr_id).category.id
                 # queryset = queryset.filter(Q(category__id=cat_id)).order_by('-created_at')
 
-
         return queryset
 
 
@@ -308,11 +307,6 @@ class ProductListBySubSubCategoryAPI(ListAPIView):
             for attr_value_id in attr_value_ids_list:
                 attr_value_id = int(attr_value_id)
                 queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id=attr_value_id)).order_by('-created_at')
-
-                # attr_id = AttributeValues.objects.get(id = attr_value_id).attribute
-                # f_att_id = FilterAttributes.objects.get(attribute = attr_id)
-                # p_f_att_id = ProductFilterAttributes.objects.get(filter_attribute = f_att_id)
-                # queryset = queryset.filter(id=p_f_att_id.product.id).order_by('-created_at')
 
         return queryset
 

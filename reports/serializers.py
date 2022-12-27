@@ -100,7 +100,7 @@ class ProductWishlistSerializer(serializers.ModelSerializer):
     count =  serializers.SerializerMethodField()
     class Meta:
         model = Product
-        fields = ['id', 'title', 'count']
+        fields = ['id', 'title', 'count', 'category']
 
     def get_count(self, obj):
         wishlist_obj = Wishlist.objects.filter(Q(product = obj.id)).exists()

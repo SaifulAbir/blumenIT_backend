@@ -339,3 +339,33 @@ class ProductWishlistReportAPI(ListAPIView):
         else:
             raise ValidationError(
                 {"msg": 'You can not see product list, because you are not an Admin!'})
+
+
+class ProductWishlistReportSearchAPI(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ProductWishlistSerializer
+    pagination_class = ProductCustomPagination
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            # work with dynamic pagination page_size
+            try:
+                pagination = self.kwargs['pagination']
+            except:
+                pagination = 10
+            self.pagination_class.page_size = pagination
+
+
+            request = self.request
+            category_id = request.GET.get('category_id')
+
+            queryset = Product.objects.all().order_by('-created_at')
+
+            if category_id:
+                queryset = queryset.filter(Q(category=category_id))
+
+            return queryset
+
+        else:
+            raise ValidationError(
+                {"msg": 'You can not search in seller product sale report list, because you are not an Admin!'})

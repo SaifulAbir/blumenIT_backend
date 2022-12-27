@@ -1,7 +1,8 @@
 from django.urls import path
 from django.views.decorators.csrf import csrf_exempt
 from reports.api.views import SalesReportAPI, SalesReportSearchAPI, VendorProductReportAPI, VendorProductReportSearchAPI, \
-    InHouseProductReportAPI, InHouseProductReportSearchAPI, SellerProductsSaleReportAPI
+    InHouseProductReportAPI, InHouseProductReportSearchAPI, SellerProductsSaleReportAPI, SellerProductsSaleReportSearchAPI, \
+    ProductStockReportAPI, ProductStockReportSearchAPI
 
 urlpatterns = [
     path('reports/sales-report/<int:pagination>/', SalesReportAPI.as_view()),
@@ -14,5 +15,9 @@ urlpatterns = [
     path('reports/in-house-product/search/<int:pagination>/', InHouseProductReportSearchAPI.as_view()),
 
     path('reports/seller-products-sale/<int:pagination>/', SellerProductsSaleReportAPI.as_view()),
+    path('reports/seller-products-sale/search/<int:pagination>/', SellerProductsSaleReportSearchAPI.as_view()),
+
+    path('reports/product-stock/<int:pagination>/', ProductStockReportAPI.as_view()),
+    path('reports/product-stock/search/<int:pagination>/', ProductStockReportSearchAPI.as_view()),
 
 ]

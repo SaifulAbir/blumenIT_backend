@@ -5,7 +5,8 @@ from product.models import Product
 from vendor.models import Seller
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from product.pagination import ProductCustomPagination
-from reports.serializers import SalesReportSerializer, VendorProductReportSerializer, InHouseProductSerializer, SellerProductSaleSerializer
+from reports.serializers import SalesReportSerializer, VendorProductReportSerializer, InHouseProductSerializer, SellerProductSaleSerializer, \
+    ProductStockSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from django.db.models import Q
@@ -228,3 +229,88 @@ class SellerProductsSaleReportAPI(ListAPIView):
         else:
             raise ValidationError(
                 {"msg": 'You can not see seller product sale list, because you are not an Admin!'})
+
+
+class SellerProductsSaleReportSearchAPI(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = SellerProductSaleSerializer
+    pagination_class = ProductCustomPagination
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            # work with dynamic pagination page_size
+            try:
+                pagination = self.kwargs['pagination']
+            except:
+                pagination = 10
+            self.pagination_class.page_size = pagination
+
+
+            request = self.request
+            status = request.GET.get('status')
+
+            queryset = Seller.objects.all().order_by('-created_at')
+
+            if status:
+                queryset = queryset.filter(Q(status__exact=status))
+
+            return queryset
+
+        else:
+            raise ValidationError(
+                {"msg": 'You can not search in seller product sale report list, because you are not an Admin!'})
+
+
+class ProductStockReportAPI(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ProductStockSerializer
+    pagination_class = ProductCustomPagination
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            # work with dynamic pagination page_size
+            try:
+                pagination = self.kwargs['pagination']
+            except:
+                pagination = 10
+            self.pagination_class.page_size = pagination
+
+            queryset = Product.objects.all().order_by('-created_at')
+
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError({"msg": "There is no product list available."})
+        else:
+            raise ValidationError(
+                {"msg": 'You can not see product list, because you are not an Admin!'})
+
+
+class ProductStockReportSearchAPI(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ProductStockSerializer
+    pagination_class = ProductCustomPagination
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            # work with dynamic pagination page_size
+            try:
+                pagination = self.kwargs['pagination']
+            except:
+                pagination = 10
+            self.pagination_class.page_size = pagination
+
+
+            request = self.request
+            category_id = request.GET.get('category_id')
+
+            queryset = Product.objects.all().order_by('-created_at')
+
+            if category_id:
+                queryset = queryset.filter(Q(category=category_id))
+
+            return queryset
+
+        else:
+            raise ValidationError(
+                {"msg": 'You can not search in seller product sale report list, because you are not an Admin!'})

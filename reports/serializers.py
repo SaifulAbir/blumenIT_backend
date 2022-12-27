@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from cart.models import Order, OrderItem
-from product.models import Product
+from product.models import Product, Inventory
 from vendor.models import Seller, StoreSettings
 from django.db.models import Q
 
@@ -77,3 +77,20 @@ class SellerProductSaleSerializer(serializers.ModelSerializer):
             order_amount = 0
 
         return order_amount
+
+
+class ProductStockSerializer(serializers.ModelSerializer):
+    stock =  serializers.SerializerMethodField()
+    class Meta:
+        model = Product
+        fields = ['id', 'title', 'short_description', 'stock', 'category']
+
+    def get_stock(self, obj):
+        inventory_obj = Inventory.objects.filter(Q(product = obj.id)).exists()
+        if inventory_obj:
+            inventory_obj_l = Inventory.objects.filter(Q(product = obj.id)).latest('created_at')
+            stock_count = inventory_obj_l.current_quantity
+        else:
+            stock_count = 0
+
+        return stock_count

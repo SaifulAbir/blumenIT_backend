@@ -57,7 +57,8 @@ INSTALLED_APPS = [
     'website',
     'blog',
     'support_ticket',
-    'reports'
+    'reports',
+    'stuff'
     # 'admin_lte',
     # 'django_countries',
 ]

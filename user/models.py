@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import PermissionsMixin
 from django.core.validators import RegexValidator
 from django.utils.translation import gettext as _
+from stuff.models import Role
 
 # Create your models here.
 from ecommerce.models import AbstractTimeStamp
@@ -51,6 +52,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_customer = models.BooleanField(default=False)
     phone = models.CharField(max_length=255, validators=[phone_regex], null=True, blank=True)
     date_joined = models.DateTimeField(('date joined'), auto_now_add=True)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE, related_name='add_role_in_user_role', blank=True, null=True)
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email', ]

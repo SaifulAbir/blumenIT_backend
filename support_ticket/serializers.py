@@ -59,7 +59,7 @@ class TicketDataSerializer(serializers.ModelSerializer):
 
     def get_ticket_conversation(self, obj):
         selected_ticket_conversation = TicketConversation.objects.filter(
-            ticket=obj, is_active=True).order_by('-created_at')
+            ticket=obj, is_active=True).order_by('id')
         return TicketConversationSerializer(selected_ticket_conversation, many=True).data
 
 

@@ -50,9 +50,9 @@ class CustomerTicketDetailsAPIView(ListAPIView):
             if queryset:
                 return queryset
             else:
-                raise ValidationError({"msg": 'Tickets not found!'})
+                raise ValidationError({"msg": 'Ticket details not found!'})
         else:
-            raise ValidationError({"msg": 'You can not see filtering attributes, because you are not an Admin!'})
+            raise ValidationError({"msg": 'You can not see ticket details, because you are not an Customer!'})
 
 
 class CustomerTicketReplyAPIView(CreateAPIView):

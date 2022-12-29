@@ -7,6 +7,7 @@ from support_ticket.serializers import TicketListSerializer, CustomerTicketCreat
     TicketConversationReplySerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
+from django.db.models import Q
 
 class CustomerTicketListAPI(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -38,18 +39,20 @@ class CustomerTicketCreateAPIView(CreateAPIView):
                 {"msg": 'You can not create ticket, because you are not an User!'})
 
 
-class CustomerTicketDetailsAPIView(APIView):
+class CustomerTicketDetailsAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
-
-    def get(self, request, *args, **kwargs):
+    serializer_class = TicketDataSerializer
+    def get_queryset(self):
+        ticket_id = self.kwargs['id']
         if self.request.user.is_customer == True:
-            ticket_id = self.kwargs['id']
-            ticket_details_data = Ticket.objects.filter(id =ticket_id, user=self.request.user)
-            serializer = TicketDataSerializer(ticket_details_data, many=True)
-            return Response(serializer.data)
+            if ticket_id:
+                queryset = Ticket.objects.filter(Q(id=ticket_id)).order_by('-created_at')
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError({"msg": 'Tickets not found!'})
         else:
-            raise ValidationError(
-                {"msg": 'You can not show ticket details, because you are not an User!'})
+            raise ValidationError({"msg": 'You can not see filtering attributes, because you are not an Admin!'})
 
 
 class CustomerTicketReplyAPIView(CreateAPIView):

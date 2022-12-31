@@ -1,9 +1,9 @@
-from rest_framework.generics import ListAPIView, CreateAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateAPIView
 from rest_framework.views import APIView
 from user.models import User
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from product.pagination import ProductCustomPagination
-from stuff.serializers import StuffListSerializer, CreateStuffSerializer
+from stuff.serializers import StuffListSerializer, CreateStuffSerializer, UpdateStuffSerializer, RoleListSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from external.validation.data_validator import check_dict_data_rise_error
@@ -77,3 +77,106 @@ class CreateStuffAPI(CreateAPIView):
         else:
             raise ValidationError(
                 {"msg": 'You can not create stuff, because you are not an Admin!'})
+
+
+class UpdateStuffAPIView(RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UpdateStuffSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        stuff_id = self.kwargs['id']
+        if self.request.user.is_superuser == True:
+            query = User.objects.filter(Q(id=stuff_id), Q(is_staff=True))
+            if query:
+                return query
+            else:
+                raise ValidationError(
+                    {"msg": 'Stuff does not exist!'})
+        else:
+            raise ValidationError({"msg": 'You can not update Stuff info, because you are not an Admin!'})
+
+
+    def put(self, request, *args, **kwargs):
+        try:
+            try:
+                name = request.data["name"]
+            except:
+                name = None
+            try:
+                email = request.data["email"]
+            except:
+                email = None
+            try:
+                phone = request.data["phone"]
+            except:
+                phone = None
+            try:
+                password = request.data["password"]
+            except:
+                password = None
+            try:
+                role = request.data["role"]
+            except:
+                role = None
+
+            stuff_id = self.kwargs['id']
+
+            try:
+                stuff_obj = User.objects.get(id=stuff_id)
+            except:
+                stuff_obj = None
+
+            if stuff_obj:
+                if name:
+                    stuff_obj.name = name
+
+                if email:
+                    current_user_email = stuff_obj.email
+                    if User.objects.filter(email__iexact=email).exclude(email__iexact=current_user_email).count() > 0:
+                        raise ValidationError({"msg": 'This email address is already in use.'})
+                    else:
+                        stuff_obj.email = email
+                        stuff_obj.username = email
+
+                if phone:
+                    current_user_phone = stuff_obj.phone
+                    if User.objects.filter(phone__iexact=phone).exclude(phone__iexact=current_user_phone).count() > 0:
+                        raise ValidationError({"msg": 'This phone is already in use.'})
+                    else:
+                        stuff_obj.phone = phone
+
+                if password:
+                    stuff_obj.set_password(password)
+
+                if role:
+                    try:
+                        stuff_obj.role = Role.objects.get(id=role)
+                    except:
+                        raise ValidationError({"msg": 'You provided a wrong role id'})
+
+                stuff_obj.save()
+                return Response(data={"user_id": stuff_obj.id}, status=status.HTTP_202_ACCEPTED)
+            else:
+                raise ValidationError({"msg": 'Stuff update failed!'})
+        except KeyError:
+            raise ValidationError({"msg": 'Stuff update failed. contact with developer!'})
+
+
+class RoleListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = RoleListSerializer
+    pagination_class = ProductCustomPagination
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = Role.objects.filter(is_active=True)
+
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError({"msg": "There is no role data in role list."})
+        else:
+            raise ValidationError(
+                {"msg": 'You can not show role list, because you are not an Admin!'})

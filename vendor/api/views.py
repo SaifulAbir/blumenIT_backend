@@ -8,7 +8,7 @@ from product.serializers import DiscountTypeSerializer, ProductTagsSerializer, T
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView, RetrieveAPIView, DestroyAPIView
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductReview, ProductTags, SubCategory, SubSubCategory, Tags, Units, VariantType, ProductVideoProvider, VatType, FilterAttributes, Attribute, AttributeValues
+from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductReview, ProductTags, SubCategory, SubSubCategory, Tags, Units, VariantType, ProductVideoProvider, VatType, FilterAttributes, Attribute, AttributeValues, Inventory
 from user.models import CustomerProfile, User
 from vendor.models import VendorRequest, Vendor, Seller
 from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategorySerializer,\
@@ -24,7 +24,7 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     AdminProfileSerializer, AdminOrderViewSerializer, AdminOrderListSerializer, AdminOrderUpdateSerializer, AdminCustomerListSerializer, \
     AdminTicketListSerializer, AdminTicketDataSerializer, TicketStatusSerializer, CategoryWiseProductSaleSerializer, \
     CategoryWiseProductStockSerializer
-from cart.models import Order
+from cart.models import Order, OrderItem
 from cart.serializers import OrderSerializer
 from user.models import User
 from cart.models import Coupon
@@ -867,13 +867,13 @@ class AdminOrderList(ListAPIView):
 class AdminOrderViewAPI(RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AdminOrderViewSerializer
-    lookup_field = 'o_id'
-    lookup_url_kwarg = "o_id"
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
 
     def get_object(self):
-        id = self.kwargs['o_id']
+        id = self.kwargs['id']
         if self.request.user.is_superuser == True:
-            query = Order.objects.get(order_id=id)
+            query = Order.objects.get(id=id)
             if query:
                 return query
             else:
@@ -922,26 +922,46 @@ class OrderListSearchAPI(ListAPIView):
 class AdminOrderUpdateAPI(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AdminOrderUpdateSerializer
-    lookup_field = 'o_id'
-    lookup_url_kwarg = "o_id"
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
 
 
     def get_queryset(self):
-        id = self.kwargs['o_id']
+        id = self.kwargs['id']
         if self.request.user.is_superuser == True:
             request = self.request
 
-            order_status = request.GET.get('order_status')
-            payment_status = request.GET.get('payment_status')
-            queryset = Order.objects.filter(order_id=id)
-            order_obj_exist = Order.objects.filter(order_id=id).exists()
+            # order_status = request.GET.get('order_status')
+            # payment_status = request.GET.get('payment_status')
+            queryset = Order.objects.filter(id=id)
+            # order_obj_exist = Order.objects.filter(order_id=id).exists()
+            order_obj_exist = Order.objects.filter(id=id).exists()
             if order_obj_exist:
-                if order_status:
-                    order_obj = queryset.objects.filter(order_id=id)
-                    order_obj.update(order_status=order_status)
-                if payment_status:
-                    order_obj = queryset.objects.filter(order_id=id)
-                    order_obj.update(payment_status=payment_status)
+                # if order_status:
+                #     order_obj = queryset.objects.filter(id=id)
+                #     print("order_status2")
+                #     print(order_status)
+                    # order_obj.update(order_status=order_status)
+
+                    # update inventory
+                #     if order_status == 'CONFIRMED':
+                #         order_items_obj_exist = OrderItem.objects.filter(order=id).exists()
+                #         print("order_items_obj_exist")
+                #         print(order_items_obj_exist)
+                #         if order_items_obj_exist:
+                #             order_items = OrderItem.objects.filter(order=id)
+                #             for order_item in order_items:
+                #                 product = order_item['product']
+                #                 quantity = order_item['quantity']
+                #                 product_filter_obj = Product.objects.filter(id=product.id)
+                #                 inventory_obj = Inventory.objects.filter(product=product).latest('created_at')
+                #                 new_update_quantity = int(inventory_obj.current_quantity) - int(quantity)
+                #                 product_filter_obj.update(quantity = new_update_quantity)
+                #                 inventory_obj.current_quantity = new_update_quantity
+                #                 inventory_obj.save()
+                # if payment_status:
+                #     order_obj = queryset.objects.filter(id=id)
+                #     order_obj.update(payment_status=payment_status)
                 return queryset
             else:
                 raise ValidationError(
@@ -950,6 +970,54 @@ class AdminOrderUpdateAPI(RetrieveUpdateAPIView):
             raise ValidationError(
                 {"msg": 'You can not show order, because you are not an Admin!'})
 
+
+    def put(self, request, *args, **kwargs):
+        try:
+            try:
+                order_status = request.data["order_status"]
+            except:
+                order_status = None
+            try:
+                payment_status = request.data["payment_status"]
+            except:
+                payment_status = None
+
+            order_id = self.kwargs['id']
+
+            try:
+                # order_obj = Order.objects.get(id=order_id)
+                order_obj = Order.objects.filter(id=order_id)
+            except:
+                order_obj = None
+
+            if order_obj:
+                if order_status:
+                    order_obj.update(order_status=order_status)
+                    # update inventory
+                    if order_status == 'CONFIRMED':
+                        order_obj_get = Order.objects.get(id=order_id)
+                        order_items_obj_exist = OrderItem.objects.filter(order=order_obj_get.id).exists()
+                        if order_items_obj_exist:
+                            order_items = OrderItem.objects.filter(order=order_obj_get.id)
+                            for order_item in order_items:
+                                product = order_item.product
+                                quantity = order_item.quantity
+                                product_filter_obj = Product.objects.filter(id=product.id)
+                                inventory_obj = Inventory.objects.filter(product=product).latest('created_at')
+                                new_update_quantity = int(inventory_obj.current_quantity) - int(quantity)
+                                product_filter_obj.update(quantity = new_update_quantity)
+                                inventory_obj.current_quantity = new_update_quantity
+                                inventory_obj.save()
+
+                if payment_status:
+                    order_obj.update(payment_status=payment_status)
+
+                # order_obj.save()
+                return Response(data={"order_id": order_obj[0].id}, status=status.HTTP_202_ACCEPTED)
+            else:
+                raise ValidationError({"msg": 'Order update failed!'})
+        except KeyError:
+            raise ValidationError({"msg": 'Order update failed. contact with developer!'})
 
 class AdminCustomerListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]

@@ -7,5 +7,5 @@ urlpatterns = [
     path('stuff/create-stuff/', CreateStuffAPI.as_view(), name='create_stuff'),
     path('stuff/update-stuff/<int:id>/', UpdateStuffAPIView.as_view(), name='update_stuff'),
     path('stuff/role-list/<int:pagination>/', RoleListAPIView.as_view(), name='role_list'),
-    path('stuff/create-role/<int:pagination>/', RoleListAPIView.as_view(), name='role_list'),
+    # path('stuff/create-role/<int:pagination>/', CreatreRoleAPIView.as_view(), name='create_role'),
 ]

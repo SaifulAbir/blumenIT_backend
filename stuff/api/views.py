@@ -180,3 +180,6 @@ class RoleListAPIView(ListAPIView):
         else:
             raise ValidationError(
                 {"msg": 'You can not show role list, because you are not an Admin!'})
+
+
+# class CreatreRoleAPIView

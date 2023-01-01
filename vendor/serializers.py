@@ -1796,7 +1796,7 @@ class AdminOrderViewSerializer(serializers.ModelSerializer):
 
 
 class AdminOrderUpdateSerializer(serializers.ModelSerializer):
-
+    order_id = serializers.CharField(read_only=True)
     class Meta:
         model = Order
         fields = ['order_id', 'order_status', 'payment_status']

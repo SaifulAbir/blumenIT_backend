@@ -929,39 +929,9 @@ class AdminOrderUpdateAPI(RetrieveUpdateAPIView):
     def get_queryset(self):
         id = self.kwargs['id']
         if self.request.user.is_superuser == True:
-            request = self.request
-
-            # order_status = request.GET.get('order_status')
-            # payment_status = request.GET.get('payment_status')
             queryset = Order.objects.filter(id=id)
-            # order_obj_exist = Order.objects.filter(order_id=id).exists()
             order_obj_exist = Order.objects.filter(id=id).exists()
             if order_obj_exist:
-                # if order_status:
-                #     order_obj = queryset.objects.filter(id=id)
-                #     print("order_status2")
-                #     print(order_status)
-                    # order_obj.update(order_status=order_status)
-
-                    # update inventory
-                #     if order_status == 'CONFIRMED':
-                #         order_items_obj_exist = OrderItem.objects.filter(order=id).exists()
-                #         print("order_items_obj_exist")
-                #         print(order_items_obj_exist)
-                #         if order_items_obj_exist:
-                #             order_items = OrderItem.objects.filter(order=id)
-                #             for order_item in order_items:
-                #                 product = order_item['product']
-                #                 quantity = order_item['quantity']
-                #                 product_filter_obj = Product.objects.filter(id=product.id)
-                #                 inventory_obj = Inventory.objects.filter(product=product).latest('created_at')
-                #                 new_update_quantity = int(inventory_obj.current_quantity) - int(quantity)
-                #                 product_filter_obj.update(quantity = new_update_quantity)
-                #                 inventory_obj.current_quantity = new_update_quantity
-                #                 inventory_obj.save()
-                # if payment_status:
-                #     order_obj = queryset.objects.filter(id=id)
-                #     order_obj.update(payment_status=payment_status)
                 return queryset
             else:
                 raise ValidationError(
@@ -985,7 +955,6 @@ class AdminOrderUpdateAPI(RetrieveUpdateAPIView):
             order_id = self.kwargs['id']
 
             try:
-                # order_obj = Order.objects.get(id=order_id)
                 order_obj = Order.objects.filter(id=order_id)
             except:
                 order_obj = None

@@ -590,8 +590,8 @@ class CheckoutSerializer(serializers.ModelSerializer):
                 product_obj = Product.objects.get(id=product.id)
 
                 # update inventory
-                # if payment_status == 'PAID':
-                if order_instance.order_status == 'CONFIRMED':
+                if order_instance.payment_status == 'PAID':
+                # if order_instance.order_status == 'CONFIRMED':
                     product_filter_obj = Product.objects.filter(id=product.id)
                     inventory_obj = Inventory.objects.filter(product=product).latest('created_at')
                     new_update_quantity = int(inventory_obj.current_quantity) - int(quantity)

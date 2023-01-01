@@ -3,13 +3,14 @@ from rest_framework.views import APIView
 from user.models import User
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from product.pagination import ProductCustomPagination
-from stuff.serializers import StuffListSerializer, CreateStuffSerializer, UpdateStuffSerializer, RoleListSerializer
+from stuff.serializers import StuffListSerializer, CreateStuffSerializer, UpdateStuffSerializer, RoleListSerializer, RoleCreateSerializer, \
+    RoleUpdateSerializer, PermissionSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from external.validation.data_validator import check_dict_data_rise_error
 from rest_framework import status
 from django.db.models import Q
-from stuff.models import Role
+from stuff.models import Role, PermissionModules
 
 
 class StuffListAPI(ListAPIView):
@@ -71,7 +72,6 @@ class CreateStuffAPI(CreateAPIView):
                     return Response({"details": "Email already exists"}, status=status.HTTP_400_BAD_REQUEST)
                 if user_obj.phone == phone:
                     return Response({"details": "Phone number already exists"}, status=status.HTTP_400_BAD_REQUEST)
-
 
             return Response({"details": role}, status=status.HTTP_400_BAD_REQUEST)
         else:
@@ -171,7 +171,7 @@ class RoleListAPIView(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True:
-            queryset = Role.objects.filter(is_active=True)
+            queryset = Role.objects.all()
 
             if queryset:
                 return queryset
@@ -182,4 +182,81 @@ class RoleListAPIView(ListAPIView):
                 {"msg": 'You can not show role list, because you are not an Admin!'})
 
 
-# class CreatreRoleAPIView
+class AdminRoleCreateAPIView(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = RoleCreateSerializer
+
+    def post(self, request, *args, **kwargs):
+        if self.request.user.is_superuser == True:
+            return super(AdminRoleCreateAPIView, self).post(request, *args, **kwargs)
+        else:
+            raise ValidationError(
+                {"msg": 'You can not create product, because you are not an Admin!'})
+
+
+class AdminRoleUpdateAPIView(RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = RoleUpdateSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        if self.request.user.is_superuser == True:
+            query = Role.objects.filter(id=id)
+            if query:
+                return query
+            else:
+                raise ValidationError(
+                    {"msg": 'Role does not exist!'})
+        else:
+            raise ValidationError({"msg": 'You can not update role, because you are not an Admin!'})
+
+
+class PermissionListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = PermissionSerializer
+    pagination_class = ProductCustomPagination
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = PermissionModules.objects.all()
+
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError({"msg": "There is no permission modules data in permission modules list."})
+        else:
+            raise ValidationError(
+                {"msg": 'You can not show permission modules list, because you are not an Admin!'})
+
+
+class AdminPermissionCreateAPIView(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = PermissionSerializer
+
+    def post(self, request, *args, **kwargs):
+        if self.request.user.is_superuser == True:
+            return super(AdminPermissionCreateAPIView, self).post(request, *args, **kwargs)
+        else:
+            raise ValidationError(
+                {"msg": 'You can not create permission, because you are not an Admin!'})
+
+
+class AdminPermissionUpdateAPIView(RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = PermissionSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        if self.request.user.is_superuser == True:
+            query = PermissionModules.objects.filter(id=id)
+            if query:
+                return query
+            else:
+                raise ValidationError(
+                    {"msg": 'Permission Modules does not exist!'})
+        else:
+            raise ValidationError({"msg": 'You can not update permission modules, because you are not an Admin!'})

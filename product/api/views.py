@@ -460,7 +460,7 @@ class OnlyTitleAPIView(APIView):
                     title = SubSubCategory.objects.get(id=id).title
                 else:
                     title = ''
-            return Response({"title": title}, status=status.HTTP_200_OK)
+            return Response({"id": id, "title": title, "type": type }, status=status.HTTP_200_OK)
         else:
             raise ValidationError({"msg":'id or type missing!'})
 

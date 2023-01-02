@@ -370,6 +370,7 @@ class ProductListBySerializer(serializers.ModelSerializer):
             'sub_category',
             'sub_sub_category',
             'price',
+            'old_price',
             'discount_type',
             'discount_amount',
             'total_quantity',

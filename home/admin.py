@@ -1,10 +1,15 @@
 from django.contrib import admin
-from home.models import SliderImage, DealsOfTheDay, ProductView, FAQ, ContactUs
+from home.models import SliderImage, DealsOfTheDay, ProductView, FAQ, ContactUs, HomeSingleRowData, PosterUnderSlider, \
+    PopularProductsUnderPoster, FeaturedProductsUnderPoster
 
 admin.site.register(SliderImage)
 admin.site.register(ProductView)
 admin.site.register(FAQ)
 admin.site.register(ContactUs)
+admin.site.register(HomeSingleRowData)
+admin.site.register(PosterUnderSlider)
+admin.site.register(PopularProductsUnderPoster)
+admin.site.register(FeaturedProductsUnderPoster)
 
 @admin.register(DealsOfTheDay)
 class QuestionAdmin(admin.ModelAdmin):

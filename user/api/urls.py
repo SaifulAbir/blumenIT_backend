@@ -1,6 +1,5 @@
 from django.urls import path
-from django.views.decorators.csrf import csrf_exempt
-from user.api.views import LoginUser, VerifyUserAPIView,  \
+from user.api.views import LoginUser,  \
     SubscriptionAPIView,  ChangePasswordView, SendOTPAPIView, OTPVerifyAPIVIEW, ReSendOTPAPIView, \
     SetPasswordAPIView, SuperUserLoginUser, CustomerOrdersList, CustomerOrderDetails, CustomerProfile, CustomerAddressListAPIView, \
          CustomerAddressAddAPIView, CustomerAddressUpdateAPIView, CustomerAddressDeleteAPIView, DashboardDataAPIView, WishlistDataAPIView
@@ -25,10 +24,4 @@ urlpatterns = [
     path('customer/dashboard-data/', DashboardDataAPIView.as_view()),
     path('customer/wishlist-data/', WishlistDataAPIView.as_view()),
 
-    # path('user-list/', UserListAPIView.as_view()),
-    # path('change-password/', change_password),
-    # path('verify-user/<str:verification_token>', VerifyUserAPIView.as_view()),
-    # path('customer-profile/', CustomerRetrieveUpdateAPIView.as_view()),
-    # path('customer-profile/update/', CustomerRetrieveUpdateAPIView.as_view()),
-    # path('register-user/', csrf_exempt(RegisterUser.as_view({'post': 'create'})), name='register_user'),
 ]

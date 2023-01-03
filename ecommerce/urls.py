@@ -25,10 +25,6 @@ schema_view = get_schema_view(
    openapi.Info(
       title="API for Ecommerce",
       default_version='v1',
-      # description="Test description",
-      # terms_of_service="https://www.google.com/policies/terms/",
-      # contact=openapi.Contact(email="contact@snippets.local"),
-      # license=openapi.License(name="BSD License"),
    ),
    public=True,
    permission_classes=[permissions.AllowAny],
@@ -48,7 +44,6 @@ urlpatterns = [
     path('api/',include('blog.api.urls')),
     path('api/',include('reports.api.urls')),
     path('api/',include('stuff.api.urls')),
-    # path('vendor/',include('admin_lte.urls')),
     path('v1/docs/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]
 

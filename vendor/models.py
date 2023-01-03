@@ -1,11 +1,5 @@
 from django.core.validators import RegexValidator
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from django.forms import forms
-from django.template.loader import render_to_string
-
-from ecommerce.common.emails import send_email_without_delay
 from ecommerce.models import AbstractTimeStamp
 from django.utils.translation import gettext as _
 from user.models import User
@@ -146,25 +140,3 @@ class VendorReview(AbstractTimeStamp):
         return str(self.pk)
 
 
-# @receiver(post_save, sender=VendorRequest)
-# def create_vendor(sender, instance, created, **kwargs):
-#     is_verified = instance.is_verified
-#     try:
-#         vendor = Vendor.objects.get(vendor_request=instance)
-#     except Vendor.DoesNotExist:
-#         vendor = None
-#     if is_verified is True and not vendor:
-#         password = User.objects.make_random_password()
-#
-#         user = User.objects.create(username=instance.email, email=instance.email,
-#                                    first_name=instance.first_name, last_name=instance.last_name)
-#         user.set_password(password)
-#         user.save()
-#         vendor_instance = Vendor.objects.create(organization_name=instance.organization_name,
-#                                                 vendor_admin=user, email=instance.email, vendor_request=instance, password=password)
-#         if vendor_instance:
-#             email_list = user.email
-#             subject = "Your Account Credentials"
-#             html_message = render_to_string('vendor_email.html',
-#                                             {'username': user.first_name, 'email': user.email, 'password': password})
-#             send_email_without_delay(subject, html_message, email_list)

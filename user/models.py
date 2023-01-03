@@ -82,7 +82,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         db_table = 'users'
 
 
-# phone_regex = RegexValidator(regex='^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$',message='Invalid phone number')
 class CustomerProfile(AbstractTimeStamp):
     GENDER_CHOICES = (
         ('M', 'Male'),

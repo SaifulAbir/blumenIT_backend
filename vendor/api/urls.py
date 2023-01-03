@@ -1,5 +1,4 @@
 from django.urls import path
-from product.api.views import ProductDetailsAPI
 from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCategoryAPIView, AdminBrandListAPIView,\
     AdminCategoryListAPIView, AdminDeleteCategoryAPIView, AdminDeleteSubCategoryAPIView, \
     AdminDeleteSubSubCategoryAPIView, AdminProductDeleteAPI, AdminProductViewAPI, AdminSubCategoryListAPIView,\
@@ -90,11 +89,5 @@ urlpatterns = [
     path('admin/ticket-status-update/<int:id>/', AdminUpdateTicketStatusAPIView.as_view()),
 
     path('admin/dashboard-data/', AdminDashboardDataAPIView.as_view()),
-
-
-    # # path('update-vendor/', VendorUpdateAPIView.as_view()),
-    # path('vendor-product-attribute-list/',
-    #      VendorAttributeListAPIView.as_view()),
-    # path('vendor-product-variant-list/', VendorVariantListAPIView.as_view()),
 
 ]

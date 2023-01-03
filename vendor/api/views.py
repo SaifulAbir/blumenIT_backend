@@ -466,18 +466,6 @@ class AdminTagListAPIView(ListAPIView):
                 {"msg": 'You can not see tag list, because you are not an Admin!'})
 
 
-class VendorAttributeListAPIView(ListAPIView):
-    permission_classes = [AllowAny]
-    queryset = ProductAttributes.objects.filter(is_active=True)
-    serializer_class = ProductAttributesSerializer
-
-
-class VendorVariantListAPIView(ListAPIView):
-    permission_classes = [AllowAny]
-    queryset = VariantType.objects.filter(is_active=True)
-    serializer_class = VariantTypeSerializer
-
-
 class AdminProductListAPI(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = VendorProductListSerializer

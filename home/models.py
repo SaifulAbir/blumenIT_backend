@@ -1,6 +1,4 @@
 from datetime import datetime
-from email.policy import default
-
 from django.db import models
 from ecommerce.models import AbstractTimeStamp
 from product.models import Product
@@ -27,6 +25,7 @@ class SliderImage(AbstractTimeStamp):
 
     def __str__(self):
         return f"{self.pk}"
+
 
 class DealsOfTheDay(AbstractTimeStamp):
     CHOICES = [
@@ -78,6 +77,7 @@ class FAQ(AbstractTimeStamp):
 
     def __str__(self):
         return f"{self.pk}"
+
 
 class ContactUs(AbstractTimeStamp):
     name = models.CharField(max_length=255, null=True, blank=True)

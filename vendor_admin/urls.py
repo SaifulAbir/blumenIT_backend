@@ -1,5 +1,4 @@
 from django.urls import path
-from django.views.decorators.csrf import csrf_exempt
 from .views import VendorLogin, VendorRequestView, ForgotPassword, DashboardView
 from vendor_admin.forms import UserLoginForm
 from django.contrib.auth.views import LogoutView

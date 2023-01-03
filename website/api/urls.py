@@ -3,6 +3,4 @@ from .views import *
 
 urlpatterns = [
     path('header/', HeaderAPIView.as_view()),
-
-    # path('recent-view/', RecentAPIView.as_view()),
 ]

@@ -1,16 +1,9 @@
-from email.policy import default
-from hashlib import blake2b
-from itertools import product
-from statistics import mode
 from django.db import models
-from pyparsing import null_debug_action
 from ecommerce.models import AbstractTimeStamp
-from vendor.models import Vendor, Seller
+from vendor.models import Seller
 from .utils import unique_slug_generator
 from django.db.models.signals import pre_save
-from user.models import User, CustomerProfile
-import string
-import random
+from user.models import User
 from django.utils import timezone
 
 from django.db.models import Avg
@@ -173,6 +166,7 @@ class DiscountTypes(AbstractTimeStamp):
     def __str__(self):
         return self.title
 
+
 class ProductVideoProvider(AbstractTimeStamp):
     title = models.CharField(max_length=800, default='', help_text="name")
     is_active = models.BooleanField(null=False, blank=False, default=True)
@@ -184,6 +178,7 @@ class ProductVideoProvider(AbstractTimeStamp):
 
     def __str__(self):
         return self.title
+
 
 class VatType(AbstractTimeStamp):
     title = models.CharField(max_length=800, default='', help_text="name")
@@ -209,6 +204,7 @@ class ShippingClass(AbstractTimeStamp):
     def __str__(self):
         return self.title
 
+
 class ProductCondition(AbstractTimeStamp):
     title = models.CharField(max_length=800, default='', help_text="name")
     class Meta:
@@ -218,6 +214,7 @@ class ProductCondition(AbstractTimeStamp):
 
     def __str__(self):
         return self.title
+
 
 class Product(AbstractTimeStamp):
     PRODUCT_STATUSES = [
@@ -290,7 +287,6 @@ class Product(AbstractTimeStamp):
     warranty = models.CharField(max_length=100, default='', null=True, blank=True)
     total_average_rating_number = models.FloatField(null=True, blank=True, default=0.0)
 
-
     class Meta:
         verbose_name = 'Product'
         verbose_name_plural = 'Products'
@@ -310,6 +306,7 @@ def pre_save_product(sender, instance, *args, **kwargs):
         instance.slug = unique_slug_generator(instance)
 
 pre_save.connect(pre_save_product, sender=Product)
+
 
 class SpecificationTitle(AbstractTimeStamp):
     title = models.CharField(max_length=800, default='', help_text="name")
@@ -337,8 +334,8 @@ class Specification(AbstractTimeStamp):
         db_table = 'specification'
 
     def __str__(self):
-        # return 'Product: ' + self.product.title
         return 'Product: ' + self.product.title + ' - title: ' + self.title.title
+
 
 class SpecificationValue(AbstractTimeStamp):
     specification = models.ForeignKey(
@@ -357,6 +354,7 @@ class SpecificationValue(AbstractTimeStamp):
         # return self.key
         return 'Product: ' + self.specification.product.title + '-specification title: ' + self.specification.title.title + '-key: ' + self.key
 
+
 class ProductAttributes(AbstractTimeStamp):
     attribute = models.ForeignKey(
         Attribute, related_name='product_attributes_attribute', blank=True, null=True, on_delete=models.PROTECT)
@@ -371,6 +369,7 @@ class ProductAttributes(AbstractTimeStamp):
 
     def __str__(self):
         return self.product.title + ' ' + self.attribute.title
+
 
 class ProductAttributeValues(AbstractTimeStamp):
     product_attribute = models.ForeignKey(ProductAttributes, on_delete=models.PROTECT,
@@ -389,6 +388,7 @@ class ProductAttributeValues(AbstractTimeStamp):
     def __str__(self):
         return self.product_attribute.product.title + ' ' + self.product_attribute.attribute.title + ' ' + self.value.value
 
+
 class Color(AbstractTimeStamp):
     title = models.CharField(
         max_length=255, null=False, blank=False, default="")
@@ -404,6 +404,7 @@ class Color(AbstractTimeStamp):
     def __str__(self):
         return self.title
 
+
 class ProductColor(AbstractTimeStamp):
     color = models.ForeignKey(Color, on_delete=models.CASCADE, null=True,
                             blank=True, related_name='product_color_color', default="")
@@ -418,6 +419,8 @@ class ProductColor(AbstractTimeStamp):
 
     def __str__(self):
         return self.product.title + ' ' + self.color.title
+
+
 class ProductVariation(AbstractTimeStamp):
     def validate_file_extension(value):
         import os
@@ -446,6 +449,7 @@ class ProductVariation(AbstractTimeStamp):
     def __str__(self):
         return self.product.title + '-variation: ' + self.variation
 
+
 class ProductCombinations(AbstractTimeStamp):
     product = models.ForeignKey(
         Product, on_delete=models.PROTECT, related_name='product_combinations_product')
@@ -468,6 +472,7 @@ class ProductCombinations(AbstractTimeStamp):
     def __str__(self):
         return str(self.id) + '-'+self.product.title+'-'+self.product_attribute_value
 
+
 class Tags(AbstractTimeStamp):
     title = models.CharField(
         max_length=100, null=False, blank=False, default="", unique=True)
@@ -480,6 +485,7 @@ class Tags(AbstractTimeStamp):
 
     def __str__(self):
         return self.title
+
 
 class ProductTags(AbstractTimeStamp):
     tag = models.ForeignKey(Tags, on_delete=models.CASCADE, null=True,
@@ -527,6 +533,8 @@ class ProductImages(AbstractTimeStamp):
 
     def __str__(self):
         return self.product.title
+
+
 class ProductReview(AbstractTimeStamp):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True,
                                 blank=True, related_name='product_review_product')

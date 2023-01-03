@@ -204,20 +204,6 @@ class ApplyCouponSerializer(serializers.ModelSerializer):
         fields = ['id', 'amount']
 
 
-class CartListSerializer(serializers.ModelSerializer):
-    product = serializers.SerializerMethodField()
-    subtotal = serializers.ReadOnlyField()
-
-    class Meta:
-        model = OrderItem
-        fields = [
-            'id',
-            'quantity',
-            'product',
-            'subtotal'
-        ]
-
-
 class DeliveryAddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeliveryAddress

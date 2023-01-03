@@ -1,14 +1,12 @@
 from django.db import models
 from ecommerce.models import AbstractTimeStamp
 from vendor.models import Vendor, Seller
-from .utils import unique_slug_generator_cart, unique_order_id_generator_for_order, unique_order_id_generator_for_vendor_order
+from .utils import unique_order_id_generator_for_order, unique_order_id_generator_for_vendor_order
 from django.db.models.signals import pre_save
 from user.models import CustomerProfile, User
 from django.utils.translation import gettext as _
 from product.models import Product, ProductAttributes, VariantType, ShippingClass, DiscountTypes
 from django.utils import timezone
-
-# from django_countries.fields import CountryField
 
 '''
     1. Item added to cart
@@ -144,8 +142,6 @@ class Order(AbstractTimeStamp):
     order_id = models.SlugField(null=False, blank=False, allow_unicode=True)
     user = models.ForeignKey(User, on_delete=models.PROTECT,
                              related_name='order_user', blank=True, null=True)
-    # customer_profile = models.ForeignKey(
-    #     CustomerProfile, on_delete=models.PROTECT, related_name='order_customer_profile', blank=True, null=True)
     product_count = models.IntegerField(blank=True, null=True)
     vendor = models.ForeignKey(
         Seller, on_delete=models.PROTECT, related_name='order_vendor', blank=True, null=True)
@@ -173,26 +169,6 @@ class Order(AbstractTimeStamp):
     delivery_agent = models.CharField(max_length=100, null=True, blank=True)
     delivery_date = models.DateTimeField(null=True, blank=True)
     comment = models.TextField(null=True, blank=True)
-    # ordered = models.BooleanField(default=True)
-    # being_delivered = models.BooleanField(default=False)
-    # received = models.BooleanField(default=False)
-    # refund_requested = models.BooleanField(default=False)
-    # refund_granted = models.BooleanField(default=False)
-    # payment = models.ForeignKey(
-    #     Payment, on_delete=models.SET_NULL, blank=True, null=True)
-    # shipping_type = models.ForeignKey(
-    #     ShippingType, on_delete=models.SET_NULL, blank=True, null=True)
-    # payment_type = models.ForeignKey(
-    #     PaymentType, on_delete=models.SET_NULL, blank=True, null=True)
-    # coupon = models.ForeignKey(
-    #     Coupon, on_delete=models.SET_NULL, blank=True, null=True)
-    # coupon_status = models.BooleanField(default=False)
-    # notes = models.TextField(null=True, blank=True, default='')
-    # total_price = models.FloatField(
-    #     max_length=255, null=False, blank=False, default=0)
-    # discounted_price = models.FloatField(
-    #     max_length=255, null=False, blank=False, default=0)
-
 
     class Meta:
         verbose_name = 'Order'
@@ -207,7 +183,6 @@ def pre_save_order(sender, instance, *args, **kwargs):
     if not instance.order_id:
         instance.order_id = 'orid-' + \
             str(unique_order_id_generator_for_order(instance))
-        # instance.order_id = 'or-' + str(unique_slug_generator_cart(instance))
 
 
 pre_save.connect(pre_save_order, sender=Order)
@@ -271,13 +246,6 @@ class OrderItem(AbstractTimeStamp):
         max_length=255, null=False, blank=False, default=0)
     total_price = models.FloatField(
         max_length=255, null=False, blank=False, default=0)
-    # is_attribute = models.BooleanField(default=False)
-    # is_varient = models.BooleanField(default=False)
-    # attribute = models.ForeignKey(
-    #     ProductAttributes, on_delete=models.CASCADE, blank=True, null=True)
-
-    # variation = models.ForeignKey(ProductVariation, on_delete=models.PROTECT,
-    #                                  related_name='order_items_variation', blank=True, null=True)
 
     @property
     def subtotal(self):
@@ -295,20 +263,7 @@ class OrderItem(AbstractTimeStamp):
     def get_total_item_price(self):
         return self.quantity * self.product.price
 
-    # TAX_AMOUNT = 19.25
-
-    # def price_ttc(self):
-    #     return self.price_ht * (1 + TAX_AMOUNT/100.0)
-
-    # def get_total_discount_item_price(self):
-    #     return self.quantity * self.product.discount_price
-
-    # def get_amount_saved(self):
-    #     return self.get_total_item_price() - self.get_total_discount_item_price()
-
     def get_final_price(self):
-        # if self.item.discount_price:
-        #     return self.get_total_discount_item_price()
         return self.get_total_item_price()
 
 

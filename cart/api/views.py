@@ -182,30 +182,12 @@ class WishlistAddRemoveAPIView(APIView):
             raise ValidationError(
                 {"msg": 'You are not an User!'})
 
-# class CartList(ListAPIView):
-#     permission_classes = (AllowAny,)
-#     serializer_class = CartListSerializer
-#     lookup_field = 'uid'
-#     lookup_url_kwarg = "uid"
-#     def get_queryset(self):
-#         uid = self.kwargs['uid']
-#         user = User.objects.get(id = uid)
-#         query = OrderItem.objects.filter(user=user,ordered=False)
-#         return query
-
 
 # class PaymentTypeCreateAPIView(CreateAPIView):
 #     serializer_class = PaymentTypeCreateSerializer
 
 #     def post(self, request, *args, **kwargs):
 #         return super(PaymentTypeCreateAPIView, self).post(request, *args, **kwargs)
-
-# class ActiveCouponlistView(ListAPIView):
-#     permission_classes = (AllowAny,)
-#     serializer_class = ActiveCouponListSerializer
-#     def get_queryset(self):
-#         queryset = Coupon.objects.filter(is_active=True)
-#         return queryset
 
 
 # urmi~~

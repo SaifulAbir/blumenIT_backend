@@ -3,7 +3,7 @@ from home.models import SliderImage, FAQ, ContactUs, HomeSingleRowData, PosterUn
     FeaturedProductsUnderPoster
 from home.serializers import SliderImagesListSerializer, product_catListSerializer,\
     ContactUsSerializer, FaqSerializer, SingleRowDataSerializer, PosterUnderSliderDataSerializer, PosterUnderPopularProductsDataSerializer, \
-        PosterUnderFeaturedProductsDataSerializer, ProductListForHomeSerializer
+        PosterUnderFeaturedProductsDataSerializer
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from datetime import date, timedelta
@@ -127,7 +127,7 @@ class CreateGetFaqAPIView(APIView):
 
 class ProductListHomeCompareAPIView(ListAPIView):
     permission_classes = (AllowAny,)
-    serializer_class = ProductListForHomeSerializer
+    serializer_class = ProductListBySerializer
 
     def get_queryset(self):
         queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')

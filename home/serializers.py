@@ -97,3 +97,14 @@ class PosterUnderFeaturedProductsDataSerializer(serializers.ModelSerializer):
                 'small_text',
                 'is_active',
                 ]
+
+
+class ProductListForHomeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = [
+            'id',
+            'title',
+            'slug',
+        ]
+

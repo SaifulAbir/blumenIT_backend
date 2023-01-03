@@ -3,7 +3,7 @@ from home.models import SliderImage, FAQ, ContactUs, HomeSingleRowData, PosterUn
     FeaturedProductsUnderPoster
 from home.serializers import SliderImagesListSerializer, product_catListSerializer,\
     ContactUsSerializer, FaqSerializer, SingleRowDataSerializer, PosterUnderSliderDataSerializer, PosterUnderPopularProductsDataSerializer, \
-        PosterUnderFeaturedProductsDataSerializer
+        PosterUnderFeaturedProductsDataSerializer, ProductListForHomeSerializer
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from datetime import date, timedelta
@@ -11,6 +11,8 @@ from django.db.models import Avg, Prefetch, Q, Count
 
 from product.models import Product, Category, Brand
 from product.serializers import ProductListBySerializer, BrandListSerializer
+from rest_framework.generics import ListAPIView
+from rest_framework.exceptions import ValidationError
 
 
 class   HomeDataAPIView(APIView):
@@ -122,3 +124,14 @@ class CreateGetFaqAPIView(APIView):
         faq_serializer = FaqSerializer(faq, many=True)
         return Response(faq_serializer.data)
 
+
+class ProductListHomeCompareAPIView(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = ProductListForHomeSerializer
+
+    def get_queryset(self):
+        queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
+        if queryset:
+            return queryset
+        else:
+            raise ValidationError({"msg": 'No Publish products available!'})

@@ -1,7 +1,8 @@
 from django.db import models
 from ecommerce.models import AbstractTimeStamp
 from user.models import User
-from .utils import unique_slug_generator_support
+from .utils import unique_slug_generator_ticket
+from django.db.models.signals import pre_save
 
 class Ticket(AbstractTimeStamp):
     TICKET_STATUSES = [
@@ -9,12 +10,9 @@ class Ticket(AbstractTimeStamp):
         ('RESOLVED', 'Resolved'),
     ]
 
-    ticket_id = models.SlugField(null=False, blank=False)
+    ticket_id = models.SlugField(null=False, allow_unicode=True, blank=True, max_length=255)
     user = models.ForeignKey(User, on_delete=models.PROTECT,related_name='ticket_creator_user', blank=True, null=True)
     ticket_subject = models.CharField(max_length=255, null=False, blank=False)
-    ticket_description = models.TextField(null=True, blank=True)
-    issue_photo = models.FileField(upload_to='ticket_photo', blank=True, null=True)
-    solution_photo = models.FileField(upload_to='ticket_photo', blank=True, null=True)
     is_active = models.BooleanField(default=True)
     status = models.CharField(
         max_length=20, choices=TICKET_STATUSES, default=TICKET_STATUSES[0][0])
@@ -25,16 +23,17 @@ class Ticket(AbstractTimeStamp):
         db_table = 'ticket'
 
     def __str__(self):
-        return self.ticket_id
+        return self.ticket_subject + ' ticket_id: '+ self.ticket_id
 
-def pre_save_support(sender, instance, *args, **kwargs):
+def pre_save_ticket(sender, instance, *args, **kwargs):
     if not instance.ticket_id:
-        instance.ticket_id = '#' + \
-            str(unique_slug_generator_support(instance))
+        instance.ticket_id = unique_slug_generator_ticket(instance)
+pre_save.connect(pre_save_ticket, sender=Ticket)
 
 class TicketConversation(AbstractTimeStamp):
     ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE, related_name='ticket_conversation_ticket', blank=True, null=True)
     conversation_text = models.TextField(null=False, blank=False)
+    conversation_photo = models.FileField(upload_to='ticket_photo', blank=True, null=True)
     replier_user = models.ForeignKey(User, on_delete=models.PROTECT,related_name='replier_user', blank=True, null=True)
     is_active = models.BooleanField(default=True)
 

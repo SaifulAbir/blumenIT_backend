@@ -1,5 +1,7 @@
 from enum import unique
 from django.template.loader import render_to_string
+
+from cart.serializers import OrderItemSerializer
 from product.serializers import ProductImageSerializer, ProductReviewSerializer
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -7,11 +9,13 @@ from rest_framework.exceptions import ValidationError
 from ecommerce.common.emails import send_email_without_delay
 from product.models import Brand, Category, Color, DiscountTypes, FlashDealInfo, FlashDealProduct, Inventory, InventoryVariation, Product, ProductAttributeValues, ProductAttributes, ProductColor, ProductCombinations, ProductCombinationsVariants, ProductImages, ProductReview, ProductTags, ProductVariation, ProductVideoProvider, ShippingClass, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units, VariantType, VatType, Attribute, FilterAttributes, ProductFilterAttributes, AttributeValues
 from user.models import User
-from cart.models import Order
+from cart.models import Order, OrderItem
+from user.serializers import CustomerProfileSerializer
 # from user.serializers import UserRegisterSerializer
 from vendor.models import VendorRequest, Vendor, StoreSettings, Seller
 from django.db.models import Avg
 from django.utils import timezone
+from support_ticket.models import Ticket, TicketConversation
 
 
 class SellerCreateSerializer(serializers.ModelSerializer):
@@ -777,7 +781,7 @@ class ProductFilterAttributesSerializer(serializers.ModelSerializer):
         model = ProductFilterAttributes
         fields = [
             'id',
-            'filter_attribute'
+            'attribute_value'
         ]
 
 
@@ -1087,15 +1091,14 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             # product_filter_attributes
             if product_filter_attributes:
                 for product_filter_attribute in product_filter_attributes:
-                    filter_attribute = product_filter_attribute['filter_attribute']
-                    if filter_attribute:
-                        product_filter_attribute_instance = ProductFilterAttributes.objects.create(filter_attribute=filter_attribute,  product=product_instance)
+                    attribute_value = product_filter_attribute['attribute_value']
+                    if attribute_value:
+                        product_filter_attribute_instance = ProductFilterAttributes.objects.create(attribute_value=attribute_value,  product=product_instance)
 
             return product_instance
         except:
             return product_instance
 # product create serializer end
-
 
 
 class VendorProductViewSerializer(serializers.ModelSerializer):
@@ -1697,9 +1700,9 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
                         product=instance).delete()
 
                 for product_filter_attribute in product_filter_attributes:
-                    filter_attribute = product_filter_attribute['filter_attribute']
-                    if filter_attribute:
-                        product_filter_attr = ProductFilterAttributes.objects.create(filter_attribute=filter_attribute, product=instance)
+                    attribute_value = product_filter_attribute['attribute_value']
+                    if attribute_value:
+                        product_filter_attr = ProductFilterAttributes.objects.create(attribute_value=attribute_value, product=instance)
             else:
                 p_f_a = ProductFilterAttributes.objects.filter(
                     product=instance).exists()
@@ -1756,7 +1759,8 @@ class ReviewListSerializer(serializers.ModelSerializer):
     customer_name = serializers.CharField(source='user.username',read_only=True)
     class Meta:
         model = ProductReview
-        fields = ['id', 'product', 'product_title', 'user', 'customer_name', 'rating_number', 'review_text', 'is_active']
+        fields = ['id', 'product', 'product_title', 'user', 'customer_name', 'rating_number', 'review_text',
+                  'is_active']
 
 
 class AttributeSerializer(serializers.ModelSerializer):
@@ -1779,24 +1783,29 @@ class AdminFilterAttributeSerializer(serializers.ModelSerializer):
     sub_sub_category_title = serializers.CharField(source='sub_sub_category.title',read_only=True)
     class Meta:
         model = FilterAttributes
-        fields = ['id', 'attribute', 'attribute_title', 'category', 'category_title', 'sub_category', 'sub_category_title', 'sub_sub_category', 'sub_sub_category_title', 'is_active']
+        fields = ['id', 'attribute', 'attribute_title', 'category', 'category_title', 'sub_category',
+                  'sub_category_title', 'sub_sub_category', 'sub_sub_category_title', 'is_active']
 
 
 class AdminOrderListSerializer(serializers.ModelSerializer):
+    user = CustomerProfileSerializer(many=False, read_only=True)
     class Meta:
         model = Order
-        fields = ['id', 'user', 'order_id', 'product_count', 'order_date', 'order_status', 'total_price']
+        fields = ['id', 'order_id', 'product_count', 'order_date', 'order_status', 'total_price', 'created_at',
+                  'payment_status', 'total_price', 'user']
 
 
 class AdminOrderViewSerializer(serializers.ModelSerializer):
+    order_item_order = OrderItemSerializer(many=True, read_only=True)
+    user = CustomerProfileSerializer(many=False, read_only=True)
     class Meta:
         model = Order
         fields = ['user', 'order_id', 'product_count', 'order_date', 'order_status', 'total_price',
-                  'payment_type', 'shipping_cost', 'coupon_discount_amount']
+                  'payment_type', 'shipping_cost', 'coupon_discount_amount', 'order_item_order', 'user']
 
 
 class AdminOrderUpdateSerializer(serializers.ModelSerializer):
-
+    order_id = serializers.CharField(read_only=True)
     class Meta:
         model = Order
         fields = ['order_id', 'order_status', 'payment_status']
@@ -1806,3 +1815,71 @@ class AdminCustomerListSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'name', 'email', 'phone', 'is_active']
+
+
+class AdminTicketListSerializer(serializers.ModelSerializer):
+    created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
+    user_name = serializers.CharField(source='ticket.user.username',read_only=True)
+    last_reply = serializers.SerializerMethodField()
+    class Meta:
+        model = Ticket
+        fields = ['id', 'ticket_id', 'created_at', 'ticket_subject', 'user_name', 'status', 'last_reply']
+
+    def get_last_reply(self, obj):
+        selected_last_ticket_conversation = TicketConversation.objects.filter(
+            ticket=obj).order_by('-created_at').latest('id').created_at
+        data = selected_last_ticket_conversation.strftime("%Y-%m-%d, %H:%M:%S")
+        return data
+
+
+class AdminTicketConversationSerializer(serializers.ModelSerializer):
+    created_at = serializers.DateTimeField(read_only=True)
+    user_name = serializers.CharField(source='ticket.user.username',read_only=True)
+    class Meta:
+        model = TicketConversation
+        fields = ['id', 'conversation_text', 'conversation_photo', 'created_at', 'user_name' ]
+
+
+class AdminTicketDataSerializer(serializers.ModelSerializer):
+    user_name = serializers.CharField(source='user.username',read_only=True)
+    ticket_conversation = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Ticket
+        fields = ['id', 'ticket_id', 'user_name', 'created_at', 'status', 'ticket_subject', 'ticket_conversation']
+
+    def get_ticket_conversation(self, obj):
+        selected_ticket_conversation = TicketConversation.objects.filter(
+            ticket=obj, is_active=True).order_by('-created_at')
+        return AdminTicketConversationSerializer(selected_ticket_conversation, many=True).data
+
+
+class TicketStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ticket
+        fields = ['id', 'status']
+
+
+class CategoryWiseProductSaleSerializer(serializers.ModelSerializer):
+    sale_count = serializers.SerializerMethodField()
+    class Meta:
+        model = Category
+        fields = ['id', 'title', 'sale_count']
+
+    def get_sale_count(self, obj):
+        sell_count = Order.objects.filter(order_item_order__product__category = obj).count()
+        return sell_count
+
+
+class CategoryWiseProductStockSerializer(serializers.ModelSerializer):
+    stock_count = serializers.SerializerMethodField()
+    class Meta:
+        model = Category
+        fields = ['id', 'title', 'stock_count']
+
+    def get_stock_count(self, obj):
+        products = Product.objects.filter(category = obj)
+        total_quantity = 0
+        for product in products:
+            total_quantity += product.total_quantity
+        return total_quantity

@@ -4,10 +4,11 @@ from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework import status
 from product.pagination import ProductCustomPagination
-from product.serializers import DiscountTypeSerializer, ProductTagsSerializer, TagsSerializer, VariantTypeSerializer
+from product.serializers import DiscountTypeSerializer, ProductTagsSerializer, TagsSerializer, VariantTypeSerializer, ProductListBySerializer
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView, RetrieveAPIView, DestroyAPIView
+from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductReview, ProductTags, SubCategory, SubSubCategory, Tags, Units, VariantType, ProductVideoProvider, VatType, FilterAttributes, Attribute, AttributeValues
+from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductReview, ProductTags, SubCategory, SubSubCategory, Tags, Units, VariantType, ProductVideoProvider, VatType, FilterAttributes, Attribute, AttributeValues, Inventory
 from user.models import CustomerProfile, User
 from vendor.models import VendorRequest, Vendor, Seller
 from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategorySerializer,\
@@ -20,14 +21,17 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     SellerCreateSerializer, FlashDealCreateSerializer, UpdateSubCategorySerializer, FilteringAttributesSerializer, AdminProfileSerializer, \
     ReviewListSerializer, AttributeSerializer, AttributeValuesSerializer, AdminFilterAttributeSerializer, \
     SellerCreateSerializer, FlashDealCreateSerializer, UpdateSubCategorySerializer, FilteringAttributesSerializer, \
-    AdminProfileSerializer, AdminOrderViewSerializer, AdminOrderListSerializer, AdminOrderUpdateSerializer, AdminCustomerListSerializer
-from cart.models import Order
+    AdminProfileSerializer, AdminOrderViewSerializer, AdminOrderListSerializer, AdminOrderUpdateSerializer, AdminCustomerListSerializer, \
+    AdminTicketListSerializer, AdminTicketDataSerializer, TicketStatusSerializer, CategoryWiseProductSaleSerializer, \
+    CategoryWiseProductStockSerializer
+from cart.models import Order, OrderItem
 from cart.serializers import OrderSerializer
 from user.models import User
 from cart.models import Coupon
 from rest_framework.exceptions import ValidationError
 from django.db.models import Avg
 from vendor.pagination import OrderCustomPagination
+from support_ticket.models import Ticket
 
 
 class AdminSellerCreateAPIView(CreateAPIView):
@@ -95,6 +99,9 @@ class AdminSellerUpdateAPIView(RetrieveUpdateAPIView):
             raise ValidationError(
                 {"msg": 'You can not update seller, because you are not an Admin!'})
 
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
 
 class AdminSellerDeleteAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -159,6 +166,7 @@ class AdminFilterAttributesAPI(ListAPIView):
         id = self.kwargs['id']
         type = self.kwargs['type']
         if self.request.user.is_superuser == True:
+            queryset = FilterAttributes.objects.all().order_by('-created_at')
             if id and type:
                 if type == 'category':
                     queryset = FilterAttributes.objects.filter(Q(category__id=id) & Q(is_active=True)).order_by('-created_at')
@@ -832,7 +840,7 @@ class AdminUpdateFilterAttributeAPIView(RetrieveUpdateAPIView):
 
 
 class AdminOrderList(ListAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     serializer_class = AdminOrderListSerializer
     pagination_class = OrderCustomPagination
 
@@ -841,7 +849,7 @@ class AdminOrderList(ListAPIView):
             request = self.request
             type = request.GET.get('type')
 
-            queryset = Order.objects.all().order_by('-created_at')
+            queryset = Order.objects.filter().order_by('-created_at')
 
             if type == 'seller':
                 queryset = queryset.filter(user=Seller)
@@ -860,13 +868,13 @@ class AdminOrderList(ListAPIView):
 class AdminOrderViewAPI(RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AdminOrderViewSerializer
-    lookup_field = 'o_id'
-    lookup_url_kwarg = "o_id"
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
 
     def get_object(self):
-        id = self.kwargs['o_id']
+        id = self.kwargs['id']
         if self.request.user.is_superuser == True:
-            query = Order.objects.get(order_id=id)
+            query = Order.objects.get(id=id)
             if query:
                 return query
             else:
@@ -915,26 +923,16 @@ class OrderListSearchAPI(ListAPIView):
 class AdminOrderUpdateAPI(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AdminOrderUpdateSerializer
-    lookup_field = 'o_id'
-    lookup_url_kwarg = "o_id"
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
 
 
     def get_queryset(self):
-        id = self.kwargs['o_id']
+        id = self.kwargs['id']
         if self.request.user.is_superuser == True:
-            request = self.request
-
-            order_status = request.GET.get('order_status')
-            payment_status = request.GET.get('payment_status')
-            queryset = Order.objects.filter(order_id=id)
-            order_obj_exist = Order.objects.filter(order_id=id).exists()
+            queryset = Order.objects.filter(id=id)
+            order_obj_exist = Order.objects.filter(id=id).exists()
             if order_obj_exist:
-                if order_status:
-                    order_obj = queryset.objects.filter(order_id=id)
-                    order_obj.update(order_status=order_status)
-                if payment_status:
-                    order_obj = queryset.objects.filter(order_id=id)
-                    order_obj.update(payment_status=payment_status)
                 return queryset
             else:
                 raise ValidationError(
@@ -943,6 +941,53 @@ class AdminOrderUpdateAPI(RetrieveUpdateAPIView):
             raise ValidationError(
                 {"msg": 'You can not show order, because you are not an Admin!'})
 
+
+    def put(self, request, *args, **kwargs):
+        try:
+            try:
+                order_status = request.data["order_status"]
+            except:
+                order_status = None
+            try:
+                payment_status = request.data["payment_status"]
+            except:
+                payment_status = None
+
+            order_id = self.kwargs['id']
+
+            try:
+                order_obj = Order.objects.filter(id=order_id)
+            except:
+                order_obj = None
+
+            if order_obj:
+                if order_status:
+                    order_obj.update(order_status=order_status)
+                    # update inventory
+                    if order_status == 'CONFIRMED':
+                        order_obj_get = Order.objects.get(id=order_id)
+                        order_items_obj_exist = OrderItem.objects.filter(order=order_obj_get.id).exists()
+                        if order_items_obj_exist:
+                            order_items = OrderItem.objects.filter(order=order_obj_get.id)
+                            for order_item in order_items:
+                                product = order_item.product
+                                quantity = order_item.quantity
+                                product_filter_obj = Product.objects.filter(id=product.id)
+                                inventory_obj = Inventory.objects.filter(product=product).latest('created_at')
+                                new_update_quantity = int(inventory_obj.current_quantity) - int(quantity)
+                                product_filter_obj.update(quantity = new_update_quantity)
+                                inventory_obj.current_quantity = new_update_quantity
+                                inventory_obj.save()
+
+                if payment_status:
+                    order_obj.update(payment_status=payment_status)
+
+                # order_obj.save()
+                return Response(data={"order_id": order_obj[0].id}, status=status.HTTP_202_ACCEPTED)
+            else:
+                raise ValidationError({"msg": 'Order update failed!'})
+        except KeyError:
+            raise ValidationError({"msg": 'Order update failed. contact with developer!'})
 
 class AdminCustomerListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -956,3 +1001,145 @@ class AdminCustomerListAPIView(ListAPIView):
         else:
             raise ValidationError({"msg": 'You can not see customer list data, because you are not an Admin!'})
 
+
+class AdminTicketListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    pagination_class = ProductCustomPagination
+    serializer_class = AdminTicketListSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = Ticket.objects.all().order_by('-created_at')
+            return queryset
+        else:
+            raise ValidationError({"msg": 'You can not see ticket list data, because you are not an Admin!'})
+
+
+class AdminTicketDetailsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        if self.request.user.is_superuser == True:
+            ticket_id = self.kwargs['id']
+            ticket_details_data = Ticket.objects.filter(id =ticket_id)
+            serializer = AdminTicketDataSerializer(ticket_details_data, many=True)
+            return Response(serializer.data)
+        else:
+            raise ValidationError({"msg": 'You can not see ticket details data, because you are not an Admin!'})
+
+
+class AdminUpdateTicketStatusAPIView(RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = TicketStatusSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            ticket_id = self.kwargs['id']
+            query = Ticket.objects.filter(id =ticket_id)
+            if query:
+                return query
+            else:
+                raise ValidationError(
+                    {"msg": 'Ticket does not found!'})
+        else:
+            raise ValidationError({"msg": 'You can not update ticket status, because you are not an Admin!'})
+
+
+class AdminDashboardDataAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if self.request.user.is_superuser == True:
+            # total customer
+            if User.objects.filter(is_customer=True).exists():
+                customer_count = User.objects.filter(is_customer=True).count()
+            else:
+                customer_count = 0
+
+            # total order
+            if Order.objects.all().exists():
+                order_count = Order.objects.all().count()
+            else:
+                order_count = 0
+
+            # total category
+            if Category.objects.all().exists():
+                category_count = Category.objects.all().count()
+            else:
+                category_count = 0
+
+            # total Brand
+            if Brand.objects.all().exists():
+                brand_count = Brand.objects.all().count()
+            else:
+                brand_count = 0
+
+            # total published Product
+            if Product.objects.filter(status = 'PUBLISH').exists():
+                published_product_count = Product.objects.filter(status = 'PUBLISH').count()
+            else:
+                published_product_count = 0
+
+            # total seller Product
+            if Product.objects.filter(~Q(in_house_product = True)).exists():
+                seller_product_count = Product.objects.filter(~Q(in_house_product = True)).count()
+            else:
+                seller_product_count = 0
+
+             # total admin Product
+            if Product.objects.filter(in_house_product = True).exists():
+                admin_product_count = Product.objects.filter(in_house_product = True).count()
+            else:
+                admin_product_count = 0
+
+            # total sellers
+            if Seller.objects.all().exists():
+                seller_count = Seller.objects.all().count()
+            else:
+                seller_count = 0
+
+            # total approved sellers
+            if Seller.objects.filter(status='APPROVED').exists():
+                approved_seller_count = Seller.objects.filter(status='APPROVED').count()
+            else:
+                approved_seller_count = 0
+
+            # total pending sellers
+            if Seller.objects.filter(status='PENDING').exists():
+                pending_seller_count = Seller.objects.filter(status='PENDING').count()
+            else:
+                pending_seller_count = 0
+
+            # Category wise product sale
+            categories = Category.objects.all()
+            category_wise_product_sale = CategoryWiseProductSaleSerializer(categories, many=True, context={"request": request})
+
+            # Category wise product stock
+            category_wise_product_stock = CategoryWiseProductStockSerializer(categories, many=True, context={"request": request})
+
+            # Top products
+            if Product.objects.filter(status='PUBLISH').exists():
+                products = Product.objects.filter(status='PUBLISH').order_by('-sell_count')
+                products_data = ProductListBySerializer(products, many=True, context={"request": request})
+
+
+            return Response({
+                "customer_count": customer_count,
+                "order_count": order_count,
+                "category_count": category_count,
+                "brand_count": brand_count,
+                "published_product_count": published_product_count,
+                "seller_product_count": seller_product_count,
+                "admin_product_count": admin_product_count,
+                "seller_count": seller_count,
+                "approved_seller_count": approved_seller_count,
+                "pending_seller_count": pending_seller_count,
+                "category_wise_product_sale": category_wise_product_sale.data,
+                "category_wise_product_stock": category_wise_product_stock.data,
+                "top_products": products_data.data
+            })
+
+        else:
+            raise ValidationError({"msg": 'You can not see dashboard data, because you are not an Admin!'})

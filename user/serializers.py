@@ -4,6 +4,8 @@ from user import models as user_models
 from user.models import CustomerProfile, Subscription, User, OTPModel
 from cart.models import Order, OrderItem, DeliveryAddress
 from product.models import Product
+from cart.models import Wishlist
+from product.serializers import ProductListBySerializer
 
 
 class SetPasswordSerializer(serializers.ModelSerializer):
@@ -97,22 +99,18 @@ class CustomerOrderListSerializer(serializers.ModelSerializer):
 
 class CustomerOrderItemsSerializer(serializers.ModelSerializer):
     product_name = serializers.SerializerMethodField()
-    product_thumb = serializers.SerializerMethodField()
+    product_thumb = serializers.ImageField(source='product.thumbnail',read_only=True)
     product_price = serializers.SerializerMethodField()
+    product_slug = serializers.CharField(source='product.slug',read_only=True)
 
     class Meta:
         model = OrderItem
-        fields = ['id', 'product_name', 'product_thumb', 'quantity', 'product_price']
+        fields = ['id', 'product_name', 'product_thumb', 'product_slug', 'quantity', 'product_price']
 
     def get_product_name(self, obj):
         product_name = Product.objects.filter(id=obj.product.id)[
             0].title
         return product_name
-
-    def get_product_thumb(self, obj):
-        product_thumb = Product.objects.filter(id=obj.product.id)[
-            0].thumbnail.url
-        return product_thumb
 
     def get_product_price(self, obj):
         product_price = Product.objects.filter(id=obj.product.id)[
@@ -139,7 +137,7 @@ class CustomerOrderDetailsSerializer(serializers.ModelSerializer):
 
     def get_order_items(self, obj):
         queryset = OrderItem.objects.filter(order=obj)
-        serializer = CustomerOrderItemsSerializer(instance=queryset, many=True)
+        serializer = CustomerOrderItemsSerializer(instance=queryset, many=True, context={'request': self.context['request']})
         return serializer.data
 
     def get_delivery_address(self, obj):
@@ -188,15 +186,15 @@ class CustomerProfileOtherDataSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'birth_date',
-            'avatar'
+            # 'avatar'
         ]
 
 
 class CustomerProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(required=False)
     email = serializers.EmailField(required=False)
-    avatar = serializers.SerializerMethodField()
-    birth_date = serializers.SerializerMethodField()
+    avatar = serializers.SerializerMethodField(read_only=True)
+    birth_date = serializers.SerializerMethodField(read_only=True)
     others_info = CustomerProfileOtherDataSerializer(many=True, required=False)
     class Meta:
         model = User
@@ -234,8 +232,9 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
 
                 for others_in in others_info:
                     birth_date = others_in['birth_date']
-                    avatar = others_in['avatar']
-                    others_in_instance = CustomerProfile.objects.create(user=instance, birth_date=birth_date, avatar=avatar)
+                    # avatar = others_in['avatar']
+                    CustomerProfile.objects.create(user=instance, birth_date=birth_date)
+                    # CustomerProfile.objects.create(user=instance, birth_date=birth_date, avatar=avatar)
             else:
                 c_p = CustomerProfile.objects.filter(
                     user=instance).exists()
@@ -264,7 +263,16 @@ class CustomerAddressSerializer(serializers.ModelSerializer):
         return delivery_address_instance
 
 
-# class CustomerAddressUpdateSerializer(serializers.ModelSerializer):
+class WishlistDataSerializer(serializers.ModelSerializer):
+    product_data = serializers.SerializerMethodField('get_product')
+    class Meta:
+        model = Wishlist
+        fields = ['id', 'user', 'product_data']
+
+    def get_product(self, obj):
+        queryset = Product.objects.filter(id=obj.product.id)
+        serializer = ProductListBySerializer(instance=queryset, many=True)
+        return serializer.data
 
 
 

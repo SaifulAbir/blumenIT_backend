@@ -69,18 +69,13 @@ class ProductCombinationForCheckoutSerializer(serializers.ModelSerializer):
 class CheckoutDetailsOrderItemSerializer(serializers.ModelSerializer):
     product_title = serializers.CharField(source='product.title',read_only=True)
     product_sku = serializers.CharField(source='product.sku',read_only=True)
-    product_thumb = serializers.SerializerMethodField()
+    product_thumb = serializers.ImageField(source='product.thumbnail',read_only=True)
     product_price = serializers.SerializerMethodField()
     product_specification = serializers.SerializerMethodField('get_product_specification')
 
     class Meta:
         model = OrderItem
         fields = ['id', 'product_title', 'product_thumb', 'quantity', 'product_price', 'product_sku', 'product_specification']
-
-    def get_product_thumb(self, obj):
-        product_thumb = Product.objects.filter(id=obj.product.id)[
-            0].thumbnail.url
-        return product_thumb
 
     def get_product_price(self, obj):
         product_price = Product.objects.filter(id=obj.product.id)[
@@ -111,12 +106,12 @@ class CheckoutDetailsSerializer(serializers.ModelSerializer):
     total_price = serializers.SerializerMethodField('get_total_price')
     class Meta:
         model = Order
-        fields = ['user', 'user_email', 'user_phone', 'order_id', 'order_date', 'delivery_date', 'order_status', 'order_items', 'delivery_address', 'payment_type',
+        fields = ['id', 'user', 'user_email', 'user_phone', 'order_id', 'order_date', 'delivery_date', 'order_status', 'order_items', 'delivery_address', 'payment_type',
         'payment_title', 'product_price', 'coupon_discount_amount', 'sub_total', 'shipping_cost', 'total_price']
 
     def get_order_items(self, obj):
-        queryset = OrderItem.objects.filter(order=obj)
-        serializer = CheckoutDetailsOrderItemSerializer(instance=queryset, many=True)
+        queryset = OrderItem.objects.filter(order=obj) 
+        serializer = CheckoutDetailsOrderItemSerializer(instance=queryset, many=True, context={'request': self.context['request']})
         return serializer.data
 
     def get_delivery_address(self, obj):
@@ -175,8 +170,12 @@ class CheckoutDetailsSerializer(serializers.ModelSerializer):
 
 
 class WishlistSerializer(serializers.Serializer):
-    product = serializers.PrimaryKeyRelatedField(
-        queryset=Product.objects.all(), many=False, write_only=True)
+    # product = serializers.PrimaryKeyRelatedField(
+    #     queryset=Product.objects.all(), many=False, write_only=True)
+
+    class Meta:
+        model = Wishlist
+        fields = ['id', 'user', 'product', 'is_active']
 
 
 class PaymentTypesListSerializer(serializers.ModelSerializer):
@@ -591,7 +590,8 @@ class CheckoutSerializer(serializers.ModelSerializer):
                 product_obj = Product.objects.get(id=product.id)
 
                 # update inventory
-                if payment_status == 'PAID':
+                if order_instance.payment_status == 'PAID':
+                # if order_instance.order_status == 'CONFIRMED':
                     product_filter_obj = Product.objects.filter(id=product.id)
                     inventory_obj = Inventory.objects.filter(product=product).latest('created_at')
                     new_update_quantity = int(inventory_obj.current_quantity) - int(quantity)

@@ -92,3 +92,62 @@ class ContactUs(AbstractTimeStamp):
 
     def __str__(self):
         return f"{self.pk}"
+
+
+class HomeSingleRowData(AbstractTimeStamp):
+    phone = models.CharField(max_length=20, null=True, blank=True)
+    whats_app_number = models.CharField(max_length=20, null=True, blank=True)
+    email = models.EmailField(null=True, blank=True)
+    bottom_banner = models.ImageField(upload_to='HomeImage', default="")
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = 'HomeSingleRowData'
+        verbose_name_plural = 'HomeSingleRowDatas'
+        db_table = 'home_single_row_data'
+
+    def __str__(self):
+        return f"{self.pk}"
+
+
+class PosterUnderSlider(AbstractTimeStamp):
+    image = models.ImageField(upload_to='HomeImage', default="")
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'PosterUnderSlider'
+        verbose_name_plural = 'PosterUnderSliders'
+        db_table = 'poster_under_slider'
+
+    def __str__(self):
+        return f"{self.pk}"
+
+
+class PopularProductsUnderPoster(AbstractTimeStamp):
+    image = models.ImageField(upload_to='HomeImage', default="")
+    bold_text = models.TextField(null=True, blank=True)
+    small_text = models.TextField(null=True, blank=True)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'PopularProductsUnderPoster'
+        verbose_name_plural = 'PopularProductsUnderPosters'
+        db_table = 'popular_products_under_poster'
+
+    def __str__(self):
+        return f"{self.pk}"
+
+
+class FeaturedProductsUnderPoster(AbstractTimeStamp):
+    image = models.ImageField(upload_to='HomeImage', default="")
+    bold_text = models.TextField(null=True, blank=True)
+    small_text = models.TextField(null=True, blank=True)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'FeaturedProductsUnderPoster'
+        verbose_name_plural = 'FeaturedProductsUnderPosters'
+        db_table = 'featured_products_under_poster'
+
+    def __str__(self):
+        return f"{self.pk}"

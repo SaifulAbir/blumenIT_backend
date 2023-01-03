@@ -6,7 +6,7 @@ from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateAP
 from rest_framework.views import APIView
 from home.models import ProductView
 from product.serializers import ProductDetailsSerializer, ProductReviewCreateSerializer, BrandSerializer,\
-StoreCategoryAPIViewListSerializer, PcBuilderDataListSerializer, ProductListBySerializer, FilterAttributeSerializer, PcBuilderCategoryListSerializer, PcBuilderSubCategoryListSerializer, PcBuilderSubSubCategoryListSerializer
+StoreCategoryAPIViewListSerializer, PcBuilderDataListSerializer, ProductListBySerializer, FilterAttributeSerializer, PcBuilderCategoryListSerializer, PcBuilderSubCategoryListSerializer, PcBuilderSubSubCategoryListSerializer, BrandListSerializer
 
 from product.models import Category, SubCategory, SubSubCategory, Product, Brand, AttributeValues
 from product.models import FilterAttributes, ProductFilterAttributes
@@ -135,16 +135,17 @@ class ProductListByCategoryAPI(ListAPIView):
             attr_value_ids_list = attr_value_ids.split(",")
             for attr_value_id in attr_value_ids_list:
                 attr_value_id = int(attr_value_id)
-                attr_id = AttributeValues.objects.get(id = attr_value_id).attribute
-                f_att_id = FilterAttributes.objects.get(attribute = attr_id)
-                p_f_att_id = ProductFilterAttributes.objects.get(filter_attribute = f_att_id)
-                queryset = queryset.filter(id=p_f_att_id.product.id).order_by('-created_at')
+                queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id=attr_value_id)).order_by('-created_at')
+
+                # attr_id = AttributeValues.objects.get(id = attr_value_id).attribute
+                # f_att_id = FilterAttributes.objects.get(attribute = attr_id)
+                # p_f_att_id = ProductFilterAttributes.objects.get(filter_attribute = f_att_id)
+                # queryset = queryset.filter(id=p_f_att_id.product.id).order_by('-created_at')
 
                 # attr_value_id = int(attr_value_id)
                 # attr_id = AttributeValues.objects.get(id = attr_value_id).attribute
                 # cat_id = FilterAttributes.objects.get(attribute = attr_id).category.id
                 # queryset = queryset.filter(Q(category__id=cat_id)).order_by('-created_at')
-
 
         return queryset
 
@@ -153,8 +154,8 @@ class ProductListByCategoryPopularProductsAPI(ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = ProductListBySerializer
     pagination_class = ProductCustomPagination
-    lookup_field = 'cid'
-    lookup_url_kwarg = "cid"
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
 
     def get_queryset(self):
         # work with dynamic pagination page_size
@@ -164,12 +165,24 @@ class ProductListByCategoryPopularProductsAPI(ListAPIView):
             pagination = 10
         self.pagination_class.page_size = pagination
 
+        id = self.kwargs['id']
+        type = self.kwargs['type']
 
-        cid = self.kwargs['cid']
-        if cid:
-            queryset = Product.objects.filter(category=cid, status='PUBLISH').annotate(count=Count('product_review_product')).order_by('-count')
+        queryset = Product.objects.filter(status='PUBLISH').annotate(count=Count('product_review_product')).order_by('-count')
+
+        if id and type:
+            if type == 'category':
+                queryset = queryset.filter(Q(category=id))
+
+            if type == 'sub_category':
+                queryset = queryset.filter(Q(sub_category=id))
+
+            if type == 'sub_sub_category':
+                queryset = queryset.filter(Q(sub_sub_category=id))
+
         else:
-            queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
+            queryset = Product.objects.filter(status='PUBLISH').annotate(count=Count('product_review_product')).order_by('-count')
+
 
 
         return queryset
@@ -240,10 +253,12 @@ class ProductListBySubCategoryAPI(ListAPIView):
             attr_value_ids_list = attr_value_ids.split(",")
             for attr_value_id in attr_value_ids_list:
                 attr_value_id = int(attr_value_id)
-                attr_id = AttributeValues.objects.get(id = attr_value_id).attribute
-                f_att_id = FilterAttributes.objects.get(attribute = attr_id)
-                p_f_att_id = ProductFilterAttributes.objects.get(filter_attribute = f_att_id)
-                queryset = queryset.filter(id=p_f_att_id.product.id).order_by('-created_at')
+                queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id=attr_value_id)).order_by('-created_at')
+
+                # attr_id = AttributeValues.objects.get(id = attr_value_id).attribute
+                # f_att_id = FilterAttributes.objects.get(attribute = attr_id)
+                # p_f_att_id = ProductFilterAttributes.objects.get(filter_attribute = f_att_id)
+                # queryset = queryset.filter(id=p_f_att_id.product.id).order_by('-created_at')
 
         return queryset
 
@@ -291,10 +306,7 @@ class ProductListBySubSubCategoryAPI(ListAPIView):
             attr_value_ids_list = attr_value_ids.split(",")
             for attr_value_id in attr_value_ids_list:
                 attr_value_id = int(attr_value_id)
-                attr_id = AttributeValues.objects.get(id = attr_value_id).attribute
-                f_att_id = FilterAttributes.objects.get(attribute = attr_id)
-                p_f_att_id = ProductFilterAttributes.objects.get(filter_attribute = f_att_id)
-                queryset = queryset.filter(id=p_f_att_id.product.id).order_by('-created_at')
+                queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id=attr_value_id)).order_by('-created_at')
 
         return queryset
 
@@ -394,10 +406,7 @@ class PcBuilderChooseAPIView(ListAPIView):
             attr_value_ids_list = attr_value_ids.split(",")
             for attr_value_id in attr_value_ids_list:
                 attr_value_id = int(attr_value_id)
-                attr_id = AttributeValues.objects.get(id = attr_value_id).attribute
-                cat_id = FilterAttributes.objects.get(attribute = attr_id).category.id
-                queryset = queryset.filter(Q(category__id=cat_id)).order_by('-created_at')
-
+                queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id=attr_value_id)).order_by('-created_at')
         return queryset
 
 
@@ -437,12 +446,96 @@ class OnlyTitleAPIView(APIView):
         if id and type:
             title = ''
             if type == 'category':
-                title = Category.objects.get(id=id).title
+                if Category.objects.filter(id=id).exists():
+                    title = Category.objects.get(id=id).title
+                else:
+                    title = ''
             if type == 'sub_category':
-                title = SubCategory.objects.get(id=id).title
+                if SubCategory.objects.filter(id=id).exists():
+                    title = SubCategory.objects.get(id=id).title
+                else:
+                    title = ''
             if type == 'sub_sub_category':
-                title = SubSubCategory.objects.get(id=id).title
-
-            return Response({"title": title}, status=status.HTTP_200_OK)
+                if SubSubCategory.objects.filter(id=id).exists():
+                    title = SubSubCategory.objects.get(id=id).title
+                else:
+                    title = ''
+            return Response({"id": id, "title": title, "type": type }, status=status.HTTP_200_OK)
         else:
             raise ValidationError({"msg":'id or type missing!'})
+
+
+class GamingCategoryListAPIView(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = StoreCategoryAPIViewListSerializer
+
+    def get_queryset(self):
+        queryset = Category.objects.filter(title__icontains='gaming', is_active=True).order_by('ordering_number')
+        return queryset
+
+
+class ProductListByCategoryGamingPopularProductsAPI(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = ProductListBySerializer
+    pagination_class = ProductCustomPagination
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        # work with dynamic pagination page_size
+        try:
+            pagination = self.kwargs['pagination']
+        except:
+            pagination = 10
+        self.pagination_class.page_size = pagination
+
+
+        id = self.kwargs['id']
+        type = self.kwargs['type']
+
+        queryset = Product.objects.filter(category__title__icontains='gaming', status='PUBLISH').annotate(count=Count('product_review_product')).order_by('-count')
+
+        if id and type:
+            if type == 'category':
+                queryset = queryset.filter(Q(category=id))
+
+            if type == 'sub_category':
+                queryset = queryset.filter(Q(sub_category=id))
+
+            if type == 'sub_sub_category':
+                queryset = queryset.filter(Q(sub_sub_category=id))
+
+        else:
+            queryset = Product.objects.filter(category__title__icontains='gaming', status='PUBLISH').annotate(count=Count('product_review_product')).order_by('-count')
+
+        return queryset
+
+
+class GamingFeaturedProductListAPI(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = ProductListBySerializer
+    pagination_class = ProductCustomPagination
+
+    def get_queryset(self):
+        # work with dynamic pagination page_size
+        try:
+            pagination = self.kwargs['pagination']
+        except:
+            pagination = 10
+        self.pagination_class.page_size = pagination
+
+        queryset = Product.objects.filter(category__title__icontains='gaming', is_featured=True, status='PUBLISH').order_by('-created_at')
+
+        return queryset
+
+
+class BrandListAPIView(ListAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = BrandListSerializer
+
+    def get_queryset(self):
+        queryset = Brand.objects.filter(is_active=True)
+        if queryset:
+            return queryset
+        else:
+            raise ValidationError({"msg": "No brand available! " })

@@ -28,10 +28,11 @@ from user.models import CustomerProfile, User, OTPModel
 from rest_framework.views import APIView
 from user.serializers import  SubscriptionSerializer,  \
     ChangePasswordSerializer, OTPSendSerializer, OTPVerifySerializer, OTPReSendSerializer, SetPasswordSerializer, CustomerOrderListSerializer, \
-    CustomerOrderDetailsSerializer, CustomerProfileSerializer, CustomerAddressListSerializer, CustomerAddressSerializer
+    CustomerOrderDetailsSerializer, CustomerProfileSerializer, CustomerAddressListSerializer, CustomerAddressSerializer, WishlistDataSerializer
 
 from vendor.pagination import OrderCustomPagination
-from cart.models import Order, DeliveryAddress
+from cart.models import Order, DeliveryAddress, Wishlist
+
 
 
 
@@ -314,13 +315,13 @@ class CustomerOrderDetails(RetrieveAPIView):
     lookup_url_kwarg = "o_id"
 
     def get_object(self):
-        id = self.kwargs['o_id']
+        o_id = self.kwargs['o_id']
         if self.request.user.is_customer == True:
-            query = Order.objects.get(order_id=id)
+            query = Order.objects.get(id=o_id, user=self.request.user)
             if query:
                 return query
             else:
-                raise ValidationError({"msg": "No Order available! " })
+                raise ValidationError({"msg": "This is not your order or Order not available! " })
         else:
             raise ValidationError(
                 {"msg": 'You can not show order details, because you are not an User!'})
@@ -445,6 +446,24 @@ class DashboardDataAPIView(APIView):
                 {"msg": 'You can not get dashboard data, because you are not an Customer!'})
 
 
+class WishlistDataAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = WishlistDataSerializer
+    pagination_class = OrderCustomPagination
+
+    def get_queryset(self):
+    # def get(self, request):
+        if self.request.user.is_customer == True:
+            wishlist_obj_exist = Wishlist.objects.filter(Q(user=self.request.user)).exists()
+            if wishlist_obj_exist:
+                queryset = Wishlist.objects.filter(Q(user=self.request.user)).order_by('-created_at')
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'Wishlist data does not exist!'})
+        else:
+            raise ValidationError(
+                {"msg": 'You can not see Wishlist data, because you are not an Customer!'})
 
 
 # class CustomerRetrieveUpdateAPIView(RetrieveUpdateAPIView):

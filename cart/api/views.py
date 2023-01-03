@@ -15,6 +15,7 @@ from product.models import Product, DiscountTypes
 from cart.models import BillingAddress, Order, OrderItem, PaymentType, Coupon, UseRecordOfCoupon, Wishlist, VendorOrder, \
     DeliveryAddress
 from user.models import User
+from django.db.models import Q
 
 
 class CouponCreateAPIView(CreateAPIView):
@@ -154,12 +155,32 @@ class CheckoutDetailsAPIView(RetrieveAPIView):
     def get_object(self):
         o_id = self.kwargs['o_id']
         try:
-            query = Order.objects.get(order_id=o_id)
+            query = Order.objects.get(id=o_id)
             return query
         except:
             raise ValidationError(
                 {"details": "Order doesn't exist."})
 
+
+class WishlistAddRemoveAPIView(APIView):
+    queryset = Wishlist.objects.all()
+
+    def post(self, request, product_id):
+        if self.request.user.is_customer == True:
+
+            user_id = self.request.user
+            product_id = self.kwargs['product_id']
+            product = Product.objects.get(id=product_id)
+            wishlist_data_exist = Wishlist.objects.filter(Q(user=user_id), Q(product=product_id)).exists()
+            if wishlist_data_exist:
+                Wishlist.objects.filter(Q(user=user_id), Q(product=product_id)).delete()
+                return Response({"msg": "wishlist updated!"})
+            else:
+                Wishlist.objects.create(user=user_id, product=product, is_active=True)
+                return Response({"msg": "wishlist created!"})
+        else:
+            raise ValidationError(
+                {"msg": 'You are not an User!'})
 
 # class CartList(ListAPIView):
 #     permission_classes = (AllowAny,)

@@ -10,7 +10,7 @@ urlpatterns = [
      path('product-list/', ProductListAPI.as_view()),
      path('search-product/', ProductSearchAPI.as_view()),
      path('filtering-attributes/<int:id>/<str:type>/',FilterAttributesAPI.as_view()),
-     path('product-list-by-category-popular-products/<int:cid>/<int:pagination>/',
+     path('product-list-by-category-popular-products/<int:id>/<str:type>/<int:pagination>/',
           ProductListByCategoryPopularProductsAPI.as_view()),
      path('product-list-by-category/<int:cid>/<int:pagination>/',
           ProductListByCategoryAPI.as_view()),
@@ -28,6 +28,12 @@ urlpatterns = [
 
      path('pc_builder-categories/',PcBuilderCategoryAPIView.as_view()),
      path('pc_builder/',PcBuilderChooseAPIView.as_view()),
+
+     path('gaming-category-list/', GamingCategoryListAPIView.as_view()),
+     path('product-list-by-category-gaming-popular-products/<int:id>/<str:type>/<int:pagination>/',
+          ProductListByCategoryGamingPopularProductsAPI.as_view()),
+     path('gaming-featured-product-list/<int:pagination>/', GamingFeaturedProductListAPI.as_view()),
+     path('brand-list/', BrandListAPIView.as_view()),
 
 
     # store front api

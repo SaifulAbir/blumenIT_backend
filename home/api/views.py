@@ -1,7 +1,9 @@
 from rest_framework.views import APIView
-from home.models import SliderImage, FAQ, ContactUs
+from home.models import SliderImage, FAQ, ContactUs, HomeSingleRowData, PosterUnderSlider, PopularProductsUnderPoster, \
+    FeaturedProductsUnderPoster
 from home.serializers import SliderImagesListSerializer, product_catListSerializer,\
-    ContactUsSerializer, FaqSerializer
+    ContactUsSerializer, FaqSerializer, SingleRowDataSerializer, PosterUnderSliderDataSerializer, PosterUnderPopularProductsDataSerializer, \
+        PosterUnderFeaturedProductsDataSerializer, ProductListForHomeSerializer
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from datetime import date, timedelta
@@ -9,6 +11,8 @@ from django.db.models import Avg, Prefetch, Q, Count
 
 from product.models import Product, Category, Brand
 from product.serializers import ProductListBySerializer, BrandListSerializer
+from rest_framework.generics import ListAPIView
+from rest_framework.exceptions import ValidationError
 
 
 class   HomeDataAPIView(APIView):
@@ -49,13 +53,34 @@ class   HomeDataAPIView(APIView):
         # brand list
         brand_list = Brand.objects.filter(is_active=True).order_by('-created_at')
         brand_list_serializer = BrandListSerializer(brand_list, many=True, context={"request": request})
+
+        # single row data
+        single_row_data = HomeSingleRowData.objects.filter(Q(is_active=True)).order_by('-created_at')[:1]
+        single_row_data_serializer = SingleRowDataSerializer(single_row_data, many=True, context={"request": request})
+
+        # poster under slider
+        poster_under_data = PosterUnderSlider.objects.filter(Q(is_active=True)).order_by('-created_at')[:3]
+        poster_under_data_serializer = PosterUnderSliderDataSerializer(poster_under_data, many=True, context={"request": request})
+
+        # poster under popular products
+        poster_under_popular_products_data = PopularProductsUnderPoster.objects.filter(Q(is_active=True)).order_by('-created_at')[:3]
+        poster_under_popular_products_data_serializer = PosterUnderPopularProductsDataSerializer(poster_under_popular_products_data, many=True, context={"request": request})
+
+        # poster under featured products
+        poster_under_featured_products_data = FeaturedProductsUnderPoster.objects.filter(Q(is_active=True)).order_by('-created_at')[:3]
+        poster_under_featured_products_data_serializer = PosterUnderFeaturedProductsDataSerializer(poster_under_featured_products_data, many=True, context={"request": request})
+
         return Response({
             "slider_images": slider_images_serializer.data,
             "featured_categories": featured_categories_serializer.data,
             "featured_products": featured_serializer.data,
             "popular_product": popular_serializer.data,
             "gaming_product": gaming_serializer.data,
-            "brand_list": brand_list_serializer.data
+            "brand_list": brand_list_serializer.data,
+            "single_row_data_serializer": single_row_data_serializer.data,
+            "poster_under_slider_data_serializer": poster_under_data_serializer.data,
+            "poster_under_popular_products_data_serializer": poster_under_popular_products_data_serializer.data,
+            "poster_under_featured_products_data_serializer": poster_under_featured_products_data_serializer.data,
         })
 
 
@@ -99,3 +124,14 @@ class CreateGetFaqAPIView(APIView):
         faq_serializer = FaqSerializer(faq, many=True)
         return Response(faq_serializer.data)
 
+
+class ProductListHomeCompareAPIView(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = ProductListForHomeSerializer
+
+    def get_queryset(self):
+        queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
+        if queryset:
+            return queryset
+        else:
+            raise ValidationError({"msg": 'No Publish products available!'})

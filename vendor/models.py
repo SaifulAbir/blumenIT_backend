@@ -15,11 +15,19 @@ phone_regex = RegexValidator(regex='^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$
 
 
 class Seller(AbstractTimeStamp):
+    SELLER_STATUSES = [
+        ('PENDING', 'Pending'),
+        ('APPROVED', 'Approved'),
+        ('FREEZE', 'Freeze')
+    ]
+
     name = models.CharField(max_length=254, null=False, blank=False)
     phone = models.CharField(max_length=255, validators=[phone_regex], null=False, blank=False, unique=True)
     email = models.EmailField(max_length=50, null=False, blank=False, unique=True, validators=[validators.EmailValidator(message="Invalid Email")])
     address = models.CharField(max_length=254, null=True, blank=True)
     logo = models.ImageField(null=True, blank=True, upload_to='images/logo')
+    status = models.CharField(
+        max_length=20, choices=SELLER_STATUSES, default=SELLER_STATUSES[0][0])
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
@@ -98,8 +106,8 @@ class StoreSettings(AbstractTimeStamp):
         max_length=254, null=True, blank=True, verbose_name=_('Address'))
     email = models.EmailField(
         max_length=255, null=False, blank=False, unique=True)
-    vendor = models.ForeignKey(
-        Vendor, on_delete=models.PROTECT, blank=False, null=False, related_name="vendor_settings",
+    seller = models.ForeignKey(
+        Seller, on_delete=models.PROTECT, blank=True, null=True, related_name="seller_store_setting",
         verbose_name=_('Vendor'))
     logo = models.ImageField(upload_to='images/store_logo')
     banner = models.ImageField(upload_to='images/banner')

@@ -66,7 +66,7 @@ class Category(AbstractTimeStamp):
         db_table = 'category'
 
     def __str__(self):
-        return 'id: ' + str(self.id) + ' title: ' + self.title
+        return 'id: ' + str(self.id) + ' Title: ' + self.title + ' Ordering Number:' + str(self.ordering_number)
 
 
 class SubCategory(AbstractTimeStamp):
@@ -86,7 +86,7 @@ class SubCategory(AbstractTimeStamp):
         db_table = 'sub_category'
 
     def __str__(self):
-        return 'id: ' + str(self.id) + ' title: ' + self.title
+        return 'id: ' + str(self.id) + ' title: ' + self.title + ' Ordering Number:' + str(self.ordering_number)
 
 
 class SubSubCategory(AbstractTimeStamp):
@@ -108,7 +108,7 @@ class SubSubCategory(AbstractTimeStamp):
         db_table = 'sub_sub_category'
 
     def __str__(self):
-        return 'id: ' + str(self.id) + ' title: ' + self.title
+        return 'id: ' + str(self.id) + ' title: ' + self.title + ' Ordering Number:' + str(self.ordering_number)
 
 
 class FilterAttributes(AbstractTimeStamp):
@@ -729,7 +729,9 @@ class InventoryVariation(AbstractTimeStamp):
 
 class ProductFilterAttributes(AbstractTimeStamp):
     filter_attribute = models.ForeignKey(
-        FilterAttributes, related_name='product_filter_attributes_filter_attribute', blank=False, null=False, on_delete=models.PROTECT)
+        FilterAttributes, related_name='product_filter_attributes_filter_attribute', blank=True, null=True, on_delete=models.PROTECT)
+    attribute_value = models.ForeignKey(
+        AttributeValues, related_name='product_filter_attributes_attribute_value', blank=True, null=True, on_delete=models.PROTECT)
     product = models.ForeignKey(
         Product, related_name='product_filter_attributes_product', blank=True, null=True, on_delete=models.PROTECT)
     is_active = models.BooleanField(null=False, blank=False, default=True)
@@ -740,4 +742,4 @@ class ProductFilterAttributes(AbstractTimeStamp):
         db_table = 'product_filter_attributes'
 
     def __str__(self):
-        return  'Attribute Title : '+ self.filter_attribute.attribute.title + ' product: ' + self.product.title
+        return  'Product: ' + self.product.title

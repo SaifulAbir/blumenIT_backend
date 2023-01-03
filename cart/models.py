@@ -151,13 +151,8 @@ class Order(AbstractTimeStamp):
         Seller, on_delete=models.PROTECT, related_name='order_vendor', blank=True, null=True)
     total_price = models.FloatField(
         max_length=255, null=False, blank=False, default=0)
-    order_status = models.CharField(
-        max_length=20, null=False, blank=False, choices=ORDER_CHOICES, default=ORDER_CHOICES[1][1])
-    payment_status = models.CharField(
-        max_length=20, null=False, blank=False, choices=PAYMENT_STATUSES, default=PAYMENT_STATUSES[1][1])
-    delivery_agent = models.CharField(max_length=100, null=True, blank=True)
     refund = models.BooleanField(default=False)
-    order_date = models.DateTimeField(auto_now_add=True)
+    order_date = models.DateField(auto_now_add=True)
     coupon = models.ForeignKey(
         Coupon, on_delete=models.SET_NULL, blank=True, null=True)
     coupon_discount_amount = models.FloatField(max_length=255, null=True, blank=True)
@@ -166,11 +161,16 @@ class Order(AbstractTimeStamp):
     shipping_cost = models.FloatField(max_length=255, null=True, blank=True)
     shipping_class = models.ForeignKey(
         ShippingClass, on_delete=models.SET_NULL, blank=True, null=True)
+    payment_status = models.CharField(
+        max_length=20, null=False, blank=False, choices=PAYMENT_STATUSES, default=PAYMENT_STATUSES[1][1])
     payment_type = models.ForeignKey(
         PaymentType, on_delete=models.SET_NULL, blank=True, null=True)
     cash_on_delivery = models.BooleanField(default=False)
+    order_status = models.CharField(
+        max_length=20, null=False, blank=False, choices=ORDER_CHOICES, default=ORDER_CHOICES[1][1])
     delivery_address = models.ForeignKey(
         DeliveryAddress, on_delete=models.CASCADE, blank=True, null=True)
+    delivery_agent = models.CharField(max_length=100, null=True, blank=True)
     delivery_date = models.DateTimeField(null=True, blank=True)
     comment = models.TextField(null=True, blank=True)
     # ordered = models.BooleanField(default=True)
@@ -263,9 +263,9 @@ pre_save.connect(pre_save_order, sender=VendorOrder)
 
 class OrderItem(AbstractTimeStamp):
     order = models.ForeignKey(
-        Order, on_delete=models.CASCADE, blank=True, null=True)
+        Order, on_delete=models.CASCADE, related_name='order_item_order', blank=True, null=True)
     product = models.ForeignKey(
-        Product, on_delete=models.CASCADE, null=False, blank=False)
+        Product, on_delete=models.CASCADE, null=False, blank=False, related_name='order_item_product')
     quantity = models.IntegerField(default=1)
     unit_price = models.FloatField(
         max_length=255, null=False, blank=False, default=0)
@@ -391,8 +391,16 @@ class Refund(AbstractTimeStamp):
 class Wishlist(AbstractTimeStamp):
     user = models.ForeignKey(User, on_delete=models.PROTECT,
                              related_name='wishlist_user', blank=True, null=True)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='wishlist_product')
     is_active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = 'Wishlist'
+        verbose_name_plural = 'Wishlists'
+        db_table = 'wishlist'
+
+    def __str__(self):
+        return str(self.user.email) + ' Product: ' + str(self.product.title)
 
 
 class BillingAddress(AbstractTimeStamp):

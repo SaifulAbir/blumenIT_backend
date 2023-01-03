@@ -1,9 +1,6 @@
 from django import forms
-from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm
 from vendor.models import VendorRequest
-from django.contrib.auth.forms import AuthenticationForm, UsernameField, PasswordChangeForm
-from django.utils.safestring import mark_safe
+from django.contrib.auth.forms import AuthenticationForm, UsernameField
 from django.contrib.auth.forms import AuthenticationForm
 
 class VendorRequestForm(forms.ModelForm):

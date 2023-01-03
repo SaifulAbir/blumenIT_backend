@@ -1,18 +1,16 @@
-
 from django.utils import timezone
-from rest_framework.generics import ListAPIView, CreateAPIView, ListCreateAPIView, DestroyAPIView, RetrieveUpdateAPIView, RetrieveAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView, DestroyAPIView, RetrieveUpdateAPIView, RetrieveAPIView
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework import serializers
 from product.serializers import DiscountTypeSerializer
 from cart.serializers import CheckoutDetailsSerializer, CheckoutSerializer, \
-    OrderItemSerializer, OrderSerializer, PaymentTypesListSerializer, WishlistSerializer, \
-    ApplyCouponSerializer, CouponSerializer, DeliveryAddressSerializer
+     PaymentTypesListSerializer, ApplyCouponSerializer, CouponSerializer, DeliveryAddressSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from product.models import Product, DiscountTypes
-from cart.models import BillingAddress, Order, OrderItem, PaymentType, Coupon, UseRecordOfCoupon, Wishlist, VendorOrder, \
+from cart.models import BillingAddress, Order, PaymentType, Coupon, UseRecordOfCoupon, Wishlist, \
     DeliveryAddress
 from user.models import User
 from django.db.models import Q
@@ -183,21 +181,11 @@ class WishlistAddRemoveAPIView(APIView):
                 {"msg": 'You are not an User!'})
 
 
-# class PaymentTypeCreateAPIView(CreateAPIView):
-#     serializer_class = PaymentTypeCreateSerializer
-
-#     def post(self, request, *args, **kwargs):
-#         return super(PaymentTypeCreateAPIView, self).post(request, *args, **kwargs)
-
-
-# urmi~~
-
 class DeliveryAddressCreateAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = DeliveryAddressSerializer
 
     def post(self, request, *args, **kwargs):
-        # request.data['user'] = request.user
         return super(DeliveryAddressCreateAPIView, self).post(request, *args, **kwargs)
 
 
@@ -230,52 +218,3 @@ class BillingAddressDeleteAPIView(DestroyAPIView):
 
     def delete(self, request, *args, **kwargs):
         return super(BillingAddressDeleteAPIView, self).delete(request, *args, **kwargs)
-
-
-# class UserOrderListAPIView(ListAPIView):
-#     permission_classes = [IsAuthenticated]
-#     serializer_class = OrderSerializer
-
-#     def get_queryset(self):
-#         queryset = Order.objects.filter(user=self.request.user).order_by('-ordered_date')
-#         return queryset
-
-
-# class VendorOrderListAPIView(ListAPIView):
-#     permission_classes = [IsAuthenticated]
-#     serializer_class = VendorOrderSerializer
-#
-#     def get_queryset(self):
-#         vendor = Vendor.objects.get(vendor_admin=self.request.user)
-#         queryset = VendorOrder.objects.prefetch_related('order_items_vendor_order').filter(vendor=vendor)
-#         return queryset
-
-
-# class VendorOrderDetailsAPIView(RetrieveAPIView):
-#     permission_classes = [IsAuthenticated]
-#     serializer_class = VendorOrderDetailSerializer
-#     # lookup_field = 'oid'
-#     # lookup_url_kwarg = 'oid'
-
-#     def get_object(self):
-#         # oid = self.kwargs['oid']
-#         query = VendorOrder.objects.get(pk=self.kwargs['pk'])
-#         return query
-
-
-# class UserOrderDetailAPIView(ListAPIView):
-#     permission_classes = [IsAuthenticated]
-#     serializer_class = OrderItemSerializer
-#     lookup_field = 'id'
-#     lookup_url_kwarg = "id"
-
-#     def get_queryset(self):
-#         id = self.kwargs['id']
-#         if id:
-#             try:
-#                 order = Order.objects.get(id=id)
-#                 orderItem = OrderItem.objects.filter(order=order)
-#                 return orderItem
-#             except:
-#                 raise ValidationError({"details": "Order Is Not Valid.!"})
-#         return orderItem

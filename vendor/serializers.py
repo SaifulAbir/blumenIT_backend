@@ -1,6 +1,5 @@
 from enum import unique
 from django.template.loader import render_to_string
-
 from cart.serializers import OrderItemSerializer
 from product.serializers import ProductImageSerializer, ProductReviewSerializer
 from rest_framework import serializers
@@ -11,7 +10,6 @@ from product.models import Brand, Category, Color, DiscountTypes, FlashDealInfo,
 from user.models import User
 from cart.models import Order, OrderItem
 from user.serializers import CustomerProfileSerializer
-# from user.serializers import UserRegisterSerializer
 from vendor.models import VendorRequest, Vendor, StoreSettings, Seller
 from django.db.models import Avg
 from django.utils import timezone
@@ -322,8 +320,8 @@ class AddNewSubSubCategorySerializer(serializers.ModelSerializer):
             sub_sub_category_filtering_attributes = validated_data.pop('sub_sub_category_filtering_attributes')
         except:
             sub_sub_category_filtering_attributes = ''
-    
-        # work with category title 
+
+        # work with category title
         title_get = validated_data.pop('title')
         title_get_data = title_get.lower()
         if title_get:
@@ -436,7 +434,6 @@ class VendorProductListSerializer(serializers.ModelSerializer):
 
 
 class ProductCombinationSerializer(serializers.ModelSerializer):
-    # sku = serializers.CharField(required=False)
     variant_type = serializers.PrimaryKeyRelatedField(
         queryset=VariantType.objects.all(), many=False, write_only=True, required=False)
     variant_value = serializers.CharField(required=False)
@@ -453,8 +450,6 @@ class ProductCombinationSerializer(serializers.ModelSerializer):
             'product_attribute',
             'product_attribute_value',
             'product_attribute_color_code',
-
-            # 'sku',
             'variant_type',
             'variant_value',
             'variant_price',
@@ -462,171 +457,6 @@ class ProductCombinationSerializer(serializers.ModelSerializer):
             'discount_type',
             'discount_amount'
         ]
-
-
-class ProductCombinationSerializerForVendorProductDetails(serializers.ModelSerializer):
-    # sku = serializers.CharField(required=False)
-    product_attribute = serializers.SerializerMethodField()
-    variant_type = serializers.SerializerMethodField()
-    variant_value = serializers.SerializerMethodField()
-    variant_price = serializers.SerializerMethodField()
-    quantity = serializers.SerializerMethodField()
-    discount_type = serializers.SerializerMethodField()
-    discount_amount = serializers.SerializerMethodField()
-
-    class Meta:
-        model = ProductCombinations
-        fields = [
-            'id',
-            'product_attribute',
-            'product_attribute_value',
-            'product_attribute_color_code',
-
-            'variant_type',
-            'variant_value',
-            'variant_price',
-            'quantity',
-            'discount_type',
-            'discount_amount'
-        ]
-
-    def get_product_attribute(self, obj):
-        try:
-            product_attribute = ProductCombinations.objects.get(
-                id=obj.id, is_active=True).product_attribute.title
-            return product_attribute
-        except:
-            return ''
-
-    def get_variant_type(self, obj):
-        try:
-            variant_type = ProductCombinationsVariants.objects.get(
-                product_combination=obj, is_active=True).variant_type.title
-            return variant_type
-        except:
-            return ''
-
-    def get_variant_value(self, obj):
-        try:
-            variant_value = ProductCombinationsVariants.objects.get(
-                product_combination=obj, is_active=True).variant_value
-            return variant_value
-        except:
-            return ''
-
-    def get_variant_price(self, obj):
-        try:
-            variant_price = ProductCombinationsVariants.objects.get(
-                product_combination=obj, is_active=True).variant_price
-            return variant_price
-        except:
-            return ''
-
-    def get_quantity(self, obj):
-        try:
-            quantity = ProductCombinationsVariants.objects.get(
-                product_combination=obj, is_active=True).quantity
-            return quantity
-        except:
-            return ''
-
-    def get_discount_type(self, obj):
-        try:
-            discount_type = ProductCombinationsVariants.objects.get(
-                product_combination=obj, is_active=True).discount_type.title
-            return discount_type
-        except:
-            return ''
-
-    def get_discount_amount(self, obj):
-        try:
-            discount_amount = ProductCombinationsVariants.objects.get(
-                product_combination=obj, is_active=True).discount_amount
-            return discount_amount
-        except:
-            return ''
-
-
-class ProductCombinationSerializerForVendorProductUpdate(serializers.ModelSerializer):
-    product_attribute = serializers.SerializerMethodField()
-    variant_type = serializers.SerializerMethodField()
-    variant_value = serializers.SerializerMethodField()
-    variant_price = serializers.SerializerMethodField()
-    quantity = serializers.SerializerMethodField()
-    discount_type = serializers.SerializerMethodField()
-    discount_amount = serializers.SerializerMethodField()
-
-    class Meta:
-        model = ProductCombinations
-        fields = [
-            'id',
-            'product_attribute',
-            'product_attribute_value',
-            'product_attribute_color_code',
-
-            'variant_type',
-            'variant_value',
-            'variant_price',
-            'quantity',
-            'discount_type',
-            'discount_amount'
-        ]
-
-    def get_product_attribute(self, obj):
-        try:
-            product_attribute = ProductCombinations.objects.get(
-                id=obj.id, is_active=True).product_attribute.id
-            return product_attribute
-        except:
-            return ''
-
-    def get_variant_type(self, obj):
-        try:
-            variant_type = ProductCombinationsVariants.objects.get(
-                product_combination=obj, is_active=True).variant_type.id
-            return variant_type
-        except:
-            return ''
-
-    def get_variant_value(self, obj):
-        try:
-            variant_value = ProductCombinationsVariants.objects.get(
-                product_combination=obj, is_active=True).variant_value
-            return variant_value
-        except:
-            return ''
-
-    def get_variant_price(self, obj):
-        try:
-            variant_price = ProductCombinationsVariants.objects.get(
-                product_combination=obj, is_active=True).variant_price
-            return variant_price
-        except:
-            return ''
-
-    def get_quantity(self, obj):
-        try:
-            quantity = ProductCombinationsVariants.objects.get(
-                product_combination=obj, is_active=True).quantity
-            return quantity
-        except:
-            return ''
-
-    def get_discount_type(self, obj):
-        try:
-            discount_type = ProductCombinationsVariants.objects.get(
-                product_combination=obj, is_active=True).discount_type.id
-            return discount_type
-        except:
-            return ''
-
-    def get_discount_amount(self, obj):
-        try:
-            discount_amount = ProductCombinationsVariants.objects.get(
-                product_combination=obj, is_active=True).discount_amount
-            return discount_amount
-        except:
-            return ''
 
 
 class ProductAttributeValuesSerializer(serializers.ModelSerializer):
@@ -803,11 +633,6 @@ class ProductCreateSerializer(serializers.ModelSerializer):
         child=serializers.CharField(), write_only=True, required=True)
     product_images = serializers.ListField(
         child=serializers.FileField(), write_only=True, required=False)
-    # product_colors = serializers.ListField(
-    #     child=serializers.PrimaryKeyRelatedField(queryset=Color.objects.all()), write_only=True, required=False)
-    # product_attributes = ProductAttributesSerializer(
-    #     many=True, required=False)
-    # product_variants = ProductVariantsSerializer(many=True, required=False)
     product_specification = ProductSpecificationSerializer(
         many=True, required=False)
     flash_deal = FlashDealSerializer(many=True, required=False)
@@ -832,8 +657,6 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             'thumbnail',
             'video_provider',
             'video_link',
-            # 'product_colors',
-            # 'product_attributes',
             'price',
             'pre_payment_amount',
             'discount_start_date',
@@ -844,7 +667,6 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             'sku',
             'external_link',
             'external_link_button_text',
-            # 'product_variants',
             'full_description',
             'active_short_description',
             'short_description',
@@ -925,24 +747,6 @@ class ProductCreateSerializer(serializers.ModelSerializer):
         except:
             product_images = ''
 
-        # product_colors
-        # try:
-        #     product_colors = validated_data.pop('product_colors')
-        # except:
-        #     product_colors = ''
-
-        # product_attributes
-        # try:
-        #     product_attributes = validated_data.pop('product_attributes')
-        # except:
-        #     product_attributes = ''
-
-        # product_variants
-        # try:
-        #     product_variants = validated_data.pop('product_variants')
-        # except:
-        #     product_variants = ''
-
         # product_specification
         try:
             product_specification = validated_data.pop('product_specification')
@@ -961,7 +765,6 @@ class ProductCreateSerializer(serializers.ModelSerializer):
         except:
             product_filter_attributes = ''
 
-        # product_instance = Product.objects.create(**validated_data, seller= Seller.objects.get(phone =  User.objects.get(id=self.context['request'].user.id).phone))
         product_instance = Product.objects.create(**validated_data)
 
         try:
@@ -990,30 +793,6 @@ class ProductCreateSerializer(serializers.ModelSerializer):
                     ProductImages.objects.create(
                         product=product_instance, file=image, status="COMPLETE")
 
-            # product_colors
-            # if product_colors:
-            #     for color in product_colors:
-            #         if Color.objects.filter(title=color).exists():
-            #             color_obj = Color.objects.get(title=color)
-            #             if color_obj:
-            #                 ProductColor.objects.create(
-            #                     color=color_obj, product=product_instance)
-            #             else:
-            #                 pass
-            #         else:
-            #             pass
-
-            # product_attributes
-            # if product_attributes:
-            #     for product_attribute in product_attributes:
-            #         attribute_attribute = product_attribute['attribute']
-            #         if product_instance and attribute_attribute:
-            #             product_attributes_instance = ProductAttributes.objects.create(attribute=attribute_attribute, product=product_instance)
-            #         product_attribute_values = product_attribute['product_attribute_values']
-            #         for product_attribute_value in product_attribute_values:
-            #             attribute_value_value = product_attribute_value['value']
-            #             product_attributes_value_instance = ProductAttributeValues.objects.create(product_attribute = product_attributes_instance, value= attribute_value_value, product=product_instance)
-
             # product with out variants
             try:
                 single_quantity = validated_data["quantity"]
@@ -1025,41 +804,6 @@ class ProductCreateSerializer(serializers.ModelSerializer):
                 Product.objects.filter(id=product_instance.id).update(total_quantity=total_quan)
                 # inventory update
                 Inventory.objects.create(product=product_instance, initial_quantity=single_quantity, current_quantity=single_quantity)
-
-            # product with variants
-            # if product_variants:
-            #     variation_total_quan = 0
-            #     for product_variant in product_variants:
-            #         variation = product_variant['variation']
-            #         variation_price = product_variant['variation_price']
-            #         variation_sku = product_variant['sku']
-            #         variant_quantity = product_variant['quantity']
-            #         try:
-            #             v_image = product_variant['image']
-            #         except:
-            #             v_image = ''
-
-            #         if variation_sku:
-            #             product_check_sku = Product.objects.filter(sku=variation_sku)
-            #             if product_check_sku:
-            #                 raise ValidationError('This SKU already exist in product.')
-            #             variation_check_sku = ProductVariation.objects.filter(sku=variation_sku)
-            #             if variation_check_sku:
-            #                 raise ValidationError('This SKU already exist in product variation.')
-
-
-            #         if variation and variation_price and variation_sku and variant_quantity:
-            #             total_price = float(variation_price) * float(variant_quantity)
-            #             product_variation_instance = ProductVariation.objects.create(product=product_instance,
-            #             variation=variation, variation_price=variation_price, sku=variation_sku, quantity=variant_quantity, total_quantity=variant_quantity, image=v_image, total_price=total_price)
-
-            #             inventory_variation_instance = InventoryVariation.objects.create(product=product_instance, product_variation=product_variation_instance, variation_initial_quantity=variant_quantity, variation_current_quantity=variant_quantity)
-
-
-            #         if variant_quantity:
-            #             variation_total_quan += variant_quantity
-            #             Product.objects.filter(id=product_instance.id).update(quantity=variation_total_quan, total_quantity=variation_total_quan)
-
 
             # product_specification
             if product_specification:

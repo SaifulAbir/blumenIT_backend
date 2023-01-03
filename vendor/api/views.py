@@ -1,21 +1,19 @@
-from datetime import datetime
 from django.db.models import Q
-from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework import status
 from product.pagination import ProductCustomPagination
-from product.serializers import DiscountTypeSerializer, ProductTagsSerializer, TagsSerializer, VariantTypeSerializer, ProductListBySerializer
-from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView, RetrieveAPIView, DestroyAPIView
+from product.serializers import DiscountTypeSerializer, TagsSerializer, ProductListBySerializer
+from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView, RetrieveAPIView
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from product.models import Brand, Category, DiscountTypes, Product, ProductAttributes, ProductReview, ProductTags, SubCategory, SubSubCategory, Tags, Units, VariantType, ProductVideoProvider, VatType, FilterAttributes, Attribute, AttributeValues, Inventory
-from user.models import CustomerProfile, User
+from product.models import Brand, Category, DiscountTypes, Product, ProductReview, SubCategory, SubSubCategory, Tags, Units, \
+    ProductVideoProvider, VatType, FilterAttributes, Attribute, AttributeValues, Inventory
+from user.models import User
 from vendor.models import VendorRequest, Vendor, Seller
 from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategorySerializer,\
     VendorBrandSerializer, AdminCategoryListSerializer, VendorProductListSerializer,\
-    ProductUpdateSerializer, VendorProductViewSerializer, \
-    SellerDetailSerializer, AdminSubCategoryListSerializer, \
-    AdminSubSubCategoryListSerializer, VendorUnitSerializer, SellerSerializer, ProductAttributesSerializer, \
+    ProductUpdateSerializer, VendorProductViewSerializer, AdminSubCategoryListSerializer, \
+    AdminSubSubCategoryListSerializer, VendorUnitSerializer, SellerSerializer, \
     ProductVideoProviderSerializer, ProductVatProviderSerializer, UpdateCategorySerializer,\
     UpdateSubSubCategorySerializer, ProductCreateSerializer, AddNewCategorySerializer, \
     SellerCreateSerializer, FlashDealCreateSerializer, UpdateSubCategorySerializer, FilteringAttributesSerializer, AdminProfileSerializer, \
@@ -25,11 +23,8 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     AdminTicketListSerializer, AdminTicketDataSerializer, TicketStatusSerializer, CategoryWiseProductSaleSerializer, \
     CategoryWiseProductStockSerializer
 from cart.models import Order, OrderItem
-from cart.serializers import OrderSerializer
 from user.models import User
-from cart.models import Coupon
 from rest_framework.exceptions import ValidationError
-from django.db.models import Avg
 from vendor.pagination import OrderCustomPagination
 from support_ticket.models import Ticket
 
@@ -886,8 +881,6 @@ class OrderListSearchAPI(ListAPIView):
             date = request.GET.get('order_date')
             start_date = request.GET.get('start')
             end_date = request.GET.get('end')
-            # date = Sample.objects.filter(date_created__gte=date_created_start,
-            #                       date_created__lte=date_created_end)
 
             queryset = Order.objects.all().order_by('-created_at')
 
@@ -970,12 +963,12 @@ class AdminOrderUpdateAPI(RetrieveUpdateAPIView):
                 if payment_status:
                     order_obj.update(payment_status=payment_status)
 
-                # order_obj.save()
                 return Response(data={"order_id": order_obj[0].id}, status=status.HTTP_202_ACCEPTED)
             else:
                 raise ValidationError({"msg": 'Order update failed!'})
         except KeyError:
             raise ValidationError({"msg": 'Order update failed. contact with developer!'})
+
 
 class AdminCustomerListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]

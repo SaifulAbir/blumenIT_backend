@@ -479,6 +479,7 @@ class PcBuilderDataListSerializer(serializers.ModelSerializer):
             'id',
             'thumbnail',
             'title',
+            'slug',
             'specification',
             'filtering_attributes',
             'price'

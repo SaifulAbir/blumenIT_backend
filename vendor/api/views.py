@@ -839,7 +839,7 @@ class AdminUpdateFilterAttributeAPIView(RetrieveUpdateAPIView):
 
 
 class AdminOrderList(ListAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     serializer_class = AdminOrderListSerializer
     pagination_class = OrderCustomPagination
 
@@ -848,7 +848,7 @@ class AdminOrderList(ListAPIView):
             request = self.request
             type = request.GET.get('type')
 
-            queryset = Order.objects.all().order_by('-created_at')
+            queryset = Order.objects.filter().order_by('-created_at')
 
             if type == 'seller':
                 queryset = queryset.filter(user=Seller)

@@ -1,5 +1,7 @@
 from enum import unique
 from django.template.loader import render_to_string
+
+from cart.serializers import OrderItemSerializer
 from product.serializers import ProductImageSerializer, ProductReviewSerializer
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -8,6 +10,7 @@ from ecommerce.common.emails import send_email_without_delay
 from product.models import Brand, Category, Color, DiscountTypes, FlashDealInfo, FlashDealProduct, Inventory, InventoryVariation, Product, ProductAttributeValues, ProductAttributes, ProductColor, ProductCombinations, ProductCombinationsVariants, ProductImages, ProductReview, ProductTags, ProductVariation, ProductVideoProvider, ShippingClass, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units, VariantType, VatType, Attribute, FilterAttributes, ProductFilterAttributes, AttributeValues
 from user.models import User
 from cart.models import Order, OrderItem
+from user.serializers import CustomerProfileSerializer
 # from user.serializers import UserRegisterSerializer
 from vendor.models import VendorRequest, Vendor, StoreSettings, Seller
 from django.db.models import Avg
@@ -1756,7 +1759,8 @@ class ReviewListSerializer(serializers.ModelSerializer):
     customer_name = serializers.CharField(source='user.username',read_only=True)
     class Meta:
         model = ProductReview
-        fields = ['id', 'product', 'product_title', 'user', 'customer_name', 'rating_number', 'review_text', 'is_active']
+        fields = ['id', 'product', 'product_title', 'user', 'customer_name', 'rating_number', 'review_text',
+                  'is_active']
 
 
 class AttributeSerializer(serializers.ModelSerializer):
@@ -1779,20 +1783,25 @@ class AdminFilterAttributeSerializer(serializers.ModelSerializer):
     sub_sub_category_title = serializers.CharField(source='sub_sub_category.title',read_only=True)
     class Meta:
         model = FilterAttributes
-        fields = ['id', 'attribute', 'attribute_title', 'category', 'category_title', 'sub_category', 'sub_category_title', 'sub_sub_category', 'sub_sub_category_title', 'is_active']
+        fields = ['id', 'attribute', 'attribute_title', 'category', 'category_title', 'sub_category',
+                  'sub_category_title', 'sub_sub_category', 'sub_sub_category_title', 'is_active']
 
 
 class AdminOrderListSerializer(serializers.ModelSerializer):
+    user = CustomerProfileSerializer(many=False, read_only=True)
     class Meta:
         model = Order
-        fields = ['id', 'user', 'order_id', 'product_count', 'order_date', 'order_status', 'total_price']
+        fields = ['id', 'order_id', 'product_count', 'order_date', 'order_status', 'total_price', 'created_at',
+                  'payment_status', 'total_price', 'user']
 
 
 class AdminOrderViewSerializer(serializers.ModelSerializer):
+    order_item_order = OrderItemSerializer(many=True, read_only=True)
+    user = CustomerProfileSerializer(many=False, read_only=True)
     class Meta:
         model = Order
         fields = ['user', 'order_id', 'product_count', 'order_date', 'order_status', 'total_price',
-                  'payment_type', 'shipping_cost', 'coupon_discount_amount']
+                  'payment_type', 'shipping_cost', 'coupon_discount_amount', 'order_item_order', 'user']
 
 
 class AdminOrderUpdateSerializer(serializers.ModelSerializer):

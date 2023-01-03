@@ -45,6 +45,7 @@ urlpatterns = [
     path('vendor/',include('vendor_admin.urls')),
     path('api/',include('website.api.urls')),
     path('api/',include('support_ticket.api.urls')),
+    path('api/',include('blog.api.urls')),
     path('api/',include('reports.api.urls')),
     path('api/',include('stuff.api.urls')),
     # path('vendor/',include('admin_lte.urls')),

@@ -4,6 +4,7 @@ from ecommerce.models import AbstractTimeStamp
 
 class BlogCategory(AbstractTimeStamp):
     title = models.CharField(max_length=100, help_text="name")
+    is_active = models.BooleanField(default=True)
 
     class Meta:
         verbose_name = 'BlogCategory'
@@ -23,6 +24,8 @@ class Blog(AbstractTimeStamp):
     full_description = models.TextField()
     short_description = models.CharField(max_length=800)
     banner = models.ImageField(upload_to='blog', blank=True, null=True)
+    status = models.BooleanField(default=True, null=False)
+    is_active = models.BooleanField(default=True)
 
     class Meta:
         verbose_name = 'Blog'

@@ -57,6 +57,8 @@ INSTALLED_APPS = [
     'website',
     'blog',
     'support_ticket',
+    'upload_file'
+    'support_ticket',
     'reports',
     'stuff'
     # 'admin_lte',

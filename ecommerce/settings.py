@@ -56,8 +56,7 @@ INSTALLED_APPS = [
     'vendor_admin',
     'website',
     'blog',
-    'support_ticket',
-    'upload_file'
+    'upload_file',
     'support_ticket',
     'reports',
     'stuff'

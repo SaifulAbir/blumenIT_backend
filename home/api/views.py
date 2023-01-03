@@ -53,7 +53,7 @@ class   HomeDataAPIView(APIView):
         brand_list_serializer = BrandListSerializer(brand_list, many=True, context={"request": request})
 
         # single row data
-        single_row_data = HomeSingleRowData.objects.filter(Q(is_active=True)).order_by('-created_at')
+        single_row_data = HomeSingleRowData.objects.filter(Q(is_active=True)).order_by('-created_at')[:1]
         single_row_data_serializer = SingleRowDataSerializer(single_row_data, many=True, context={"request": request})
 
         # poster under slider
@@ -76,7 +76,7 @@ class   HomeDataAPIView(APIView):
             "gaming_product": gaming_serializer.data,
             "brand_list": brand_list_serializer.data,
             "single_row_data_serializer": single_row_data_serializer.data,
-            "poster_under_data_serializer": poster_under_data_serializer.data,
+            "poster_under_slider_data_serializer": poster_under_data_serializer.data,
             "poster_under_popular_products_data_serializer": poster_under_popular_products_data_serializer.data,
             "poster_under_featured_products_data_serializer": poster_under_featured_products_data_serializer.data,
         })

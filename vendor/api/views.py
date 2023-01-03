@@ -166,6 +166,7 @@ class AdminFilterAttributesAPI(ListAPIView):
         id = self.kwargs['id']
         type = self.kwargs['type']
         if self.request.user.is_superuser == True:
+            queryset = FilterAttributes.objects.all().order_by('-created_at')
             if id and type:
                 if type == 'category':
                     queryset = FilterAttributes.objects.filter(Q(category__id=id) & Q(is_active=True)).order_by('-created_at')

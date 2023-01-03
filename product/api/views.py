@@ -6,7 +6,7 @@ from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateAP
 from rest_framework.views import APIView
 from home.models import ProductView
 from product.serializers import ProductDetailsSerializer, ProductReviewCreateSerializer, BrandSerializer,\
-StoreCategoryAPIViewListSerializer, PcBuilderDataListSerializer, ProductListBySerializer, FilterAttributeSerializer, PcBuilderCategoryListSerializer, PcBuilderSubCategoryListSerializer, PcBuilderSubSubCategoryListSerializer, BrandListSerializer
+StoreCategoryAPIViewListSerializer, ProductListBySerializer, FilterAttributeSerializer, PcBuilderCategoryListSerializer, PcBuilderSubCategoryListSerializer, PcBuilderSubSubCategoryListSerializer, BrandListSerializer
 
 from product.models import Category, SubCategory, SubSubCategory, Product, Brand, AttributeValues
 from product.models import FilterAttributes, ProductFilterAttributes
@@ -370,8 +370,9 @@ class VendorProductListForFrondEndAPI(ListAPIView):
 
 
 class PcBuilderChooseAPIView(ListAPIView):
-    permission_classes = (AllowAny,)
-    serializer_class = PcBuilderDataListSerializer
+    permission_classes = (AllowAny,) 
+    serializer_class = ProductListBySerializer
+    # serializer_class = PcBuilderDataListSerializer
     pagination_class = ProductCustomPagination
 
     def get_queryset(self):

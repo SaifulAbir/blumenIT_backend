@@ -469,21 +469,21 @@ class FilterAttributeSerializer(serializers.ModelSerializer):
         return serializer.data
 
 
-class PcBuilderDataListSerializer(serializers.ModelSerializer):
-    specification = serializers.SerializerMethodField()
-    filtering_attributes = serializers.SerializerMethodField()
+# class PcBuilderDataListSerializer(serializers.ModelSerializer):
+#     specification = serializers.SerializerMethodField()
+#     filtering_attributes = serializers.SerializerMethodField()
 
-    class Meta:
-        model = Product
-        fields = [
-            'id',
-            'thumbnail',
-            'title',
-            'slug',
-            'specification',
-            'filtering_attributes',
-            'price'
-        ]
+#     class Meta:
+#         model = Product
+#         fields = [
+#             'id',
+#             'thumbnail',
+#             'title',
+#             'slug',
+#             'specification',
+#             'filtering_attributes',
+#             'price'
+#         ]
 
     def get_specification(self, obj):
         try:

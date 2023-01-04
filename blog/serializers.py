@@ -1,4 +1,3 @@
-
 from blog.models import BlogCategory, Blog
 from rest_framework import serializers
 

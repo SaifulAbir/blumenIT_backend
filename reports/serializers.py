@@ -60,7 +60,6 @@ class SellerProductSaleSerializer(serializers.ModelSerializer):
         order_item_obj = OrderItem.objects.filter(Q(product__seller = obj.id)).exists()
         if order_item_obj:
             order_item_ob = OrderItem.objects.filter(Q(product__seller = obj.id)).count()
-            # print(order_item_ob)
         else:
             order_item_ob = 0
 

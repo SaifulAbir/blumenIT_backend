@@ -1,11 +1,6 @@
 from rest_framework import serializers
 from .models import *
-from product.models import Product, Category, Brand
-from product.serializers import \
-    ProductDetailsSerializer
-
-# # # list Serializer start
-
+from product.models import Category
 
 class SliderImagesListSerializer(serializers.ModelSerializer):
     class Meta:

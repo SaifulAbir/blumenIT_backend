@@ -3,7 +3,7 @@ from product.serializers import ProductImageSerializer, ProductReviewSerializer
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from product.models import Brand, Category, DiscountTypes, FlashDealInfo, FlashDealProduct, Inventory, \
-    Product, ProductAttributeValues, ProductAttributes, ProductCombinations, \
+    Product, ProductAttributeValues, ProductAttributes, \
     ProductImages, ProductReview, ProductTags, ProductVariation, ProductVideoProvider, \
     ShippingClass, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units,\
     VariantType, VatType, Attribute, FilterAttributes, ProductFilterAttributes, AttributeValues

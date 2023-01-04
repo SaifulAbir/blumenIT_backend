@@ -450,29 +450,6 @@ class ProductVariation(AbstractTimeStamp):
         return self.product.title + '-variation: ' + self.variation
 
 
-class ProductCombinations(AbstractTimeStamp):
-    product = models.ForeignKey(
-        Product, on_delete=models.PROTECT, related_name='product_combinations_product')
-    product_attribute = models.ForeignKey(
-        ProductAttributes, related_name="product_combinations_product_attributes", null=True, blank=True, on_delete=models.PROTECT)
-    product_attribute_value = models.CharField(
-        max_length=500, null=False, blank=False, default="")
-    product_attribute_price = models.FloatField(
-        max_length=255, null=True, blank=True, default=0)
-    product_attribute_color_code = models.CharField(
-        max_length=100, null=True, blank=True, default="")
-
-    is_active = models.BooleanField(null=False, blank=False, default=True)
-
-    class Meta:
-        verbose_name = 'ProductCombination'
-        verbose_name_plural = 'ProductCombinations'
-        db_table = 'product_combinations'
-
-    def __str__(self):
-        return str(self.id) + '-'+self.product.title+'-'+self.product_attribute_value
-
-
 class Tags(AbstractTimeStamp):
     title = models.CharField(
         max_length=100, null=False, blank=False, default="", unique=True)

@@ -180,13 +180,11 @@ class CustomerOrderDetailsSerializer(serializers.ModelSerializer):
 
 
 class CustomerProfileOtherDataSerializer(serializers.ModelSerializer):
-    
     class Meta:
         model = CustomerProfile
         fields = [
             'id',
             'birth_date',
-            # 'avatar'
         ]
 
 
@@ -232,9 +230,7 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
 
                 for others_in in others_info:
                     birth_date = others_in['birth_date']
-                    # avatar = others_in['avatar']
                     CustomerProfile.objects.create(user=instance, birth_date=birth_date)
-                    # CustomerProfile.objects.create(user=instance, birth_date=birth_date, avatar=avatar)
             else:
                 c_p = CustomerProfile.objects.filter(
                     user=instance).exists()

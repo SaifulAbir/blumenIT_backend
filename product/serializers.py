@@ -1,17 +1,9 @@
-# from collections import OrderedDict
-import collections
-import base64
-from itertools import product
-from curses import meta
-from email.policy import default
-from pyexpat import model
-from attr import fields
 from rest_framework import serializers
 from product.models import Category, ProductImages, SubCategory, SubSubCategory, Product, ProductTags, ProductReview, ProductAttributes, Brand, DiscountTypes, Tags, Units, VariantType, Specification, SpecificationValue, AttributeValues, Seller, FilterAttributes
 
 from user.models import User
 from vendor.models import StoreSettings
-from django.db.models import Avg, Count, Q, F
+from django.db.models import Avg
 from rest_framework.exceptions import ValidationError
 
 class SellerDataSerializer(serializers.ModelSerializer):
@@ -77,7 +69,6 @@ class SubCategorySerializer(serializers.ModelSerializer):
 
 class SubCategorySerializerForMegaMenu(serializers.ModelSerializer):
     sub_sub_category = serializers.SerializerMethodField()
-
     class Meta:
         model = SubCategory
         fields = [
@@ -329,7 +320,6 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
     def get_related_products(self, obj):
         selected_related_products = Product.objects.filter(
             category=obj.category.id, status='PUBLISH').exclude(id=obj.id).order_by('-sell_count')
-        print(selected_related_products)
         return ProductListBySerializer(selected_related_products, many=True).data
 
 
@@ -406,7 +396,6 @@ class ProductListBySerializer(serializers.ModelSerializer):
         return ProductReviewSerializer(selected_product_reviews, many=True).data
 
 
-# work with pc builder start
 class PcBuilderSpecificationValuesSerializer(serializers.ModelSerializer):
     class Meta:
         model = SpecificationValue
@@ -429,8 +418,8 @@ class PcBuilderSpecificationSerializer(serializers.ModelSerializer):
             'specification_values'
         ]
 
-    def get_existing_specification_values(self, instence):
-        queryset = SpecificationValue.objects.filter(specification=instence.id, is_active = True)
+    def get_existing_specification_values(self, instance):
+        queryset = SpecificationValue.objects.filter(specification=instance.id, is_active = True)
         serializer = PcBuilderSpecificationValuesSerializer(instance=queryset, many=True)
         return serializer.data
 
@@ -457,27 +446,9 @@ class FilterAttributeSerializer(serializers.ModelSerializer):
         ]
 
     def get_attribute_values(self, instance):
-        # queryset = AttributeValues.objects.filter(attribute=instance.id, is_active = True)
         queryset = AttributeValues.objects.filter(attribute=instance.attribute.id, is_active = True)
         serializer = AttributeValuesSerializer(instance=queryset, many=True)
         return serializer.data
-
-
-# class PcBuilderDataListSerializer(serializers.ModelSerializer):
-#     specification = serializers.SerializerMethodField()
-#     filtering_attributes = serializers.SerializerMethodField()
-
-#     class Meta:
-#         model = Product
-#         fields = [
-#             'id',
-#             'thumbnail',
-#             'title',
-#             'slug',
-#             'specification',
-#             'filtering_attributes',
-#             'price'
-#         ]
 
     def get_specification(self, obj):
         try:
@@ -524,8 +495,6 @@ class PcBuilderSubSubCategoryListSerializer(serializers.ModelSerializer):
 
     def get_type(self, obj):
         return 'sub_sub_category'
-
-# work with pc builder end
 
 
 class BrandListSerializer(serializers.ModelSerializer):

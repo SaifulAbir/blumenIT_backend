@@ -105,7 +105,7 @@ class CheckoutDetailsSerializer(serializers.ModelSerializer):
         'payment_title', 'product_price', 'coupon_discount_amount', 'sub_total', 'shipping_cost', 'total_price']
 
     def get_order_items(self, obj):
-        queryset = OrderItem.objects.filter(order=obj) 
+        queryset = OrderItem.objects.filter(order=obj)
         serializer = CheckoutDetailsOrderItemSerializer(instance=queryset, many=True, context={'request': self.context['request']})
         return serializer.data
 
@@ -209,7 +209,6 @@ class OrderSerializer(serializers.ModelSerializer):
 class OrderItemSerializer(serializers.ModelSerializer):
     order = OrderSerializer(read_only=True)
     product = ProductSerializer(read_only=True)
-
     class Meta:
         model = OrderItem
         fields = ['id', 'order', 'product', 'quantity', 'subtotal']
@@ -266,7 +265,6 @@ class CheckoutSerializer(serializers.ModelSerializer):
 
                 # update inventory
                 if order_instance.payment_status == 'PAID':
-                # if order_instance.order_status == 'CONFIRMED':
                     product_filter_obj = Product.objects.filter(id=product.id)
                     inventory_obj = Inventory.objects.filter(product=product).latest('created_at')
                     new_update_quantity = int(inventory_obj.current_quantity) - int(quantity)

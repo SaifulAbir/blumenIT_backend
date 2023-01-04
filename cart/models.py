@@ -1,11 +1,11 @@
 from django.db import models
 from ecommerce.models import AbstractTimeStamp
-from vendor.models import Vendor, Seller
-from .utils import unique_order_id_generator_for_order, unique_order_id_generator_for_vendor_order
+from vendor.models import Seller
+from .utils import unique_order_id_generator_for_order
 from django.db.models.signals import pre_save
-from user.models import CustomerProfile, User
+from user.models import User
 from django.utils.translation import gettext as _
-from product.models import Product, ProductAttributes, VariantType, ShippingClass, DiscountTypes
+from product.models import Product, ShippingClass, DiscountTypes
 from django.utils import timezone
 
 '''

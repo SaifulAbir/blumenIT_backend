@@ -389,38 +389,6 @@ class ProductAttributeValues(AbstractTimeStamp):
         return self.product_attribute.product.title + ' ' + self.product_attribute.attribute.title + ' ' + self.value.value
 
 
-class Color(AbstractTimeStamp):
-    title = models.CharField(
-        max_length=255, null=False, blank=False, default="")
-    color_code = models.CharField(
-        max_length=20, null=False, blank=False, default="")
-    is_active = models.BooleanField(null=False, blank=False, default=True)
-
-    class Meta:
-        verbose_name = 'Color'
-        verbose_name_plural = 'Colors'
-        db_table = 'color'
-
-    def __str__(self):
-        return self.title
-
-
-class ProductColor(AbstractTimeStamp):
-    color = models.ForeignKey(Color, on_delete=models.CASCADE, null=True,
-                            blank=True, related_name='product_color_color', default="")
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=False,
-                                blank=False, related_name='product_color_product', default="")
-    is_active = models.BooleanField(null=False, blank=False, default=True)
-
-    class Meta:
-        verbose_name = 'ProductColor'
-        verbose_name_plural = 'ProductColors'
-        db_table = 'product_color'
-
-    def __str__(self):
-        return self.product.title + ' ' + self.color.title
-
-
 class ProductVariation(AbstractTimeStamp):
     def validate_file_extension(value):
         import os
@@ -582,45 +550,6 @@ class VariantType(AbstractTimeStamp):
         return self.title
 
 
-class ProductCombinationsVariants(AbstractTimeStamp):
-    product = models.ForeignKey(
-        Product, null=True, blank=True, on_delete=models.PROTECT, related_name='product_combinations_variant_product')
-    variant_type = models.ForeignKey(
-        VariantType, related_name="product_combinations_variant_variant_type", null=True, blank=True, on_delete=models.PROTECT)
-    variant_value = models.CharField(max_length=500, null=True, blank=True)
-    variant_price = models.FloatField(
-        max_length=255, null=True, blank=True, default=0)
-    quantity = models.IntegerField(null=True, blank=True, default=0)
-    discount_type = models.ForeignKey(
-        DiscountTypes, related_name="product_combinations_variant_discount_type", null=True, blank=True, on_delete=models.PROTECT)
-    discount_amount = models.FloatField(
-        max_length=255, null=True, blank=True, default=0)
-    is_active = models.BooleanField(null=False, blank=False, default=True)
-
-    class Meta:
-        verbose_name = 'ProductCombinationsVariant'
-        verbose_name_plural = 'ProductCombinationsVariants'
-        db_table = 'product_combinations_variant'
-
-    def __str__(self):
-        # return self.variant_type.title + ' ' + self.variant_value
-        return str(self.id)+'-'+self.product_combination.product.title+'-'+self.variant_type.title+'-'+self.variant_value
-
-    def save(self, *args, **kwargs):
-        super(ProductCombinationsVariants, self).save(*args, **kwargs)
-        try:
-            product = Product.objects.get(id=self.product.id)
-            p_cs = ProductCombinationsVariants.objects.filter(
-                product=self.product)
-            total = 0
-            for p_c in p_cs:
-                total += p_c.quantity
-            product.total_quantity = total
-            product.save()
-        except:
-            print("Error in product combination save.")
-
-
 class TextColor(AbstractTimeStamp):
     title = models.CharField(
         max_length=255, null=False, blank=False, default="")
@@ -635,6 +564,7 @@ class TextColor(AbstractTimeStamp):
 
     def __str__(self):
         return self.title
+
 
 class FlashDealInfo(AbstractTimeStamp):
     title = models.CharField(
@@ -656,6 +586,7 @@ class FlashDealInfo(AbstractTimeStamp):
 
     def __str__(self):
         return self.title
+
 
 class FlashDealProduct(AbstractTimeStamp):
     flash_deal_info = models.ForeignKey(
@@ -691,21 +622,6 @@ class Inventory(AbstractTimeStamp):
     def __str__(self):
         return self.product.title
 
-class InventoryVariation(AbstractTimeStamp):
-    variation_initial_quantity = models.IntegerField(null=True, blank=True, default=0)
-    variation_current_quantity = models.IntegerField(null=True, blank=True, default=0)
-    product = models.ForeignKey(
-        Product, on_delete=models.PROTECT, related_name='inventory_variation_product')
-    product_variation = models.ForeignKey(
-        ProductVariation, on_delete=models.PROTECT, related_name='inventory_variation_product_variation', null=True, blank=True)
-
-    class Meta:
-        verbose_name = 'InventoryVariation'
-        verbose_name_plural = 'InventoryVariations'
-        db_table = 'inventory_variation'
-
-    def __str__(self):
-        return self.product_variation.product.title + '- variation name: ' + self.product_variation.variation
 
 class ProductFilterAttributes(AbstractTimeStamp):
     filter_attribute = models.ForeignKey(

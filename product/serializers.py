@@ -26,26 +26,6 @@ class UserDataSerializer(serializers.ModelSerializer):
         ]
 
 
-class StoreDataSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = StoreSettings
-        fields = [
-            'id',
-            'store_name',
-            'address',
-            'email',
-            'logo',
-            'banner',
-            'phone',
-            'bio',
-            'facebook',
-            'twitter',
-            'instagram',
-            'youtube',
-            'linkedin'
-        ]
-
-
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
@@ -174,21 +154,6 @@ class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductImages
         fields = ['id', 'file']
-
-
-class ProductAttributeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProductAttributes
-        fields = ['id', 'title']
-
-
-class VariantTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = VariantType
-        fields = [
-            'id',
-            'title'
-        ]
 
 
 class SpecificationValuesSerializer(serializers.ModelSerializer):
@@ -495,9 +460,3 @@ class PcBuilderSubSubCategoryListSerializer(serializers.ModelSerializer):
 
     def get_type(self, obj):
         return 'sub_sub_category'
-
-
-class BrandListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Brand
-        fields = ['id', 'title', 'logo']

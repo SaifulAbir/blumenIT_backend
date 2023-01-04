@@ -6,8 +6,7 @@ from home.serializers import SliderImagesListSerializer, product_catListSerializ
         PosterUnderFeaturedProductsDataSerializer
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-from datetime import date, timedelta
-from django.db.models import Avg, Prefetch, Q, Count
+from django.db.models import Q, Count
 
 from product.models import Product, Category, Brand
 from product.serializers import ProductListBySerializer, BrandListSerializer
@@ -23,16 +22,6 @@ class   HomeDataAPIView(APIView):
         # slider images
         slider_images = SliderImage.objects.filter(is_active=True)
         slider_images_serializer = SliderImagesListSerializer(slider_images, many=True, context={"request": request})
-
-        # top category of the month
-        # top_best_sellers = Product.objects.filter(status='PUBLISH').order_by('-sell_count')
-        # category_ids = top_best_sellers.values_list('category__id', flat=True).distinct()
-        # final_category_ids = []
-        # for category_id in category_ids:
-        #     if category_id not in final_category_ids:
-        #         final_category_ids.append(category_id)
-        # product_cat = Category.objects.filter(id__in=final_category_ids)[:6]
-        # product_cat_serializer = product_catListSerializer(product_cat, many=True, context={"request": request})
 
         # featured_categories
         featured_categories = Category.objects.filter(is_featured=True, is_active=True).order_by('-created_at')

@@ -1,15 +1,14 @@
 from datetime import datetime
-from django.db.models import Q, Count, Value, F, CharField, Prefetch, Subquery, Max, Min, ExpressionWrapper, \
-    IntegerField, Sum, DecimalField
+from django.db.models import Q, Count
 from ecommerce.settings import MEDIA_URL
-from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveUpdateAPIView, RetrieveAPIView, DestroyAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView
 from rest_framework.views import APIView
 from home.models import ProductView
 from product.serializers import ProductDetailsSerializer, ProductReviewCreateSerializer, BrandSerializer,\
 StoreCategoryAPIViewListSerializer, ProductListBySerializer, FilterAttributeSerializer, PcBuilderCategoryListSerializer, PcBuilderSubCategoryListSerializer, PcBuilderSubSubCategoryListSerializer, BrandListSerializer
 
 from product.models import Category, SubCategory, SubSubCategory, Product, Brand, AttributeValues
-from product.models import FilterAttributes, ProductFilterAttributes
+from product.models import FilterAttributes
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework import status

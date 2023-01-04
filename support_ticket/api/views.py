@@ -1,12 +1,10 @@
 from rest_framework.generics import ListAPIView, CreateAPIView
-from rest_framework.views import APIView
 from support_ticket.models import Ticket
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from vendor.pagination import OrderCustomPagination
 from support_ticket.serializers import TicketListSerializer, CustomerTicketCreateSerializer, TicketDataSerializer, \
     TicketConversationReplySerializer
 from rest_framework.exceptions import ValidationError
-from rest_framework.response import Response
 from django.db.models import Q
 
 class CustomerTicketListAPI(ListAPIView):

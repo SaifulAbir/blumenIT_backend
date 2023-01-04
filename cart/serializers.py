@@ -29,38 +29,6 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = ['id', 'thumbnail', 'title', 'price', 'total_quantity']
 
 
-class noteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Order
-        fields = ['notes']
-
-
-class ProductCombinationForCheckoutSerializer(serializers.ModelSerializer):
-
-    product = serializers.IntegerField(write_only=True, required=True)
-    quantity = serializers.IntegerField(write_only=True, required=True)
-    price = serializers.DecimalField(
-        max_digits=255, decimal_places=2, required=True)
-    product_attribute = serializers.IntegerField(
-        write_only=True, required=False)
-    product_attribute_value = serializers.CharField(
-        write_only=True, required=False)
-    variant_type = serializers.IntegerField(write_only=True, required=False)
-    variant_value = serializers.CharField(write_only=True, required=False)
-
-    class Meta:
-        model = OrderItem
-        fields = ['id',
-                  'product',
-                  'quantity',
-                  'price',
-                  'product_attribute',
-                  'product_attribute_value',
-                  'variant_type',
-                  'variant_value'
-                  ]
-
-
 class CheckoutDetailsOrderItemSerializer(serializers.ModelSerializer):
     product_title = serializers.CharField(source='product.title',read_only=True)
     product_sku = serializers.CharField(source='product.sku',read_only=True)
@@ -170,16 +138,6 @@ class PaymentTypesListSerializer(serializers.ModelSerializer):
             'id',
             'type_name',
             'note'
-        ]
-
-
-class ShippingTypesListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ShippingType
-        fields = [
-            'id',
-            'type_name',
-            'price'
         ]
 
 

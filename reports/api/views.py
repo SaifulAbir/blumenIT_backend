@@ -1,16 +1,13 @@
-from rest_framework.generics import ListAPIView, CreateAPIView
-from rest_framework.views import APIView
+from rest_framework.generics import ListAPIView
 from cart.models import Order, OrderItem
 from product.models import Product
 from vendor.models import Seller
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from product.pagination import ProductCustomPagination
 from reports.serializers import SalesReportSerializer, VendorProductReportSerializer, InHouseProductSerializer, SellerProductSaleSerializer, \
     ProductStockSerializer, ProductWishlistSerializer
 from rest_framework.exceptions import ValidationError
-from rest_framework.response import Response
 from django.db.models import Q
-# import datetime
 
 class SalesReportAPI(ListAPIView):
     permission_classes = [IsAuthenticated]

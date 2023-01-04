@@ -6,7 +6,7 @@ from product.models import Brand, Category, DiscountTypes, FlashDealInfo, FlashD
     Product, ProductAttributeValues, ProductAttributes, \
     ProductImages, ProductReview, ProductTags, ProductVariation, ProductVideoProvider, \
     ShippingClass, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units,\
-    VariantType, VatType, Attribute, FilterAttributes, ProductFilterAttributes, AttributeValues
+    VatType, Attribute, FilterAttributes, ProductFilterAttributes, AttributeValues
 from user.models import User
 from cart.models import Order
 from user.serializers import CustomerProfileSerializer
@@ -487,7 +487,7 @@ class ProductExistingVariantsSerializer(serializers.ModelSerializer):
         ]
 
 
-class SpecificationValuesSerializer(serializers.ModelSerializer):
+class ProductSpecificationValuesSerializer(serializers.ModelSerializer):
     class Meta:
         model = SpecificationValue
         fields = [
@@ -507,7 +507,7 @@ class VatTypeSerializer(serializers.ModelSerializer):
 
 
 class ProductSpecificationSerializer(serializers.ModelSerializer):
-    specification_values = SpecificationValuesSerializer(
+    specification_values = ProductSpecificationValuesSerializer(
         many=True, required=False)
     class Meta:
         model = Specification
@@ -530,7 +530,7 @@ class ProductExistingSpecificationSerializer(serializers.ModelSerializer):
 
     def get_existing_specification_values(self, instense):
         queryset = SpecificationValue.objects.filter(specification=instense.id, is_active = True)
-        serializer = SpecificationValuesSerializer(instance=queryset, many=True)
+        serializer = ProductSpecificationValuesSerializer(instance=queryset, many=True)
         return serializer.data
 
 

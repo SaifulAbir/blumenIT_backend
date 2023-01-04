@@ -371,7 +371,6 @@ class VendorProductListForFrondEndAPI(ListAPIView):
 class PcBuilderChooseAPIView(ListAPIView):
     permission_classes = (AllowAny,) 
     serializer_class = ProductListBySerializer
-    # serializer_class = PcBuilderDataListSerializer
     pagination_class = ProductCustomPagination
 
     def get_queryset(self):

@@ -401,11 +401,23 @@ class PcBuilderChooseAPIView(ListAPIView):
             max_price = price_list[1]
             queryset = queryset.filter(price__range=(min_price, max_price)).order_by('-created_at')
 
+        # if attr_value_ids:
+        #     attr_value_ids_list = attr_value_ids.split(",")
+        #     for attr_value_id in attr_value_ids_list:
+        #         attr_value_id = int(attr_value_id)
+        #         queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id=attr_value_id)).order_by('-created_at')
+
+        new_attr_value_ids = []
         if attr_value_ids:
             attr_value_ids_list = attr_value_ids.split(",")
             for attr_value_id in attr_value_ids_list:
                 attr_value_id = int(attr_value_id)
-                queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id=attr_value_id)).order_by('-created_at')
+                new_attr_value_ids.append(attr_value_id)
+
+        if new_attr_value_ids:
+            queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id__in = new_attr_value_ids)).order_by('-created_at')
+
+
         return queryset
 
 

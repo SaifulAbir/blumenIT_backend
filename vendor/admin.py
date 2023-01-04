@@ -1,9 +1,6 @@
 from django.contrib import admin
-from vendor.models import StoreSettings, VendorRequest, Vendor, VendorReview, Seller
+from vendor.models import StoreSettings, Seller
 
-# admin.site.register(VendorRequest)
-# admin.site.register(Vendor)
-# admin.site.register(VendorReview)
 admin.site.register(Seller)
 admin.site.register(StoreSettings)
 

@@ -577,8 +577,6 @@ class ProductCombinationMedia(AbstractTimeStamp):
         if not ext.lower() in valid_extensions:
             raise ValidationError('Unsupported file extension.')
 
-    product_combination = models.ForeignKey(
-        ProductCombinations, on_delete=models.PROTECT, related_name='product_media_product_combination')
     file = models.FileField(upload_to='products', validators=[
                             validate_file_extension])
     status = models.CharField(
@@ -590,8 +588,7 @@ class ProductCombinationMedia(AbstractTimeStamp):
         db_table = 'product_combination_medias'
 
     def __str__(self):
-        # return self.pk
-        return self.product_combination.product.title
+        return self.status
 
 
 class VariantType(AbstractTimeStamp):
@@ -609,8 +606,6 @@ class VariantType(AbstractTimeStamp):
 
 
 class ProductCombinationsVariants(AbstractTimeStamp):
-    product_combination = models.ForeignKey(
-        ProductCombinations, related_name="product_combinations_variant_product_combination", null=True, blank=True, on_delete=models.PROTECT)
     product = models.ForeignKey(
         Product, null=True, blank=True, on_delete=models.PROTECT, related_name='product_combinations_variant_product')
     variant_type = models.ForeignKey(

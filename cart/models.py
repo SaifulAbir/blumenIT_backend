@@ -188,53 +188,6 @@ def pre_save_order(sender, instance, *args, **kwargs):
 pre_save.connect(pre_save_order, sender=Order)
 
 
-class VendorOrder(AbstractTimeStamp):
-    ORDER_CHOICES = [
-        ('PENDING', 'pending'),
-        ('PROCESSING', 'processing'),
-        ('SHIPPED', 'shipped'),
-        ('DELIVERED', 'delivered'),
-        ('RETURN', 'return'),
-        ('CANCEL', 'cancel'),
-    ]
-
-    order = models.ForeignKey(Order, on_delete=models.PROTECT,
-                              related_name='vendor_order_order', blank=True, null=True)
-    user = models.ForeignKey(User, on_delete=models.PROTECT,
-                             related_name='vendor_order_user', blank=True, null=True)
-    customer_profile = models.ForeignKey(
-        CustomerProfile, on_delete=models.PROTECT, related_name='vendor_order_customer_profile', blank=True, null=True)
-    vendor_order_id = models.SlugField(
-        null=False, blank=False, allow_unicode=True)
-    ordered_date = models.DateTimeField(auto_now_add=True)
-    ordered = models.BooleanField(default=True)
-    received = models.BooleanField(default=False)
-    refund_requested = models.BooleanField(default=False)
-    refund_granted = models.BooleanField(default=False)
-    shipping_type = models.ForeignKey(
-        ShippingType, on_delete=models.SET_NULL, blank=True, null=True, related_name='vendor_order_shipping_type')
-    order_status = models.CharField(
-        max_length=20, null=False, blank=False, choices=ORDER_CHOICES, default=ORDER_CHOICES[1][1])
-    vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT,
-                               related_name='vendor_order_vendor', blank=True, null=True)
-
-    class Meta:
-        verbose_name = 'VendorOrder'
-        verbose_name_plural = 'VendorOrders'
-        db_table = 'vendor_orders'
-
-    def __str__(self):
-        return self.vendor_order_id
-
-
-def pre_save_order(sender, instance, *args, **kwargs):
-    if not instance.vendor_order_id:
-        instance.vendor_order_id = 'vorid-' + \
-            str(unique_order_id_generator_for_vendor_order(instance))
-
-
-pre_save.connect(pre_save_order, sender=VendorOrder)
-
 
 class OrderItem(AbstractTimeStamp):
     order = models.ForeignKey(
@@ -265,36 +218,6 @@ class OrderItem(AbstractTimeStamp):
 
     def get_final_price(self):
         return self.get_total_item_price()
-
-
-class OrderItemCombination(AbstractTimeStamp):
-    product = models.ForeignKey(
-        Product, related_name="order_item_combination_product", on_delete=models.CASCADE, blank=True, null=True)
-    order = models.ForeignKey(
-        Order, related_name="order_item_combination_order", on_delete=models.CASCADE, blank=True, null=True)
-    orderItem = models.ForeignKey(
-        OrderItem, related_name="order_item_combination_order_item", on_delete=models.CASCADE, blank=True, null=True)
-    product_attribute = models.ForeignKey(
-        ProductAttributes, related_name="order_item_combination_product_attributes", null=True, blank=True, on_delete=models.PROTECT)
-    product_attribute_value = models.CharField(
-        max_length=500, null=False, blank=False, default="")
-    product_attribute_price = models.FloatField(
-        max_length=255, null=True, blank=True, default=0)
-    variant_type = models.ForeignKey(
-        VariantType, related_name="order_item_combination_variant_type", null=True, blank=True, on_delete=models.PROTECT)
-    variant_value = models.CharField(max_length=500, null=True, blank=True)
-    variant_price = models.FloatField(
-        max_length=255, null=True, blank=True, default=0)
-    variant_ordered_quantity = models.IntegerField(
-        null=True, blank=True, default=0)
-
-    class Meta:
-        verbose_name = 'OrderItemCombination'
-        verbose_name_plural = 'OrderItemCombinations'
-        db_table = 'order_item_combination'
-
-    def __str__(self):
-        return str(self.id)
 
 
 class CustomerAddress(AbstractTimeStamp):

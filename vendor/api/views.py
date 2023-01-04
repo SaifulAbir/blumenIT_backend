@@ -9,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from product.models import Brand, Category, DiscountTypes, Product, ProductReview, SubCategory, SubSubCategory, Tags, Units, \
     ProductVideoProvider, VatType, FilterAttributes, Attribute, AttributeValues, Inventory
 from user.models import User
-from vendor.models import VendorRequest, Vendor, Seller
+from vendor.models import Seller
 from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategorySerializer,\
     VendorBrandSerializer, AdminCategoryListSerializer, VendorProductListSerializer,\
     ProductUpdateSerializer, VendorProductViewSerializer, AdminSubCategoryListSerializer, \

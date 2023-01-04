@@ -7,7 +7,7 @@ from email.policy import default
 from pyexpat import model
 from attr import fields
 from rest_framework import serializers
-from product.models import Category, ProductCombinationMedia, ProductImages, SubCategory, SubSubCategory, Product, ProductTags, ProductReview, ProductAttributes, Brand, DiscountTypes, Tags, Units, VariantType, Specification, SpecificationValue, AttributeValues, Seller, FilterAttributes
+from product.models import Category, ProductImages, SubCategory, SubSubCategory, Product, ProductTags, ProductReview, ProductAttributes, Brand, DiscountTypes, Tags, Units, VariantType, Specification, SpecificationValue, AttributeValues, Seller, FilterAttributes
 
 from user.models import User
 from vendor.models import StoreSettings
@@ -189,12 +189,6 @@ class ProductAttributeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductAttributes
         fields = ['id', 'title']
-
-
-class ProductCombinationMediaSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ProductCombinationMedia
-        fields = ['id', 'file']
 
 
 class VariantTypeSerializer(serializers.ModelSerializer):

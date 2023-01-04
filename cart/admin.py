@@ -1,5 +1,6 @@
 from django.contrib import admin
-from cart.models import BillingAddress, OrderItemCombination, PaymentType, ShippingType, Coupon, UseRecordOfCoupon, Order, VendorOrder, OrderItem, DeliveryAddress, Wishlist
+from cart.models import BillingAddress, PaymentType, ShippingType, Coupon, UseRecordOfCoupon, Order, \
+     OrderItem, DeliveryAddress, Wishlist
 
 
 # Register your models here.
@@ -8,17 +9,13 @@ admin.site.register(Coupon)
 admin.site.register(UseRecordOfCoupon)
 admin.site.register(PaymentType)
 admin.site.register(BillingAddress)
-admin.site.register(VendorOrder)
 admin.site.register(OrderItem)
-admin.site.register(OrderItemCombination)
 admin.site.register(DeliveryAddress)
-# admin.site.register(Order)
 admin.site.register(Wishlist)
 
 
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
-    # fields = ['product', 'quantity', 'vendor_order']
     fields = ['product', 'quantity']
 
 

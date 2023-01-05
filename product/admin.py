@@ -1,5 +1,8 @@
 from django.contrib import admin
-from product.models import FlashDealProduct, Specification, SpecificationValue, TextColor, Attribute, AttributeValues, Category, FlashDealInfo, Inventory, ProductImages, ShippingClass, SubCategory, SubSubCategory, Brand, Tags, Units, DiscountTypes, Product, VariantType, ProductTags, ProductReview, ProductVideoProvider, VatType, SpecificationTitle, FilterAttributes, ProductFilterAttributes, ProductCondition
+from product.models import FlashDealProduct, Specification, SpecificationValue, TextColor, Attribute, AttributeValues, \
+    Category, FlashDealInfo, Inventory, ProductImages, ShippingClass, SubCategory, SubSubCategory, Brand, Tags, Units, \
+    DiscountTypes, Product, VariantType, ProductTags, ProductReview, ProductVideoProvider, VatType, SpecificationTitle, \
+    FilterAttributes, ProductFilterAttributes, ProductCondition
 
 
 admin.site.register(Category)
@@ -24,7 +27,7 @@ admin.site.register(TextColor)
 admin.site.register(SpecificationTitle)
 admin.site.register(SpecificationValue)
 admin.site.register(FlashDealProduct)
-admin.site.register(FilterAttributes)
+admin.site.register(FilterAttributes) 
 admin.site.register(ProductCondition)
 
 class ProductImageInline(admin.TabularInline):

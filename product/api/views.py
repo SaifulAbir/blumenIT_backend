@@ -130,11 +130,11 @@ class ProductListByCategoryAPI(ListAPIView):
             max_price = price_list[1]
             queryset = queryset.filter(price__range=(min_price, max_price)).order_by('-created_at')
 
-        if attr_value_ids:
-            attr_value_ids_list = attr_value_ids.split(",")
-            for attr_value_id in attr_value_ids_list:
-                attr_value_id = int(attr_value_id)
-                queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id=attr_value_id)).order_by('-created_at')
+        # if attr_value_ids:
+        #     attr_value_ids_list = attr_value_ids.split(",")
+        #     for attr_value_id in attr_value_ids_list:
+        #         attr_value_id = int(attr_value_id)
+        #         queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id=attr_value_id)).order_by('-created_at')
 
                 # attr_id = AttributeValues.objects.get(id = attr_value_id).attribute
                 # f_att_id = FilterAttributes.objects.get(attribute = attr_id)
@@ -145,6 +145,16 @@ class ProductListByCategoryAPI(ListAPIView):
                 # attr_id = AttributeValues.objects.get(id = attr_value_id).attribute
                 # cat_id = FilterAttributes.objects.get(attribute = attr_id).category.id
                 # queryset = queryset.filter(Q(category__id=cat_id)).order_by('-created_at')
+
+        new_attr_value_ids = []
+        if attr_value_ids:
+            attr_value_ids_list = attr_value_ids.split(",")
+            for attr_value_id in attr_value_ids_list:
+                attr_value_id = int(attr_value_id)
+                new_attr_value_ids.append(attr_value_id)
+
+        if new_attr_value_ids:
+            queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id__in = new_attr_value_ids)).order_by('-id').distinct("id")
 
         return queryset
 
@@ -248,16 +258,15 @@ class ProductListBySubCategoryAPI(ListAPIView):
             max_price = price_list[1]
             queryset = queryset.filter(price__range=(min_price, max_price)).order_by('-created_at')
 
+        new_attr_value_ids = []
         if attr_value_ids:
             attr_value_ids_list = attr_value_ids.split(",")
             for attr_value_id in attr_value_ids_list:
                 attr_value_id = int(attr_value_id)
-                queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id=attr_value_id)).order_by('-created_at')
+                new_attr_value_ids.append(attr_value_id)
 
-                # attr_id = AttributeValues.objects.get(id = attr_value_id).attribute
-                # f_att_id = FilterAttributes.objects.get(attribute = attr_id)
-                # p_f_att_id = ProductFilterAttributes.objects.get(filter_attribute = f_att_id)
-                # queryset = queryset.filter(id=p_f_att_id.product.id).order_by('-created_at')
+        if new_attr_value_ids:
+            queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id__in = new_attr_value_ids)).order_by('-id').distinct("id")
 
         return queryset
 
@@ -301,11 +310,15 @@ class ProductListBySubSubCategoryAPI(ListAPIView):
             max_price = price_list[1]
             queryset = queryset.filter(price__range=(min_price, max_price)).order_by('-created_at')
 
+        new_attr_value_ids = []
         if attr_value_ids:
             attr_value_ids_list = attr_value_ids.split(",")
             for attr_value_id in attr_value_ids_list:
                 attr_value_id = int(attr_value_id)
-                queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id=attr_value_id)).order_by('-created_at')
+                new_attr_value_ids.append(attr_value_id)
+
+        if new_attr_value_ids:
+            queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id__in = new_attr_value_ids)).order_by('-id').distinct("id")
 
         return queryset
 
@@ -415,7 +428,7 @@ class PcBuilderChooseAPIView(ListAPIView):
                 new_attr_value_ids.append(attr_value_id)
 
         if new_attr_value_ids:
-            queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id__in = new_attr_value_ids)).order_by('-created_at')
+            queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id__in = new_attr_value_ids)).order_by('-id').distinct("id")
 
 
         return queryset

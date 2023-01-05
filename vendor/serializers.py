@@ -3,8 +3,7 @@ from product.serializers import ProductImageSerializer, ProductReviewSerializer
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from product.models import Brand, Category, DiscountTypes, FlashDealInfo, FlashDealProduct, Inventory, \
-    Product, ProductAttributeValues, ProductAttributes, \
-    ProductImages, ProductReview, ProductTags, ProductVariation, ProductVideoProvider, \
+    Product, ProductImages, ProductReview, ProductTags, ProductVariation, ProductVideoProvider, \
     ShippingClass, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units,\
     VatType, Attribute, FilterAttributes, ProductFilterAttributes, AttributeValues
 from user.models import User
@@ -409,17 +408,6 @@ class VendorProductListSerializer(serializers.ModelSerializer):
 
     def get_avg_rating(self, obj):
         return obj.product_review_product.all().aggregate(Avg('rating_number'))['rating_number__avg']
-
-
-class ProductAttributeValuesSerializer(serializers.ModelSerializer):
-    attribute_value_title = serializers.CharField(source="value.value",read_only=True)
-    class Meta:
-        model = ProductAttributeValues
-        fields = [
-            'id',
-            'value',
-            'attribute_value_title'
-        ]
 
 
 class ProductSpecificationValuesSerializer(serializers.ModelSerializer):

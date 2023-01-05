@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from product.models import Category, ProductImages, SubCategory, SubSubCategory, Product, ProductTags, ProductReview, ProductAttributes, Brand, DiscountTypes, Tags, Units, VariantType, Specification, SpecificationValue, AttributeValues, Seller, FilterAttributes
+from product.models import Category, ProductImages, SubCategory, SubSubCategory, Product, ProductTags, ProductReview, \
+     Brand, DiscountTypes, Tags, Units, Specification, SpecificationValue, AttributeValues, Seller, FilterAttributes
 
 from user.models import User
 from vendor.models import StoreSettings

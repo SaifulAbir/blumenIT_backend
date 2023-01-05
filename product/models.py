@@ -35,7 +35,7 @@ class AttributeValues(AbstractTimeStamp):
         db_table = 'attribute_attribute'
 
     def __str__(self):
-        return 'attribute: ' + self.attribute.title + ' value: '+ self.value
+        return 'attribute: ' + self.attribute.title + ' value: '+ self.value + ' ' + str(self.id)
 
 
 class Category(AbstractTimeStamp):
@@ -299,7 +299,7 @@ class Product(AbstractTimeStamp):
         return self.reviews.aggregate(Avg('rating'))
 
     def __str__(self):
-        return self.title
+        return self.title + ' ' + str(self.category.id) + ' ' + str(self.status) + ' ' + str(self.id)
 
 def pre_save_product(sender, instance, *args, **kwargs):
     if not instance.slug:
@@ -353,40 +353,6 @@ class SpecificationValue(AbstractTimeStamp):
     def __str__(self):
         # return self.key
         return 'Product: ' + self.specification.product.title + '-specification title: ' + self.specification.title.title + '-key: ' + self.key
-
-
-class ProductAttributes(AbstractTimeStamp):
-    attribute = models.ForeignKey(
-        Attribute, related_name='product_attributes_attribute', blank=True, null=True, on_delete=models.PROTECT)
-    product = models.ForeignKey(
-        Product, related_name='product_attributes_product', blank=True, null=True, on_delete=models.PROTECT)
-    is_active = models.BooleanField(null=False, blank=False, default=True)
-
-    class Meta:
-        verbose_name = 'ProductAttribute'
-        verbose_name_plural = 'ProductAttributes'
-        db_table = 'product_attributes'
-
-    def __str__(self):
-        return self.product.title + ' ' + self.attribute.title
-
-
-class ProductAttributeValues(AbstractTimeStamp):
-    product_attribute = models.ForeignKey(ProductAttributes, on_delete=models.PROTECT,
-                               related_name='product_attribute_values_product_attribute', blank=True, null=True)
-    value = models.ForeignKey(AttributeValues, on_delete=models.PROTECT,
-                               related_name='product_attribute_values_value', blank=True, null=True)
-    product = models.ForeignKey(
-        Product, related_name='product_attributes_values_product', blank=True, null=True, on_delete=models.PROTECT)
-    is_active = models.BooleanField(null=False, blank=False, default=True)
-
-    class Meta:
-        verbose_name = 'ProductAttributeValue'
-        verbose_name_plural = 'ProductAttributeValues'
-        db_table = 'product_attribute_value'
-
-    def __str__(self):
-        return self.product_attribute.product.title + ' ' + self.product_attribute.attribute.title + ' ' + self.value.value
 
 
 class ProductVariation(AbstractTimeStamp):

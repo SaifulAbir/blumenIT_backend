@@ -3,12 +3,12 @@ from home.models import SliderImage, FAQ, ContactUs, HomeSingleRowData, PosterUn
     FeaturedProductsUnderPoster
 from home.serializers import SliderImagesListSerializer, product_catListSerializer,\
     ContactUsSerializer, FaqSerializer, SingleRowDataSerializer, PosterUnderSliderDataSerializer, PosterUnderPopularProductsDataSerializer, \
-        PosterUnderFeaturedProductsDataSerializer, StoreCategoryAPIViewListSerializer
+        PosterUnderFeaturedProductsDataSerializer, StoreCategoryAPIViewListSerializer, product_sub_catListSerializer
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from django.db.models import Q, Count
 
-from product.models import Product, Category, Brand
+from product.models import Product, Category, SubCategory, Brand
 from product.serializers import ProductListBySerializer, BrandListSerializer
 from rest_framework.generics import ListAPIView
 from rest_framework.exceptions import ValidationError
@@ -83,13 +83,13 @@ class  GamingDataAPIView(APIView):
         slider_images = SliderImage.objects.filter(Q(is_active=True), Q(is_gaming=True))
         slider_images_serializer = SliderImagesListSerializer(slider_images, many=True, context={"request": request})
 
-        # categories_with_logo
-        categories_with_logo = Category.objects.filter(is_active=True, is_gaming=True).order_by('-created_at')[:8]
-        categories_with_logo_serializer = product_catListSerializer(categories_with_logo, many=True, context={"request": request})
+        # sub_categories_with_logo
+        categories_with_logo = SubCategory.objects.filter(category__is_gaming__icontains=True, is_active=True).order_by('-created_at')[:8]
+        categories_with_logo_serializer = product_sub_catListSerializer(categories_with_logo, many=True, context={"request": request})
 
         # popular_categories
-        popular_categories = Category.objects.filter(is_active=True, is_gaming=True).order_by('-created_at')
-        popular_categories_serializer = product_catListSerializer(popular_categories, many=True, context={"request": request})
+        popular_categories = SubCategory.objects.filter(category__is_gaming__icontains=True, is_active=True).order_by('-created_at')
+        popular_categories_serializer = product_sub_catListSerializer(popular_categories, many=True, context={"request": request})
 
         # popular products
         popular = Product.objects.filter(category__is_gaming__icontains=True, status="PUBLISH").annotate(count=Count('product_review_product')).order_by('-count')

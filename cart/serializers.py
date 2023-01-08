@@ -178,7 +178,8 @@ class ProductItemCheckoutSerializer(serializers.ModelSerializer):
         fields = ['id',
                   'product',
                   'quantity',
-                  'unit_price'
+                  'unit_price',
+                  'warranty'
                   ]
 
 
@@ -216,8 +217,15 @@ class CheckoutSerializer(serializers.ModelSerializer):
                 quantity = order_item['quantity']
                 unit_price = order_item['unit_price']
                 total_price = float(unit_price) * float(quantity)
+
+                try:
+                    warranty = order_item['warranty']
+                except:
+                    warranty = ''
+
+
                 order_item_instance = OrderItem.objects.create(order=order_instance, product=product, quantity=int(
-                    quantity), unit_price=unit_price)
+                    quantity), unit_price=unit_price, total_price=total_price, warranty=warranty)
 
                 product_obj = Product.objects.get(id=product.id)
 

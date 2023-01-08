@@ -199,6 +199,7 @@ class OrderItem(AbstractTimeStamp):
         max_length=255, null=False, blank=False, default=0)
     total_price = models.FloatField(
         max_length=255, null=False, blank=False, default=0)
+    warranty = models.CharField(max_length=100, default='', null=True, blank=True)
 
     @property
     def subtotal(self):

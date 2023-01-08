@@ -82,6 +82,7 @@ class FAQ(AbstractTimeStamp):
 class ContactUs(AbstractTimeStamp):
     name = models.CharField(max_length=255, null=True, blank=True)
     email = models.EmailField(null=True, blank=True)
+    phone = models.CharField(max_length=20, null=True, blank=True)
     message = models.TextField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
 

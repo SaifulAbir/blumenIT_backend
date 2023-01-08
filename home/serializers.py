@@ -42,6 +42,7 @@ class ContactUsSerializer(serializers.ModelSerializer):
                 'id',
                 'name',
                 'email',
+                'phone',
                 'message',
                 'is_active',
                 ]

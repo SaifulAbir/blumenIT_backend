@@ -81,8 +81,9 @@ class ContactUsAPIView(APIView):
         try:
             name = request.data.get('name')
             email = request.data.get('email')
+            phone = request.data.get('phone')
             message = request.data.get('message')
-            contact = ContactUs(name=name, email=email, message=message)
+            contact = ContactUs(name=name, email=email, phone=phone, message=message)
             contact.save()
             return Response({"message": "Your message has been sent successfully."})
         except:

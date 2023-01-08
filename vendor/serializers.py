@@ -5,7 +5,7 @@ from rest_framework.exceptions import ValidationError
 from product.models import Brand, Category, DiscountTypes, FlashDealInfo, FlashDealProduct, Inventory, \
     Product, ProductImages, ProductReview, ProductTags, ProductVariation, ProductVideoProvider, \
     ShippingClass, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units,\
-    VatType, Attribute, FilterAttributes, ProductFilterAttributes, AttributeValues
+    VatType, Attribute, FilterAttributes, ProductFilterAttributes, AttributeValues, ProductWarranty, Warranty
 from user.models import User
 from cart.models import Order
 from user.serializers import CustomerProfileSerializer
@@ -490,6 +490,18 @@ class ProductFilterAttributesSerializer(serializers.ModelSerializer):
         ]
 
 
+class ProductWarrantiesSerializer(serializers.ModelSerializer):
+    warranty = serializers.PrimaryKeyRelatedField(queryset=Warranty.objects.filter(is_active=True), many=False, write_only=True, required= True)
+    class Meta:
+        model = ProductWarranty
+        fields = [
+            'id',
+            'warranty',
+            'warranty_value',
+            'warranty_value_type'
+        ]
+
+
 # product create serializer start
 class ProductCreateSerializer(serializers.ModelSerializer):
     title = serializers.CharField(required=True)
@@ -512,6 +524,7 @@ class ProductCreateSerializer(serializers.ModelSerializer):
         many=True, required=False)
     flash_deal = FlashDealSerializer(many=True, required=False)
     product_filter_attributes = ProductFilterAttributesSerializer(many=True, required=False)
+    product_warranties = ProductWarrantiesSerializer(many=True, required=False)
 
     class Meta:
         model = Product
@@ -558,7 +571,8 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             'shipping_class',
             'vat',
             'vat_type',
-            'product_filter_attributes'
+            'product_filter_attributes',
+            'product_warranties'
         ]
 
         read_only_fields = ('slug', 'sell_count')
@@ -640,6 +654,12 @@ class ProductCreateSerializer(serializers.ModelSerializer):
         except:
             product_filter_attributes = ''
 
+        # product_warranties
+        try:
+            product_warranties = validated_data.pop('product_warranties')
+        except:
+            product_warranties = ''
+
         product_instance = Product.objects.create(**validated_data)
 
         try:
@@ -713,6 +733,14 @@ class ProductCreateSerializer(serializers.ModelSerializer):
                     attribute_value = product_filter_attribute['attribute_value']
                     if attribute_value:
                         product_filter_attribute_instance = ProductFilterAttributes.objects.create(attribute_value=attribute_value,  product=product_instance)
+
+            # product_warranties
+            if product_warranties:
+                for product_warranty in product_warranties:
+                    warranty = product_warranty['warranty']
+                    warranty_value = product_warranty['warranty_value']
+                    warranty_value_type = product_warranty['warranty_value_type']
+                    product_warranty_instance = ProductWarranty.objects.create(product=product_instance, warranty=warranty, warranty_value=warranty_value, warranty_value_type=warranty_value_type)
 
             return product_instance
         except:
@@ -796,6 +824,9 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
     vat_type = VatTypeSerializer(many=False, required=False)
     existing_product_filter_attributes = serializers.SerializerMethodField('get_product_filter_attributes')
     product_filter_attributes = ProductFilterAttributesSerializer(many=True, required=False)
+    existing_product_warranties = serializers.SerializerMethodField('get_product_warranties')
+    product_warranties = ProductWarrantiesSerializer(many=True, required=False)
+
 
     class Meta:
         model = Product
@@ -852,9 +883,10 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
                     'shipping_class',
                     'vat',
                     'vat_type',
-                    'warranty',
                     'existing_product_filter_attributes',
-                    'product_filter_attributes'
+                    'product_filter_attributes',
+                    'existing_product_warranties',
+                    'product_warranties'
                 ]
 
     def get_product_category_name(self, obj):
@@ -927,6 +959,11 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
     def get_product_filter_attributes(self, product):
         queryset = ProductFilterAttributes.objects.filter(product=product, is_active = True)
         serializer = ProductFilterAttributesSerializer(instance=queryset, many=True)
+        return serializer.data
+
+    def get_product_warranties(self, product):
+        queryset = ProductWarranty.objects.filter(product=product, is_active = True)
+        serializer = ProductWarrantiesSerializer(instance=queryset, many=True)
         return serializer.data
 
 
@@ -1006,6 +1043,12 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
             product_filter_attributes = validated_data.pop('product_filter_attributes')
         except:
             product_filter_attributes = ''
+
+        # product_warranties
+        try:
+            product_warranties = validated_data.pop('product_warranties')
+        except:
+            product_warranties = ''
 
 
         try:
@@ -1132,6 +1175,26 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
                     product=instance).exists()
                 if p_f_a == True:
                     ProductFilterAttributes.objects.filter(
+                        product=instance).delete()
+
+            # product_warranties
+            if product_warranties:
+                p_w = ProductWarranty.objects.filter(
+                    product=instance).exists()
+                if p_w == True:
+                    ProductWarranty.objects.filter(
+                        product=instance).delete()
+
+                for product_warranties in product_warranties:
+                    warranty = product_filter_attribute['warranty']
+                    warranty_value = product_filter_attribute['warranty_value']
+                    warranty_value_type = product_filter_attribute['warranty_value_type']
+                    product_warranty_instance = p_w.objects.create(product=instance, warranty=warranty, warranty_value=warranty_value, warranty_value_type=warranty_value_type)
+            else:
+                p_w = ProductWarranty.objects.filter(
+                    product=instance).exists()
+                if p_w == True:
+                    ProductWarranty.objects.filter(
                         product=instance).delete()
 
             validated_data.update({"updated_at": timezone.now()})

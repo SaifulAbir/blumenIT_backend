@@ -5,7 +5,7 @@ from .utils import unique_order_id_generator_for_order
 from django.db.models.signals import pre_save
 from user.models import User
 from django.utils.translation import gettext as _
-from product.models import Product, ShippingClass, DiscountTypes
+from product.models import Product, ShippingClass, DiscountTypes, ProductWarranty
 from django.utils import timezone
 
 '''
@@ -199,7 +199,9 @@ class OrderItem(AbstractTimeStamp):
         max_length=255, null=False, blank=False, default=0)
     total_price = models.FloatField(
         max_length=255, null=False, blank=False, default=0)
-    warranty = models.CharField(max_length=100, default='', null=True, blank=True)
+    product_warranty = models.ForeignKey(
+        ProductWarranty, on_delete=models.CASCADE, related_name='order_item_product_warranty', blank=True, null=True)
+    price_after_add_warranty = models.FloatField(max_length=255, null=False, blank=False, default=0)
 
     @property
     def subtotal(self):

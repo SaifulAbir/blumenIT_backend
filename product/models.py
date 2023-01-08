@@ -607,3 +607,36 @@ class ProductFilterAttributes(AbstractTimeStamp):
 
     def __str__(self):
         return  'Product: ' + self.product.title
+
+
+class Warranty(AbstractTimeStamp):
+    title = models.CharField(max_length=800, default='')
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'Warranty'
+        verbose_name_plural = 'Warranties'
+        db_table = 'warranty'
+
+    def __str__(self):
+        return  self.title
+
+
+class ProductWarranty(AbstractTimeStamp):
+    WARRANTY_VALUE_TYPE = [
+        ('PERCENTAGE', '%'),
+        ('FIX', 'Fix')]
+
+    product = models.ForeignKey(Product, related_name='product_warranty_product', blank=True, null=True, on_delete=models.PROTECT)
+    warranty = models.ForeignKey(Warranty, related_name='product_warranty_warranty', blank=True, null=True, on_delete=models.PROTECT)
+    warranty_value = models.IntegerField()
+    warranty_value_type = models.CharField(max_length=20, choices=WARRANTY_VALUE_TYPE, default=WARRANTY_VALUE_TYPE[0][0])
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'ProductWarranty'
+        verbose_name_plural = 'ProductWarranties'
+        db_table = 'product_warranty'
+
+    def __str__(self):
+        return  'product: ' + self.product.title + ' warranty: ' + self.warranty.title

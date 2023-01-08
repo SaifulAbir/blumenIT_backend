@@ -21,19 +21,19 @@ class   HomeDataAPIView(APIView):
     def get(self, request):
 
         # slider images
-        slider_images = SliderImage.objects.filter(Q(is_active=True), Q(is_gaming=False))
+        slider_images = SliderImage.objects.filter(Q(is_active=True))
         slider_images_serializer = SliderImagesListSerializer(slider_images, many=True, context={"request": request})
 
         # featured_categories
-        featured_categories = Category.objects.filter(is_featured=True, is_active=True, is_gaming=False).order_by('-created_at')
+        featured_categories = Category.objects.filter(is_featured=True, is_active=True).order_by('-created_at')
         featured_categories_serializer = product_catListSerializer(featured_categories, many=True, context={"request": request})
 
         # featured
-        featured = Product.objects.filter(status='PUBLISH', is_featured=True, category__is_gaming__icontains=False).order_by('-created_at')
+        featured = Product.objects.filter(status='PUBLISH', is_featured=True).order_by('-created_at')
         featured_serializer = ProductListBySerializer(featured, many=True, context={"request": request})
 
         # most popular
-        popular = Product.objects.filter(status="PUBLISH", category__is_gaming__icontains=False).annotate(count=Count('product_review_product')).order_by('-count')
+        popular = Product.objects.filter(status="PUBLISH").annotate(count=Count('product_review_product')).order_by('-count')
         popular_serializer = ProductListBySerializer(popular, many=True, context={"request": request})
 
         # gaming product
@@ -41,7 +41,7 @@ class   HomeDataAPIView(APIView):
         gaming_serializer = ProductListBySerializer(gaming_product, many=True, context={"request": request})
 
         # brand list
-        brand_list = Brand.objects.filter(is_active=True, is_gaming=False).order_by('-created_at')
+        brand_list = Brand.objects.filter(is_active=True).order_by('-created_at')
         brand_list_serializer = BrandListSerializer(brand_list, many=True, context={"request": request})
 
         # single row data
@@ -53,11 +53,11 @@ class   HomeDataAPIView(APIView):
         poster_under_data_serializer = PosterUnderSliderDataSerializer(poster_under_data, many=True, context={"request": request})
 
         # poster under popular products
-        poster_under_popular_products_data = PopularProductsUnderPoster.objects.filter(Q(is_active=True), Q(is_gaming=False), Q(is_gaming=False)).order_by('-created_at')[:3]
+        poster_under_popular_products_data = PopularProductsUnderPoster.objects.filter(Q(is_active=True)).order_by('-created_at')[:3]
         poster_under_popular_products_data_serializer = PosterUnderPopularProductsDataSerializer(poster_under_popular_products_data, many=True, context={"request": request})
 
         # poster under featured products
-        poster_under_featured_products_data = FeaturedProductsUnderPoster.objects.filter(Q(is_active=True), Q(is_gaming=False)).order_by('-created_at')[:3]
+        poster_under_featured_products_data = FeaturedProductsUnderPoster.objects.filter(Q(is_active=True)).order_by('-created_at')[:3]
         poster_under_featured_products_data_serializer = PosterUnderFeaturedProductsDataSerializer(poster_under_featured_products_data, many=True, context={"request": request})
 
         return Response({

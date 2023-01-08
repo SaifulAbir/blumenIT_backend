@@ -272,8 +272,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
         try:
             queryset = ProductImages.objects.filter(
                 product=obj, is_active=True).distinct()
-            serializer = ProductImageSerializer(instance=queryset, many=True, context={
-                                                'request': self.context['request']})
+            serializer = ProductImageSerializer(instance=queryset, many=True, context={'request': self.context['request']})
             return serializer.data
         except:
             return []
@@ -286,7 +285,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
     def get_related_products(self, obj):
         selected_related_products = Product.objects.filter(
             category=obj.category.id, status='PUBLISH').exclude(id=obj.id).order_by('-sell_count')
-        return ProductListBySerializer(selected_related_products, many=True).data
+        return ProductListBySerializer(selected_related_products, many=True, context={'request': self.context['request']}).data
 
 
 class ProductListBySerializer(serializers.ModelSerializer):

@@ -50,6 +50,7 @@ class Category(AbstractTimeStamp):
     is_active = models.BooleanField(null=False, blank=False, default=True)
     pc_builder = models.BooleanField(null=False, blank=False, default=False)
     is_featured = models.BooleanField(null=False, blank=False, default=False)
+    is_gaming = models.BooleanField(null=False, blank=False, default=False)
 
     subtitle = models.TextField(null=True, blank=True, default="")
 
@@ -129,6 +130,7 @@ class Brand(AbstractTimeStamp):
         max_length=100, null=False, blank=True)
     logo = models.ImageField(upload_to='brand', blank=True, null=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
+    is_gaming = models.BooleanField(null=False, blank=False, default=False)
 
     class Meta:
         verbose_name = 'Brand'

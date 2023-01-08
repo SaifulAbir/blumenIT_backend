@@ -17,6 +17,7 @@ class SliderImage(AbstractTimeStamp):
     bold_text = models.TextField(null=True, blank=True)
     small_text = models.TextField(null=True, blank=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
+    is_gaming = models.BooleanField(null=False, blank=False, default=False)
 
     class Meta:
         verbose_name = 'SliderImage'
@@ -129,6 +130,7 @@ class PopularProductsUnderPoster(AbstractTimeStamp):
     bold_text = models.TextField(null=True, blank=True)
     small_text = models.TextField(null=True, blank=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
+    is_gaming = models.BooleanField(null=False, blank=False, default=False)
 
     class Meta:
         verbose_name = 'PopularProductsUnderPoster'
@@ -144,6 +146,7 @@ class FeaturedProductsUnderPoster(AbstractTimeStamp):
     bold_text = models.TextField(null=True, blank=True)
     small_text = models.TextField(null=True, blank=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
+    is_gaming = models.BooleanField(null=False, blank=False, default=False)
 
     class Meta:
         verbose_name = 'FeaturedProductsUnderPoster'

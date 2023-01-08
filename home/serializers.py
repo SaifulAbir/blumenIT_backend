@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import *
-from product.models import Category
+from product.models import Category, SubCategory, SubSubCategory
 
 class SliderImagesListSerializer(serializers.ModelSerializer):
     class Meta:
@@ -94,3 +94,41 @@ class PosterUnderFeaturedProductsDataSerializer(serializers.ModelSerializer):
                 'is_active',
                 ]
 
+
+
+class GamingSubSubCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubSubCategory
+        fields = ['id', 'title']
+
+
+class SubCategorySerializerForMegaMenu(serializers.ModelSerializer):
+    sub_sub_category = serializers.SerializerMethodField()
+    class Meta:
+        model = SubCategory
+        fields = [
+            'id',
+            'title',
+            'sub_sub_category'
+        ]
+
+    def get_sub_sub_category(self, obj):
+        selected_sub_sub_category = SubSubCategory.objects.filter(
+            sub_category=obj).distinct()
+        return GamingSubSubCategorySerializer(selected_sub_sub_category, many=True).data
+
+
+class StoreCategoryAPIViewListSerializer(serializers.ModelSerializer):
+    sub_category = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Category
+        fields = ['id', 'title', 'icon', 'banner', 'sub_category']
+
+    def get_sub_category(self, obj):
+        try:
+            queryset = SubCategory.objects.filter(category=obj.id, is_active=True).distinct()
+            serializer = SubCategorySerializerForMegaMenu(instance=queryset, many=True)
+            return serializer.data
+        except:
+            return []

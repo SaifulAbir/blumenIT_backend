@@ -64,6 +64,22 @@ class SubCategorySerializerForMegaMenu(serializers.ModelSerializer):
         return SubSubCategorySerializer(selected_sub_sub_category, many=True).data
 
 
+class StoreCategoryAPIViewListSerializer(serializers.ModelSerializer):
+    sub_category = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Category
+        fields = ['id', 'title', 'icon', 'banner', 'sub_category']
+
+    def get_sub_category(self, obj):
+        try:
+            queryset = SubCategory.objects.filter(category=obj.id, is_active=True).distinct()
+            serializer = SubCategorySerializerForMegaMenu(instance=queryset, many=True)
+            return serializer.data
+        except:
+            return []
+
+
 class BrandSerializer(serializers.ModelSerializer):
     title = serializers.CharField(required=True)
 
@@ -183,22 +199,6 @@ class SpecificationSerializer(serializers.ModelSerializer):
         queryset = SpecificationValue.objects.filter(specification=instense.id, is_active = True)
         serializer = SpecificationValuesSerializer(instance=queryset, many=True)
         return serializer.data
-
-
-class StoreCategoryAPIViewListSerializer(serializers.ModelSerializer):
-    sub_category = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Category
-        fields = ['id', 'title', 'icon', 'banner', 'sub_category']
-
-    def get_sub_category(self, obj):
-        try:
-            queryset = SubCategory.objects.filter(category=obj.id, is_active=True).distinct()
-            serializer = SubCategorySerializerForMegaMenu(instance=queryset, many=True)
-            return serializer.data
-        except:
-            return []
 
 
 class ProductDetailsSerializer(serializers.ModelSerializer):

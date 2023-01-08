@@ -26,11 +26,6 @@ urlpatterns = [
 
      path('pc_builder-categories/',PcBuilderCategoryAPIView.as_view()),
      path('pc_builder/',PcBuilderChooseAPIView.as_view()),
-
-     path('gaming-category-list/', GamingCategoryListAPIView.as_view()),
-     path('product-list-by-category-gaming-popular-products/<int:id>/<str:type>/<int:pagination>/',
-          ProductListByCategoryGamingPopularProductsAPI.as_view()),
-     path('gaming-featured-product-list/<int:pagination>/', GamingFeaturedProductListAPI.as_view()),
      path('brand-list/', BrandListAPIView.as_view()),
 
 ]

@@ -249,7 +249,9 @@ class ProductListBySerializer(serializers.ModelSerializer):
             'review_count',
             'shipping_time',
             'product_reviews',
-            'warranty'
+            'warranty',
+            'short_description',
+            'full_description'
         ]
 
     def get_avg_rating(self, ob):

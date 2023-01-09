@@ -24,6 +24,16 @@ class product_catListSerializer(serializers.ModelSerializer):
                 ]
 
 
+class product_sub_catListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubCategory
+        fields = [
+                'id',
+                'title',
+                'icon'
+                ]
+
+
 class FaqSerializer(serializers.ModelSerializer):
     class Meta:
         model = FAQ

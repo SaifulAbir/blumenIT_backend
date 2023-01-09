@@ -639,4 +639,4 @@ class ProductWarranty(AbstractTimeStamp):
         db_table = 'product_warranty'
 
     def __str__(self):
-        return  'product: ' + self.product.title + ' warranty: ' + self.warranty.title
+        return  'id: ' + str(self.id) + ' product: ' + self.product.title + ' warranty: ' + self.warranty.title

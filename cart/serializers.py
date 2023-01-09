@@ -35,10 +35,11 @@ class CheckoutDetailsOrderItemSerializer(serializers.ModelSerializer):
     product_thumb = serializers.ImageField(source='product.thumbnail',read_only=True)
     product_price = serializers.SerializerMethodField()
     product_specification = serializers.SerializerMethodField('get_product_specification')
+    product_warranty_title = serializers.CharField(source='product_warranty.warranty.title',read_only=True)
 
     class Meta:
         model = OrderItem
-        fields = ['id', 'product_title', 'product_thumb', 'quantity', 'product_price', 'product_sku', 'product_specification']
+        fields = ['id', 'product_title', 'product_thumb', 'product_price', 'product_sku', 'product_specification', 'quantity', 'unit_price', 'total_price', 'product_warranty', 'product_warranty_title', 'price_after_add_warranty' ]
 
     def get_product_price(self, obj):
         product_price = Product.objects.filter(id=obj.product.id)[
@@ -173,13 +174,14 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 
 class ProductItemCheckoutSerializer(serializers.ModelSerializer):
+    product_warranty = serializers.PrimaryKeyRelatedField(queryset=ProductWarranty.objects.all(), many=False, write_only=True, required= False)
     class Meta:
         model = OrderItem
         fields = ['id',
                   'product',
                   'quantity',
                   'unit_price',
-                  'warranty'
+                  'product_warranty'
                   ]
 
 
@@ -219,13 +221,27 @@ class CheckoutSerializer(serializers.ModelSerializer):
                 total_price = float(unit_price) * float(quantity)
 
                 try:
-                    warranty = order_item['warranty']
+                    product_warranty = order_item['product_warranty']
                 except:
-                    warranty = ''
+                    product_warranty = None
 
+                if product_warranty:
+                    warranty_value = product_warranty.warranty_value
+                    warranty_value_type = product_warranty.warranty_value_type
 
-                order_item_instance = OrderItem.objects.create(order=order_instance, product=product, quantity=int(
-                    quantity), unit_price=unit_price, total_price=total_price, warranty=warranty)
+                    if warranty_value_type == 'PERCENTAGE':
+                        price_after_add_warranty = float((float(unit_price) / 100) * float(warranty_value))
+                        price_after_add_warranty = unit_price + price_after_add_warranty
+                        print(price_after_add_warranty)
+                    elif warranty_value_type == 'FIX':
+                        price_after_add_warranty = float(float(unit_price) + float(warranty_value))
+                        price_after_add_warranty = unit_price + price_after_add_warranty
+
+                    order_item_instance = OrderItem.objects.create(order=order_instance, product=product, quantity=int(
+                    quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, price_after_add_warranty=price_after_add_warranty)
+                else:
+                    order_item_instance = OrderItem.objects.create(order=order_instance, product=product, quantity=int(
+                    quantity), unit_price=unit_price, total_price=total_price)
 
                 product_obj = Product.objects.get(id=product.id)
 

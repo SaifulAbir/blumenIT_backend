@@ -102,10 +102,11 @@ class CustomerOrderItemsSerializer(serializers.ModelSerializer):
     product_thumb = serializers.ImageField(source='product.thumbnail',read_only=True)
     product_price = serializers.SerializerMethodField()
     product_slug = serializers.CharField(source='product.slug',read_only=True)
+    product_warranty_title = serializers.CharField(source='product_warranty.warranty.title',read_only=True)
 
     class Meta:
         model = OrderItem
-        fields = ['id', 'product_name', 'product_thumb', 'product_slug', 'quantity', 'product_price']
+        fields = ['id', 'product_name', 'product_thumb', 'product_slug', 'product_price', 'quantity', 'unit_price', 'total_price', 'product_warranty', 'product_warranty_title', 'price_after_add_warranty']
 
     def get_product_name(self, obj):
         product_name = Product.objects.filter(id=obj.product.id)[
@@ -141,9 +142,12 @@ class CustomerOrderDetailsSerializer(serializers.ModelSerializer):
         return serializer.data
 
     def get_delivery_address(self, obj):
-        queryset = DeliveryAddress.objects.filter(id=obj.delivery_address.id)
-        serializer = CustomerDeliveryAddressSerializer(instance=queryset, many=True)
-        return serializer.data
+        try:
+            queryset = DeliveryAddress.objects.filter(id=obj.delivery_address.id)
+            serializer = CustomerDeliveryAddressSerializer(instance=queryset, many=True)
+            return serializer.data
+        except:
+            return None
 
     def get_sub_total(self, obj):
         order_items = OrderItem.objects.filter(order=obj)

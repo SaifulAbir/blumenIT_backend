@@ -660,6 +660,9 @@ class ProductCreateSerializer(serializers.ModelSerializer):
         except:
             product_warranties = ''
 
+        # print("product_warranties")
+        # print(product_warranties)
+
         product_instance = Product.objects.create(**validated_data)
 
         try:
@@ -734,6 +737,7 @@ class ProductCreateSerializer(serializers.ModelSerializer):
                     if attribute_value:
                         product_filter_attribute_instance = ProductFilterAttributes.objects.create(attribute_value=attribute_value,  product=product_instance)
 
+            
             # product_warranties
             if product_warranties:
                 for product_warranty in product_warranties:

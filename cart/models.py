@@ -197,11 +197,12 @@ class OrderItem(AbstractTimeStamp):
     quantity = models.IntegerField(default=1)
     unit_price = models.FloatField(
         max_length=255, null=False, blank=False, default=0)
+    unit_price_after_add_warranty = models.FloatField(max_length=255, null=False, blank=False, default=0)
     total_price = models.FloatField(
         max_length=255, null=False, blank=False, default=0)
     product_warranty = models.ForeignKey(
         ProductWarranty, on_delete=models.CASCADE, related_name='order_item_product_warranty', blank=True, null=True)
-    price_after_add_warranty = models.FloatField(max_length=255, null=False, blank=False, default=0)
+    
 
     @property
     def subtotal(self):

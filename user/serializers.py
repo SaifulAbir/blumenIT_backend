@@ -106,7 +106,7 @@ class CustomerOrderItemsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = OrderItem
-        fields = ['id', 'product_name', 'product_thumb', 'product_slug', 'product_price', 'quantity', 'unit_price', 'total_price', 'product_warranty', 'product_warranty_title', 'price_after_add_warranty']
+        fields = ['id', 'product_name', 'product_thumb', 'product_slug', 'product_price', 'quantity', 'unit_price', 'unit_price_after_add_warranty', 'total_price', 'product_warranty', 'product_warranty_title']
 
     def get_product_name(self, obj):
         product_name = Product.objects.filter(id=obj.product.id)[

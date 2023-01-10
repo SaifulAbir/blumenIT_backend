@@ -60,7 +60,7 @@ class Category(AbstractTimeStamp):
         db_table = 'category'
 
     def __str__(self):
-        return 'id: ' + str(self.id) + ' Title: ' + self.title + ' Ordering Number:' + str(self.ordering_number)
+        return 'id: ' + str(self.id) + ' Title: ' + self.title + ' pc_builder:' + str(self.pc_builder)
 
 
 class SubCategory(AbstractTimeStamp):
@@ -80,7 +80,7 @@ class SubCategory(AbstractTimeStamp):
         db_table = 'sub_category'
 
     def __str__(self):
-        return 'id: ' + str(self.id) + ' title: ' + self.title + ' Ordering Number:' + str(self.ordering_number)
+        return 'id: ' + str(self.id) + ' title: ' + self.title + ' pc_builder:' + str(self.pc_builder)
 
 
 class SubSubCategory(AbstractTimeStamp):
@@ -640,3 +640,33 @@ class ProductWarranty(AbstractTimeStamp):
 
     def __str__(self):
         return  'id: ' + str(self.id) + ' product: ' + self.product.title + ' warranty: ' + self.warranty.title
+
+
+class SavePc(AbstractTimeStamp):
+    title = models.CharField(max_length=300, default='')
+    description = models.TextField(default='', null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.PROTECT,related_name='save_pc_user', blank=True, null=True)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'SavePc'
+        verbose_name_plural = 'SavePcs'
+        db_table = 'save_pc'
+
+    def __str__(self):
+        return  'id: ' + str(self.id) + ' title: ' + self.title + ' user: ' + self.user.email
+
+
+class SavePcItems(AbstractTimeStamp):
+    save_pc = models.ForeignKey(SavePc, on_delete=models.CASCADE, related_name='save_pc_items_save_pc', blank=False, null=False)
+    sub_category = models.ForeignKey(SubCategory, related_name='save_pc_items_sub_category', blank=False, null=True, on_delete=models.PROTECT)
+    product = models.ForeignKey(Product, related_name='save_pc_items_product', blank=True, null=True, on_delete=models.PROTECT)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'SavePcItems'
+        verbose_name_plural = 'SavePcItems'
+        db_table = 'save_pc_items'
+
+    def __str__(self):
+        return  'id: ' + str(self.id) + ' sub_category: ' + self.sub_category.title + ' product: ' + self.product.title

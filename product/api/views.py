@@ -499,3 +499,5 @@ class BrandListAPIView(ListAPIView):
             return queryset
         else:
             raise ValidationError({"msg": "No brand available! " })
+
+

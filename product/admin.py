@@ -2,7 +2,7 @@ from django.contrib import admin
 from product.models import FlashDealProduct, Specification, SpecificationValue, TextColor, Attribute, AttributeValues, \
     Category, FlashDealInfo, Inventory, ProductImages, ShippingClass, SubCategory, SubSubCategory, Brand, Tags, Units, \
     DiscountTypes, Product, VariantType, ProductTags, ProductReview, ProductVideoProvider, VatType, SpecificationTitle, \
-    FilterAttributes, ProductFilterAttributes, ProductCondition, Warranty, ProductWarranty
+    FilterAttributes, ProductFilterAttributes, ProductCondition, Warranty, ProductWarranty, SavePc, SavePcItems
 
 
 admin.site.register(Category)
@@ -59,6 +59,17 @@ class ProductWarrantyInline(admin.TabularInline):
 class ProductAdmin(admin.ModelAdmin):
     inlines = [
         ProductImageInline, ProductTagsInline, SpecificationInline, ProductFilterAttributesInline, ProductWarrantyInline
+    ]
+
+class SavePcItemsInline(admin.TabularInline):
+    model = SavePcItems
+    fields = ['sub_category', 'product']
+
+
+@admin.register(SavePc)
+class SavePcAdmin(admin.ModelAdmin):
+    inlines = [
+        SavePcItemsInline
     ]
 
 

@@ -3,7 +3,7 @@ from rest_framework import serializers
 from user import models as user_models
 from user.models import CustomerProfile, Subscription, User, OTPModel
 from cart.models import Order, OrderItem, DeliveryAddress
-from product.models import Product
+from product.models import Product, SavePc, SavePcItems, SubCategory
 from cart.models import Wishlist
 from product.serializers import ProductListBySerializer
 
@@ -274,3 +274,54 @@ class WishlistDataSerializer(serializers.ModelSerializer):
         serializer = ProductListBySerializer(instance=queryset, many=True)
         return serializer.data
 
+
+class SavePcItemsSerializer(serializers.ModelSerializer):
+    sub_category = serializers.PrimaryKeyRelatedField(queryset=SubCategory.objects.filter(pc_builder=True), many=False, write_only=True, required= True)
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.filter(status='PUBLISH'), many=False, write_only=True, required= False)
+    class Meta:
+        model = SavePcItems
+        fields = [
+            'id',
+            'sub_category',
+            'product'
+        ]
+
+class SavePcCreateSerializer(serializers.ModelSerializer):
+    save_pc_items = SavePcItemsSerializer(many=True, required=False)
+    class Meta:
+        model = SavePc
+        fields = ['id', 'title', 'description', 'save_pc_items']
+
+    def create(self, validated_data):
+         # save_pc_items
+        try:
+            save_pc_items = validated_data.pop('save_pc_items')
+        except:
+            save_pc_items = ''
+
+        save_pc_instance = SavePc.objects.create(**validated_data, user=self.context['request'].user )
+
+        try:
+            # save_pc_items
+            if save_pc_items:
+                for save_pc_item in save_pc_items:
+                    sub_category = save_pc_item['sub_category']
+                    product = save_pc_item['product']
+                    save_pc_items_instance = SavePcItems.objects.create(save_pc=save_pc_instance, sub_category=sub_category, product=product)
+
+            return save_pc_instance
+        except:
+            return save_pc_instance
+
+
+class SavaPcDataSerializer(serializers.ModelSerializer):
+    created_at = serializers.DateTimeField(format="%d %B, %Y %I:%M %p")
+    class Meta:
+        model = SavePc
+        fields = ['id', 'title', 'description', 'created_at']
+
+
+class SavePcDetailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SavePcItems
+        fields = ['id', 'sub_category', 'product']

@@ -28,10 +28,12 @@ from user.models import CustomerProfile, User, OTPModel
 from rest_framework.views import APIView
 from user.serializers import  SubscriptionSerializer,  \
     ChangePasswordSerializer, OTPSendSerializer, OTPVerifySerializer, OTPReSendSerializer, SetPasswordSerializer, CustomerOrderListSerializer, \
-    CustomerOrderDetailsSerializer, CustomerProfileSerializer, CustomerAddressListSerializer, CustomerAddressSerializer, WishlistDataSerializer
+    CustomerOrderDetailsSerializer, CustomerProfileSerializer, CustomerAddressListSerializer, CustomerAddressSerializer, \
+    WishlistDataSerializer, SavePcCreateSerializer, SavaPcDataSerializer, SavePcDetailsSerializer
 
 from vendor.pagination import OrderCustomPagination
 from cart.models import Order, DeliveryAddress, Wishlist
+from product.models import SavePc, SavePcItems
 
 
 
@@ -449,3 +451,55 @@ class WishlistDataAPIView(ListAPIView):
             raise ValidationError(
                 {"msg": 'You can not see Wishlist data, because you are not an Customer!'})
 
+
+class SavePcAPIView(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = SavePcCreateSerializer
+
+    def post(self, request, *args, **kwargs):
+        if self.request.user.is_customer == True:
+            uid = User.objects.get(id=self.request.user.id)
+            if uid:
+                return super(SavePcAPIView, self).post(request, *args, **kwargs)
+        else:
+            raise ValidationError({"msg": 'You are not a Customer.'})
+
+
+class SavePcListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = SavaPcDataSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_customer == True:
+            save_pc_obj_exist = SavePc.objects.filter(Q(user=self.request.user), Q(is_active=True)).exists()
+            if save_pc_obj_exist:
+                queryset = SavePc.objects.filter(Q(user=self.request.user), Q(is_active=True)).order_by('-created_at')
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'Save Pc data does not exist!'})
+        else:
+            raise ValidationError(
+                {"msg": 'You can not see Save Pc data, because you are not an Customer!'})
+
+
+class SavePcViewAPIView(RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = SavePcDetailsSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_object(self):
+        id = self.kwargs['id']
+        if self.request.user.is_customer == True:
+            save_pc_items_obj_exist = SavePcItems.objects.filter(save_pc=id).exists()
+            print(save_pc_items_obj_exist)
+            if save_pc_items_obj_exist:
+                queryset = SavePcItems.objects.filter(save_pc=id)
+                print(queryset)
+                return queryset
+            else:
+                raise ValidationError({"msg": 'Save Pc Items data does not exist!'})
+        else:
+            raise ValidationError(
+                {"msg": 'You can not see Save Pc data, because you are not an Customer!'})

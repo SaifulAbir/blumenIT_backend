@@ -70,10 +70,15 @@ class SellerUpdateSerializer(serializers.ModelSerializer):
 
 class SellerSerializer(serializers.ModelSerializer):
     logo = serializers.ImageField(allow_null=True)
+    total_product = serializers.SerializerMethodField('get_total_product')
 
     class Meta:
         model = Seller
-        fields = ['id', 'name', 'address', 'phone', 'email', 'logo', 'is_active']
+        fields = ['id', 'name', 'address', 'phone', 'email', 'logo', 'is_active', 'total_product']
+
+    def get_total_product(self, obj):
+        total_product_count = Product.objects.filter(status='PUBLISH', seller=obj).count()
+        return total_product_count
 
 
 class SellerDetailSerializer(serializers.ModelSerializer):

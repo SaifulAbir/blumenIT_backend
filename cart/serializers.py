@@ -185,7 +185,6 @@ class ProductItemCheckoutSerializer(serializers.ModelSerializer):
                   'product',
                   'quantity',
                   'unit_price',
-                  'unit_price_after_add_warranty',
                   'product_warranty'
                   ]
 
@@ -223,8 +222,8 @@ class CheckoutSerializer(serializers.ModelSerializer):
                 product = order_item['product']
                 quantity = order_item['quantity']
                 unit_price = order_item['unit_price']
-                if order_item['unit_price_after_add_warranty'] != 0.0:
-                    unit_price = order_item['unit_price_after_add_warranty']
+                # if order_item['unit_price_after_add_warranty'] != 0.0:
+                #     unit_price = order_item['unit_price_after_add_warranty']
                 total_price = float(unit_price) * float(quantity)
 
                 try:
@@ -242,6 +241,8 @@ class CheckoutSerializer(serializers.ModelSerializer):
                     elif warranty_value_type == 'FIX':
                         unit_price_after_add_warranty = float(float(unit_price) + float(warranty_value))
                         unit_price_after_add_warranty = unit_price + unit_price_after_add_warranty
+
+                    total_price =  float(unit_price_after_add_warranty) * float(quantity)
 
                     order_item_instance = OrderItem.objects.create(order=order_instance, product=product, quantity=int(
                     quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty)

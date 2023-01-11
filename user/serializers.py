@@ -172,6 +172,8 @@ class CustomerOrderDetailsSerializer(serializers.ModelSerializer):
         total_price = 0
         for order_item in order_items:
             price = order_item.unit_price
+            if order_item.unit_price_after_add_warranty != 0.0:
+                price = order_item.unit_price_after_add_warranty
             quantity = order_item.quantity
             t_price = float(price) * float(quantity)
             prices.append(t_price)

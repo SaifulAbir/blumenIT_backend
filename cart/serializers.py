@@ -195,8 +195,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['id', 'product_count', 'total_price', 'coupon', 'coupon_status',
-                  'coupon_discount_amount', 'tax_amount', 'payment_type', 'shipping_cost', 'order_items', 'delivery_address', 'comment']
+        fields = ['id', 'product_count', 'coupon', 'coupon_status', 'coupon_discount_amount', 'tax_amount', 'payment_type', 'shipping_cost', 'order_items', 'delivery_address', 'comment']
 
     def create(self, validated_data):
         order_items = validated_data.pop('order_items')
@@ -217,13 +216,11 @@ class CheckoutSerializer(serializers.ModelSerializer):
 
         if order_items:
             count = 0
-
             for order_item in order_items:
                 product = order_item['product']
                 quantity = order_item['quantity']
                 unit_price = order_item['unit_price']
-                # if order_item['unit_price_after_add_warranty'] != 0.0:
-                #     unit_price = order_item['unit_price_after_add_warranty']
+
                 total_price = float(unit_price) * float(quantity)
 
                 try:
@@ -270,7 +267,10 @@ class CheckoutSerializer(serializers.ModelSerializer):
                     sell_count=product_sell_quan)
 
         # work with coupon start
-        coupon_status = validated_data.pop('coupon_status')
+        try:
+            coupon_status = validated_data.pop('coupon_status')
+        except:
+            coupon_status = None
 
         if coupon_status == True:
             coupon = validated_data.pop('coupon')

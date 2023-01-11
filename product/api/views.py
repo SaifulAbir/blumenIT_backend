@@ -4,7 +4,7 @@ from ecommerce.settings import MEDIA_URL
 from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView
 from rest_framework.views import APIView
 from home.models import ProductView
-from product.serializers import ProductDetailsSerializer, ProductReviewCreateSerializer, BrandSerializer,\
+from product.serializers import ProductDetailsSerializer, ProductReviewCreateSerializer, \
 StoreCategoryAPIViewListSerializer, ProductListBySerializer, FilterAttributeSerializer, PcBuilderCategoryListSerializer, PcBuilderSubCategoryListSerializer, PcBuilderSubSubCategoryListSerializer, BrandListSerializer
 
 from product.models import Category, SubCategory, SubSubCategory, Product, Brand, AttributeValues
@@ -17,37 +17,6 @@ from product.pagination import ProductCustomPagination
 from itertools import chain
 from user.models import CustomerProfile, User
 from vendor.models import Vendor
-
-
-
-class BrandCreateAPIView(CreateAPIView):
-    permission_classes = [AllowAny]
-    serializer_class = BrandSerializer
-
-    def post(self, request, *args, **kwargs):
-        return super(BrandCreateAPIView, self).post(request, *args, **kwargs)
-
-
-class BrandDeleteAPIView(ListAPIView):
-    permission_classes = [AllowAny]
-    serializer_class = BrandSerializer
-    queryset =  Brand.objects.all()
-    lookup_field = 'id'
-    lookup_url_kwarg = 'id'
-
-    def get_queryset(self):
-        brand_id = self.kwargs['id']
-        brand_obj = Brand.objects.filter(id=brand_id).exists()
-        if brand_obj:
-            brand_obj = Brand.objects.filter(id=brand_id)
-            brand_obj.update(is_active=False)
-
-            queryset = Brand.objects.filter(is_active=True).order_by('-created_at')
-            return queryset
-        else:
-            raise ValidationError(
-                {"msg": 'Brand Does not exist!'}
-            )
 
 
 class StoreCategoryListAPIView(ListAPIView):

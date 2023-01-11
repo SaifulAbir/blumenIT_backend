@@ -94,7 +94,7 @@ class AdminCategoryListSerializer(serializers.ModelSerializer):
     class Meta:
         ref_name = "admin category list serializer"
         model = Category
-        fields = ['id', 'title', 'ordering_number', 'type']
+        fields = ['id', 'title', 'ordering_number', 'type', 'banner', 'icon']
 
 
 class AddNewCategorySerializer(serializers.ModelSerializer):
@@ -374,7 +374,7 @@ class UpdateSubSubCategorySerializer(serializers.ModelSerializer):
 class VendorBrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
-        fields = ['id', 'title']
+        fields = ['id', 'title', 'logo', 'meta_title', 'meta_description']
 
 
 class VendorUnitSerializer(serializers.ModelSerializer):

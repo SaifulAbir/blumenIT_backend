@@ -403,7 +403,7 @@ class AdminBrandListAPIView(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True:
-            queryset = Brand.objects.filter(is_active=True)
+            queryset = Brand.objects.all()
             if queryset:
                 return queryset
             else:
@@ -1124,3 +1124,33 @@ class AdminDashboardDataAPIView(APIView):
 
         else:
             raise ValidationError({"msg": 'You can not see dashboard data, because you are not an Admin!'})
+
+
+class AdminBrandCreateAPIView(CreateAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = VendorBrandSerializer
+
+    def post(self, request, *args, **kwargs):
+        return super(AdminBrandCreateAPIView, self).post(request, *args, **kwargs)
+
+
+class AdminBrandDeleteAPIView(ListAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = VendorBrandSerializer
+    queryset =  Brand.objects.all()
+    lookup_field = 'id'
+    lookup_url_kwarg = 'id'
+
+    def get_queryset(self):
+        brand_id = self.kwargs['id']
+        brand_obj = Brand.objects.filter(id=brand_id).exists()
+        if brand_obj:
+            brand_obj = Brand.objects.filter(id=brand_id)
+            brand_obj.update(is_active=False)
+
+            queryset = Brand.objects.filter(is_active=True).order_by('-created_at')
+            return queryset
+        else:
+            raise ValidationError(
+                {"msg": 'Brand Does not exist!'}
+            )

@@ -1272,17 +1272,22 @@ class ReviewListSerializer(serializers.ModelSerializer):
                   'is_active']
 
 
-class AttributeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Attribute
-        fields = ['id', 'title', 'is_active']
-
-
 class AttributeValuesSerializer(serializers.ModelSerializer):
     attribute_title = serializers.CharField(source='attribute.title',read_only=True)
     class Meta:
         model = AttributeValues
         fields = ['id', 'attribute', 'attribute_title', 'value', 'is_active']
+
+
+class AttributeSerializer(serializers.ModelSerializer):
+    attribute_values = serializers.SerializerMethodField('get_attribute_values')
+    class Meta:
+        model = Attribute
+        fields = ['id', 'title', 'is_active', 'attribute_values']
+
+    def get_attribute_values(self, obj):
+        values = AttributeValues.objects.filter(attribute=obj, is_active=True)
+        return AttributeValuesSerializer(values, many=True, context={'request': self.context['request']}).data
 
 
 class AdminFilterAttributeSerializer(serializers.ModelSerializer):

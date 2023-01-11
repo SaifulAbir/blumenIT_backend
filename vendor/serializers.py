@@ -830,6 +830,7 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
     product_filter_attributes = ProductFilterAttributesSerializer(many=True, required=False)
     existing_product_warranties = serializers.SerializerMethodField('get_product_warranties')
     product_warranties = ProductWarrantiesSerializer(many=True, required=False)
+    old_price = serializers.FloatField(read_only=True)
 
 
     class Meta:
@@ -1054,6 +1055,12 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
         except:
             product_warranties = ''
 
+        # price
+        try:
+            price = validated_data.pop('price')
+        except:
+            price = ''
+
 
         try:
             # tags
@@ -1200,6 +1207,12 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
                 if p_w == True:
                     ProductWarranty.objects.filter(
                         product=instance).delete()
+
+            # work with price
+            if price:
+                existing_price = Product.objects.get(id=instance.id).price
+                if price != existing_price:
+                    validated_data.update({"price" : price, "old_price" : existing_price})
 
             validated_data.update({"updated_at": timezone.now()})
             return super().update(instance, validated_data)

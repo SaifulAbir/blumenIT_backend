@@ -501,3 +501,27 @@ class SavePcViewAPIView(RetrieveAPIView):
         else:
             raise ValidationError(
                 {"msg": 'You can not see Save Pc data, because you are not an Customer!'})
+
+
+class SavePcDeleteAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = SavaPcDataSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        if self.request.user.is_customer == True:
+            save_pc_obj_exist = SavePc.objects.filter(id=id).exists()
+            if save_pc_obj_exist:
+                save_pc_obj = SavePc.objects.filter(id=id)
+                save_pc_obj.update(is_active=False)
+
+                queryset = SavePc.objects.filter(Q(user=self.request.user), Q(is_active=True)).order_by('-created_at')
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'Save Pc data does not exist!'})
+        else:
+            raise ValidationError(
+                {"msg": 'You can not delete this Save PC data, because you are not an Customer!'})

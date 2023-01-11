@@ -3,7 +3,7 @@ from user.api.views import LoginUser,  \
     SubscriptionAPIView,  ChangePasswordView, SendOTPAPIView, OTPVerifyAPIVIEW, ReSendOTPAPIView, \
     SetPasswordAPIView, SuperUserLoginUser, CustomerOrdersList, CustomerOrderDetails, CustomerProfile, CustomerAddressListAPIView, \
     CustomerAddressAddAPIView, CustomerAddressUpdateAPIView, CustomerAddressDeleteAPIView, DashboardDataAPIView, WishlistDataAPIView, \
-    SavePcAPIView, SavePcListAPIView, SavePcViewAPIView
+    SavePcAPIView, SavePcListAPIView, SavePcViewAPIView, SavePcDeleteAPIView
 
 urlpatterns = [
     path('login/', LoginUser.as_view({'post': 'create'}), name='login_user'),
@@ -27,5 +27,6 @@ urlpatterns = [
     path('customer/save-pc/', SavePcAPIView.as_view()),
     path('customer/save-pc-list/', SavePcListAPIView.as_view()),
     path('customer/save-pc-view/<int:id>/', SavePcViewAPIView.as_view()),
+    path('customer/save-pc-delete/<int:id>/', SavePcDeleteAPIView.as_view()),
 
 ]

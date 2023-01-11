@@ -492,12 +492,10 @@ class SavePcViewAPIView(RetrieveAPIView):
     def get_object(self):
         id = self.kwargs['id']
         if self.request.user.is_customer == True:
-            save_pc_items_obj_exist = SavePcItems.objects.filter(save_pc=id).exists()
-            print(save_pc_items_obj_exist)
-            if save_pc_items_obj_exist:
-                queryset = SavePcItems.objects.filter(save_pc=id)
-                print(queryset)
-                return queryset
+            save_pc_obj_exist = SavePc.objects.filter(id=id).exists()
+            if save_pc_obj_exist:
+                query = SavePc.objects.get(id=id)
+                return query
             else:
                 raise ValidationError({"msg": 'Save Pc Items data does not exist!'})
         else:

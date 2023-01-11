@@ -185,6 +185,7 @@ class ProductItemCheckoutSerializer(serializers.ModelSerializer):
                   'product',
                   'quantity',
                   'unit_price',
+                  'unit_price_after_add_warranty',
                   'product_warranty'
                   ]
 
@@ -222,6 +223,8 @@ class CheckoutSerializer(serializers.ModelSerializer):
                 product = order_item['product']
                 quantity = order_item['quantity']
                 unit_price = order_item['unit_price']
+                if order_item['unit_price_after_add_warranty'] != 0.0:
+                    unit_price = order_item['unit_price_after_add_warranty']
                 total_price = float(unit_price) * float(quantity)
 
                 try:

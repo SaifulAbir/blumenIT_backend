@@ -103,20 +103,26 @@ class CustomerOrderItemsSerializer(serializers.ModelSerializer):
     product_price = serializers.SerializerMethodField()
     product_slug = serializers.CharField(source='product.slug',read_only=True)
     product_warranty_title = serializers.CharField(source='product_warranty.warranty.title',read_only=True)
+    unit_price = serializers.SerializerMethodField('get_unit_price')
 
     class Meta:
         model = OrderItem
-        fields = ['id', 'product_name', 'product_thumb', 'product_slug', 'product_price', 'quantity', 'unit_price', 'unit_price_after_add_warranty', 'total_price', 'product_warranty', 'product_warranty_title']
+        # fields = ['id', 'product_name', 'product_thumb', 'product_slug', 'product_price', 'quantity', 'unit_price', 'unit_price_after_add_warranty', 'total_price', 'product_warranty', 'product_warranty_title']
+        fields = ['id', 'product_name', 'product_thumb', 'product_slug', 'product_price', 'quantity', 'unit_price', 'total_price', 'product_warranty', 'product_warranty_title']
 
     def get_product_name(self, obj):
-        product_name = Product.objects.filter(id=obj.product.id)[
-            0].title
+        product_name = Product.objects.filter(id=obj.product.id)[0].title
         return product_name
 
     def get_product_price(self, obj):
-        product_price = Product.objects.filter(id=obj.product.id)[
-            0].price
+        product_price = Product.objects.filter(id=obj.product.id)[0].price
         return product_price
+
+    def get_unit_price(self, obj):
+        unit_price = obj.unit_price
+        if obj.unit_price_after_add_warranty != 0.0:
+            unit_price = obj.unit_price_after_add_warranty
+        return unit_price
 
 
 class CustomerDeliveryAddressSerializer(serializers.ModelSerializer):
@@ -321,7 +327,42 @@ class SavaPcDataSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'description', 'created_at']
 
 
-class SavePcDetailsSerializer(serializers.ModelSerializer):
+class SavePcItemsProductDetailsSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField('get_name')
+    qty = serializers.IntegerField(default=1)
+    price = serializers.SerializerMethodField('get_price')
+    imgUrl = serializers.ImageField(source="thumbnail",read_only=True)
+    class Meta:
+        model = Product
+        fields = ['id', 'name', 'qty', 'price', 'imgUrl']
+
+    def get_name(self, obj):
+        return obj.title
+
+    def get_price(self, obj):
+        return obj.price
+
+
+class SavePcItemsDetailsSerializer(serializers.ModelSerializer):
+    title = serializers.CharField(source="sub_category.title",read_only=True)
+    icon = serializers.ImageField(source="sub_category.icon",read_only=True)
+    type = serializers.CharField(default='sub_category')
+    item = serializers.SerializerMethodField('get_item')
     class Meta:
         model = SavePcItems
-        fields = ['id', 'sub_category', 'product']
+        fields = ['id', 'title', 'icon', 'type', 'item']
+
+    def get_item(self, obj):
+        selected_item = Product.objects.filter(id=obj.product.id)
+        return SavePcItemsProductDetailsSerializer(selected_item, many=True, context={'request': self.context['request']}).data
+
+
+class SavePcDetailsSerializer(serializers.ModelSerializer):
+    save_pc_items = serializers.SerializerMethodField('get_save_pc_items')
+    class Meta:
+        model = SavePc
+        fields = ['id', 'title', 'save_pc_items']
+
+    def get_save_pc_items(self, obj):
+        selected_save_pc_items = SavePcItems.objects.filter(save_pc=obj, is_active=True)
+        return SavePcItemsDetailsSerializer(selected_save_pc_items, many=True, context={'request': self.context['request']}).data

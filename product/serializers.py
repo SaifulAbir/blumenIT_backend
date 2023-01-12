@@ -304,6 +304,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
     vat_type_title = serializers.CharField(source="vat_type.title",read_only=True)
     related_products = serializers.SerializerMethodField()
     product_warranties = serializers.SerializerMethodField('get_product_warranties')
+    quantity = serializers.SerializerMethodField('get_quantity')
 
     class Meta:
         model = Product
@@ -382,6 +383,9 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
     def get_product_warranties(self, obj):
         selected_warranties = ProductWarranty.objects.filter(product=obj, is_active=True)
         return ProductWarrantySerializer(selected_warranties, many=True, context={'request': self.context['request']}).data
+
+    def get_quantity(self, obj):
+        return obj.total_quantity
 
 
 class PcBuilderSpecificationValuesSerializer(serializers.ModelSerializer):

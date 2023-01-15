@@ -275,7 +275,7 @@ class Product(AbstractTimeStamp):
     thumbnail = models.FileField(upload_to='products', blank=True, null=True)
     low_stock_quantity_warning = models.IntegerField(null=True, blank=True, default=0)
     show_stock_quantity = models.BooleanField(default=False)
-    vat = models.IntegerField(null=True, blank=True, default=0)
+    vat = models.FloatField(null=True, blank=True, default=0.0)
     vat_type = models.ForeignKey(
         VatType, related_name="product_vat_type", null=True, blank=True, on_delete=models.PROTECT)
     shipping_class = models.ForeignKey(

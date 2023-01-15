@@ -185,17 +185,18 @@ class ProductItemCheckoutSerializer(serializers.ModelSerializer):
                   'product',
                   'quantity',
                   'unit_price',
-                  'product_warranty'
+                  'product_warranty',
                   ]
 
 
 class CheckoutSerializer(serializers.ModelSerializer):
     order_items = ProductItemCheckoutSerializer(many=True, required=False)
     coupon_status = serializers.BooleanField(write_only=True, required=False)
+    order_id = serializers.CharField(read_only=True)
 
     class Meta:
         model = Order
-        fields = ['id', 'product_count', 'coupon', 'coupon_status', 'coupon_discount_amount', 'tax_amount', 'payment_type', 'shipping_cost', 'order_items', 'delivery_address', 'comment']
+        fields = ['id', 'order_id', 'product_count', 'coupon', 'coupon_status', 'coupon_discount_amount', 'tax_amount', 'payment_type', 'shipping_cost', 'order_items', 'delivery_address', 'comment']
 
     def create(self, validated_data):
         order_items = validated_data.pop('order_items')
@@ -220,6 +221,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
                 product = order_item['product']
                 quantity = order_item['quantity']
                 unit_price = order_item['unit_price']
+                in_house_product = order_item['in_house_product']
 
                 total_price = float(unit_price) * float(quantity)
 
@@ -241,8 +243,34 @@ class CheckoutSerializer(serializers.ModelSerializer):
 
                     total_price =  float(unit_price_after_add_warranty) * float(quantity)
 
-                    order_item_instance = OrderItem.objects.create(order=order_instance, product=product, quantity=int(
-                    quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty)
+                    # work with SubOrder
+                    if product.in_house_product == True:
+                        if SubOrder.objects.filter(order_id=order_instance, in_house_order=True).exists():
+                            sub_order_instance = SubOrder.objects.filter(order_id=order_instance, in_house_order=True)
+                            order_item_instance = OrderItem.objects.create(order=order_instance, sub_order=sub_order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty)
+                        else:
+                            if SubOrder.objects.filter(order_id=order_instance).exists():
+                                sub_order_instance = SubOrder.objects.filter(order_id=order_instance, in_house_order=False)
+                                order_item_instance = OrderItem.objects.create(order=order_instance, sub_order=sub_order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty)
+                            else:
+                                sub_order_instance = SubOrder.objects.create(order_id=order_instance, in_house_order=True)
+                                order_item_instance = OrderItem.objects.create(order=order_instance, sub_order=sub_order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty)
+
+                    if product.in_house_product == False:
+                        if SubOrder.objects.filter(order_id=order_instance, in_house_order=False).exists():
+                            sub_order_instance = SubOrder.objects.filter(order_id=order_instance, in_house_order=False)
+                            order_item_instance = OrderItem.objects.create(order=order_instance, sub_order=sub_order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty)
+                        else:
+                            if SubOrder.objects.filter(order_id=order_instance).exists():
+                                sub_order_instance = SubOrder.objects.filter(order_id=order_instance, in_house_order=True)
+                                order_item_instance = OrderItem.objects.create(order=order_instance, sub_order=sub_order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty)
+                            else:
+                                sub_order_instance = SubOrder.objects.create(order_id=order_instance, in_house_order=False)
+                                order_item_instance = OrderItem.objects.create(order=order_instance, sub_order=sub_order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty)
+
+
+                    # order_item_instance = OrderItem.objects.create(order=order_instance, product=product, quantity=int(
+                    # quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty)
                 else:
                     order_item_instance = OrderItem.objects.create(order=order_instance, product=product, quantity=int(
                     quantity), unit_price=unit_price, total_price=total_price)

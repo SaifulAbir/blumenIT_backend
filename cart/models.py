@@ -188,10 +188,32 @@ def pre_save_order(sender, instance, *args, **kwargs):
 pre_save.connect(pre_save_order, sender=Order)
 
 
+class SubOrder(AbstractTimeStamp):
+    sub_order_id = models.SlugField(null=False, blank=False, allow_unicode=True)
+    order_id = models.ForeignKey(Order, on_delete=models.CASCADE, blank=True, null=True)
+    in_house_order = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = 'SubOrder'
+        verbose_name_plural = 'SubOrders'
+        db_table = 'sub_orders'
+
+    def __str__(self):
+        return self.sub_order_id
+
+def pre_save_sub_order(sender, instance, *args, **kwargs):
+    if not instance.sub_order_id:
+        instance.sub_order_id = 'orid-' + \
+            str(unique_order_id_generator_for_order(instance))
+
+
+pre_save.connect(pre_save_sub_order, sender=SubOrder)
 
 class OrderItem(AbstractTimeStamp):
     order = models.ForeignKey(
         Order, on_delete=models.CASCADE, related_name='order_item_order', blank=True, null=True)
+    sub_order = models.ForeignKey(
+        SubOrder, on_delete=models.CASCADE, related_name='order_item_sub_order', blank=True, null=True)
     product = models.ForeignKey(
         Product, on_delete=models.CASCADE, null=False, blank=False, related_name='order_item_product')
     quantity = models.IntegerField(default=1)

@@ -277,6 +277,25 @@ class ProductListBySerializer(serializers.ModelSerializer):
         return ProductReviewSerializer(selected_product_reviews, many=True).data
 
 
+class ProductListBySerializerForHomeData(serializers.ModelSerializer):
+    discount_type = DiscountTypeSerializer()
+
+    class Meta:
+        model = Product
+        fields = [
+            'id',
+            'title',
+            'slug',
+            'total_quantity',
+            'price',
+            'old_price',
+            'discount_type',
+            'discount_amount',
+            'thumbnail',
+            'warranty'
+        ]
+
+
 class ProductWarrantySerializer(serializers.ModelSerializer):
     warranty_title = serializers.CharField(source="warranty.title", read_only=True)
     class Meta:

@@ -9,7 +9,7 @@ from rest_framework.permissions import AllowAny
 from django.db.models import Q, Count
 
 from product.models import Product, Category, SubCategory, Brand
-from product.serializers import ProductListBySerializer, BrandListSerializer
+from product.serializers import ProductListBySerializer, BrandListSerializer, ProductListBySerializerForHomeData
 from rest_framework.generics import ListAPIView
 from rest_framework.exceptions import ValidationError
 from product.pagination import ProductCustomPagination
@@ -30,15 +30,15 @@ class   HomeDataAPIView(APIView):
 
         # featured
         featured = Product.objects.filter(status='PUBLISH', is_featured=True).order_by('-created_at')
-        featured_serializer = ProductListBySerializer(featured, many=True, context={"request": request})
+        featured_serializer = ProductListBySerializerForHomeData(featured, many=True, context={"request": request})
 
         # most popular
         popular = Product.objects.filter(status="PUBLISH").annotate(count=Count('product_review_product')).order_by('-count')
-        popular_serializer = ProductListBySerializer(popular, many=True, context={"request": request})
+        popular_serializer = ProductListBySerializerForHomeData(popular, many=True, context={"request": request})
 
         # gaming product
         gaming_product = Product.objects.filter(status="PUBLISH").order_by('-created_at')
-        gaming_serializer = ProductListBySerializer(gaming_product, many=True, context={"request": request})
+        gaming_serializer = ProductListBySerializerForHomeData(gaming_product, many=True, context={"request": request})
 
         # brand list
         brand_list = Brand.objects.filter(is_active=True).order_by('-created_at')

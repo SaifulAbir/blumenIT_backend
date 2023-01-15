@@ -92,9 +92,34 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
 
 
 class CustomerOrderListSerializer(serializers.ModelSerializer):
+    total_price = serializers.SerializerMethodField('get_total_price')
     class Meta:
         model = Order
         fields = ['id', 'user', 'order_id', 'order_date', 'order_status', 'total_price']
+
+    def get_total_price(self, obj):
+        order_items = OrderItem.objects.filter(order=obj)
+        prices = []
+        total_price = 0
+        for order_item in order_items:
+            price = order_item.unit_price
+            if order_item.unit_price_after_add_warranty != 0.0:
+                price = order_item.unit_price_after_add_warranty
+            quantity = order_item.quantity
+            t_price = float(price) * float(quantity)
+            prices.append(t_price)
+        sub_total = sum(prices)
+        if sub_total:
+            total_price += sub_total
+
+        shipping_cost = obj.shipping_cost
+        if shipping_cost:
+            total_price += shipping_cost
+
+        coupon_discount_amount = obj.coupon_discount_amount
+        if coupon_discount_amount:
+            total_price -= coupon_discount_amount
+        return total_price
 
 
 class CustomerOrderItemsSerializer(serializers.ModelSerializer):

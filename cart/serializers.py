@@ -242,7 +242,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
 
                     total_price =  float(unit_price_after_add_warranty) * float(quantity)
 
-                    # work with SubOrder start
+                    # work with SubOrder start //
                     if product.in_house_product == True:
                         if SubOrder.objects.filter(order_id=order_instance, in_house_order=True).exists():
                             sub_order_instance = SubOrder.objects.get(order_id=order_instance, in_house_order=True)

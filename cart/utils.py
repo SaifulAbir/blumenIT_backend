@@ -41,6 +41,23 @@ def unique_order_id_generator_for_order(instance, new_order_id=None):
     return order_id
 
 
+def unique_sub_order_id_generator_for_sub_order(instance, new_sub_order_id=None):
+    if new_sub_order_id is not None:
+        sub_order_id = new_sub_order_id
+    else:
+        sub_order_id_str = "sub_or_"+str(random_string_generator(size=8))
+        sub_order_id = slugify(str(sub_order_id_str))
+        # slug = slugify(str(instance.user))
+    Klass = instance.__class__
+    qs_exists = Klass.objects.filter(sub_order_id=sub_order_id).exists()
+
+    if qs_exists:
+        new_order_id = "{sub_order_id}-{randstr}".format(
+            sub_order_id=sub_order_id, randstr=random_string_generator(size=8))
+        return unique_sub_order_id_generator_for_sub_order(instance, new_order_id=new_order_id)
+    return sub_order_id
+
+
 def unique_order_id_generator_for_vendor_order(instance, new_vendor_order_id=None):
     if new_vendor_order_id is not None:
         vendor_order_id = new_vendor_order_id

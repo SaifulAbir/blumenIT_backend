@@ -1,7 +1,7 @@
 from django.db import models
 from ecommerce.models import AbstractTimeStamp
 from vendor.models import Seller
-from .utils import unique_order_id_generator_for_order
+from .utils import unique_order_id_generator_for_order, unique_sub_order_id_generator_for_sub_order
 from django.db.models.signals import pre_save
 from user.models import User
 from django.utils.translation import gettext as _
@@ -203,9 +203,8 @@ class SubOrder(AbstractTimeStamp):
 
 def pre_save_sub_order(sender, instance, *args, **kwargs):
     if not instance.sub_order_id:
-        instance.sub_order_id = 'orid-' + \
-            str(unique_order_id_generator_for_order(instance))
-
+        instance.sub_order_id = 'suborid-' + \
+            str(unique_sub_order_id_generator_for_sub_order(instance))
 
 pre_save.connect(pre_save_sub_order, sender=SubOrder)
 

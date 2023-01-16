@@ -518,7 +518,7 @@ class ProductCreateSerializer(serializers.ModelSerializer):
     minimum_purchase_quantity = serializers.IntegerField(required=True)
     price = serializers.FloatField(required=True)
     quantity = serializers.IntegerField(required=False, write_only=True)
-    vat_type = VatTypeSerializer(many=False, required=False)
+    # vat_type = VatTypeSerializer(many=False, required=False)
     shipping_class = serializers.PrimaryKeyRelatedField(queryset=ShippingClass.objects.all(), many=False, write_only=True, required= False)
 
     product_tags = serializers.ListField(

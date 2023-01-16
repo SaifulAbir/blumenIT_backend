@@ -1,6 +1,6 @@
 from django.contrib import admin
 from cart.models import BillingAddress, PaymentType, ShippingType, Coupon, UseRecordOfCoupon, Order, \
-     OrderItem, DeliveryAddress, Wishlist
+     OrderItem, DeliveryAddress, Wishlist, SubOrder
 
 
 # Register your models here.
@@ -17,9 +17,19 @@ class OrderItemInline(admin.TabularInline):
     model = OrderItem
     fields = ['product', 'quantity', 'unit_price', 'unit_price_after_add_warranty', 'total_price', 'product_warranty']
 
+class SubOrderInline(admin.TabularInline):
+    model = SubOrder
+    fields = ['sub_order_id', 'in_house_order']
+
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     inlines = [
-        OrderItemInline,
+        SubOrderInline, OrderItemInline
+    ]
+
+@admin.register(SubOrder)
+class SubOrderAdmin(admin.ModelAdmin):
+    inlines = [
+        OrderItemInline
     ]

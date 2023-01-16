@@ -22,7 +22,7 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     AdminProfileSerializer, AdminOrderViewSerializer, AdminOrderListSerializer, AdminOrderUpdateSerializer, AdminCustomerListSerializer, \
     AdminTicketListSerializer, AdminTicketDataSerializer, TicketStatusSerializer, CategoryWiseProductSaleSerializer, \
     CategoryWiseProductStockSerializer
-from cart.models import Order, OrderItem
+from cart.models import Order, OrderItem, SubOrder
 from user.models import User
 from rest_framework.exceptions import ValidationError
 from vendor.pagination import OrderCustomPagination
@@ -832,13 +832,15 @@ class AdminOrderList(ListAPIView):
             request = self.request
             type = request.GET.get('type')
 
-            queryset = Order.objects.filter().order_by('-created_at')
+            # queryset = Order.objects.filter().order_by('-created_at')
+            queryset = SubOrder.objects.filter().order_by('-created_at')
 
-            if type == 'seller':
-                queryset = queryset.filter(user=Seller)
+            # if type == 'seller':
+            #     queryset = queryset.filter(user=Seller)
 
             if type == 'in_house_order':
-                queryset = queryset.filter(vendor__product_seller__in_house_product=True)
+                # queryset = queryset.filter(vendor__product_seller__in_house_product=True)
+                queryset = queryset.filter(in_house_order=True)
             if queryset:
                 return queryset
             else:

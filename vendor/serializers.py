@@ -7,7 +7,7 @@ from product.models import Brand, Category, DiscountTypes, FlashDealInfo, FlashD
     ShippingClass, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units,\
     VatType, Attribute, FilterAttributes, ProductFilterAttributes, AttributeValues, ProductWarranty, Warranty
 from user.models import User
-from cart.models import Order
+from cart.models import Order, SubOrder, OrderItem
 from user.serializers import CustomerProfileSerializer
 from vendor.models import Seller
 from django.db.models import Avg
@@ -1302,11 +1302,42 @@ class AdminFilterAttributeSerializer(serializers.ModelSerializer):
 
 
 class AdminOrderListSerializer(serializers.ModelSerializer):
-    user = CustomerProfileSerializer(many=False, read_only=True)
+    order_id = serializers.CharField(source='order_id.order_id',read_only=True)
+    product_count = serializers.CharField(source='order_id.product_count',read_only=True)
+    order_date = serializers.CharField(source='order_id.order_date',read_only=True)
+    order_status = serializers.CharField(source='order_id.order_status',read_only=True)
+    total_price = serializers.SerializerMethodField('get_total_price')
+    created_at = serializers.CharField(source='order_id.created_at',read_only=True)
+    payment_status = serializers.CharField(source='order_id.payment_status',read_only=True)
+    user = serializers.CharField(source='order_id.user.email',read_only=True)
+
     class Meta:
-        model = Order
-        fields = ['id', 'order_id', 'product_count', 'order_date', 'order_status', 'total_price', 'created_at',
-                  'payment_status', 'total_price', 'user']
+        model = SubOrder
+        fields = ['id', 'order_id', 'sub_order_id', 'product_count', 'order_date', 'order_status', 'total_price', 'created_at', 'payment_status', 'user']
+
+    def get_total_price(self, obj):
+        order_items = OrderItem.objects.filter(order=obj.order_id)
+        prices = []
+        total_price = 0
+        for order_item in order_items:
+            price = order_item.unit_price
+            if order_item.unit_price_after_add_warranty != 0.0:
+                price = order_item.unit_price_after_add_warranty
+            quantity = order_item.quantity
+            t_price = float(price) * float(quantity)
+            prices.append(t_price)
+        sub_total = sum(prices)
+        if sub_total:
+            total_price += sub_total
+
+        shipping_cost = obj.order_id.shipping_cost
+        if shipping_cost:
+            total_price += shipping_cost
+
+        coupon_discount_amount = obj.order_id.coupon_discount_amount
+        if coupon_discount_amount:
+            total_price -= coupon_discount_amount
+        return total_price
 
 
 class AdminOrderViewSerializer(serializers.ModelSerializer):

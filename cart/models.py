@@ -203,7 +203,7 @@ class SubOrder(AbstractTimeStamp):
 
 def pre_save_sub_order(sender, instance, *args, **kwargs):
     if not instance.sub_order_id:
-        instance.sub_order_id = 'suborid-' + \
+        instance.sub_order_id = '' + \
             str(unique_sub_order_id_generator_for_sub_order(instance))
 
 pre_save.connect(pre_save_sub_order, sender=SubOrder)

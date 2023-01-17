@@ -200,6 +200,7 @@ class ShippingClass(AbstractTimeStamp):
     title = models.CharField(max_length=800, default='', help_text="name")
     description = models.TextField(default='', null=False, blank=False)
     delivery_charge = models.FloatField(max_length=255, null=False, blank=False, default=0)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
     class Meta:
         verbose_name = 'ShippingClass'
         verbose_name_plural = 'ShippingClasses'

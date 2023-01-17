@@ -5,7 +5,7 @@ from rest_framework.exceptions import ValidationError
 from product.models import Brand, Category, DiscountTypes, FlashDealInfo, FlashDealProduct, Inventory, \
     Product, ProductImages, ProductReview, ProductTags, ProductVariation, ProductVideoProvider, \
     ShippingClass, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units,\
-    VatType, Attribute, FilterAttributes, ProductFilterAttributes, AttributeValues, ProductWarranty, Warranty
+    VatType, Attribute, FilterAttributes, ProductFilterAttributes, AttributeValues, ProductWarranty, Warranty, SpecificationTitle
 from user.models import User
 from cart.models import Order, SubOrder, OrderItem
 from user.serializers import CustomerProfileSerializer
@@ -1476,4 +1476,16 @@ class AdminWarrantyListSerializer(serializers.ModelSerializer):
 class AdminAttributeValueSerializer(serializers.ModelSerializer):
     class Meta:
         model = AttributeValues
+        fields = ['id', 'value']
+
+
+class AdminShippingClassSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ShippingClass
+        fields = ['id', 'title', 'description', 'delivery_charge']
+
+
+class AdminSpecificationTitleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SpecificationTitle
         fields = ['id', 'title']

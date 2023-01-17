@@ -7,7 +7,7 @@ from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAP
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from product.models import Brand, Category, DiscountTypes, Product, ProductReview, SubCategory, SubSubCategory, Tags, Units, \
-    ProductVideoProvider, VatType, FilterAttributes, Attribute, AttributeValues, Inventory
+    ProductVideoProvider, VatType, FilterAttributes, Attribute, AttributeValues, Inventory, FlashDealInfo
 from user.models import User
 from vendor.models import Seller
 from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategorySerializer,\
@@ -16,9 +16,9 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     AdminSubSubCategoryListSerializer, VendorUnitSerializer, SellerSerializer, \
     ProductVideoProviderSerializer, ProductVatProviderSerializer, UpdateCategorySerializer,\
     UpdateSubSubCategorySerializer, ProductCreateSerializer, AddNewCategorySerializer, \
-    SellerCreateSerializer, FlashDealCreateSerializer, UpdateSubCategorySerializer, FilteringAttributesSerializer, AdminProfileSerializer, \
+    SellerCreateSerializer, FlashDealSerializer, UpdateSubCategorySerializer, FilteringAttributesSerializer, AdminProfileSerializer, \
     ReviewListSerializer, AttributeSerializer, AttributeValuesSerializer, AdminFilterAttributeSerializer, \
-    SellerCreateSerializer, FlashDealCreateSerializer, UpdateSubCategorySerializer, FilteringAttributesSerializer, \
+    SellerCreateSerializer, UpdateSubCategorySerializer, FilteringAttributesSerializer, \
     AdminProfileSerializer, AdminOrderViewSerializer, AdminOrderListSerializer, AdminOrderUpdateSerializer, AdminCustomerListSerializer, \
     AdminTicketListSerializer, AdminTicketDataSerializer, TicketStatusSerializer, CategoryWiseProductSaleSerializer, \
     CategoryWiseProductStockSerializer
@@ -607,7 +607,7 @@ class AdminVatTypeListAPIView(ListAPIView):
 
 class AdminFlashDealCreateAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = FlashDealCreateSerializer
+    serializer_class = FlashDealSerializer
 
 
     def post(self, request, *args, **kwargs):
@@ -616,6 +616,22 @@ class AdminFlashDealCreateAPIView(CreateAPIView):
         else:
             raise ValidationError(
                 {"msg": 'You can not create flash deal, because you are not an Admin!'})
+
+
+class AdminFlashDealListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = FlashDealSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = FlashDealInfo.objects.all(is_active=True)
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'Flash Deal does not exist!'})
+        else:
+            raise ValidationError({"msg": 'You can not view Flash Deal list, because you are not an Admin!'})
 
 
 class AdminProfileAPIView(RetrieveAPIView):

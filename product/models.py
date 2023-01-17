@@ -548,6 +548,7 @@ class FlashDealInfo(AbstractTimeStamp):
     start_date = models.DateTimeField(null=False, blank=False,default=timezone.now)
     end_date = models.DateTimeField(null=False, blank=False, default=timezone.now)
     is_active = models.BooleanField(null=False, blank=False, default=True)
+    is_featured = models.BooleanField(null=False, blank=False, default=False)
 
     class Meta:
         verbose_name = 'FlashDealInfo'

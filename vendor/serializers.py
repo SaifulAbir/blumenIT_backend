@@ -742,7 +742,6 @@ class ProductCreateSerializer(serializers.ModelSerializer):
                     if attribute_value:
                         product_filter_attribute_instance = ProductFilterAttributes.objects.create(attribute_value=attribute_value,  product=product_instance)
 
-            
             # product_warranties
             if product_warranties:
                 for product_warranty in product_warranties:
@@ -1241,8 +1240,18 @@ class ProductVatProviderSerializer(serializers.ModelSerializer):
         fields = ['id', 'title']
 
 
-class FlashDealCreateSerializer(serializers.ModelSerializer):
+class FlashDealProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FlashDealProduct
+        fields = [
+                    'id',
+                    'product',
+                    'discount_type',
+                    'discount_amount',
+                ]
 
+class FlashDealSerializer(serializers.ModelSerializer):
+    flash_deal_products = FlashDealProductSerializer(many=True, required=False)
     class Meta:
         model = FlashDealInfo
         fields = [
@@ -1252,8 +1261,34 @@ class FlashDealCreateSerializer(serializers.ModelSerializer):
                     'text_color',
                     'banner',
                     'start_date',
-                    'end_date'
+                    'end_date',
+                    'is_active',
+                    'is_featured',
+                    'flash_deal_products'
                 ]
+
+    def create(self, validated_data):
+        # product_warranties
+        try:
+            flash_deal_products = validated_data.pop('flash_deal_products')
+        except:
+            flash_deal_products = ''
+
+        flash_deal_instance = FlashDealInfo.objects.create(**validated_data)
+
+        # product_warranties
+        if flash_deal_products:
+            for flash_deal_product in flash_deal_products:
+                product = flash_deal_product['product']
+                discount_type = flash_deal_product['discount_type']
+                discount_amount = flash_deal_product['discount_amount']
+                FlashDealProduct.objects.create(flash_deal_info=flash_deal_instance, product=product, discount_type=discount_type, discount_amount=discount_amount)
+
+        # try:
+
+        #     return flash_deal_instance
+        # except:
+        #     return flash_deal_instance
 
 
 class AdminProfileSerializer(serializers.ModelSerializer):
@@ -1309,11 +1344,12 @@ class AdminOrderListSerializer(serializers.ModelSerializer):
     total_price = serializers.SerializerMethodField('get_total_price')
     created_at = serializers.CharField(source='order_id.created_at',read_only=True)
     payment_status = serializers.CharField(source='order_id.payment_status',read_only=True)
-    user = serializers.CharField(source='order_id.user.email',read_only=True)
+    user_email = serializers.CharField(source='order_id.user.email',read_only=True)
+    user_phone = serializers.CharField(source='order_id.user.phone',read_only=True)
 
     class Meta:
         model = SubOrder
-        fields = ['id', 'order_id', 'sub_order_id', 'product_count', 'order_date', 'order_status', 'total_price', 'created_at', 'payment_status', 'user', 'in_house_order']
+        fields = ['id', 'order_id', 'sub_order_id', 'product_count', 'order_date', 'order_status', 'total_price', 'created_at', 'payment_status', 'user_email', 'in_house_order']
 
     def get_total_price(self, obj):
         order_items = OrderItem.objects.filter(order=obj.order_id)

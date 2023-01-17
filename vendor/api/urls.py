@@ -67,8 +67,8 @@ urlpatterns = [
     path('admin/order-search/',OrderListSearchAPI.as_view(),),
     path('admin/order-update/<str:id>', AdminOrderUpdateAPI.as_view()),
     path('admin/customer-list/', AdminCustomerListAPIView.as_view()),
-    path('admin/ticket-list/', AdminTicketListAPIView.as_view()),
-    path('admin/ticket-details/<int:id>/', AdminTicketDetailsAPIView.as_view()),
-    path('admin/ticket-status-update/<int:id>/', AdminUpdateTicketStatusAPIView.as_view()),
+    path('admin/support-ticket-list/', AdminTicketListAPIView.as_view()),
+    path('admin/support-ticket-details/<int:id>/', AdminTicketDetailsAPIView.as_view()),
+    path('admin/support-ticket-status-update/<int:id>/', AdminUpdateTicketStatusAPIView.as_view()),
     path('admin/dashboard-data/', AdminDashboardDataAPIView.as_view()),
 ]

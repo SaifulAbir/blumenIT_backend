@@ -292,7 +292,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
                 # update inventory
                 inventory_obj = Inventory.objects.filter(product=product).latest('created_at')
                 new_update_quantity = int(inventory_obj.current_quantity) - int(quantity)
-                product.update(quantity = new_update_quantity)
+                Product.objects.filter(id=product.id).update(quantity = new_update_quantity)
                 inventory_obj.current_quantity = new_update_quantity
                 inventory_obj.save()
 

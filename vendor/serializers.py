@@ -518,7 +518,6 @@ class ProductCreateSerializer(serializers.ModelSerializer):
     minimum_purchase_quantity = serializers.IntegerField(required=True)
     price = serializers.FloatField(required=True)
     quantity = serializers.IntegerField(required=False, write_only=True)
-    # vat_type = VatTypeSerializer(many=False, required=False)
     shipping_class = serializers.PrimaryKeyRelatedField(queryset=ShippingClass.objects.all(), many=False, write_only=True, required= False)
 
     product_tags = serializers.ListField(
@@ -1466,3 +1465,15 @@ class CategoryWiseProductStockSerializer(serializers.ModelSerializer):
         for product in products:
             total_quantity += product.total_quantity
         return total_quantity
+
+
+class AdminWarrantyListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Warranty
+        fields = ['id', 'title']
+
+
+class AdminAttributeValueSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AttributeValues
+        fields = ['id', 'title']

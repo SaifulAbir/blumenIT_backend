@@ -7,7 +7,7 @@ from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAP
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from product.models import Brand, Category, DiscountTypes, Product, ProductReview, SubCategory, SubSubCategory, Tags, Units, \
-    ProductVideoProvider, VatType, FilterAttributes, Attribute, AttributeValues, Inventory, FlashDealInfo
+    ProductVideoProvider, VatType, FilterAttributes, Attribute, AttributeValues, Inventory, FlashDealInfo, Warranty
 from user.models import User
 from vendor.models import Seller
 from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategorySerializer,\
@@ -21,7 +21,7 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     SellerCreateSerializer, UpdateSubCategorySerializer, FilteringAttributesSerializer, \
     AdminProfileSerializer, AdminOrderViewSerializer, AdminOrderListSerializer, AdminOrderUpdateSerializer, AdminCustomerListSerializer, \
     AdminTicketListSerializer, AdminTicketDataSerializer, TicketStatusSerializer, CategoryWiseProductSaleSerializer, \
-    CategoryWiseProductStockSerializer
+    CategoryWiseProductStockSerializer, AdminWarrantyListSerializer, AdminAttributeValueSerializer
 from cart.models import Order, OrderItem, SubOrder
 from user.models import User
 from rest_framework.exceptions import ValidationError
@@ -1167,3 +1167,29 @@ class AdminBrandDeleteAPIView(ListAPIView):
             raise ValidationError(
                 {"msg": 'Brand Does not exist!'}
             )
+
+
+class AdminWarrantyListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    pagination_class = ProductCustomPagination
+    serializer_class = AdminWarrantyListSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = Warranty.objects.filter(is_active=True)
+            return queryset
+        else:
+            raise ValidationError({"msg": 'You can not see ticket list data, because you are not an Admin!'})
+
+
+class AdminAttributeValueListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    pagination_class = ProductCustomPagination
+    serializer_class = AdminAttributeValueSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = AttributeValues.objects.filter(is_active=True)
+            return queryset
+        else:
+            raise ValidationError({"msg": 'You can not see ticket list data, because you are not an Admin!'})

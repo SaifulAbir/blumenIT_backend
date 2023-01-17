@@ -1349,7 +1349,7 @@ class AdminOrderListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SubOrder
-        fields = ['id', 'order_id', 'sub_order_id', 'product_count', 'order_date', 'order_status', 'total_price', 'created_at', 'payment_status', 'user_email', 'in_house_order']
+        fields = ['id', 'order_id', 'sub_order_id', 'product_count', 'order_date', 'order_status', 'total_price', 'created_at', 'payment_status', 'user_email', 'user_phone', 'in_house_order']
 
     def get_total_price(self, obj):
         order_items = OrderItem.objects.filter(order=obj.order_id)

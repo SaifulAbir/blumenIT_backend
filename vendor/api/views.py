@@ -832,14 +832,9 @@ class AdminOrderList(ListAPIView):
             request = self.request
             type = request.GET.get('type')
 
-            # queryset = Order.objects.filter().order_by('-created_at')
             queryset = SubOrder.objects.filter().order_by('-created_at')
 
-            # if type == 'seller':
-            #     queryset = queryset.filter(user=Seller)
-
             if type == 'in_house_order':
-                # queryset = queryset.filter(vendor__product_seller__in_house_product=True)
                 queryset = queryset.filter(in_house_order=True)
             if queryset:
                 return queryset

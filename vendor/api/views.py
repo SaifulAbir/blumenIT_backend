@@ -624,7 +624,7 @@ class AdminFlashDealListAPIView(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True:
-            queryset = FlashDealInfo.objects.all(is_active=True)
+            queryset = FlashDealInfo.objects.all()
             if queryset:
                 return queryset
             else:

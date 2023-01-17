@@ -397,6 +397,7 @@ class VendorProductListSerializer(serializers.ModelSerializer):
         model = Product
         fields = [
             'id',
+            'slug',
             'thumbnail',
             'title',
             'vendor_organization_name',

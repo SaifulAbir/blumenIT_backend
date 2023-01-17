@@ -257,55 +257,51 @@ class CheckoutSerializer(serializers.ModelSerializer):
                     if product.in_house_product == True:
                         if SubOrder.objects.filter(order_id=order_instance, in_house_order=True).exists():
                             sub_order_instance = SubOrder.objects.get(order_id=order_instance, in_house_order=True)
-                            order_item_instance = OrderItem.objects.create(order=order_instance, sub_order=sub_order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty)
+                            OrderItem.objects.create(order=order_instance, sub_order=sub_order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty)
                         else:
                             sub_order_instance = SubOrder.objects.create(order_id=order_instance, in_house_order=True)
-                            order_item_instance = OrderItem.objects.create(order=order_instance, sub_order=sub_order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty)
+                            OrderItem.objects.create(order=order_instance, sub_order=sub_order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty)
 
                     if product.in_house_product == False:
                         if SubOrder.objects.filter(order_id=order_instance, in_house_order=False).exists():
                             sub_order_instance = SubOrder.objects.get(order_id=order_instance, in_house_order=False)
-                            order_item_instance = OrderItem.objects.create(order=order_instance, sub_order=sub_order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty)
+                            OrderItem.objects.create(order=order_instance, sub_order=sub_order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty)
                         else:
                             sub_order_instance = SubOrder.objects.create(order_id=order_instance, in_house_order=False)
-                            order_item_instance = OrderItem.objects.create(order=order_instance, sub_order=sub_order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty)
+                            OrderItem.objects.create(order=order_instance, sub_order=sub_order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty)
                     # work with SubOrder end
                 else:
                     # work with SubOrder start
                     if product.in_house_product == True:
                         if SubOrder.objects.filter(order_id=order_instance, in_house_order=True).exists():
                             sub_order_instance = SubOrder.objects.get(order_id=order_instance, in_house_order=True)
-                            order_item_instance = OrderItem.objects.create(order=order_instance, sub_order=sub_order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price)
+                            OrderItem.objects.create(order=order_instance, sub_order=sub_order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price)
                         else:
                             sub_order_instance = SubOrder.objects.create(order_id=order_instance, in_house_order=True)
-                            order_item_instance = OrderItem.objects.create(order=order_instance, sub_order=sub_order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price)
+                            OrderItem.objects.create(order=order_instance, sub_order=sub_order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price)
 
                     if product.in_house_product == False:
                         if SubOrder.objects.filter(order_id=order_instance, in_house_order=False).exists():
                             sub_order_instance = SubOrder.objects.get(order_id=order_instance, in_house_order=False)
-                            order_item_instance = OrderItem.objects.create(order=order_instance, sub_order=sub_order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price)
+                            OrderItem.objects.create(order=order_instance, sub_order=sub_order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price)
                         else:
                             sub_order_instance = SubOrder.objects.create(order_id=order_instance, in_house_order=False)
-                            order_item_instance = OrderItem.objects.create(order=order_instance, sub_order=sub_order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price)
+                            OrderItem.objects.create(order=order_instance, sub_order=sub_order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price)
                     # work with SubOrder end
 
-                product_obj = Product.objects.get(id=product.id)
-
                 # update inventory
-                # if order_instance.payment_status == 'PAID':
-                product_filter_obj = Product.objects.filter(id=product.id)
                 inventory_obj = Inventory.objects.filter(product=product).latest('created_at')
                 new_update_quantity = int(inventory_obj.current_quantity) - int(quantity)
-                product_filter_obj.update(quantity = new_update_quantity)
+                product.update(quantity = new_update_quantity)
                 inventory_obj.current_quantity = new_update_quantity
                 inventory_obj.save()
 
                 # product sell count update
                 count += 1
                 product_sell_quan = Product.objects.filter(
-                    slug=product_obj.slug)[0].sell_count
+                    slug=product.slug)[0].sell_count
                 product_sell_quan += 1
-                Product.objects.filter(slug=product_obj.slug).update(
+                Product.objects.filter(slug=product.slug).update(
                     sell_count=product_sell_quan)
 
         # work with coupon start

@@ -1250,7 +1250,7 @@ class FlashDealProductSerializer(serializers.ModelSerializer):
                     'discount_amount',
                 ]
 
-class FlashDealSerializer(serializers.ModelSerializer):
+class FlashDealInfoSerializer(serializers.ModelSerializer):
     flash_deal_products = FlashDealProductSerializer(many=True, required=False)
     class Meta:
         model = FlashDealInfo
@@ -1283,6 +1283,8 @@ class FlashDealSerializer(serializers.ModelSerializer):
                 discount_type = flash_deal_product['discount_type']
                 discount_amount = flash_deal_product['discount_amount']
                 FlashDealProduct.objects.create(flash_deal_info=flash_deal_instance, product=product, discount_type=discount_type, discount_amount=discount_amount)
+
+        return flash_deal_instance
 
         # try:
 

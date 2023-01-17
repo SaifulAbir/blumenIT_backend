@@ -16,7 +16,7 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     AdminSubSubCategoryListSerializer, VendorUnitSerializer, SellerSerializer, \
     ProductVideoProviderSerializer, ProductVatProviderSerializer, UpdateCategorySerializer,\
     UpdateSubSubCategorySerializer, ProductCreateSerializer, AddNewCategorySerializer, \
-    SellerCreateSerializer, FlashDealSerializer, UpdateSubCategorySerializer, FilteringAttributesSerializer, AdminProfileSerializer, \
+    SellerCreateSerializer, FlashDealInfoSerializer, UpdateSubCategorySerializer, FilteringAttributesSerializer, AdminProfileSerializer, \
     ReviewListSerializer, AttributeSerializer, AttributeValuesSerializer, AdminFilterAttributeSerializer, \
     SellerCreateSerializer, UpdateSubCategorySerializer, FilteringAttributesSerializer, \
     AdminProfileSerializer, AdminOrderViewSerializer, AdminOrderListSerializer, AdminOrderUpdateSerializer, AdminCustomerListSerializer, \
@@ -607,7 +607,7 @@ class AdminVatTypeListAPIView(ListAPIView):
 
 class AdminFlashDealCreateAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = FlashDealSerializer
+    serializer_class = FlashDealInfoSerializer
 
 
     def post(self, request, *args, **kwargs):
@@ -620,7 +620,7 @@ class AdminFlashDealCreateAPIView(CreateAPIView):
 
 class AdminFlashDealListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = FlashDealSerializer
+    serializer_class = FlashDealInfoSerializer
 
     def get_queryset(self):
         if self.request.user.is_superuser == True:

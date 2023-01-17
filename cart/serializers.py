@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import *
 from product.models import Product, Inventory, Specification
 from product.serializers import SpecificationSerializer
+from rest_framework.exceptions import ValidationError
 
 
 class CouponSerializer(serializers.ModelSerializer):
@@ -211,6 +212,16 @@ class CheckoutSerializer(serializers.ModelSerializer):
                 order_status = "CONFIRMED"
                 payment_status = "PAID"
 
+        # stop process if any product out of stock 
+        if order_items:
+            for order_item in order_items:
+                product = order_item['product']
+                quantity = order_item['quantity']
+                inventory_obj = Inventory.objects.filter(product=product).latest('created_at')
+                new_update_quantity = int(inventory_obj.current_quantity) - int(quantity)
+                if int(new_update_quantity) < 0:
+                    raise ValidationError("Order didn't create. One of product out of stock.")
+
         order_instance = Order.objects.create(
             **validated_data, user=self.context['request'].user, order_status=order_status,
             payment_status=payment_status )
@@ -281,13 +292,13 @@ class CheckoutSerializer(serializers.ModelSerializer):
                 product_obj = Product.objects.get(id=product.id)
 
                 # update inventory
-                if order_instance.payment_status == 'PAID':
-                    product_filter_obj = Product.objects.filter(id=product.id)
-                    inventory_obj = Inventory.objects.filter(product=product).latest('created_at')
-                    new_update_quantity = int(inventory_obj.current_quantity) - int(quantity)
-                    product_filter_obj.update(quantity = new_update_quantity)
-                    inventory_obj.current_quantity = new_update_quantity
-                    inventory_obj.save()
+                # if order_instance.payment_status == 'PAID':
+                product_filter_obj = Product.objects.filter(id=product.id)
+                inventory_obj = Inventory.objects.filter(product=product).latest('created_at')
+                new_update_quantity = int(inventory_obj.current_quantity) - int(quantity)
+                product_filter_obj.update(quantity = new_update_quantity)
+                inventory_obj.current_quantity = new_update_quantity
+                inventory_obj.save()
 
                 # product sell count update
                 count += 1

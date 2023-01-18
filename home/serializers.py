@@ -142,3 +142,9 @@ class StoreCategoryAPIViewListSerializer(serializers.ModelSerializer):
             return serializer.data
         except:
             return []
+
+
+class CorporateDealCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CorporateDeal
+        fields = ['id', 'first_name', 'last_name', 'email', 'company_name', 'phone', 'region', 'details_text', 'attached_file']

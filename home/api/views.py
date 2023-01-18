@@ -3,14 +3,15 @@ from home.models import SliderImage, FAQ, ContactUs, HomeSingleRowData, PosterUn
     FeaturedProductsUnderPoster
 from home.serializers import SliderImagesListSerializer, product_catListSerializer,\
     ContactUsSerializer, FaqSerializer, SingleRowDataSerializer, PosterUnderSliderDataSerializer, PosterUnderPopularProductsDataSerializer, \
-        PosterUnderFeaturedProductsDataSerializer, StoreCategoryAPIViewListSerializer, product_sub_catListSerializer
+    PosterUnderFeaturedProductsDataSerializer, StoreCategoryAPIViewListSerializer, product_sub_catListSerializer, \
+    CorporateDealCreateSerializer
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.db.models import Q, Count
 
 from product.models import Product, Category, SubCategory, Brand
 from product.serializers import ProductListBySerializer, BrandListSerializer, ProductListBySerializerForHomeData
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView
 from rest_framework.exceptions import ValidationError
 from product.pagination import ProductCustomPagination
 
@@ -244,3 +245,11 @@ class GamingFeaturedProductListAPI(ListAPIView):
         queryset = Product.objects.filter(category__title__icontains='gaming', is_featured=True, status='PUBLISH').order_by('-created_at')
 
         return queryset
+
+
+class CorporateDealCreateAPIView(CreateAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = CorporateDealCreateSerializer
+
+    def post(self, request, *args, **kwargs):
+        return super(CorporateDealCreateAPIView, self).post(request, *args, **kwargs)

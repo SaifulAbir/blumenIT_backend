@@ -13,6 +13,7 @@ from vendor.models import Seller
 from django.db.models import Avg
 from django.utils import timezone
 from support_ticket.models import Ticket, TicketConversation
+from home.models import CorporateDeal
 
 
 class SellerCreateSerializer(serializers.ModelSerializer):
@@ -1529,3 +1530,9 @@ class AdminSubscribersListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subscription
         fields = ['id', 'email']
+
+
+class AdminCorporateDealSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CorporateDeal
+        fields = ['id', 'first_name', 'last_name', 'email', 'company_name', 'phone', 'region', 'details_text', 'attached_file']

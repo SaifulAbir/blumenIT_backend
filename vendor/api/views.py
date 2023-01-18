@@ -11,6 +11,7 @@ from product.models import Brand, Category, DiscountTypes, Product, ProductRevie
     ShippingClass, SpecificationTitle
 from user.models import User
 from vendor.models import Seller
+from home.models import CorporateDeal
 from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategorySerializer,\
     VendorBrandSerializer, AdminCategoryListSerializer, VendorProductListSerializer,\
     ProductUpdateSerializer, VendorProductViewSerializer, AdminSubCategoryListSerializer, \
@@ -23,7 +24,7 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     AdminProfileSerializer, AdminOrderViewSerializer, AdminOrderListSerializer, AdminOrderUpdateSerializer, AdminCustomerListSerializer, \
     AdminTicketListSerializer, AdminTicketDataSerializer, TicketStatusSerializer, CategoryWiseProductSaleSerializer, \
     CategoryWiseProductStockSerializer, AdminWarrantyListSerializer, AdminAttributeValueSerializer, AdminShippingClassSerializer, \
-    AdminSpecificationTitleSerializer, AdminSubscribersListSerializer
+    AdminSpecificationTitleSerializer, AdminSubscribersListSerializer, AdminCorporateDealSerializer
 from cart.models import Order, OrderItem, SubOrder
 from user.models import User, Subscription
 from rest_framework.exceptions import ValidationError
@@ -1303,3 +1304,41 @@ class AdminSubscriberDeleteAPIView(ListAPIView):
                 )
         else:
             raise ValidationError({"msg": 'You can not delete subscriber, because you are not an Admin!'})
+
+
+class AdminCorporateDealListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    pagination_class = ProductCustomPagination
+    serializer_class = AdminCorporateDealSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = CorporateDeal.objects.filter(is_active=True).order_by('-created_at')
+            return queryset
+        else:
+            raise ValidationError({"msg": 'You can not see Corporate list data, because you are not an Admin!'})
+
+
+class AdminCorporateDealDeleteAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    pagination_class = ProductCustomPagination
+    serializer_class = AdminCorporateDealSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = 'id'
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        if self.request.user.is_superuser == True:
+            corporate_deal_obj = CorporateDeal.objects.filter(id=id).exists()
+            if corporate_deal_obj:
+                corporate_deal_obj = CorporateDeal.objects.filter(id=id)
+                corporate_deal_obj.update(is_active=False)
+
+                queryset = CorporateDeal.objects.filter(is_active=True).order_by('-created_at')
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'Corporate Deal Does not exist!'}
+                )
+        else:
+            raise ValidationError({"msg": 'You can not delete corporate deal, because you are not an Admin!'})

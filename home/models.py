@@ -155,3 +155,23 @@ class FeaturedProductsUnderPoster(AbstractTimeStamp):
 
     def __str__(self):
         return f"{self.pk}"
+
+
+class CorporateDeal(AbstractTimeStamp):
+    first_name = models.CharField(max_length=20, blank=True)
+    last_name = models.CharField(max_length=20, blank=True)
+    email = models.EmailField(max_length=255, unique=True)
+    company_name = models.CharField(max_length=120, blank=True)
+    phone = models.CharField(max_length=255, null=True, blank=True)
+    region = models.CharField(max_length=255, null=True, blank=True)
+    details_text = models.TextField(null=True, blank=True)
+    attached_file = models.FileField(upload_to='corporate', blank=True, null=True)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'CorporateDeal'
+        verbose_name_plural = 'CorporateDeals'
+        db_table = 'corporate_deal'
+
+    def __str__(self):
+        return 'First Name: ' + self.first_name + ' Last Name: ' + self.last_name + ' Company Name: ' + self.company_name + ' Phone:' + self.phone

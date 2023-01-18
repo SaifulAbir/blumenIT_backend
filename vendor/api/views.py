@@ -23,9 +23,9 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     AdminProfileSerializer, AdminOrderViewSerializer, AdminOrderListSerializer, AdminOrderUpdateSerializer, AdminCustomerListSerializer, \
     AdminTicketListSerializer, AdminTicketDataSerializer, TicketStatusSerializer, CategoryWiseProductSaleSerializer, \
     CategoryWiseProductStockSerializer, AdminWarrantyListSerializer, AdminAttributeValueSerializer, AdminShippingClassSerializer, \
-    AdminSpecificationTitleSerializer
+    AdminSpecificationTitleSerializer, AdminSubscribersListSerializer
 from cart.models import Order, OrderItem, SubOrder
-from user.models import User
+from user.models import User, Subscription
 from rest_framework.exceptions import ValidationError
 from vendor.pagination import OrderCustomPagination
 from support_ticket.models import Ticket
@@ -641,6 +641,7 @@ class AdminFlashDealUpdateAPIView(RetrieveUpdateAPIView):
 
 class AdminFlashDealDeleteAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
+    pagination_class = ProductCustomPagination
     serializer_class = FlashDealInfoSerializer
     lookup_field = 'id'
     lookup_url_kwarg = 'id'
@@ -661,6 +662,7 @@ class AdminFlashDealDeleteAPIView(ListAPIView):
                 )
         else:
             raise ValidationError({"msg": 'You can not delete flash deal, because you are not an Admin!'})
+
 
 class AdminFlashDealListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -1263,3 +1265,41 @@ class AdminSpecificationTitleListAPIView(ListAPIView):
             return queryset
         else:
             raise ValidationError({"msg": 'You can not see ticket list data, because you are not an Admin!'})
+
+
+class AdminSubscribersListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    pagination_class = ProductCustomPagination
+    serializer_class = AdminSubscribersListSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = Subscription.objects.filter(is_active=True).order_by('-created_at')
+            return queryset
+        else:
+            raise ValidationError({"msg": 'You can not see Subscribers list data, because you are not an Admin!'})
+
+
+class AdminSubscriberDeleteAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    pagination_class = ProductCustomPagination
+    serializer_class = AdminSubscribersListSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = 'id'
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        if self.request.user.is_superuser == True:
+            subscription_obj = Subscription.objects.filter(id=id).exists()
+            if subscription_obj:
+                subscription_obj = Subscription.objects.filter(id=id)
+                subscription_obj.update(is_active=False)
+
+                queryset = Subscription.objects.filter(is_active=True).order_by('-created_at')
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'Subscriber Does not exist!'}
+                )
+        else:
+            raise ValidationError({"msg": 'You can not delete subscriber, because you are not an Admin!'})

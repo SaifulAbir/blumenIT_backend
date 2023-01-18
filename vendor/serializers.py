@@ -6,7 +6,7 @@ from product.models import Brand, Category, DiscountTypes, FlashDealInfo, FlashD
     Product, ProductImages, ProductReview, ProductTags, ProductVariation, ProductVideoProvider, \
     ShippingClass, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units,\
     VatType, Attribute, FilterAttributes, ProductFilterAttributes, AttributeValues, ProductWarranty, Warranty, SpecificationTitle
-from user.models import User
+from user.models import User, Subscription
 from cart.models import Order, SubOrder, OrderItem
 from user.serializers import CustomerProfileSerializer
 from vendor.models import Seller
@@ -1435,10 +1435,11 @@ class AdminCustomerListSerializer(serializers.ModelSerializer):
 class AdminTicketListSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
     user_name = serializers.CharField(source='ticket.user.username',read_only=True)
+    user_email = serializers.CharField(source='ticket.user.email',read_only=True)
     last_reply = serializers.SerializerMethodField()
     class Meta:
         model = Ticket
-        fields = ['id', 'ticket_id', 'created_at', 'ticket_subject', 'user_name', 'status', 'last_reply']
+        fields = ['id', 'ticket_id', 'created_at', 'ticket_subject', 'user_name', 'user_email', 'status', 'last_reply']
 
     def get_last_reply(self, obj):
         selected_last_ticket_conversation = TicketConversation.objects.filter(
@@ -1522,3 +1523,9 @@ class AdminSpecificationTitleSerializer(serializers.ModelSerializer):
     class Meta:
         model = SpecificationTitle
         fields = ['id', 'title']
+
+
+class AdminSubscribersListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subscription
+        fields = ['id', 'email']

@@ -15,7 +15,9 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminUpdateFilterAttributeAPIView, AdminCustomerListAPIView, AdminTicketListAPIView, AdminTicketDetailsAPIView, \
     AdminUpdateTicketStatusAPIView, AdminDashboardDataAPIView, AdminBrandCreateAPIView, AdminBrandDeleteAPIView, \
     AdminFlashDealListAPIView, AdminWarrantyListAPIView, AdminAttributeValueListAPIView, AdminShippingClassListAPIView, \
-    AdminSpecificationTitleListAPIView, AdminFlashDealUpdateAPIView, AdminFlashDealDeleteAPIView
+    AdminSpecificationTitleListAPIView, AdminFlashDealUpdateAPIView, AdminFlashDealDeleteAPIView, AdminSubscribersListAPIView, \
+    AdminSubscriberDeleteAPIView
+
 
 urlpatterns = [
     path('admin/seller-create/', AdminSellerCreateAPIView.as_view()),
@@ -80,4 +82,6 @@ urlpatterns = [
     path('admin/attribute-value-list/', AdminAttributeValueListAPIView.as_view()),
     path('admin/shipping-class-list/', AdminShippingClassListAPIView.as_view()),
     path('admin/specification-title-list/', AdminSpecificationTitleListAPIView.as_view()),
+    path('admin/subscribers-list/', AdminSubscribersListAPIView.as_view()),
+    path('admin/subscriber-delete/<int:id>/', AdminSubscriberDeleteAPIView.as_view()),
 ]

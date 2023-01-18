@@ -406,7 +406,7 @@ class AdminBrandListAPIView(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True:
-            queryset = Brand.objects.all()
+            queryset = Brand.objects.filter(is_active=True)
             if queryset:
                 return queryset
             else:

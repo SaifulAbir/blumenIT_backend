@@ -15,7 +15,7 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminUpdateFilterAttributeAPIView, AdminCustomerListAPIView, AdminTicketListAPIView, AdminTicketDetailsAPIView, \
     AdminUpdateTicketStatusAPIView, AdminDashboardDataAPIView, AdminBrandCreateAPIView, AdminBrandDeleteAPIView, \
     AdminFlashDealListAPIView, AdminWarrantyListAPIView, AdminAttributeValueListAPIView, AdminShippingClassListAPIView, \
-    AdminSpecificationTitleListAPIView, AdminFlashDealUpdateAPIView
+    AdminSpecificationTitleListAPIView, AdminFlashDealUpdateAPIView, AdminFlashDealDeleteAPIView
 
 urlpatterns = [
     path('admin/seller-create/', AdminSellerCreateAPIView.as_view()),
@@ -53,6 +53,7 @@ urlpatterns = [
     path('admin/flash-deal-list/', AdminFlashDealListAPIView.as_view()),
     path('admin/flash-deal-create/', AdminFlashDealCreateAPIView.as_view()),
     path('admin/flash-deal-update/<int:id>/', AdminFlashDealUpdateAPIView.as_view()),
+    path('admin/flash-deal-delete/<int:id>/', AdminFlashDealDeleteAPIView.as_view()),
     path('admin/profile/', AdminProfileAPIView.as_view()),
     path('admin/review-list/', AdminReviewListAPIView.as_view()),
     path('admin/review-inactive/<int:id>/', AdminReviewInactiveAPIView.as_view()),

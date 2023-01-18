@@ -638,6 +638,27 @@ class AdminFlashDealUpdateAPIView(RetrieveUpdateAPIView):
         else:
             raise ValidationError({"msg": 'You can not update flash deal, because you are not an Admin!'})
 
+
+class AdminFlashDealDeleteAPIView(ListAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = FlashDealInfoSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = 'id'
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        flash_deal_info_obj = FlashDealInfo.objects.filter(id=id).exists()
+        if flash_deal_info_obj:
+            flash_deal_info_obj = FlashDealInfo.objects.filter(id=id)
+            flash_deal_info_obj.update(is_active=False)
+
+            queryset = FlashDealInfo.objects.filter(is_active=True).order_by('-created_at')
+            return queryset
+        else:
+            raise ValidationError(
+                {"msg": 'Flash Deal Info Does not exist!'}
+            )
+
 class AdminFlashDealListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = FlashDealInfoSerializer

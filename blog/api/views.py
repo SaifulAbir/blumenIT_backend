@@ -41,7 +41,7 @@ class BlogCategoryListAPIView(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True:
-            queryset = BlogCategory.objects.all().order_by('-created_at')
+            queryset = BlogCategory.objects.filter(is_active=True).order_by('-created_at')
             if queryset:
                 return queryset
             else:

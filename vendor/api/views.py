@@ -620,6 +620,24 @@ class AdminFlashDealCreateAPIView(CreateAPIView):
                 {"msg": 'You can not create flash deal, because you are not an Admin!'})
 
 
+class AdminFlashDealUpdateAPIView(RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = FlashDealInfoSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        if self.request.user.is_superuser == True:
+            query = FlashDealInfo.objects.filter(id=id)
+            if query:
+                return query
+            else:
+                raise ValidationError(
+                    {"msg": 'Flash Deal does not found!'})
+        else:
+            raise ValidationError({"msg": 'You can not update flash deal, because you are not an Admin!'})
+
 class AdminFlashDealListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = FlashDealInfoSerializer

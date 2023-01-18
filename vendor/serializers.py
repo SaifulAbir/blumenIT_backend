@@ -665,9 +665,6 @@ class ProductCreateSerializer(serializers.ModelSerializer):
         except:
             product_warranties = ''
 
-        # print("product_warranties")
-        # print(product_warranties)
-
         product_instance = Product.objects.create(**validated_data)
 
         try:
@@ -1241,6 +1238,8 @@ class ProductVatProviderSerializer(serializers.ModelSerializer):
 
 
 class FlashDealProductSerializer(serializers.ModelSerializer):
+    discount_type = serializers.PrimaryKeyRelatedField(queryset=DiscountTypes.objects.all(), many=False, write_only=True, required= True)
+    discount_amount = serializers.FloatField(required= True)
     class Meta:
         model = FlashDealProduct
         fields = [
@@ -1252,6 +1251,7 @@ class FlashDealProductSerializer(serializers.ModelSerializer):
 
 class FlashDealInfoSerializer(serializers.ModelSerializer):
     flash_deal_products = FlashDealProductSerializer(many=True, required=False)
+    existing_flash_deal_products = serializers.SerializerMethodField('get_flash_deal_products')
     class Meta:
         model = FlashDealInfo
         fields = [
@@ -1264,8 +1264,14 @@ class FlashDealInfoSerializer(serializers.ModelSerializer):
                     'end_date',
                     'is_active',
                     'is_featured',
-                    'flash_deal_products'
+                    'flash_deal_products',
+                    'existing_flash_deal_products'
                 ]
+
+    def get_flash_deal_products(self, obj):
+        queryset = FlashDealProduct.objects.filter(flash_deal_info=obj, is_active = True)
+        serializer = FlashDealProductSerializer(instance=queryset, many=True)
+        return serializer.data
 
     def create(self, validated_data):
         # product_warranties
@@ -1276,22 +1282,48 @@ class FlashDealInfoSerializer(serializers.ModelSerializer):
 
         flash_deal_instance = FlashDealInfo.objects.create(**validated_data)
 
-        # product_warranties
-        if flash_deal_products:
-            for flash_deal_product in flash_deal_products:
-                product = flash_deal_product['product']
-                discount_type = flash_deal_product['discount_type']
-                discount_amount = flash_deal_product['discount_amount']
-                FlashDealProduct.objects.create(flash_deal_info=flash_deal_instance, product=product, discount_type=discount_type, discount_amount=discount_amount)
+        try:
+            # product_warranties
+            if flash_deal_products:
+                for flash_deal_product in flash_deal_products:
+                    product = flash_deal_product['product']
+                    discount_type = flash_deal_product['discount_type']
+                    discount_amount = flash_deal_product['discount_amount']
+                    FlashDealProduct.objects.create(flash_deal_info=flash_deal_instance, product=product, discount_type=discount_type, discount_amount=discount_amount)
 
-        return flash_deal_instance
+            return flash_deal_instance
+        except:
+            return flash_deal_instance
 
-        # try:
+    def update(self, instance, validated_data):
+        # flash_deal_products
+        try:
+            flash_deal_products = validated_data.pop('flash_deal_products')
+        except:
+            flash_deal_products = ''
 
-        #     return flash_deal_instance
-        # except:
-        #     return flash_deal_instance
+        try:
+            # product_warranties
+            if flash_deal_products:
+                f_d_p = FlashDealProduct.objects.filter(flash_deal_info=instance).exists()
+                if f_d_p == True:
+                    FlashDealProduct.objects.filter(flash_deal_info=instance).delete()
 
+                for flash_deal_product in flash_deal_products:
+                    product = flash_deal_product['product']
+                    discount_type = flash_deal_product['discount_type']
+                    discount_amount = flash_deal_product['discount_amount']
+                    FlashDealProduct.objects.create(flash_deal_info=instance, product=product, discount_type=discount_type, discount_amount=discount_amount)
+            else:
+                f_d_p = FlashDealProduct.objects.filter(flash_deal_info=instance).exists()
+                if f_d_p == True:
+                    FlashDealProduct.objects.filter(flash_deal_info=instance).delete()
+
+            validated_data.update({"updated_at": timezone.now()})
+            return super().update(instance, validated_data)
+        except:
+            validated_data.update({"updated_at": timezone.now()})
+            return super().update(instance, validated_data)
 
 class AdminProfileSerializer(serializers.ModelSerializer):
 

@@ -5,23 +5,7 @@ from product.serializers import SpecificationSerializer
 from rest_framework.exceptions import ValidationError
 
 
-class CouponSerializer(serializers.ModelSerializer):
-    amount = serializers.FloatField(required=True)
 
-    class Meta:
-        model = Coupon
-        read_only_field = ['id']
-        fields = [  'id',
-                    'code',
-                    'coupon_type',
-                    'amount',
-                    'discount_type',
-                    'number_of_uses',
-                    'start_time',
-                    'end_time',
-                    'min_shopping',
-                    'is_active'
-                ]
 
 
 class ProductSerializer(serializers.ModelSerializer):

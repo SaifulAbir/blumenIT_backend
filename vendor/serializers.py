@@ -7,7 +7,7 @@ from product.models import Brand, Category, DiscountTypes, FlashDealInfo, FlashD
     ShippingClass, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units,\
     VatType, Attribute, FilterAttributes, ProductFilterAttributes, AttributeValues, ProductWarranty, Warranty, SpecificationTitle
 from user.models import User, Subscription
-from cart.models import Order, SubOrder, OrderItem, DeliveryAddress
+from cart.models import Order, Coupon, OrderItem, DeliveryAddress
 from user.serializers import CustomerProfileSerializer
 from vendor.models import Seller
 from django.db.models import Avg
@@ -1398,7 +1398,7 @@ class AdminOrderListSerializer(serializers.ModelSerializer):
         fields = ['id', 'order_id', 'product_count', 'order_date', 'order_status', 'total_price', 'created_at', 'payment_status', 'user_email', 'user_phone']
 
     def get_total_price(self, obj):
-        order_items = OrderItem.objects.filter(order=obj.order_id)
+        order_items = OrderItem.objects.filter(order=obj)
         prices = []
         total_price = 0
         for order_item in order_items:
@@ -1412,11 +1412,11 @@ class AdminOrderListSerializer(serializers.ModelSerializer):
         if sub_total:
             total_price += sub_total
 
-        shipping_cost = obj.order_id.shipping_cost
+        shipping_cost = obj.shipping_cost
         if shipping_cost:
             total_price += shipping_cost
 
-        coupon_discount_amount = obj.order_id.coupon_discount_amount
+        coupon_discount_amount = obj.coupon_discount_amount
         if coupon_discount_amount:
             total_price -= coupon_discount_amount
         return total_price
@@ -1597,3 +1597,22 @@ class AdminCorporateDealSerializer(serializers.ModelSerializer):
     class Meta:
         model = CorporateDeal
         fields = ['id', 'first_name', 'last_name', 'email', 'company_name', 'phone', 'region', 'details_text', 'attached_file']
+
+
+class AdminCouponSerializer(serializers.ModelSerializer):
+    amount = serializers.FloatField(required=True)
+
+    class Meta:
+        model = Coupon
+        read_only_field = ['id']
+        fields = [  'id',
+                    'code',
+                    'coupon_type',
+                    'amount',
+                    'discount_type',
+                    'number_of_uses',
+                    'start_time',
+                    'end_time',
+                    'min_shopping',
+                    'is_active'
+                ]

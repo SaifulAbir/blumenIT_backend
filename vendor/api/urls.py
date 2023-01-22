@@ -16,8 +16,8 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminUpdateTicketStatusAPIView, AdminDashboardDataAPIView, AdminBrandCreateAPIView, AdminBrandDeleteAPIView, \
     AdminFlashDealListAPIView, AdminWarrantyListAPIView, AdminShippingClassListAPIView, \
     AdminSpecificationTitleListAPIView, AdminFlashDealUpdateAPIView, AdminFlashDealDeleteAPIView, AdminSubscribersListAPIView, \
-    AdminSubscriberDeleteAPIView, AdminCorporateDealListAPIView, AdminCorporateDealDeleteAPIView, AdminAttributeDeleteAPIView
-    
+    AdminSubscriberDeleteAPIView, AdminCorporateDealListAPIView, AdminCorporateDealDeleteAPIView, AdminAttributeDeleteAPIView, \
+    AdminOrderDeleteAPIView, AdminCouponCreateAPIView, AdminCouponListAPIView, AdminCouponUpdateAPIView, AdminCouponDeleteAPIView
 
 
 urlpatterns = [
@@ -49,7 +49,7 @@ urlpatterns = [
     path('admin/order-view/<int:id>/',AdminOrderViewAPI.as_view()),
     path('admin/order-search/',OrderListSearchAPI.as_view(),),
     path('admin/order-update/<str:id>', AdminOrderUpdateAPI.as_view()),
-    # path('admin/order-delete/<int:id>/', AdminOrderDeleteAPIView.as_view()),
+    path('admin/order-delete/<int:id>/', AdminOrderDeleteAPIView.as_view()),
 
 
     # review apies
@@ -129,6 +129,13 @@ urlpatterns = [
 
     # specification apies
     path('admin/specification-title-list/', AdminSpecificationTitleListAPIView.as_view()),
+
+
+    # coupon apies
+    path('admin/coupon-create/', AdminCouponCreateAPIView.as_view()),
+    path('admin/coupon-list/', AdminCouponListAPIView.as_view()),
+    path('admin/coupon-update/<int:id>/', AdminCouponUpdateAPIView.as_view()),
+    path('admin/coupon-delete/<int:id>/', AdminCouponDeleteAPIView.as_view()),
 
 
     # others

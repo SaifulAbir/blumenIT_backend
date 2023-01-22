@@ -410,7 +410,8 @@ class VendorProductListSerializer(serializers.ModelSerializer):
             'quantity',
             'low_stock_quantity_warning',
             'todays_deal',
-            'is_featured'
+            'is_featured',
+            'is_active'
         ]
 
     def get_avg_rating(self, obj):
@@ -1506,12 +1507,6 @@ class AdminWarrantyListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Warranty
         fields = ['id', 'title']
-
-
-class AdminAttributeValueSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = AttributeValues
-        fields = ['id', 'value']
 
 
 class AdminShippingClassSerializer(serializers.ModelSerializer):

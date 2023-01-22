@@ -285,6 +285,7 @@ class Product(AbstractTimeStamp):
         ProductCondition, related_name="product_product_condition", null=True, blank=True, on_delete=models.PROTECT)
     status = models.CharField(
         max_length=20, choices=PRODUCT_STATUSES, default=PRODUCT_STATUSES[0][0])
+    is_active = models.BooleanField(null=False, blank=False, default=True)
     digital = models.BooleanField(default=False)
     in_house_product = models.BooleanField(default=False)
     whole_sale_product = models.BooleanField(default=False)

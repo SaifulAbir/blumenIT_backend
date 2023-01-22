@@ -23,7 +23,7 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     SellerCreateSerializer, UpdateSubCategorySerializer, FilteringAttributesSerializer, \
     AdminProfileSerializer, AdminOrderViewSerializer, AdminOrderListSerializer, AdminOrderUpdateSerializer, AdminCustomerListSerializer, \
     AdminTicketListSerializer, AdminTicketDataSerializer, TicketStatusSerializer, CategoryWiseProductSaleSerializer, \
-    CategoryWiseProductStockSerializer, AdminWarrantyListSerializer, AdminAttributeValueSerializer, AdminShippingClassSerializer, \
+    CategoryWiseProductStockSerializer, AdminWarrantyListSerializer, AdminShippingClassSerializer, \
     AdminSpecificationTitleSerializer, AdminSubscribersListSerializer, AdminCorporateDealSerializer
 from cart.models import Order, OrderItem, SubOrder
 from user.models import User, Subscription
@@ -474,7 +474,7 @@ class AdminProductListAPI(ListAPIView):
             request = self.request
             type = request.GET.get('type')
 
-            queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
+            queryset = Product.objects.filter(is_active=True).order_by('-created_at')
 
             if type == 'digital':
                 queryset = queryset.filter(digital=True)
@@ -505,8 +505,7 @@ class AdminProductListSearchAPI(ListAPIView):
             sort_by = request.GET.get('sort_by')
             query = request.GET.get('search')
 
-            queryset = Product.objects.filter(
-                status='PUBLISH').order_by('-created_at')
+            queryset = Product.objects.filter(is_active=True).order_by('-created_at')
 
             if seller:
                 queryset = queryset.filter(seller__id=seller)
@@ -560,13 +559,12 @@ class AdminProductDeleteAPI(ListAPIView):
     def get_queryset(self):
         slug = self.kwargs['slug']
         if self.request.user.is_superuser == True:
-            product_obj_exist = Product.objects.filter(
-                slug=slug).exists()
+            product_obj_exist = Product.objects.filter(slug=slug).exists()
             if product_obj_exist:
                 product_obj = Product.objects.filter(slug=slug)
-                product_obj.update(status='UNPUBLISH')
+                product_obj.update(is_active=False)
 
-                queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
+                queryset = Product.objects.filter(is_active=True).order_by('-created_at')
                 return queryset
             else:
                 raise ValidationError(
@@ -760,10 +758,39 @@ class AdminAttributeListAPIView(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True:
-            queryset = Attribute.objects.all().order_by('-created_at')
+            queryset = Attribute.objects.filter(is_active=True).order_by('-created_at')
             return queryset
         else:
             raise ValidationError({"msg": 'You can not see attribute data, because you are not an Admin!'})
+
+
+class AdminAttributeDeleteAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    pagination_class = ProductCustomPagination
+    serializer_class = AttributeSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = 'id'
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        if self.request.user.is_superuser == True:
+            attribute_obj = Attribute.objects.filter(id=id).exists()
+            if attribute_obj:
+                Attribute.objects.filter(id=id).update(is_active=False)
+                attribute_values_obj_exist = AttributeValues.objects.filter(attribute=id).exists()
+                if attribute_values_obj_exist:
+                    attribute_values_objs = AttributeValues.objects.filter(attribute=id)
+                    for attribute_values_obj in attribute_values_objs:
+                        AttributeValues.objects.filter(attribute=id).update(is_active=False)
+
+                queryset = Attribute.objects.filter(is_active=True).order_by('-created_at')
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'Attribute Does not exist!'}
+                )
+        else:
+            raise ValidationError({"msg": 'You can not delete attribute, because you are not an Admin!'})
 
 
 class AdminAddNewAttributeAPIView(CreateAPIView):
@@ -795,19 +822,6 @@ class AdminUpdateAttributeAPIView(RetrieveUpdateAPIView):
                     {"msg": 'Attribute does not found!'})
         else:
             raise ValidationError({"msg": 'You can not update attribute, because you are not an Admin!'})
-
-
-class AdminAttributeValuesListAPIView(ListAPIView):
-    permission_classes = [IsAuthenticated]
-    pagination_class = ProductCustomPagination
-    serializer_class = AttributeValuesSerializer
-
-    def get_queryset(self):
-        if self.request.user.is_superuser == True:
-            queryset = AttributeValues.objects.all().order_by('-created_at')
-            return queryset
-        else:
-            raise ValidationError({"msg": 'You can not see attribute values data, because you are not an Admin!'})
 
 
 class AdminAddNewAttributeValueAPIView(CreateAPIView):
@@ -1229,19 +1243,6 @@ class AdminWarrantyListAPIView(ListAPIView):
             raise ValidationError({"msg": 'You can not see ticket list data, because you are not an Admin!'})
 
 
-class AdminAttributeValueListAPIView(ListAPIView):
-    permission_classes = [IsAuthenticated]
-    pagination_class = ProductCustomPagination
-    serializer_class = AdminAttributeValueSerializer
-
-    def get_queryset(self):
-        if self.request.user.is_superuser == True:
-            queryset = AttributeValues.objects.filter(is_active=True)
-            return queryset
-        else:
-            raise ValidationError({"msg": 'You can not see ticket list data, because you are not an Admin!'})
-
-
 class AdminShippingClassListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     pagination_class = ProductCustomPagination
@@ -1342,3 +1343,6 @@ class AdminCorporateDealDeleteAPIView(ListAPIView):
                 )
         else:
             raise ValidationError({"msg": 'You can not delete corporate deal, because you are not an Admin!'})
+
+
+

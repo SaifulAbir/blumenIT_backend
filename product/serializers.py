@@ -279,6 +279,7 @@ class ProductListBySerializer(serializers.ModelSerializer):
 
 class ProductListBySerializerForHomeData(serializers.ModelSerializer):
     discount_type = DiscountTypeSerializer()
+    total_quantity = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -294,6 +295,10 @@ class ProductListBySerializerForHomeData(serializers.ModelSerializer):
             'thumbnail',
             'warranty'
         ]
+
+    def get_total_quantity(self, obj):
+        quantity = Product.objects.get(id=obj.id).quantity
+        return quantity
 
 
 class ProductWarrantySerializer(serializers.ModelSerializer):

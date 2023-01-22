@@ -900,7 +900,7 @@ class AdminUpdateFilterAttributeAPIView(RetrieveUpdateAPIView):
 
 
 class AdminOrderList(ListAPIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     serializer_class = AdminOrderListSerializer
     pagination_class = OrderCustomPagination
 
@@ -909,7 +909,7 @@ class AdminOrderList(ListAPIView):
             request = self.request
             type = request.GET.get('type')
 
-            queryset = SubOrder.objects.filter().order_by('-created_at')
+            queryset = Order.objects.filter(is_active=True).order_by('-created_at')
 
             if type == 'in_house_order':
                 queryset = queryset.filter(in_house_order=True)
@@ -956,7 +956,7 @@ class OrderListSearchAPI(ListAPIView):
             start_date = request.GET.get('start')
             end_date = request.GET.get('end')
 
-            queryset = Order.objects.all().order_by('-created_at')
+            queryset = SubOrder.objects.all(is_active=True).order_by('-created_at')
 
             if query:
                 queryset = queryset.filter(
@@ -1345,4 +1345,24 @@ class AdminCorporateDealDeleteAPIView(ListAPIView):
             raise ValidationError({"msg": 'You can not delete corporate deal, because you are not an Admin!'})
 
 
+# class AdminOrderDeleteAPIView(ListAPIView):
+#     permission_classes = [IsAuthenticated]
+#     pagination_class = ProductCustomPagination
+#     serializer_class = AdminOrderListSerializer
+#     lookup_field = 'id'
+#     lookup_url_kwarg = 'id'
 
+#     def get_queryset(self):
+#         id = self.kwargs['id']
+#         if self.request.user.is_superuser == True:
+#             order_obj = Order.objects.filter(id=id).exists()
+#             if order_obj:
+#                 Order.objects.filter(id=id).update(is_active=False)
+#                 queryset = Order.objects.filter(is_active=True).order_by('-created_at')
+#                 return queryset
+#             else:
+#                 raise ValidationError(
+#                     {"msg": 'Orders Does not exist!'}
+#                 )
+#         else:
+#             raise ValidationError({"msg": 'You can not delete orders, because you are not an Admin!'})

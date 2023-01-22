@@ -9,7 +9,7 @@ class TicketListSerializer(serializers.ModelSerializer):
 
 class TicketConversationSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(read_only=True)
-    user_name = serializers.CharField(source='ticket.user.username',read_only=True)
+    user_name = serializers.CharField(source='ticket.user.email',read_only=True)
     class Meta:
         model = TicketConversation
         fields = ['id', 'conversation_text', 'conversation_photo', 'created_at', 'user_name' ]
@@ -44,7 +44,7 @@ class CustomerTicketCreateSerializer(serializers.ModelSerializer):
                     conversation_photo = ''
 
                 if conversation_text:
-                    ticket_conversation_instance = TicketConversation.objects.create(conversation_text=conversation_text,  conversation_photo=conversation_photo, ticket=ticket_instance)
+                    ticket_conversation_instance = TicketConversation.objects.create(conversation_text=conversation_text,  conversation_photo=conversation_photo, ticket=ticket_instance, replier_user=self.context['request'].user)
 
         return ticket_instance
 

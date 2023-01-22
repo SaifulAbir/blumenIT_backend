@@ -169,6 +169,7 @@ class Order(AbstractTimeStamp):
     delivery_agent = models.CharField(max_length=100, null=True, blank=True)
     delivery_date = models.DateTimeField(null=True, blank=True)
     comment = models.TextField(null=True, blank=True)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
         verbose_name = 'Order'
@@ -192,6 +193,8 @@ class SubOrder(AbstractTimeStamp):
     sub_order_id = models.SlugField(null=False, blank=False, allow_unicode=True)
     order_id = models.ForeignKey(Order, on_delete=models.CASCADE, blank=True, null=True)
     in_house_order = models.BooleanField(default=False)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
 
     class Meta:
         verbose_name = 'SubOrder'
@@ -223,7 +226,7 @@ class OrderItem(AbstractTimeStamp):
         max_length=255, null=False, blank=False, default=0)
     product_warranty = models.ForeignKey(
         ProductWarranty, on_delete=models.CASCADE, related_name='order_item_product_warranty', blank=True, null=True)
-    
+    is_active = models.BooleanField(null=False, blank=False, default=True)
 
     @property
     def subtotal(self):

@@ -9,7 +9,7 @@ class TicketListSerializer(serializers.ModelSerializer):
 
 class TicketConversationSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(read_only=True)
-    user_name = serializers.CharField(source='ticket.user.email',read_only=True)
+    user_name = serializers.CharField(source='replier_user.email',read_only=True)
     class Meta:
         model = TicketConversation
         fields = ['id', 'conversation_text', 'conversation_photo', 'created_at', 'user_name' ]

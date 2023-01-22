@@ -58,8 +58,8 @@ class CustomerTicketReplyAPIView(CreateAPIView):
     serializer_class = TicketConversationReplySerializer
 
     def post(self, request, *args, **kwargs):
-        if self.request.user.is_customer == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             return super(CustomerTicketReplyAPIView, self).post(request, *args, **kwargs)
         else:
             raise ValidationError(
-                {"msg": 'You can not create ticket reply, because you are not an User!'})
+                {"msg": 'You can not create ticket reply, because you are not an Admin or a stuff!'})

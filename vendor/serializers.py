@@ -1563,10 +1563,10 @@ class CategoryWiseProductStockSerializer(serializers.ModelSerializer):
 
     def get_stock_count(self, obj):
         products = Product.objects.filter(category = obj)
-        total_quantity = 0
+        available_quantity = 0
         for product in products:
-            total_quantity += product.total_quantity
-        return total_quantity
+            available_quantity += product.quantity
+        return available_quantity
 
 
 class AdminWarrantyListSerializer(serializers.ModelSerializer):

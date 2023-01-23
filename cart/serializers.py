@@ -9,9 +9,14 @@ from rest_framework.exceptions import ValidationError
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    total_quantity = serializers.SerializerMethodField()
     class Meta:
         model = Product
         fields = ['id', 'thumbnail', 'title', 'price', 'total_quantity']
+
+    def get_total_quantity(self, obj):
+        quantity = Product.objects.get(id=obj.id).quantity
+        return quantity
 
 
 class CheckoutDetailsOrderItemSerializer(serializers.ModelSerializer):

@@ -223,9 +223,12 @@ class CheckoutSerializer(serializers.ModelSerializer):
                     order_items_not_in_house_product += 1
 
             total_order_items = int(len(order_items))
+            in_house_order = True
             if order_items_in_house_product == total_order_items:
+                in_house_order = True
                 pass
             elif order_items_not_in_house_product == total_order_items:
+                in_house_order = False
                 pass
             else:
                 raise ValidationError("Order didn't create, Because of multiple products types available in order items.")
@@ -233,7 +236,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
 
         order_instance = Order.objects.create(
             **validated_data, user=self.context['request'].user, order_status=order_status,
-            payment_status=payment_status )
+            payment_status=payment_status, in_house_order=in_house_order)
 
         if order_items:
             count = 0

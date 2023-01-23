@@ -169,6 +169,7 @@ class Order(AbstractTimeStamp):
     delivery_agent = models.CharField(max_length=100, null=True, blank=True)
     delivery_date = models.DateTimeField(null=True, blank=True)
     comment = models.TextField(null=True, blank=True)
+    in_house_order = models.BooleanField(default=False)
     is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:

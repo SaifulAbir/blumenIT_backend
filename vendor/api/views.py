@@ -25,7 +25,7 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     AdminTicketListSerializer, AdminTicketDataSerializer, TicketStatusSerializer, CategoryWiseProductSaleSerializer, \
     CategoryWiseProductStockSerializer, AdminWarrantyListSerializer, AdminShippingClassSerializer, \
     AdminSpecificationTitleSerializer, AdminSubscribersListSerializer, AdminCorporateDealSerializer, AdminCouponSerializer
-from cart.models import Order, OrderItem, SubOrder, Coupon
+from cart.models import Order, OrderItem, Coupon
 from user.models import User, Subscription
 from rest_framework.exceptions import ValidationError
 from vendor.pagination import OrderCustomPagination
@@ -956,7 +956,7 @@ class OrderListSearchAPI(ListAPIView):
             start_date = request.GET.get('start')
             end_date = request.GET.get('end')
 
-            queryset = SubOrder.objects.all(is_active=True).order_by('-created_at')
+            queryset = Order.objects.filter(is_active=True).order_by('-created_at')
 
             if query:
                 queryset = queryset.filter(
@@ -1051,10 +1051,34 @@ class AdminCustomerListAPIView(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True:
-            queryset = User.objects.filter(is_customer=True)
+            queryset = User.objects.filter(is_customer=True, is_active=True)
             return queryset
         else:
             raise ValidationError({"msg": 'You can not see customer list data, because you are not an Admin!'})
+
+
+class AdminCustomerDeleteAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    pagination_class = ProductCustomPagination
+    serializer_class = AdminCustomerListSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = 'id'
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        if self.request.user.is_superuser == True:
+            user_obj = User.objects.filter(id=id, is_customer=True, is_active=True).exists()
+            if user_obj:
+                User.objects.filter(id=id, is_customer=True, is_active=True).update(is_active=False)
+
+                queryset = User.objects.filter(is_customer=True, is_active=True).order_by('-created_at')
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'User Does not exist!'}
+                )
+        else:
+            raise ValidationError({"msg": 'You can not delete User, because you are not an Admin!'})
 
 
 class AdminTicketListAPIView(ListAPIView):

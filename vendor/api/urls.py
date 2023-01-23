@@ -17,7 +17,8 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminFlashDealListAPIView, AdminWarrantyListAPIView, AdminShippingClassListAPIView, \
     AdminSpecificationTitleListAPIView, AdminFlashDealUpdateAPIView, AdminFlashDealDeleteAPIView, AdminSubscribersListAPIView, \
     AdminSubscriberDeleteAPIView, AdminCorporateDealListAPIView, AdminCorporateDealDeleteAPIView, AdminAttributeDeleteAPIView, \
-    AdminOrderDeleteAPIView, AdminCouponCreateAPIView, AdminCouponListAPIView, AdminCouponUpdateAPIView, AdminCouponDeleteAPIView
+    AdminOrderDeleteAPIView, AdminCouponCreateAPIView, AdminCouponListAPIView, AdminCouponUpdateAPIView, AdminCouponDeleteAPIView, \
+    AdminCustomerDeleteAPIView
 
 
 urlpatterns = [
@@ -117,6 +118,7 @@ urlpatterns = [
 
     # customer apies
     path('admin/customer-list/', AdminCustomerListAPIView.as_view()),
+    path('admin/customer-delete/<int:id>/', AdminCustomerDeleteAPIView.as_view()),
 
 
     # shipping class apies

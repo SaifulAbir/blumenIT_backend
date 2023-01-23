@@ -13,11 +13,11 @@ class BlogCategorySerializer(serializers.ModelSerializer):
 
 class BlogSerializer(serializers.ModelSerializer):
     title = serializers.CharField(required=True)
-    slug = serializers.SlugField(required=True)
+    slug = serializers.SlugField(read_only=True)
 
     class Meta:
         model = Blog
-        fields = ['id','title', 'slug', 'blog_category', 'blog_text', 'is_active']
+        fields = ['id','title', 'slug', 'blog_category', 'banner', 'banner', 'short_description', 'full_description', 'meta_title', 'meta_image', 'meta_description', 'meta_keywords', 'is_active']
 
 
 class CustomerBlogListSerializer(serializers.ModelSerializer):
@@ -51,7 +51,7 @@ class CustomerBlogDataSerializer(serializers.ModelSerializer):
     blog_reviews = serializers.SerializerMethodField()
     class Meta:
         model = Blog
-        fields = ['id', 'banner', 'title', 'created_by_email', 'created_by_name', 'view_count', 'created_at', 'blog_text', 'popular_blog', 'blog_reviews']
+        fields = ['id', 'banner', 'title', 'created_by_email', 'created_by_name', 'view_count', 'created_at', 'full_description', 'popular_blog', 'blog_reviews']
 
     def get_popular_blog(self, obj):
         try:

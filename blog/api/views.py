@@ -85,11 +85,9 @@ class BlogCategoryDeleteAPIView(ListAPIView):
     def get_queryset(self):
         if self.request.user.is_superuser == True:
             bcat_id = self.kwargs['id']
-            brand_obj = BlogCategory.objects.filter(id=bcat_id).exists()
-            if brand_obj:
-                brand_obj = BlogCategory.objects.filter(id=bcat_id)
-                brand_obj.update(is_active=False)
-
+            blog_category_obj = BlogCategory.objects.filter(id=bcat_id).exists()
+            if blog_category_obj:
+                BlogCategory.objects.filter(id=bcat_id).update(is_active=False)
                 queryset = BlogCategory.objects.filter(is_active=True).order_by('-created_at')
                 return queryset
             else:
@@ -163,10 +161,10 @@ class AdminBlogSearchAPI(ListAPIView):
             request = self.request
             query = request.GET.get('search')
 
-            queryset = Blog.objects.all().order_by('-created_at')
+            queryset = Blog.objects.filter(is_active=True).order_by('-created_at')
             if query:
                 queryset = queryset.filter(
-                    Q(order_id__icontains=query)
+                    Q(title__icontains=query)
                 )
 
             return queryset
@@ -207,9 +205,7 @@ class AdminBlogDeleteAPIView(ListAPIView):
             blog_obj_exist = Blog.objects.filter(
                 slug=slug).exists()
             if blog_obj_exist:
-                product_obj = Blog.objects.filter(slug=slug)
-                product_obj.update(is_active=False)
-
+                Blog.objects.filter(slug=slug).update(is_active=False)
                 queryset = Blog.objects.filter(is_active=True).order_by('-created_at')
                 return queryset
             else:

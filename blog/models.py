@@ -25,12 +25,17 @@ class Blog(AbstractTimeStamp):
         null=False, allow_unicode=True, blank=True, max_length=255)
     blog_category = models.ForeignKey(
         BlogCategory, related_name='blog_category', on_delete=models.PROTECT, null=True, blank=True)
-    blog_text = models.TextField(default='', null=True, blank=True)
+    short_description = models.TextField(default='', null=True, blank=True)
+    full_description = models.TextField(default='', null=True, blank=True)
     banner = models.ImageField(upload_to='blog', blank=True, null=True)
     thumbnail = models.ImageField(upload_to='blog', blank=True, null=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='blog_created_user', blank=True, null=True)
     view_count = models.BigIntegerField(null=True, blank=True, default=0)
     total_average_rating_number = models.FloatField(null=True, blank=True, default=0.0)
+    meta_title = models.CharField(max_length=100, help_text="name", default='')
+    meta_image = models.ImageField(upload_to='blog', blank=True, null=True)
+    meta_description = models.TextField(default='', null=True, blank=True)
+    meta_keywords = models.CharField(max_length=100, help_text="name", default='')
     is_active = models.BooleanField(default=True)
 
     class Meta:

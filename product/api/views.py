@@ -88,6 +88,8 @@ class ProductListByCategoryAPI(ListAPIView):
         request = self.request
         filter_price = request.GET.get('filter_price')
         attr_value_ids = request.GET.get('attr_value_ids')
+        price_low_to_high = request.GET.get('price_low_to_high')
+        price_high_to_low = request.GET.get('price_high_to_low')
 
         if filter_price:
             price_list = []
@@ -99,21 +101,6 @@ class ProductListByCategoryAPI(ListAPIView):
             max_price = price_list[1]
             queryset = queryset.filter(price__range=(min_price, max_price)).order_by('-created_at')
 
-        # if attr_value_ids:
-        #     attr_value_ids_list = attr_value_ids.split(",")
-        #     for attr_value_id in attr_value_ids_list:
-        #         attr_value_id = int(attr_value_id)
-        #         queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id=attr_value_id)).order_by('-created_at')
-
-                # attr_id = AttributeValues.objects.get(id = attr_value_id).attribute
-                # f_att_id = FilterAttributes.objects.get(attribute = attr_id)
-                # p_f_att_id = ProductFilterAttributes.objects.get(filter_attribute = f_att_id)
-                # queryset = queryset.filter(id=p_f_att_id.product.id).order_by('-created_at')
-
-                # attr_value_id = int(attr_value_id)
-                # attr_id = AttributeValues.objects.get(id = attr_value_id).attribute
-                # cat_id = FilterAttributes.objects.get(attribute = attr_id).category.id
-                # queryset = queryset.filter(Q(category__id=cat_id)).order_by('-created_at')
 
         new_attr_value_ids = []
         if attr_value_ids:
@@ -124,6 +111,12 @@ class ProductListByCategoryAPI(ListAPIView):
 
         if new_attr_value_ids:
             queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id__in = new_attr_value_ids)).order_by('-id').distinct("id")
+
+        if price_low_to_high:
+            queryset = queryset.order_by('price')
+
+        if price_high_to_low:
+            queryset = queryset.order_by('-price')
 
         return queryset
 
@@ -216,6 +209,8 @@ class ProductListBySubCategoryAPI(ListAPIView):
         request = self.request
         filter_price = request.GET.get('filter_price')
         attr_value_ids = request.GET.get('attr_value_ids')
+        price_low_to_high = request.GET.get('price_low_to_high')
+        price_high_to_low = request.GET.get('price_high_to_low')
 
         if filter_price:
             price_list = []
@@ -236,6 +231,12 @@ class ProductListBySubCategoryAPI(ListAPIView):
 
         if new_attr_value_ids:
             queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id__in = new_attr_value_ids)).order_by('-id').distinct("id")
+
+        if price_low_to_high:
+            queryset = queryset.order_by('price')
+
+        if price_high_to_low:
+            queryset = queryset.order_by('-price')
 
         return queryset
 
@@ -268,6 +269,8 @@ class ProductListBySubSubCategoryAPI(ListAPIView):
         request = self.request
         filter_price = request.GET.get('filter_price')
         attr_value_ids = request.GET.get('attr_value_ids')
+        price_low_to_high = request.GET.get('price_low_to_high')
+        price_high_to_low = request.GET.get('price_high_to_low')
 
         if filter_price:
             price_list = []
@@ -288,6 +291,12 @@ class ProductListBySubSubCategoryAPI(ListAPIView):
 
         if new_attr_value_ids:
             queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id__in = new_attr_value_ids)).order_by('-id').distinct("id")
+
+        if price_low_to_high:
+            queryset = queryset.order_by('price')
+
+        if price_high_to_low:
+            queryset = queryset.order_by('-price')
 
         return queryset
 
@@ -361,6 +370,8 @@ class PcBuilderChooseAPIView(ListAPIView):
         type = request.GET.get('type')
         filter_price = request.GET.get('filter_price')
         attr_value_ids = request.GET.get('attr_value_ids')
+        price_low_to_high = request.GET.get('price_low_to_high')
+        price_high_to_low = request.GET.get('price_high_to_low')
 
         queryset = Product.objects.filter(
             status='PUBLISH').order_by('-created_at')
@@ -383,11 +394,6 @@ class PcBuilderChooseAPIView(ListAPIView):
             max_price = price_list[1]
             queryset = queryset.filter(price__range=(min_price, max_price)).order_by('-created_at')
 
-        # if attr_value_ids:
-        #     attr_value_ids_list = attr_value_ids.split(",")
-        #     for attr_value_id in attr_value_ids_list:
-        #         attr_value_id = int(attr_value_id)
-        #         queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id=attr_value_id)).order_by('-created_at')
 
         new_attr_value_ids = []
         if attr_value_ids:
@@ -398,6 +404,12 @@ class PcBuilderChooseAPIView(ListAPIView):
 
         if new_attr_value_ids:
             queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id__in = new_attr_value_ids)).order_by('-id').distinct("id")
+
+        if price_low_to_high:
+            queryset = queryset.order_by('price')
+
+        if price_high_to_low:
+            queryset = queryset.order_by('-price')
 
 
         return queryset

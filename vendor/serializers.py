@@ -411,7 +411,8 @@ class VendorProductListSerializer(serializers.ModelSerializer):
             'low_stock_quantity_warning',
             'todays_deal',
             'is_featured',
-            'is_active'
+            'is_active',
+            'in_house_product'
         ]
 
     def get_avg_rating(self, obj):
@@ -777,7 +778,8 @@ class VendorProductViewSerializer(serializers.ModelSerializer):
             'refundable',
             'full_description',
             'product_specification',
-            'product_reviews'
+            'product_reviews',
+            'in_house_product'
         ]
 
     def get_product_images(self, obj):

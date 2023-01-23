@@ -252,7 +252,8 @@ class ProductListBySerializer(serializers.ModelSerializer):
             'product_reviews',
             'warranty',
             'short_description',
-            'full_description'
+            'full_description',
+            'in_house_product'
         ]
 
     def get_avg_rating(self, ob):
@@ -298,7 +299,8 @@ class ProductListBySerializerForHomeData(serializers.ModelSerializer):
             'discount_type',
             'discount_amount',
             'thumbnail',
-            'warranty'
+            'warranty',
+            'in_house_product'
         ]
 
     def get_total_quantity(self, obj):
@@ -373,7 +375,8 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             'product_condition',
             'video_link',
             'related_products',
-            'product_warranties'
+            'product_warranties',
+            'in_house_product'
         ]
 
     def get_avg_rating(self, obj):

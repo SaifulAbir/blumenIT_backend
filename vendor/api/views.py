@@ -913,6 +913,10 @@ class AdminOrderList(ListAPIView):
 
             if type == 'in_house_order':
                 queryset = queryset.filter(in_house_order=True)
+            if type == 'seller_order':
+                queryset = queryset.filter(is_active=True).order_by('vendor')
+            if type == 'pick_up_point_order':
+                queryset = queryset.filter(is_active=True, delivery_address__isnull=True).order_by('vendor')
             if queryset:
                 return queryset
             else:

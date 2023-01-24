@@ -1377,27 +1377,14 @@ class AdminFilterAttributeSerializer(serializers.ModelSerializer):
 
 
 class AdminOrderListSerializer(serializers.ModelSerializer):
-    # order_id = serializers.CharField(source='order_id.order_id',read_only=True)
-    # product_count = serializers.CharField(source='order_id.product_count',read_only=True)
-    # order_date = serializers.CharField(source='order_id.order_date',read_only=True)
-    # order_status = serializers.CharField(source='order_id.order_status',read_only=True)
-    # total_price = serializers.SerializerMethodField('get_total_price')
-    # created_at = serializers.CharField(source='order_id.created_at',read_only=True)
-    # payment_status = serializers.CharField(source='order_id.payment_status',read_only=True)
-    # user_email = serializers.CharField(source='order_id.user.email',read_only=True)
-    # user_phone = serializers.CharField(source='order_id.user.phone',read_only=True)
-
     total_price = serializers.SerializerMethodField('get_total_price')
     user_email = serializers.CharField(source='user.email',read_only=True)
     user_phone = serializers.CharField(source='user.phone',read_only=True)
-
-    # class Meta:
-    #     model = SubOrder
-    #     fields = ['id', 'order_id', 'sub_order_id', 'product_count', 'order_date', 'order_status', 'total_price', 'created_at', 'payment_status', 'user_email', 'user_phone', 'in_house_order']
+    seller = serializers.CharField(source='vendor.name',read_only=True)
 
     class Meta:
         model = Order
-        fields = ['id', 'order_id', 'product_count', 'order_date', 'order_status', 'total_price', 'created_at', 'payment_status', 'user_email', 'user_phone']
+        fields = ['id', 'delivery_address', 'order_id', 'product_count', 'order_date', 'order_status', 'total_price', 'created_at', 'payment_status', 'user_email', 'user_phone', 'vendor', 'seller', 'delivery_agent', 'refund']
 
     def get_total_price(self, obj):
         order_items = OrderItem.objects.filter(order=obj)

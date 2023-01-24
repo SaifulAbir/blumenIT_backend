@@ -7,7 +7,9 @@ from home.models import ProductView
 from product.serializers import ProductDetailsSerializer, ProductReviewCreateSerializer, \
 StoreCategoryAPIViewListSerializer, ProductListBySerializer, FilterAttributeSerializer, PcBuilderCategoryListSerializer, PcBuilderSubCategoryListSerializer, PcBuilderSubSubCategoryListSerializer, BrandListSerializer
 
-from product.models import Category, SubCategory, SubSubCategory, Product, Brand, AttributeValues
+from vendor.serializers import AdminOfferSerializer
+
+from product.models import Category, SubCategory, SubSubCategory, Product, Brand, Offer, OfferProduct
 from product.models import FilterAttributes
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -482,3 +484,95 @@ class BrandListAPIView(ListAPIView):
             raise ValidationError({"msg": "No brand available! " })
 
 
+class OffersListAPIView(ListAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = AdminOfferSerializer
+
+    def get_queryset(self):
+        queryset = Offer.objects.filter(is_active=True)
+        if queryset:
+            return queryset
+        else:
+            raise ValidationError({"msg": "No offers available! " })
+
+
+class OfferDetailsAPIView(RetrieveAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = AdminOfferSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_object(self):
+        offer_id = self.kwargs['id']
+        try:
+            query = Offer.objects.get(id=offer_id)
+            return query
+        except:
+            raise ValidationError({"details": "Offer doesn't exist!"})
+
+
+class OfferProductsListAPIView(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = ProductListBySerializer
+    pagination_class = ProductCustomPagination
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        # work with dynamic pagination page_size
+        try:
+            pagination = self.kwargs['pagination']
+        except:
+            pagination = 10
+        self.pagination_class.page_size = pagination
+
+
+        id = self.kwargs['id']
+
+        products = []
+        offer_obj = Offer.objects.get(id=id)
+        offer_products = OfferProduct.objects.filter(offer=offer_obj)
+        for offer_product in offer_products:
+            products.append(offer_product.product.id)
+
+        if products:
+            queryset = Product.objects.filter(id__in=products, status='PUBLISH').order_by('-created_at')
+        else:
+            queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
+
+
+        # filtering start
+        request = self.request
+        filter_price = request.GET.get('filter_price')
+        attr_value_ids = request.GET.get('attr_value_ids')
+        price_low_to_high = request.GET.get('price_low_to_high')
+        price_high_to_low = request.GET.get('price_high_to_low')
+
+        if filter_price:
+            price_list = []
+            filter_prices = filter_price.split("-")
+            for filter_price in filter_prices:
+                price_list.append(int(filter_price))
+
+            min_price = price_list[0]
+            max_price = price_list[1]
+            queryset = queryset.filter(price__range=(min_price, max_price)).order_by('-created_at')
+
+
+        new_attr_value_ids = []
+        if attr_value_ids:
+            attr_value_ids_list = attr_value_ids.split(",")
+            for attr_value_id in attr_value_ids_list:
+                attr_value_id = int(attr_value_id)
+                new_attr_value_ids.append(attr_value_id)
+
+        if new_attr_value_ids:
+            queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id__in = new_attr_value_ids)).order_by('-id').distinct("id")
+
+        if price_low_to_high:
+            queryset = queryset.order_by('price')
+
+        if price_high_to_low:
+            queryset = queryset.order_by('-price')
+
+        return queryset

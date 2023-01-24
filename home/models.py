@@ -28,27 +28,6 @@ class SliderImage(AbstractTimeStamp):
         return f"{self.pk}"
 
 
-class DealsOfTheDay(AbstractTimeStamp):
-    CHOICES = [
-        ('per', 'Percentage'),
-        ('flat', 'Flat'),]
-
-    product = models.ManyToManyField(Product)
-    start_date = models.DateField(blank=True, null=True)
-    end_date = models.DateField(blank=True, null=True)
-    discount_price = models.FloatField(max_length=255, null=False, blank=False, default=0)
-    discount_price_type = models.CharField(max_length=20, null=False, blank=False, choices=CHOICES)
-    is_active = models.BooleanField(null=False, blank=False, default=True)
-
-    class Meta:
-        verbose_name = 'DealsOfTheDay'
-        verbose_name_plural = 'DealsOfTheDays'
-        db_table = 'dealsOfTheDay'
-
-    def __str__(self):
-        return f"{self.pk}"
-
-
 class ProductView(AbstractTimeStamp):
 
     product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='product_view_count')

@@ -18,7 +18,8 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminSpecificationTitleListAPIView, AdminFlashDealUpdateAPIView, AdminFlashDealDeleteAPIView, AdminSubscribersListAPIView, \
     AdminSubscriberDeleteAPIView, AdminCorporateDealListAPIView, AdminCorporateDealDeleteAPIView, AdminAttributeDeleteAPIView, \
     AdminOrderDeleteAPIView, AdminCouponCreateAPIView, AdminCouponListAPIView, AdminCouponUpdateAPIView, AdminCouponDeleteAPIView, \
-    AdminCustomerDeleteAPIView
+    AdminCustomerDeleteAPIView, AdminBrandUpdateAPIView, AdminOffersListAPIView, AdminOffersCreateAPIView, AdminOffersDetailsAPIView, \
+    AdminOffersUpdateAPIView, AdminOffersDeleteAPIView
 
 
 urlpatterns = [
@@ -90,6 +91,7 @@ urlpatterns = [
     # brand apies
     path('admin/product-brand-list/', AdminBrandListAPIView.as_view()),
     path('admin/brand-create/', AdminBrandCreateAPIView.as_view()),
+    path('admin/brand-update/<int:id>/', AdminBrandUpdateAPIView.as_view()),
     path('admin/brand-delete/<int:id>/', AdminBrandDeleteAPIView.as_view()),
 
 
@@ -138,6 +140,14 @@ urlpatterns = [
     path('admin/coupon-list/', AdminCouponListAPIView.as_view()),
     path('admin/coupon-update/<int:id>/', AdminCouponUpdateAPIView.as_view()),
     path('admin/coupon-delete/<int:id>/', AdminCouponDeleteAPIView.as_view()),
+
+
+    # offers apies
+    path('admin/offers-list/', AdminOffersListAPIView.as_view()),
+    path('admin/offers-details/<int:id>/', AdminOffersDetailsAPIView.as_view()),
+    path('admin/offers-create/', AdminOffersCreateAPIView.as_view()),
+    path('admin/offers-update/<int:id>/', AdminOffersUpdateAPIView.as_view()),
+    path('admin/offers-delete/<int:id>/', AdminOffersDeleteAPIView.as_view()),
 
 
     # others

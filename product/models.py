@@ -675,3 +675,58 @@ class SavePcItems(AbstractTimeStamp):
 
     def __str__(self):
         return  'id: ' + str(self.id) + ' sub_category: ' + self.sub_category.title + ' product: ' + self.product.title
+
+
+class OfferCategory(AbstractTimeStamp):
+    title = models.CharField(
+        max_length=100, null=False, blank=False, default="", help_text="name")
+    ordering_number = models.IntegerField(null=False, blank=False, default=0)
+
+    class Meta:
+        verbose_name = 'OfferCategory'
+        verbose_name_plural = 'OfferCategories'
+        db_table = 'offer_category'
+
+    def __str__(self):
+        return 'id: ' + str(self.id) + ' Title: ' + self.title
+
+
+class Offer(AbstractTimeStamp):
+    CHOICES = [
+        ('per', 'Percentage'),
+        ('flat', 'Flat'),]
+    title = models.CharField(max_length=100, null=False, blank=False, default="", help_text="name")
+    product_category = models.ForeignKey(
+        Category, related_name='offer_product_category', blank=True, null=True, on_delete=models.PROTECT)
+    offer_category = models.ForeignKey(
+        OfferCategory, related_name='offer_offer_category', blank=True, null=True, on_delete=models.PROTECT)
+    start_date = models.DateTimeField(blank=True, null=True)
+    end_date = models.DateTimeField(blank=True, null=True)
+    thumbnail = models.FileField(upload_to='offers', blank=True, null=True)
+    short_description = models.CharField(max_length=800, default='', null=True, blank=True)
+    full_description = models.TextField(default='', null=True, blank=True)
+    discount_price = models.FloatField(max_length=255, null=True, blank=True, default=0)
+    discount_price_type = models.ForeignKey(DiscountTypes, on_delete=models.PROTECT, related_name='offer_discount_type', null=True, blank=True)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'Offer'
+        verbose_name_plural = 'Offers'
+        db_table = 'offer'
+
+    def __str__(self):
+        return f"{self.pk}"
+
+
+class OfferProduct(AbstractTimeStamp):
+    offer = models.ForeignKey(Offer, related_name='offer_product_offer', blank=True, null=True, on_delete=models.PROTECT)
+    product = models.ForeignKey(Product, related_name='offer_offer_product', blank=True, null=True, on_delete=models.PROTECT)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'OfferProduct'
+        verbose_name_plural = 'OfferProducts'
+        db_table = 'offer_products'
+
+    def __str__(self):
+        return f"{self.pk}"

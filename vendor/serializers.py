@@ -5,7 +5,8 @@ from rest_framework.exceptions import ValidationError
 from product.models import Brand, Category, DiscountTypes, FlashDealInfo, FlashDealProduct, Inventory, \
     Product, ProductImages, ProductReview, ProductTags, ProductVariation, ProductVideoProvider, \
     ShippingClass, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units,\
-    VatType, Attribute, FilterAttributes, ProductFilterAttributes, AttributeValues, ProductWarranty, Warranty, SpecificationTitle
+    VatType, Attribute, FilterAttributes, ProductFilterAttributes, AttributeValues, ProductWarranty, Warranty, SpecificationTitle, \
+    Offer, OfferProduct
 from user.models import User, Subscription
 from cart.models import Order, Coupon, OrderItem, DeliveryAddress
 from user.serializers import CustomerProfileSerializer
@@ -380,7 +381,7 @@ class UpdateSubSubCategorySerializer(serializers.ModelSerializer):
 class VendorBrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
-        fields = ['id', 'title', 'logo', 'meta_title', 'meta_description']
+        fields = ['id', 'title', 'logo', 'meta_title', 'meta_description', 'is_gaming', 'is_active']
 
 
 class VendorUnitSerializer(serializers.ModelSerializer):
@@ -1605,3 +1606,93 @@ class AdminCouponSerializer(serializers.ModelSerializer):
                     'min_shopping',
                     'is_active'
                 ]
+
+
+class AdminOfferProductsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OfferProduct
+        fields = [  'id',
+                    'product',
+        ]
+
+
+class AdminOfferSerializer(serializers.ModelSerializer):
+    offer_category_title = serializers.CharField(source='offer_category.title',read_only=True)
+    product_category_title = serializers.CharField(source='product_category.title',read_only=True)
+    offer_products = AdminOfferProductsSerializer(many=True, required=False)
+    existing_offer_products = serializers.SerializerMethodField('get_existing_offer_products')
+    start_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", required=False)
+    end_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", required=False)
+
+    class Meta:
+        model = Offer
+        read_only_field = ['id']
+        fields = [  'id',
+                    'title',
+                    'product_category',
+                    'product_category_title',
+                    'offer_category',
+                    'offer_category_title',
+                    'start_date',
+                    'end_date',
+                    'thumbnail',
+                    'short_description',
+                    'full_description',
+                    'discount_price',
+                    'discount_price_type',
+                    'offer_products',
+                    'existing_offer_products'
+                ]
+
+    def get_existing_offer_products(self, obj):
+        queryset = OfferProduct.objects.filter(offer=obj, is_active = True)
+        serializer = AdminOfferProductsSerializer(instance=queryset, many=True)
+        return serializer.data
+
+
+    def create(self, validated_data):
+        # offer_products
+        try:
+            offer_products = validated_data.pop('offer_products')
+        except:
+            offer_products = ''
+
+        offer_instance = Offer.objects.create(**validated_data)
+
+        try:
+            # offer_products
+            if offer_products:
+                for offer_product in offer_products:
+                    product = offer_product['product']
+                    OfferProduct.objects.create(offer=offer_instance, product=product)
+            return offer_instance
+        except:
+            return offer_instance
+
+    def update(self, instance, validated_data):
+        # offer_products
+        try:
+            offer_products = validated_data.pop('offer_products')
+        except:
+            offer_products = ''
+
+        try:
+            # offer_products
+            if offer_products:
+                o_p = OfferProduct.objects.filter(offer=instance).exists()
+                if o_p == True:
+                    OfferProduct.objects.filter(offer=instance).delete()
+
+                for offer_product in offer_products:
+                    product = offer_product['product']
+                    OfferProduct.objects.create(offer=instance, product=product)
+            else:
+                o_p = OfferProduct.objects.filter(offer=instance).exists()
+                if o_p == True:
+                    OfferProduct.objects.filter(offer=instance).delete()
+
+            validated_data.update({"updated_at": timezone.now()})
+            return super().update(instance, validated_data)
+        except:
+            validated_data.update({"updated_at": timezone.now()})
+            return super().update(instance, validated_data)

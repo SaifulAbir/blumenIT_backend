@@ -10,7 +10,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.db.models import Q, Count
 
 from product.models import Product, Category, SubCategory, Brand
-from product.serializers import ProductListBySerializer, BrandListSerializer, ProductListBySerializerForHomeData
+from product.serializers import ProductListBySerializer, BrandSerializer, ProductListBySerializerForHomeData
 from rest_framework.generics import ListAPIView, CreateAPIView
 from rest_framework.exceptions import ValidationError
 from product.pagination import ProductCustomPagination
@@ -43,7 +43,7 @@ class   HomeDataAPIView(APIView):
 
         # brand list
         brand_list = Brand.objects.filter(is_active=True).order_by('-created_at')
-        brand_list_serializer = BrandListSerializer(brand_list, many=True, context={"request": request})
+        brand_list_serializer = BrandSerializer(brand_list, many=True, context={"request": request})
 
         # single row data
         single_row_data = HomeSingleRowData.objects.filter(Q(is_active=True)).order_by('-created_at')[:1]
@@ -110,7 +110,7 @@ class  GamingDataAPIView(APIView):
 
         # brand list
         brand_list = Brand.objects.filter(is_active=True, is_gaming=True).order_by('-created_at')
-        brand_list_serializer = BrandListSerializer(brand_list, many=True, context={"request": request})
+        brand_list_serializer = BrandSerializer(brand_list, many=True, context={"request": request})
 
         # single row data
         single_row_data = HomeSingleRowData.objects.filter(Q(is_active=True)).order_by('-created_at')[:1]

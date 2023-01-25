@@ -131,6 +131,7 @@ class Brand(AbstractTimeStamp):
     logo = models.ImageField(upload_to='brand', blank=True, null=True)
     meta_title = models.CharField(max_length=200, null=False, blank=True)
     meta_description = models.TextField(null=True, blank=True)
+    rating_number = models.FloatField(null=True, blank=True, default=0.0)
     is_active = models.BooleanField(null=False, blank=False, default=True)
     is_gaming = models.BooleanField(null=False, blank=False, default=False)
 

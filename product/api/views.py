@@ -5,7 +5,7 @@ from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView
 from rest_framework.views import APIView
 from home.models import ProductView
 from product.serializers import ProductDetailsSerializer, ProductReviewCreateSerializer, \
-StoreCategoryAPIViewListSerializer, ProductListBySerializer, FilterAttributeSerializer, PcBuilderCategoryListSerializer, PcBuilderSubCategoryListSerializer, PcBuilderSubSubCategoryListSerializer, BrandListSerializer
+StoreCategoryAPIViewListSerializer, ProductListBySerializer, FilterAttributeSerializer, PcBuilderCategoryListSerializer, PcBuilderSubCategoryListSerializer, PcBuilderSubSubCategoryListSerializer, BrandSerializer
 
 from vendor.serializers import AdminOfferSerializer
 
@@ -473,11 +473,97 @@ class OnlyTitleAPIView(APIView):
 
 
 class BrandListAPIView(ListAPIView):
-    permission_classes = [AllowAny]
-    serializer_class = BrandListSerializer
+    permission_classes = (AllowAny,)
+    serializer_class = BrandSerializer
+    pagination_class = ProductCustomPagination
 
     def get_queryset(self):
-        queryset = Brand.objects.filter(is_active=True)
+        # work with dynamic pagination page_size
+        try:
+            pagination = self.kwargs['pagination']
+        except:
+            pagination = 10
+        self.pagination_class.page_size = pagination
+
+        queryset = Brand.objects.filter(is_active=True).order_by('-created_at')
+
+        # filtering start
+        request = self.request
+        alphabetic = request.GET.get('alphabetic')
+        popularity = request.GET.get('popularity')
+        newest = request.GET.get('newest')
+
+        if alphabetic:
+            queryset = queryset.order_by('title')
+
+        if popularity:
+            queryset = queryset.order_by('-rating_number')
+
+        if newest:
+            queryset = queryset.order_by('-created_at')
+
+        if queryset:
+            return queryset
+        else:
+            raise ValidationError({"msg": "No brand available! " })
+
+
+class ProductListByBrandAPI(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = ProductListBySerializer
+    pagination_class = ProductCustomPagination
+    lookup_field = 'bid'
+    lookup_url_kwarg = "bid"
+
+    def get_queryset(self):
+        # work with dynamic pagination page_size
+        try:
+            pagination = self.kwargs['pagination']
+        except:
+            pagination = 10
+        self.pagination_class.page_size = pagination
+
+
+        bid = self.kwargs['bid']
+        if bid:
+            queryset = Product.objects.filter(brand=bid, status='PUBLISH').order_by('-created_at')
+        else:
+            queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
+
+        # filtering start
+        request = self.request
+        popularity = request.GET.get('popularity')
+        newest = request.GET.get('newest')
+        price_high_to_low = request.GET.get('price_high_to_low')
+        price_high_to_low = request.GET.get('price_low_to_high')
+
+        # if filter_price:
+        #     price_list = []
+        #     filter_prices = filter_price.split("-")
+        #     for filter_price in filter_prices:
+        #         price_list.append(int(filter_price))
+
+        #     min_price = price_list[0]
+        #     max_price = price_list[1]
+        #     queryset = queryset.filter(price__range=(min_price, max_price)).order_by('-created_at')
+
+
+        # new_attr_value_ids = []
+        # if attr_value_ids:
+        #     attr_value_ids_list = attr_value_ids.split(",")
+        #     for attr_value_id in attr_value_ids_list:
+        #         attr_value_id = int(attr_value_id)
+        #         new_attr_value_ids.append(attr_value_id)
+
+        # if new_attr_value_ids:
+        #     queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id__in = new_attr_value_ids)).order_by('-id').distinct("id")
+
+        # if price_low_to_high:
+        #     queryset = queryset.order_by('price')
+
+        # if price_high_to_low:
+        #     queryset = queryset.order_by('-price')
+
         if queryset:
             return queryset
         else:

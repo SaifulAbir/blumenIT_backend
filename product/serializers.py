@@ -101,10 +101,10 @@ class BrandSerializer(serializers.ModelSerializer):
         return brand_instance
 
 
-class BrandListSerializer(serializers.ModelSerializer):
+class BrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
-        fields = ['id', 'title', 'logo']
+        fields = ['id', 'title', 'logo', 'meta_title', 'meta_description', 'is_gaming', 'rating_number', 'created_at']
 
 
 class UnitSerializer(serializers.ModelSerializer):

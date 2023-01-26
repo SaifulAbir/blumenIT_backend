@@ -475,15 +475,8 @@ class OnlyTitleAPIView(APIView):
 class BrandListAPIView(ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = BrandSerializer
-    pagination_class = ProductCustomPagination
 
     def get_queryset(self):
-        # work with dynamic pagination page_size
-        try:
-            pagination = self.kwargs['pagination']
-        except:
-            pagination = 10
-        self.pagination_class.page_size = pagination
 
         queryset = Brand.objects.filter(is_active=True).order_by('-created_at')
 
@@ -535,39 +528,28 @@ class ProductListByBrandAPI(ListAPIView):
         popularity = request.GET.get('popularity')
         newest = request.GET.get('newest')
         price_high_to_low = request.GET.get('price_high_to_low')
-        price_high_to_low = request.GET.get('price_low_to_high')
+        price_low_to_high = request.GET.get('price_low_to_high')
+        name = request.GET.get('name')
 
-        # if filter_price:
-        #     price_list = []
-        #     filter_prices = filter_price.split("-")
-        #     for filter_price in filter_prices:
-        #         price_list.append(int(filter_price))
+        if popularity:
+            queryset = queryset.order_by('-total_average_rating_number')
 
-        #     min_price = price_list[0]
-        #     max_price = price_list[1]
-        #     queryset = queryset.filter(price__range=(min_price, max_price)).order_by('-created_at')
+        if newest:
+            queryset = queryset.order_by('-created_at')
 
+        if price_high_to_low:
+            queryset = queryset.order_by('-price')
 
-        # new_attr_value_ids = []
-        # if attr_value_ids:
-        #     attr_value_ids_list = attr_value_ids.split(",")
-        #     for attr_value_id in attr_value_ids_list:
-        #         attr_value_id = int(attr_value_id)
-        #         new_attr_value_ids.append(attr_value_id)
+        if price_low_to_high:
+            queryset = queryset.order_by('price')
 
-        # if new_attr_value_ids:
-        #     queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id__in = new_attr_value_ids)).order_by('-id').distinct("id")
-
-        # if price_low_to_high:
-        #     queryset = queryset.order_by('price')
-
-        # if price_high_to_low:
-        #     queryset = queryset.order_by('-price')
+        if name:
+            queryset = queryset.order_by('title')
 
         if queryset:
             return queryset
         else:
-            raise ValidationError({"msg": "No brand available! " })
+            raise ValidationError({"msg": "No products available! " })
 
 
 class OffersListAPIView(ListAPIView):

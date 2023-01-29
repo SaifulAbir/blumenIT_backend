@@ -3,7 +3,7 @@ from product.models import FlashDealProduct, Specification, SpecificationValue, 
     Category, FlashDealInfo, Inventory, ProductImages, ShippingClass, SubCategory, SubSubCategory, Brand, Tags, Units, \
     DiscountTypes, Product, VariantType, ProductTags, ProductReview, ProductVideoProvider, VatType, SpecificationTitle, \
     FilterAttributes, ProductFilterAttributes, ProductCondition, Warranty, ProductWarranty, SavePc, SavePcItems, Offer, \
-    OfferProduct, OfferCategory
+    OfferProduct, OfferCategory, ShippingCountry, ShippingState, ShippingCity
 
 
 admin.site.register(Category)
@@ -23,6 +23,9 @@ admin.site.register(AttributeValues)
 admin.site.register(FlashDealInfo)
 admin.site.register(VatType)
 admin.site.register(Inventory)
+admin.site.register(ShippingCountry)
+admin.site.register(ShippingState)
+admin.site.register(ShippingCity)
 admin.site.register(ShippingClass)
 admin.site.register(TextColor)
 admin.site.register(SpecificationTitle)

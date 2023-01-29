@@ -523,8 +523,6 @@ class ProductCreateSerializer(serializers.ModelSerializer):
     minimum_purchase_quantity = serializers.IntegerField(required=True)
     price = serializers.FloatField(required=True)
     quantity = serializers.IntegerField(required=False, write_only=True)
-    shipping_class = serializers.PrimaryKeyRelatedField(queryset=ShippingClass.objects.all(), many=False, write_only=True, required= False)
-
     product_tags = serializers.ListField(
         child=serializers.CharField(), write_only=True, required=True)
     product_images = serializers.ListField(
@@ -576,8 +574,6 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             'is_featured',
             'todays_deal',
             'flash_deal',
-            'shipping_time',
-            'shipping_class',
             'vat',
             'vat_type',
             'product_filter_attributes',
@@ -890,8 +886,6 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
                     'todays_deal',
                     'existing_flash_deal',
                     'flash_deal',
-                    'shipping_time',
-                    'shipping_class',
                     'vat',
                     'vat_type',
                     'existing_product_filter_attributes',
@@ -1568,7 +1562,7 @@ class AdminWarrantyListSerializer(serializers.ModelSerializer):
 class AdminShippingClassSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShippingClass
-        fields = ['id', 'title', 'description', 'delivery_charge']
+        fields = ['id', 'description', 'shipping_country', 'shipping_state', 'shipping_city', 'start_date', 'end_date', 'delivery_charge']
 
 
 class AdminSpecificationTitleSerializer(serializers.ModelSerializer):

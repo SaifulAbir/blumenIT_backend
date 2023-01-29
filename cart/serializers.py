@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import *
-from product.models import Product, Inventory, Specification
+from product.models import Product, Inventory, Specification, ShippingClass
 from product.serializers import SpecificationSerializer
 from rest_framework.exceptions import ValidationError
 
@@ -347,3 +347,9 @@ class CheckoutSerializer(serializers.ModelSerializer):
         # work with coupon end
 
         return order_instance
+
+
+class ShippingClassDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ShippingClass
+        fields = ['id', 'shipping_state']

@@ -24,7 +24,7 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     AdminProfileSerializer, AdminOrderViewSerializer, AdminOrderListSerializer, AdminOrderUpdateSerializer, AdminCustomerListSerializer, \
     AdminTicketListSerializer, AdminTicketDataSerializer, TicketStatusSerializer, CategoryWiseProductSaleSerializer, \
     CategoryWiseProductStockSerializer, AdminWarrantyListSerializer, AdminAttributeValueSerializer, AdminShippingClassSerializer, \
-    AdminSpecificationTitleSerializer, AdminSubscribersListSerializer, AdminCorporateDealSerializer
+    AdminSpecificationTitleSerializer, AdminSubscribersListSerializer, AdminCorporateDealSerializer, AdminPosProductListSerializer
 from cart.models import Order, OrderItem, SubOrder
 from user.models import User, Subscription
 from rest_framework.exceptions import ValidationError
@@ -1342,3 +1342,26 @@ class AdminCorporateDealDeleteAPIView(ListAPIView):
                 )
         else:
             raise ValidationError({"msg": 'You can not delete corporate deal, because you are not an Admin!'})
+
+
+class AdminPosProductListAPI(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminPosProductListSerializer
+    pagination_class = ProductCustomPagination
+
+    def get_object(self):
+        if self.request.user.is_superuser == True:
+            request = self.request
+            queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
+
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError({"msg": "Product doesn't exist! " })
+        else:
+            raise ValidationError(
+                {"msg": 'You can not show product list, because you are not an Admin!'})
+
+class AdminPosSearchAPI(ListAPIView):
+    pagination_class = ProductCustomPagination
+    serializer_class = AdminPosProductListSerializer

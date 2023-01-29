@@ -1,5 +1,5 @@
 from cart.serializers import OrderItemSerializer
-from product.serializers import ProductImageSerializer, ProductReviewSerializer
+from product.serializers import ProductImageSerializer, ProductReviewSerializer, BrandSerializer, UnitSerializer
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from product.models import Brand, Category, DiscountTypes, FlashDealInfo, FlashDealProduct, Inventory, \
@@ -1536,3 +1536,23 @@ class AdminCorporateDealSerializer(serializers.ModelSerializer):
     class Meta:
         model = CorporateDeal
         fields = ['id', 'first_name', 'last_name', 'email', 'company_name', 'phone', 'region', 'details_text', 'attached_file']
+
+class AdminPosProductListSerializer(serializers.ModelSerializer):
+    brand_title = serializers.CharField(source="brand.title", read_only=True)
+    brand = BrandSerializer()
+    unit = UnitSerializer()
+
+    class Meta:
+        model = Product
+        fields = [
+            'id',
+            'slug',
+            'thumbnail',
+            'title',
+            'price',
+            'quantity',
+            'low_stock_quantity_warning',
+            'brand_title',
+            'brand',
+            'unit',
+        ]

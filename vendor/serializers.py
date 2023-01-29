@@ -1,13 +1,16 @@
 from cart.serializers import OrderItemSerializer
 from product.serializers import ProductImageSerializer, ProductReviewSerializer, BrandSerializer, UnitSerializer
+from cart.serializers import OrderItemSerializer, DeliveryAddressSerializer
+from product.serializers import ProductImageSerializer, ProductReviewSerializer
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from product.models import Brand, Category, DiscountTypes, FlashDealInfo, FlashDealProduct, Inventory, \
     Product, ProductImages, ProductReview, ProductTags, ProductVariation, ProductVideoProvider, \
     ShippingClass, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units,\
-    VatType, Attribute, FilterAttributes, ProductFilterAttributes, AttributeValues, ProductWarranty, Warranty, SpecificationTitle
+    VatType, Attribute, FilterAttributes, ProductFilterAttributes, AttributeValues, ProductWarranty, Warranty, SpecificationTitle, \
+    Offer, OfferProduct
 from user.models import User, Subscription
-from cart.models import Order, SubOrder, OrderItem
+from cart.models import Order, Coupon, OrderItem, DeliveryAddress
 from user.serializers import CustomerProfileSerializer
 from vendor.models import Seller
 from django.db.models import Avg
@@ -410,7 +413,9 @@ class VendorProductListSerializer(serializers.ModelSerializer):
             'quantity',
             'low_stock_quantity_warning',
             'todays_deal',
-            'is_featured'
+            'is_featured',
+            'is_active',
+            'in_house_product'
         ]
 
     def get_avg_rating(self, obj):
@@ -776,7 +781,8 @@ class VendorProductViewSerializer(serializers.ModelSerializer):
             'refundable',
             'full_description',
             'product_specification',
-            'product_reviews'
+            'product_reviews',
+            'in_house_product'
         ]
 
     def get_product_images(self, obj):
@@ -1326,6 +1332,7 @@ class FlashDealInfoSerializer(serializers.ModelSerializer):
             validated_data.update({"updated_at": timezone.now()})
             return super().update(instance, validated_data)
 
+
 class AdminProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -1372,22 +1379,17 @@ class AdminFilterAttributeSerializer(serializers.ModelSerializer):
 
 
 class AdminOrderListSerializer(serializers.ModelSerializer):
-    order_id = serializers.CharField(source='order_id.order_id',read_only=True)
-    product_count = serializers.CharField(source='order_id.product_count',read_only=True)
-    order_date = serializers.CharField(source='order_id.order_date',read_only=True)
-    order_status = serializers.CharField(source='order_id.order_status',read_only=True)
     total_price = serializers.SerializerMethodField('get_total_price')
-    created_at = serializers.CharField(source='order_id.created_at',read_only=True)
-    payment_status = serializers.CharField(source='order_id.payment_status',read_only=True)
-    user_email = serializers.CharField(source='order_id.user.email',read_only=True)
-    user_phone = serializers.CharField(source='order_id.user.phone',read_only=True)
+    user_email = serializers.CharField(source='user.email',read_only=True)
+    user_phone = serializers.CharField(source='user.phone',read_only=True)
+    seller = serializers.CharField(source='vendor.name',read_only=True)
 
     class Meta:
-        model = SubOrder
-        fields = ['id', 'order_id', 'sub_order_id', 'product_count', 'order_date', 'order_status', 'total_price', 'created_at', 'payment_status', 'user_email', 'user_phone', 'in_house_order']
+        model = Order
+        fields = ['id', 'delivery_address', 'order_id', 'product_count', 'order_date', 'order_status', 'total_price', 'created_at', 'payment_status', 'user_email', 'user_phone', 'vendor', 'seller', 'delivery_agent', 'refund']
 
     def get_total_price(self, obj):
-        order_items = OrderItem.objects.filter(order=obj.order_id)
+        order_items = OrderItem.objects.filter(order=obj)
         prices = []
         total_price = 0
         for order_item in order_items:
@@ -1401,11 +1403,11 @@ class AdminOrderListSerializer(serializers.ModelSerializer):
         if sub_total:
             total_price += sub_total
 
-        shipping_cost = obj.order_id.shipping_cost
+        shipping_cost = obj.shipping_cost
         if shipping_cost:
             total_price += shipping_cost
 
-        coupon_discount_amount = obj.order_id.coupon_discount_amount
+        coupon_discount_amount = obj.coupon_discount_amount
         if coupon_discount_amount:
             total_price -= coupon_discount_amount
         return total_price
@@ -1413,11 +1415,67 @@ class AdminOrderListSerializer(serializers.ModelSerializer):
 
 class AdminOrderViewSerializer(serializers.ModelSerializer):
     order_item_order = OrderItemSerializer(many=True, read_only=True)
-    user = CustomerProfileSerializer(many=False, read_only=True)
+    # user = serializers.SerializerMethodField('get_user')
+    # order_id = serializers.SerializerMethodField('get_order_id')
+
+    user = CustomerProfileSerializer(read_only=True)
+    delivery_address = DeliveryAddressSerializer(read_only=True)
+    total_price = serializers.SerializerMethodField('get_total_price')
+    payment_method = serializers.CharField(source='payment_type.type_name',read_only=True)
+    sub_total = serializers.SerializerMethodField('get_sub_total')
+
     class Meta:
+        # model = SubOrder
+        # fields = ['id', 'user', 'order_id']
+
         model = Order
-        fields = ['user', 'order_id', 'product_count', 'order_date', 'order_status', 'total_price',
-                  'payment_type', 'shipping_cost', 'coupon_discount_amount', 'order_item_order', 'user']
+        fields = ['user', 'delivery_address', 'order_id', 'product_count', 'order_date', 'order_status', 'order_date', 'total_price',
+                  'payment_method', 'order_item_order', 'sub_total', 'tax_amount', 'shipping_cost', 'coupon_discount_amount']
+
+    # def get_user(self, obj):
+    #     user = obj.order_id.user
+    #     return CustomerProfileSerializer(user, many=False).data
+
+    # def get_order_id(self, obj):
+    #     order_id = obj.sub_order_id
+    #     return order_id
+
+    def get_sub_total(self, obj):
+        order_items = OrderItem.objects.filter(order=obj)
+        prices = []
+        for order_item in order_items:
+            price = order_item.unit_price
+            if order_item.unit_price_after_add_warranty != 0.0:
+                price = order_item.unit_price_after_add_warranty
+            quantity = order_item.quantity
+            t_price = float(price) * float(quantity)
+            prices.append(t_price)
+        sub_total = sum(prices)
+        return sub_total
+
+    def get_total_price(self, obj):
+        order_items = OrderItem.objects.filter(order=obj)
+        prices = []
+        total_price = 0
+        for order_item in order_items:
+            price = order_item.unit_price
+            if order_item.unit_price_after_add_warranty != 0.0:
+                price = order_item.unit_price_after_add_warranty
+            quantity = order_item.quantity
+            t_price = float(price) * float(quantity)
+            prices.append(t_price)
+        sub_total = sum(prices)
+        if sub_total:
+            total_price += sub_total
+
+        shipping_cost = obj.shipping_cost
+        if shipping_cost:
+            total_price += shipping_cost
+
+        coupon_discount_amount = obj.coupon_discount_amount
+        if coupon_discount_amount:
+            total_price -= coupon_discount_amount
+        return total_price
 
 
 class AdminOrderUpdateSerializer(serializers.ModelSerializer):
@@ -1496,22 +1554,16 @@ class CategoryWiseProductStockSerializer(serializers.ModelSerializer):
 
     def get_stock_count(self, obj):
         products = Product.objects.filter(category = obj)
-        total_quantity = 0
+        available_quantity = 0
         for product in products:
-            total_quantity += product.total_quantity
-        return total_quantity
+            available_quantity += product.quantity
+        return available_quantity
 
 
 class AdminWarrantyListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Warranty
         fields = ['id', 'title']
-
-
-class AdminAttributeValueSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = AttributeValues
-        fields = ['id', 'value']
 
 
 class AdminShippingClassSerializer(serializers.ModelSerializer):
@@ -1536,6 +1588,115 @@ class AdminCorporateDealSerializer(serializers.ModelSerializer):
     class Meta:
         model = CorporateDeal
         fields = ['id', 'first_name', 'last_name', 'email', 'company_name', 'phone', 'region', 'details_text', 'attached_file']
+
+
+class AdminCouponSerializer(serializers.ModelSerializer):
+    amount = serializers.FloatField(required=True)
+
+    class Meta:
+        model = Coupon
+        read_only_field = ['id']
+        fields = [  'id',
+                    'code',
+                    'coupon_type',
+                    'amount',
+                    'discount_type',
+                    'number_of_uses',
+                    'start_time',
+                    'end_time',
+                    'min_shopping',
+                    'is_active'
+                ]
+
+
+class AdminOfferProductsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OfferProduct
+        fields = [  'id',
+                    'product',
+        ]
+
+
+class AdminOfferSerializer(serializers.ModelSerializer):
+    offer_category_title = serializers.CharField(source='offer_category.title',read_only=True)
+    product_category_title = serializers.CharField(source='product_category.title',read_only=True)
+    offer_products = AdminOfferProductsSerializer(many=True, required=False)
+    existing_offer_products = serializers.SerializerMethodField('get_existing_offer_products')
+    start_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", required=False)
+    end_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", required=False)
+
+    class Meta:
+        model = Offer
+        read_only_field = ['id']
+        fields = [  'id',
+                    'title',
+                    'product_category',
+                    'product_category_title',
+                    'offer_category',
+                    'offer_category_title',
+                    'start_date',
+                    'end_date',
+                    'thumbnail',
+                    'short_description',
+                    'full_description',
+                    'discount_price',
+                    'discount_price_type',
+                    'offer_products',
+                    'existing_offer_products'
+                ]
+
+    def get_existing_offer_products(self, obj):
+        queryset = OfferProduct.objects.filter(offer=obj, is_active = True)
+        serializer = AdminOfferProductsSerializer(instance=queryset, many=True)
+        return serializer.data
+
+
+    def create(self, validated_data):
+        # offer_products
+        try:
+            offer_products = validated_data.pop('offer_products')
+        except:
+            offer_products = ''
+
+        offer_instance = Offer.objects.create(**validated_data)
+
+        try:
+            # offer_products
+            if offer_products:
+                for offer_product in offer_products:
+                    product = offer_product['product']
+                    OfferProduct.objects.create(offer=offer_instance, product=product)
+            return offer_instance
+        except:
+            return offer_instance
+
+    def update(self, instance, validated_data):
+        # offer_products
+        try:
+            offer_products = validated_data.pop('offer_products')
+        except:
+            offer_products = ''
+
+        try:
+            # offer_products
+            if offer_products:
+                o_p = OfferProduct.objects.filter(offer=instance).exists()
+                if o_p == True:
+                    OfferProduct.objects.filter(offer=instance).delete()
+
+                for offer_product in offer_products:
+                    product = offer_product['product']
+                    OfferProduct.objects.create(offer=instance, product=product)
+            else:
+                o_p = OfferProduct.objects.filter(offer=instance).exists()
+                if o_p == True:
+                    OfferProduct.objects.filter(offer=instance).delete()
+
+            validated_data.update({"updated_at": timezone.now()})
+            return super().update(instance, validated_data)
+        except:
+            validated_data.update({"updated_at": timezone.now()})
+            return super().update(instance, validated_data)
 
 class AdminPosProductListSerializer(serializers.ModelSerializer):
     brand_title = serializers.CharField(source="brand.title", read_only=True)

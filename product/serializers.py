@@ -101,10 +101,10 @@ class BrandSerializer(serializers.ModelSerializer):
         return brand_instance
 
 
-class BrandListSerializer(serializers.ModelSerializer):
+class BrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
-        fields = ['id', 'title', 'logo']
+        fields = ['id', 'title', 'logo', 'meta_title', 'meta_description', 'is_gaming', 'rating_number', 'created_at']
 
 
 class UnitSerializer(serializers.ModelSerializer):
@@ -217,6 +217,7 @@ class ProductListBySerializer(serializers.ModelSerializer):
     sub_sub_category = SubSubCategorySerializer()
     brand = BrandSerializer()
     unit = UnitSerializer()
+    total_quantity = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -251,7 +252,8 @@ class ProductListBySerializer(serializers.ModelSerializer):
             'product_reviews',
             'warranty',
             'short_description',
-            'full_description'
+            'full_description',
+            'in_house_product'
         ]
 
     def get_avg_rating(self, ob):
@@ -276,9 +278,14 @@ class ProductListBySerializer(serializers.ModelSerializer):
             product=obj, is_active=True).distinct()
         return ProductReviewSerializer(selected_product_reviews, many=True).data
 
+    def get_total_quantity(self, obj):
+        quantity = Product.objects.get(id=obj.id).quantity
+        return quantity
+
 
 class ProductListBySerializerForHomeData(serializers.ModelSerializer):
     discount_type = DiscountTypeSerializer()
+    total_quantity = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -292,8 +299,13 @@ class ProductListBySerializerForHomeData(serializers.ModelSerializer):
             'discount_type',
             'discount_amount',
             'thumbnail',
-            'warranty'
+            'warranty',
+            'in_house_product'
         ]
+
+    def get_total_quantity(self, obj):
+        quantity = Product.objects.get(id=obj.id).quantity
+        return quantity
 
 
 class ProductWarrantySerializer(serializers.ModelSerializer):
@@ -323,7 +335,6 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
     vat_type_title = serializers.CharField(source="vat_type.title",read_only=True)
     related_products = serializers.SerializerMethodField()
     product_warranties = serializers.SerializerMethodField('get_product_warranties')
-    quantity = serializers.SerializerMethodField('get_quantity')
 
     class Meta:
         model = Product
@@ -364,7 +375,8 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             'product_condition',
             'video_link',
             'related_products',
-            'product_warranties'
+            'product_warranties',
+            'in_house_product'
         ]
 
     def get_avg_rating(self, obj):
@@ -402,9 +414,6 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
     def get_product_warranties(self, obj):
         selected_warranties = ProductWarranty.objects.filter(product=obj, is_active=True)
         return ProductWarrantySerializer(selected_warranties, many=True, context={'request': self.context['request']}).data
-
-    def get_quantity(self, obj):
-        return obj.total_quantity
 
 
 class PcBuilderSpecificationValuesSerializer(serializers.ModelSerializer):

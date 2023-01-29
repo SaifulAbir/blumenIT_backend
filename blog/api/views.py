@@ -1,6 +1,6 @@
 from requests import Response
 from django.db.models import Q
-from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import serializers
 from rest_framework.response import Response
@@ -11,7 +11,8 @@ from blog.pagination import BlogCustomPagination
 
 
 from blog.models import BlogCategory, Blog
-from blog.serializers import BlogCategorySerializer, BlogSerializer
+from blog.serializers import BlogCategorySerializer, BlogSerializer, CustomerBlogListSerializer, CustomerBlogDataSerializer, \
+    ReviewCreateSerializer
 
 
 class BlogCategoryCreateAPIView(CreateAPIView):
@@ -34,6 +35,7 @@ class BlogCategoryCreateAPIView(CreateAPIView):
                 {"msg": 'You can not create Blog Category, because you are not an Admin!'}
             )
 
+
 class BlogCategoryListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = BlogCategorySerializer
@@ -53,6 +55,7 @@ class BlogCategoryListAPIView(ListAPIView):
                 {"msg": 'You can not view Blog Category List, because you are not an Admin!'}
             )
 
+
 class BlogCategoryUpdateAPIView(RetrieveUpdateAPIView):
         permission_classes = [IsAuthenticated]
         serializer_class = BlogCategorySerializer
@@ -71,6 +74,7 @@ class BlogCategoryUpdateAPIView(RetrieveUpdateAPIView):
                 raise ValidationError(
                     {"msg": 'You can not update coupon, because you are not an Admin!'})
 
+
 class BlogCategoryDeleteAPIView(ListAPIView):
     permission_classes = [AllowAny]
     serializer_class = BlogCategorySerializer
@@ -81,11 +85,9 @@ class BlogCategoryDeleteAPIView(ListAPIView):
     def get_queryset(self):
         if self.request.user.is_superuser == True:
             bcat_id = self.kwargs['id']
-            brand_obj = BlogCategory.objects.filter(id=bcat_id).exists()
-            if brand_obj:
-                brand_obj = BlogCategory.objects.filter(id=bcat_id)
-                brand_obj.update(is_active=False)
-
+            blog_category_obj = BlogCategory.objects.filter(id=bcat_id).exists()
+            if blog_category_obj:
+                BlogCategory.objects.filter(id=bcat_id).update(is_active=False)
                 queryset = BlogCategory.objects.filter(is_active=True).order_by('-created_at')
                 return queryset
             else:
@@ -95,6 +97,7 @@ class BlogCategoryDeleteAPIView(ListAPIView):
         else:
             raise ValidationError(
                 {"msg": 'You can not update coupon, because you are not an Admin!'})
+
 
 class AdminBlogCreateAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated]
@@ -107,6 +110,7 @@ class AdminBlogCreateAPIView(CreateAPIView):
             raise ValidationError(
                 {"msg": 'You can not create seller, because you are not an Admin!'}
             )
+
 
 class AdminBlogDetailAPIView(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
@@ -157,16 +161,18 @@ class AdminBlogSearchAPI(ListAPIView):
             request = self.request
             query = request.GET.get('search')
 
-            queryset = Blog.objects.all().order_by('-created_at')
+            queryset = Blog.objects.filter(is_active=True).order_by('-created_at')
             if query:
                 queryset = queryset.filter(
-                    Q(order_id__icontains=query)
+                    Q(title__icontains=query)
                 )
 
             return queryset
         else:
             raise ValidationError(
                 {"msg": 'You can not show Blog list, because you are not an Admin!'})
+
+
 class AdminBlogUpdateAPIView(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = BlogSerializer
@@ -185,6 +191,7 @@ class AdminBlogUpdateAPIView(RetrieveUpdateAPIView):
             raise ValidationError(
                 {"msg": 'You can not update blog, because you are not an Admin!'})
 
+
 class AdminBlogDeleteAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = BlogSerializer
@@ -198,9 +205,7 @@ class AdminBlogDeleteAPIView(ListAPIView):
             blog_obj_exist = Blog.objects.filter(
                 slug=slug).exists()
             if blog_obj_exist:
-                product_obj = Blog.objects.filter(slug=slug)
-                product_obj.update(is_active=False)
-
+                Blog.objects.filter(slug=slug).update(is_active=False)
                 queryset = Blog.objects.filter(is_active=True).order_by('-created_at')
                 return queryset
             else:
@@ -209,3 +214,46 @@ class AdminBlogDeleteAPIView(ListAPIView):
         else:
             raise ValidationError(
                 {"msg": 'You can not delete this blog, because you are not an Admin!'})
+
+
+class CustomerBlogListAPIView(ListAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = CustomerBlogListSerializer
+    pagination_class = BlogCustomPagination
+
+    def get_queryset(self):
+        queryset = Blog.objects.filter(is_active=True).order_by('-created_at')
+        if queryset:
+            return queryset
+        else:
+            raise ValidationError(
+                {"msg": 'Blog data does not exist!'}
+            )
+
+
+class CustomerBlogDetailsAPIView(RetrieveAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = CustomerBlogDataSerializer
+    lookup_field = 'slug'
+    lookup_url_kwarg = 'slug'
+
+    def get_object(self):
+        slug = self.kwargs['slug']
+        try:
+            query = Blog.objects.get(slug=slug)
+            return query
+        except:
+            raise ValidationError(
+                {"details": "Blog doesn't exist!"}
+            )
+
+
+class CustomerReviewCreateAPIView(CreateAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = ReviewCreateSerializer
+
+    def post(self, request, *args, **kwargs):
+        return super(CustomerReviewCreateAPIView, self).post(request, *args, **kwargs)
+
+
+

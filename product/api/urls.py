@@ -21,10 +21,13 @@ urlpatterns = [
      path('vendor-product-list-for-frontend/<int:vid>/',
           VendorProductListForFrondEndAPI.as_view()),
      path('only-title/', OnlyTitleAPIView.as_view()),
-
      path('pc_builder-categories/',PcBuilderCategoryAPIView.as_view()),
      path('pc_builder/',PcBuilderChooseAPIView.as_view()),
+     path('offers-list/', OffersListAPIView.as_view()),
+     path('offer-details/<int:id>/', OfferDetailsAPIView.as_view()),
+     path('offer-products-list/<int:id>/<int:pagination>/', OfferProductsListAPIView.as_view()),
      path('brand-list/', BrandListAPIView.as_view()),
+     path('product-list-by-brand/<int:bid>/<int:pagination>/',ProductListByBrandAPI.as_view()),
 
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

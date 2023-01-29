@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework import serializers
 from product.serializers import DiscountTypeSerializer
 from cart.serializers import CheckoutDetailsSerializer, CheckoutSerializer, \
-     PaymentTypesListSerializer, ApplyCouponSerializer, CouponSerializer, DeliveryAddressSerializer
+     PaymentTypesListSerializer, ApplyCouponSerializer, DeliveryAddressSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -14,49 +14,6 @@ from cart.models import BillingAddress, Order, PaymentType, Coupon, UseRecordOfC
     DeliveryAddress
 from user.models import User
 from django.db.models import Q
-
-
-class CouponCreateAPIView(CreateAPIView):
-    permission_classes = [IsAuthenticated]
-    serializer_class = CouponSerializer
-
-    def post(self, request, *args, **kwargs):
-        if self.request.user.is_superuser == True:
-            return super(CouponCreateAPIView, self).post(request, *args, **kwargs)
-        else:
-            raise ValidationError(
-                {"msg": 'You can not create coupon, because you are not an Admin!'})
-
-
-class CouponListAPIView(ListAPIView):
-    permission_classes = [IsAuthenticated]
-    serializer_class = CouponSerializer
-
-    def get_queryset(self):
-        if self.request.user.is_superuser == True:
-            queryset = Coupon.objects.all()
-            if queryset:
-                return queryset
-            else:
-                raise ValidationError(
-                    {"msg": 'Vat types does not exist!'})
-        else:
-            raise ValidationError({"msg": 'You can not view coupon list, because you are not an Admin!'})
-
-
-class CouponUpdateAPIView(RetrieveUpdateAPIView):
-    permission_classes = [IsAuthenticated]
-    serializer_class = CouponSerializer
-    queryset = Coupon.objects.all()
-    lookup_field = 'id'
-    lookup_url_kwarg = "id"
-
-    def put(self, request, *args, **kwargs):
-        if self.request.user.is_superuser == True:
-            return super(CouponUpdateAPIView, self).put(request, *args, **kwargs)
-        else:
-            raise ValidationError(
-                {"msg": 'You can not update coupon, because you are not an Admin!'})
 
 
 class DiscountTypeCreateAPIView(CreateAPIView):

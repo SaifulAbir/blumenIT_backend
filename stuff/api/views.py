@@ -164,6 +164,30 @@ class UpdateStuffAPIView(RetrieveUpdateAPIView):
             raise ValidationError({"msg": 'Stuff update failed. contact with developer!'})
 
 
+class AdminStuffDeleteAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    pagination_class = ProductCustomPagination
+    serializer_class = StuffListSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = 'id'
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        if self.request.user.is_superuser == True:
+            stuff_obj = User.objects.filter(id=id, is_staff=True, is_active=True).exists()
+            if stuff_obj:
+                stuff_obj = User.objects.filter(id=id, is_staff=True, is_active=True).update(is_active=False)
+
+                queryset = User.objects.filter( is_staff=True, is_active=True)
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'Staff Does not exist!'}
+                )
+        else:
+            raise ValidationError({"msg": 'You can not delete staff, because you are not an Admin!'})
+
+
 class RoleListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = RoleListSerializer

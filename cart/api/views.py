@@ -9,7 +9,7 @@ from cart.serializers import CheckoutDetailsSerializer, CheckoutSerializer, \
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from product.models import Product, DiscountTypes
+from product.models import Product, DiscountTypes, ShippingClass
 from cart.models import BillingAddress, Order, PaymentType, Coupon, UseRecordOfCoupon, Wishlist, \
     DeliveryAddress
 from user.models import User
@@ -182,5 +182,5 @@ class ShippingClassDataAPIView(ListAPIView):
     serializer_class = ShippingClassDataSerializer
 
     def get_queryset(self):
-        queryset = DeliveryAddress.objects.filter(user=self.request.user, is_active=True).order_by('-created_at')
+        queryset = ShippingClass.objects.filter(is_active=True).order_by('-created_at')
         return queryset

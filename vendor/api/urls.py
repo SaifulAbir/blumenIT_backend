@@ -19,7 +19,9 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminSubscriberDeleteAPIView, AdminCorporateDealListAPIView, AdminCorporateDealDeleteAPIView, AdminAttributeDeleteAPIView, \
     AdminOrderDeleteAPIView, AdminCouponCreateAPIView, AdminCouponListAPIView, AdminCouponUpdateAPIView, AdminCouponDeleteAPIView, \
     AdminCustomerDeleteAPIView, AdminBrandUpdateAPIView, AdminOffersListAPIView, AdminOffersCreateAPIView, AdminOffersDetailsAPIView, \
-    AdminOffersUpdateAPIView, AdminOffersDeleteAPIView, AdminPosProductListAPI
+    AdminOffersUpdateAPIView, AdminOffersDeleteAPIView, AdminPosProductListAPI, AdminShippingCountryListAPIView, \
+    AdminShippingCountryListFilterAPIView, AdminShippingCountryAddAPIView, AdminShippingCountryUpdateAPIView, \
+    AdminShippingCountryDeleteAPIView
 
 
 urlpatterns = [
@@ -94,6 +96,11 @@ urlpatterns = [
 
 
     # shipping class apies
+    path('admin/shipping-country-add/', AdminShippingCountryAddAPIView.as_view()),
+    path('admin/shipping-country-list/', AdminShippingCountryListAPIView.as_view()),
+    path('admin/shipping-country-filter/', AdminShippingCountryListFilterAPIView.as_view()),
+    path('admin/shipping-country-update/<int:id>/', AdminShippingCountryUpdateAPIView.as_view()),
+    path('admin/shipping-country-delete/<int:id>/', AdminShippingCountryDeleteAPIView.as_view()),
     path('admin/shipping-class-list/', AdminShippingClassListAPIView.as_view()),
 
 

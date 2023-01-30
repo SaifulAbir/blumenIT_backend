@@ -241,11 +241,10 @@ class ShippingCity(AbstractTimeStamp):
 
 class ShippingClass(AbstractTimeStamp):
     description = models.TextField(default='', null=False, blank=False)
-    shipping_country = models.ForeignKey(ShippingCountry, on_delete=models.CASCADE, related_name='shipping_class_shipping_country', blank=True, null=True)
-    shipping_state = models.ForeignKey(ShippingState, on_delete=models.CASCADE, related_name='shipping_class_shipping_state', blank=True, null=True)
-    shipping_city = models.ForeignKey(ShippingCity, on_delete=models.CASCADE, related_name='shipping_class_shipping_city', blank=True, null=True)
-    start_date = models.DateField(null=True, blank=True)
-    end_date = models.DateField(null=True, blank=True)
+    shipping_country = models.ForeignKey(ShippingCountry, on_delete=models.CASCADE, related_name='shipping_class_shipping_country', blank=False, null=False)
+    shipping_state = models.ForeignKey(ShippingState, on_delete=models.CASCADE, related_name='shipping_class_shipping_state', blank=False, null=False)
+    shipping_city = models.ForeignKey(ShippingCity, on_delete=models.CASCADE, related_name='shipping_class_shipping_city', blank=False, null=False)
+    delivery_days = models.IntegerField(default=0, help_text="Minimum days to delivery")
     delivery_charge = models.FloatField(max_length=255, null=False, blank=False, default=0)
     is_active = models.BooleanField(null=False, blank=False, default=True)
     class Meta:

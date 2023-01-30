@@ -25,8 +25,9 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     AdminTicketListSerializer, AdminTicketDataSerializer, TicketStatusSerializer, CategoryWiseProductSaleSerializer, \
     CategoryWiseProductStockSerializer, AdminWarrantyListSerializer, AdminShippingClassSerializer, \
     AdminSpecificationTitleSerializer, AdminSubscribersListSerializer, AdminCorporateDealSerializer, AdminCouponSerializer, \
-    AdminOfferSerializer
+    AdminOfferSerializer, AdminPosProductListSerializer
 from cart.models import Order, OrderItem, Coupon
+from cart.models import Order, OrderItem, SubOrder
 from user.models import User, Subscription
 from rest_framework.exceptions import ValidationError
 from vendor.pagination import OrderCustomPagination
@@ -475,7 +476,7 @@ class AdminProductListAPI(ListAPIView):
             request = self.request
             type = request.GET.get('type')
 
-            queryset = Product.objects.filter(is_active=True).order_by('-created_at')
+            queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
 
             if type == 'digital':
                 queryset = queryset.filter(digital=True)
@@ -1567,3 +1568,26 @@ class AdminOffersDeleteAPIView(ListAPIView):
                 )
         else:
             raise ValidationError({"msg": 'You can not delete Offer data, because you are not an Admin!'})
+
+
+class AdminPosProductListAPI(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminPosProductListSerializer
+    pagination_class = ProductCustomPagination
+
+    def get_object(self):
+        if self.request.user.is_superuser == True:
+            request = self.request
+            queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
+
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError({"msg": "Product doesn't exist! " })
+        else:
+            raise ValidationError(
+                {"msg": 'You can not show product list, because you are not an Admin!'})
+
+class AdminPosSearchAPI(ListAPIView):
+    pagination_class = ProductCustomPagination
+    serializer_class = AdminPosProductListSerializer

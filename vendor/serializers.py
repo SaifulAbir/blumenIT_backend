@@ -1,3 +1,5 @@
+from cart.serializers import OrderItemSerializer
+from product.serializers import ProductImageSerializer, ProductReviewSerializer, BrandSerializer, UnitSerializer
 from cart.serializers import OrderItemSerializer, DeliveryAddressSerializer
 from product.serializers import ProductImageSerializer, ProductReviewSerializer
 from rest_framework import serializers
@@ -381,7 +383,7 @@ class UpdateSubSubCategorySerializer(serializers.ModelSerializer):
 class VendorBrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
-        fields = ['id', 'title', 'logo', 'meta_title', 'meta_description', 'is_gaming', 'is_active']
+        fields = ['id', 'title', 'logo', 'meta_title', 'meta_description']
 
 
 class VendorUnitSerializer(serializers.ModelSerializer):
@@ -1248,7 +1250,6 @@ class FlashDealProductSerializer(serializers.ModelSerializer):
                     'discount_amount',
                 ]
 
-
 class FlashDealInfoSerializer(serializers.ModelSerializer):
     flash_deal_products = FlashDealProductSerializer(many=True, required=False)
     existing_flash_deal_products = serializers.SerializerMethodField('get_flash_deal_products')
@@ -1690,3 +1691,23 @@ class AdminOfferSerializer(serializers.ModelSerializer):
         except:
             validated_data.update({"updated_at": timezone.now()})
             return super().update(instance, validated_data)
+
+class AdminPosProductListSerializer(serializers.ModelSerializer):
+    brand_title = serializers.CharField(source="brand.title", read_only=True)
+    brand = BrandSerializer()
+    unit = UnitSerializer()
+
+    class Meta:
+        model = Product
+        fields = [
+            'id',
+            'slug',
+            'thumbnail',
+            'title',
+            'price',
+            'quantity',
+            'low_stock_quantity_warning',
+            'brand_title',
+            'brand',
+            'unit',
+        ]

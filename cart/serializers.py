@@ -1,8 +1,9 @@
 from rest_framework import serializers
 from .models import *
-from product.models import Product, Inventory, Specification
+from product.models import Product, Inventory, Specification, ShippingClass
 from product.serializers import SpecificationSerializer
 from rest_framework.exceptions import ValidationError
+import datetime
 
 
 
@@ -58,9 +59,10 @@ class CheckoutDetailsSerializer(serializers.ModelSerializer):
     user_phone = serializers.CharField(source='user.phone',read_only=True)
     product_price = serializers.SerializerMethodField('get_product_price')
     total_price = serializers.SerializerMethodField('get_total_price')
+    delivery_date = serializers.SerializerMethodField('get_delivery_date')
     class Meta:
         model = Order
-        fields = ['id', 'user', 'user_email', 'user_phone', 'order_id', 'order_date', 'delivery_date', 'order_status', 'order_items', 'delivery_address', 'payment_type', 'payment_title', 'product_price', 'coupon_discount_amount', 'sub_total', 'shipping_cost', 'total_price']
+        fields = ['id', 'user', 'user_email', 'user_phone', 'order_id', 'order_date', 'delivery_date', 'order_status', 'order_items', 'delivery_address', 'payment_type', 'payment_title', 'product_price', 'coupon_discount_amount', 'sub_total', 'shipping_class', 'shipping_cost', 'total_price']
 
     def get_order_items(self, obj):
         queryset = OrderItem.objects.filter(order=obj)
@@ -124,6 +126,18 @@ class CheckoutDetailsSerializer(serializers.ModelSerializer):
             total_price -= coupon_discount_amount
         return total_price
 
+    def get_delivery_date(self, obj):
+        try:
+            if obj.shipping_class:
+                delivery_days = ShippingClass.objects.get(id=obj.shipping_class.id).delivery_days
+                order_date = obj.order_date
+                order_date_c = datetime.datetime.strptime(str(order_date), "%Y-%m-%d")
+                delivery_date = order_date_c + datetime.timedelta(days=int(delivery_days))
+                return delivery_date.date()
+            else:
+                return ''
+        except:
+            return ''
 
 class PaymentTypesListSerializer(serializers.ModelSerializer):
     class Meta:
@@ -186,8 +200,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['id', 'order_id', 'product_count', 'coupon', 'coupon_status', 'coupon_discount_amount', 'tax_amount',
-                  'payment_type', 'shipping_cost', 'order_items', 'delivery_address', 'comment']
+        fields = ['id', 'order_id', 'product_count', 'coupon', 'coupon_status', 'coupon_discount_amount', 'tax_amount', 'payment_type', 'shipping_class', 'shipping_cost', 'order_items', 'delivery_address', 'comment']
 
     def create(self, validated_data):
         order_items = validated_data.pop('order_items')
@@ -348,3 +361,14 @@ class CheckoutSerializer(serializers.ModelSerializer):
         # work with coupon end
 
         return order_instance
+
+
+class ShippingClassDataSerializer(serializers.ModelSerializer):
+    state_city_concate = serializers.SerializerMethodField('get_state_city_concate')
+    class Meta:
+        model = ShippingClass
+        fields = ['id', 'description', 'shipping_country', 'shipping_state', 'shipping_city', 'delivery_days', 'delivery_charge', 'state_city_concate']
+
+    def get_state_city_concate(self, obj):
+        c_name = obj.shipping_state.title + ' ' + obj.shipping_city.title
+        return c_name

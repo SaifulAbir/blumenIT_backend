@@ -19,6 +19,10 @@ class BlogSerializer(serializers.ModelSerializer):
         model = Blog
         fields = ['id','title', 'slug', 'blog_category', 'banner', 'banner', 'short_description', 'full_description', 'meta_title', 'meta_image', 'meta_description', 'meta_keywords', 'is_active']
 
+    def create(self, validated_data):
+        blog_instance = Blog.objects.create(**validated_data, created_by=self.context['request'].user)
+        return blog_instance
+
 
 class CustomerBlogListSerializer(serializers.ModelSerializer):
     created_by_email = serializers.CharField(source='created_by.email', read_only=True)

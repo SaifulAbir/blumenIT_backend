@@ -24,6 +24,8 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     AdminProfileSerializer, AdminOrderViewSerializer, AdminOrderListSerializer, AdminOrderUpdateSerializer, AdminCustomerListSerializer, \
     AdminTicketListSerializer, AdminTicketDataSerializer, TicketStatusSerializer, CategoryWiseProductSaleSerializer, \
     CategoryWiseProductStockSerializer, AdminWarrantyListSerializer, AdminShippingClassSerializer, \
+    AdminSpecificationTitleSerializer, AdminSubscribersListSerializer, AdminCorporateDealSerializer, AdminCouponSerializer, VatTypeSerializer, \
+    AdminOfferSerializer, AdminPosProductListSerializer, AdminShippingCountrySerializer, AdminShippingCitySerializer
     AdminSpecificationTitleSerializer, AdminSubscribersListSerializer, AdminCorporateDealSerializer, AdminCouponSerializer, \
     AdminOfferSerializer, AdminPosProductListSerializer, AdminPosOrderSerializer
 from cart.models import Order, OrderItem, Coupon
@@ -33,7 +35,7 @@ from rest_framework.exceptions import ValidationError
 from vendor.pagination import OrderCustomPagination
 from support_ticket.models import Ticket
 
-
+# Seller related admin apies views............................ start
 class AdminSellerCreateAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = SellerCreateSerializer
@@ -126,8 +128,10 @@ class AdminSellerDeleteAPIView(ListAPIView):
         else:
             raise ValidationError(
                 {"msg": 'You can not delete seller, because you are not an Admin!'})
+# Seller related admin apies views............................ end
 
 
+# Product related admin apies views............................ start
 class AdminProductCreateAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ProductCreateSerializer
@@ -159,30 +163,118 @@ class AdminProductUpdateAPIView(RetrieveUpdateAPIView):
             raise ValidationError({"msg": 'You can not update this product, because you are not an Admin!'})
 
 
-class AdminFilterAttributesAPI(ListAPIView):
+class AdminProductListAPI(ListAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = FilteringAttributesSerializer
+    serializer_class = VendorProductListSerializer
+    pagination_class = ProductCustomPagination
+
     def get_queryset(self):
-        id = self.kwargs['id']
-        type = self.kwargs['type']
         if self.request.user.is_superuser == True:
-            queryset = FilterAttributes.objects.all().order_by('-created_at')
-            if id and type:
-                if type == 'category':
-                    queryset = FilterAttributes.objects.filter(Q(category__id=id) & Q(is_active=True)).order_by('-created_at')
-                if type == 'sub_category':
-                    queryset = FilterAttributes.objects.filter(Q(sub_category__id=id) & Q(is_active=True)).order_by('-created_at')
-                if type == 'sub_sub_category':
-                    queryset = FilterAttributes.objects.filter(Q(sub_sub_category__id=id) & Q(is_active=True)).order_by('-created_at')
+            request = self.request
+            type = request.GET.get('type')
+
+            queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
+
+            if type == 'digital':
+                queryset = queryset.filter(digital=True)
+            if type == 'in_house_product':
+                queryset = queryset.filter(in_house_product=True)
+            if type == 'whole_sale_product':
+                queryset = queryset.filter(whole_sale_product=True)
 
             if queryset:
                 return queryset
             else:
-                raise ValidationError({"msg": 'Filter Attributes not found!'})
+                raise ValidationError({"msg": "Product doesn't exist! " })
         else:
-            raise ValidationError({"msg": 'You can not see filtering attributes, because you are not an Admin!'})
+            raise ValidationError(
+                {"msg": 'You can not show product list, because you are not an Admin!'})
 
 
+class AdminProductListSearchAPI(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    pagination_class = ProductCustomPagination
+    serializer_class = VendorProductListSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            request = self.request
+
+            seller = request.GET.get('seller')
+            sort_by = request.GET.get('sort_by')
+            query = request.GET.get('search')
+
+            queryset = Product.objects.filter(is_active=True).order_by('-created_at')
+
+            if seller:
+                queryset = queryset.filter(seller__id=seller)
+
+            if sort_by:
+                if sort_by == 'rating_high_low':
+                    queryset = queryset.order_by('-total_average_rating_number')
+
+                if sort_by == 'rating_low_high':
+                    queryset = queryset.order_by('total_average_rating_number')
+                if sort_by == 'num_of_sale_high_low':
+                    queryset = queryset.order_by('-sell_count')
+                if sort_by == 'num_of_sale_low_high':
+                    queryset = queryset.order_by('sell_count')
+
+            if query:
+                queryset = queryset.filter(Q(title__icontains=query))
+
+            return queryset
+        else:
+            raise ValidationError(
+                {"msg": 'You can not show product list, because you are not an Admin!'})
+
+
+class AdminProductViewAPI(RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = VendorProductViewSerializer
+    lookup_field = 'slugi'
+    lookup_url_kwarg = "slugi"
+
+    def get_object(self):
+        slug = self.kwargs['slugi']
+        if self.request.user.is_superuser == True:
+            query = Product.objects.get(slug=slug)
+            if query:
+                return query
+            else:
+                raise ValidationError({"msg": "Product doesn't exist! " })
+        else:
+            raise ValidationError(
+                {"msg": 'You can not show product view, because you are not an Admin!'})
+
+
+class AdminProductDeleteAPI(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = VendorProductListSerializer
+    pagination_class = ProductCustomPagination
+    lookup_field = 'slug'
+    lookup_url_kwarg = "slug"
+
+    def get_queryset(self):
+        slug = self.kwargs['slug']
+        if self.request.user.is_superuser == True:
+            product_obj_exist = Product.objects.filter(slug=slug).exists()
+            if product_obj_exist:
+                product_obj = Product.objects.filter(slug=slug)
+                product_obj.update(is_active=False)
+
+                queryset = Product.objects.filter(is_active=True).order_by('-created_at')
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'Product Does not exist!'})
+        else:
+            raise ValidationError(
+                {"msg": 'You can not delete this product, because you are not an Admin!'})
+# Product related admin apies views............................ end
+
+
+# Category,SubCategory,SubSubCategory related admin apies views............................ start
 class AdminCategoryListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AdminCategoryListSerializer
@@ -315,8 +407,7 @@ class AdminDeleteSubCategoryAPIView(ListAPIView):
             sub_category_obj_exist = SubCategory.objects.filter(
                 id=id).exists()
             if sub_category_obj_exist:
-                sub_category_obj = SubCategory.objects.filter(id=id)
-                sub_category_obj.update(is_active=False)
+                SubCategory.objects.filter(id=id).update(is_active=False)
 
                 queryset = SubCategory.objects.filter(is_active=True).order_by('-created_at')
                 return queryset
@@ -400,7 +491,7 @@ class AdminDeleteSubSubCategoryAPIView(ListAPIView):
                     {"msg": 'Sub Sub Category Does not exist!'})
         else:
             raise ValidationError({"msg": 'You can not delete sub sub category, because you are not an Admin!'})
-
+# Category,SubCategory,SubSubCategory related admin apies views............................ end
 
 class AdminBrandListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -418,6 +509,7 @@ class AdminBrandListAPIView(ListAPIView):
                 {"msg": 'You can not see brand list, because you are not an Admin!'})
 
 
+# Unit related admin apies views............................ start
 class AdminUnitListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = VendorUnitSerializer
@@ -434,180 +526,62 @@ class AdminUnitListAPIView(ListAPIView):
                 {"msg": 'You can not see unit list, because you are not an Admin!'})
 
 
-class AdminDiscountListAPIView(ListAPIView):
-    permission_classes = [AllowAny]
-    serializer_class = DiscountTypeSerializer
+class AdminUnitAddAPIView(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = VendorUnitSerializer
 
-    def get_queryset(self):
+    def post(self, request, *args, **kwargs):
         if self.request.user.is_superuser == True:
-            queryset = DiscountTypes.objects.filter(is_active=True)
-            if queryset:
-                return queryset
-            else:
-                raise ValidationError({"msg": "No discount available! " })
+            return super(AdminUnitAddAPIView, self).post(request, *args, **kwargs)
         else:
             raise ValidationError(
-                {"msg": 'You can not see discount list, because you are not an Admin!'})
+                {"msg": 'You can not create unit, because you are not an Admin!'})
 
 
-class AdminTagListAPIView(ListAPIView):
+class AdminUnitUpdateAPIView(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = TagsSerializer
+    serializer_class = VendorUnitSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
 
     def get_queryset(self):
+        id = self.kwargs['id']
         if self.request.user.is_superuser == True:
-            queryset = Tags.objects.filter(is_active=True)
-            if queryset:
-                return queryset
-            else:
-                raise ValidationError({"msg": "No tag available! " })
-        else:
-            raise ValidationError(
-                {"msg": 'You can not see tag list, because you are not an Admin!'})
-
-
-class AdminProductListAPI(ListAPIView):
-    permission_classes = [IsAuthenticated]
-    serializer_class = VendorProductListSerializer
-    pagination_class = ProductCustomPagination
-
-    def get_queryset(self):
-        if self.request.user.is_superuser == True:
-            request = self.request
-            type = request.GET.get('type')
-
-            queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
-
-            if type == 'digital':
-                queryset = queryset.filter(digital=True)
-            if type == 'in_house_product':
-                queryset = queryset.filter(in_house_product=True)
-            if type == 'whole_sale_product':
-                queryset = queryset.filter(whole_sale_product=True)
-
-            if queryset:
-                return queryset
-            else:
-                raise ValidationError({"msg": "Product doesn't exist! " })
-        else:
-            raise ValidationError(
-                {"msg": 'You can not show product list, because you are not an Admin!'})
-
-
-class AdminProductListSearchAPI(ListAPIView):
-    permission_classes = [IsAuthenticated]
-    pagination_class = ProductCustomPagination
-    serializer_class = VendorProductListSerializer
-
-    def get_queryset(self):
-        if self.request.user.is_superuser == True:
-            request = self.request
-
-            seller = request.GET.get('seller')
-            sort_by = request.GET.get('sort_by')
-            query = request.GET.get('search')
-
-            queryset = Product.objects.filter(is_active=True).order_by('-created_at')
-
-            if seller:
-                queryset = queryset.filter(seller__id=seller)
-
-            if sort_by:
-                if sort_by == 'rating_high_low':
-                    queryset = queryset.order_by('-total_average_rating_number')
-
-                if sort_by == 'rating_low_high':
-                    queryset = queryset.order_by('total_average_rating_number')
-                if sort_by == 'num_of_sale_high_low':
-                    queryset = queryset.order_by('-sell_count')
-                if sort_by == 'num_of_sale_low_high':
-                    queryset = queryset.order_by('sell_count')
-
-            if query:
-                queryset = queryset.filter(Q(title__icontains=query))
-
-            return queryset
-        else:
-            raise ValidationError(
-                {"msg": 'You can not show product list, because you are not an Admin!'})
-
-
-class AdminProductViewAPI(RetrieveAPIView):
-    permission_classes = [IsAuthenticated]
-    serializer_class = VendorProductViewSerializer
-    lookup_field = 'slugi'
-    lookup_url_kwarg = "slugi"
-
-    def get_object(self):
-        slug = self.kwargs['slugi']
-        if self.request.user.is_superuser == True:
-            query = Product.objects.get(slug=slug)
+            query = Units.objects.filter(id=id)
             if query:
                 return query
             else:
-                raise ValidationError({"msg": "Product doesn't exist! " })
+                raise ValidationError(
+                    {"msg": 'Units does not found!'})
         else:
-            raise ValidationError(
-                {"msg": 'You can not show product view, because you are not an Admin!'})
+            raise ValidationError({"msg": 'You can not update Units, because you are not an Admin!'})
 
 
-class AdminProductDeleteAPI(ListAPIView):
+class AdminUnitDeleteAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = VendorProductListSerializer
+    serializer_class = VendorUnitSerializer
     pagination_class = ProductCustomPagination
-    lookup_field = 'slug'
-    lookup_url_kwarg = "slug"
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
 
     def get_queryset(self):
-        slug = self.kwargs['slug']
+        id = self.kwargs['id']
         if self.request.user.is_superuser == True:
-            product_obj_exist = Product.objects.filter(slug=slug).exists()
-            if product_obj_exist:
-                product_obj = Product.objects.filter(slug=slug)
-                product_obj.update(is_active=False)
+            sub_category_obj_exist = Units.objects.filter(id=id).exists()
+            if sub_category_obj_exist:
+                Units.objects.filter(id=id).update(is_active=False)
 
-                queryset = Product.objects.filter(is_active=True).order_by('-created_at')
+                queryset = Units.objects.filter(is_active=True).order_by('-created_at')
                 return queryset
             else:
                 raise ValidationError(
-                    {"msg": 'Product Does not exist!'})
+                    {"msg": 'Units Does not exist!'})
         else:
-            raise ValidationError(
-                {"msg": 'You can not delete this product, because you are not an Admin!'})
+            raise ValidationError({"msg": 'You can not delete Units, because you are not an Admin!'})
+# Unit related admin apies views............................ end
 
 
-class AdminVideoProviderListAPIView(ListAPIView):
-    permission_classes = [IsAuthenticated]
-    serializer_class = ProductVideoProviderSerializer
-
-    def get_queryset(self):
-        if self.request.user.is_superuser == True:
-            queryset = ProductVideoProvider.objects.filter(is_active=True)
-            if queryset:
-                return queryset
-            else:
-                raise ValidationError(
-                    {"msg": 'Video provider data does not exist!'})
-        else:
-            raise ValidationError({"msg": 'You can not view video provider list, because you are not an Admin!'})
-
-
-class AdminVatTypeListAPIView(ListAPIView):
-    permission_classes = [IsAuthenticated]
-    serializer_class = ProductVatProviderSerializer
-
-    def get_queryset(self):
-        if self.request.user.is_superuser == True:
-            queryset = VatType.objects.filter(is_active=True)
-            if queryset:
-                return queryset
-            else:
-                raise ValidationError(
-                    {"msg": 'Vat types does not exist!'})
-        else:
-            raise ValidationError({"msg": 'You can not view Vat types list, because you are not an Admin!'})
-
-
+# Flash Deal related admin apies views............................ start
 class AdminFlashDealCreateAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = FlashDealInfoSerializer
@@ -679,6 +653,7 @@ class AdminFlashDealListAPIView(ListAPIView):
                     {"msg": 'Flash Deal does not exist!'})
         else:
             raise ValidationError({"msg": 'You can not view Flash Deal list, because you are not an Admin!'})
+# Flash Deal related admin apies views............................ end
 
 
 class AdminProfileAPIView(RetrieveAPIView):
@@ -697,6 +672,7 @@ class AdminProfileAPIView(RetrieveAPIView):
             raise ValidationError({"msg": 'You can not view your profile, because you are not an Admin!'})
 
 
+# Review related admin apies views............................ start
 class AdminReviewListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ReviewListSerializer
@@ -751,8 +727,10 @@ class ReviewSearchAPI(ListAPIView):
             return queryset
         else:
             raise ValidationError({"msg": 'You can not search review data, because you are not an Admin!'})
+# Review related admin apies views............................ end
 
 
+# Attribute, AttributeValue related admin apies views............................ start
 class AdminAttributeListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     pagination_class = ProductCustomPagination
@@ -901,6 +879,32 @@ class AdminUpdateFilterAttributeAPIView(RetrieveUpdateAPIView):
             raise ValidationError({"msg": 'You can not update filter attribute, because you are not an Admin!'})
 
 
+class AdminFilterAttributesAPI(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = FilteringAttributesSerializer
+    def get_queryset(self):
+        id = self.kwargs['id']
+        type = self.kwargs['type']
+        if self.request.user.is_superuser == True:
+            queryset = FilterAttributes.objects.all().order_by('-created_at')
+            if id and type:
+                if type == 'category':
+                    queryset = FilterAttributes.objects.filter(Q(category__id=id) & Q(is_active=True)).order_by('-created_at')
+                if type == 'sub_category':
+                    queryset = FilterAttributes.objects.filter(Q(sub_category__id=id) & Q(is_active=True)).order_by('-created_at')
+                if type == 'sub_sub_category':
+                    queryset = FilterAttributes.objects.filter(Q(sub_sub_category__id=id) & Q(is_active=True)).order_by('-created_at')
+
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError({"msg": 'Filter Attributes not found!'})
+        else:
+            raise ValidationError({"msg": 'You can not see filtering attributes, because you are not an Admin!'})
+# Attribute, AttributeValue related admin apies views............................ end
+
+
+# Order related admin apies views............................ start
 class AdminOrderList(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AdminOrderListSerializer
@@ -979,6 +983,7 @@ class OrderListSearchAPI(ListAPIView):
         else:
             raise ValidationError(
                 {"msg": 'You can not show Order list, because you are not an Admin!'})
+# Order related admin apies views............................ end
 
 
 class AdminOrderUpdateAPI(RetrieveUpdateAPIView):
@@ -1050,6 +1055,7 @@ class AdminOrderUpdateAPI(RetrieveUpdateAPIView):
             raise ValidationError({"msg": 'Order update failed. contact with developer!'})
 
 
+# Customer related admin apies views............................ start
 class AdminCustomerListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     pagination_class = ProductCustomPagination
@@ -1085,8 +1091,10 @@ class AdminCustomerDeleteAPIView(ListAPIView):
                 )
         else:
             raise ValidationError({"msg": 'You can not delete User, because you are not an Admin!'})
+# Customer related admin apies views............................ end
 
 
+# Ticket related admin apies views............................ start
 class AdminTicketListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     pagination_class = ProductCustomPagination
@@ -1130,6 +1138,7 @@ class AdminUpdateTicketStatusAPIView(RetrieveUpdateAPIView):
                     {"msg": 'Ticket does not found!'})
         else:
             raise ValidationError({"msg": 'You can not update ticket status, because you are not an Admin!'})
+# Ticket related admin apies views............................ end
 
 
 class AdminDashboardDataAPIView(APIView):
@@ -1230,12 +1239,17 @@ class AdminDashboardDataAPIView(APIView):
             raise ValidationError({"msg": 'You can not see dashboard data, because you are not an Admin!'})
 
 
+# brand related admin apies views............................ start
 class AdminBrandCreateAPIView(CreateAPIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     serializer_class = VendorBrandSerializer
 
     def post(self, request, *args, **kwargs):
-        return super(AdminBrandCreateAPIView, self).post(request, *args, **kwargs)
+        if self.request.user.is_superuser == True:
+            return super(AdminBrandCreateAPIView, self).post(request, *args, **kwargs)
+        else:
+            raise ValidationError(
+                {"msg": 'You can not create brand, because you are not an Admin!'})
 
 
 class AdminBrandUpdateAPIView(RetrieveUpdateAPIView):
@@ -1277,6 +1291,7 @@ class AdminBrandDeleteAPIView(ListAPIView):
             raise ValidationError(
                 {"msg": 'Brand Does not exist!'}
             )
+# brand related admin apies views............................ end
 
 
 class AdminWarrantyListAPIView(ListAPIView):
@@ -1292,6 +1307,116 @@ class AdminWarrantyListAPIView(ListAPIView):
             raise ValidationError({"msg": 'You can not see ticket list data, because you are not an Admin!'})
 
 
+
+# shipping related admin apies views............................ start
+class AdminShippingCountryAddAPIView(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminShippingCountrySerializer
+
+    def post(self, request, *args, **kwargs):
+        if self.request.user.is_superuser == True:
+            return super(AdminShippingCountryAddAPIView, self).post(request, *args, **kwargs)
+        else:
+            raise ValidationError(
+                {"msg": 'You can not create Shipping Country, because you are not an Admin!'})
+
+
+class AdminShippingCountryListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminShippingCountrySerializer
+    pagination_class = ProductCustomPagination
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = ShippingCountry.objects.filter(is_active=True).order_by('-created_at')
+
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError({"msg": "Shipping Country doesn't exist! " })
+        else:
+            raise ValidationError(
+                {"msg": 'You can not show Shipping Country list, because you are not an Admin!'})
+
+
+class AdminShippingCountryListFilterAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    pagination_class = ProductCustomPagination
+    serializer_class = AdminShippingCountrySerializer
+
+    def get_queryset(self):
+        request = self.request
+        search = request.GET.get('search')
+        if self.request.user.is_superuser == True:
+            queryset = ShippingCountry.objects.filter(is_active= True).order_by('-created_at')
+            if search:
+                queryset = queryset.filter(Q(title__icontains=search) | Q(code__icontains=search))
+
+            return queryset
+        else:
+            raise ValidationError({"msg": 'You can not search Shipping Country data, because you are not an Admin!'})
+
+
+class AdminShippingCountryUpdateAPIView(RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminShippingCountrySerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        if self.request.user.is_superuser == True:
+            query = ShippingCountry.objects.filter(id=id, is_active=True)
+            if query:
+                return query
+            else:
+                raise ValidationError(
+                    {"msg": 'Shipping Country does not found!'})
+        else:
+            raise ValidationError({"msg": 'You can not update Shipping Country, because you are not an Admin!'})
+
+
+class AdminShippingCountryDeleteAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    pagination_class = ProductCustomPagination
+    serializer_class = AdminShippingCountrySerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = 'id'
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        if self.request.user.is_superuser == True:
+            shipping_country_obj = ShippingCountry.objects.filter(id=id).exists()
+            if shipping_country_obj:
+                shipping_country_obj = ShippingCountry.objects.filter(id=id).update(is_active=False)
+                queryset = ShippingCountry.objects.filter(is_active=True).order_by('-created_at')
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'Shipping Country Info Does not exist!'}
+                )
+        else:
+            raise ValidationError({"msg": 'You can not delete Shipping Country, because you are not an Admin!'})
+
+
+class AdminShippingCityListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminShippingCitySerializer
+    pagination_class = ProductCustomPagination
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = ShippingCity.objects.filter(is_active=True).order_by('-created_at')
+
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError({"msg": "Shipping City doesn't exist! " })
+        else:
+            raise ValidationError(
+                {"msg": 'You can not show Shipping City list, because you are not an Admin!'})
+
+
 class AdminShippingClassListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     pagination_class = ProductCustomPagination
@@ -1300,10 +1425,13 @@ class AdminShippingClassListAPIView(ListAPIView):
     def get_queryset(self):
         if self.request.user.is_superuser == True:
             queryset = ShippingClass.objects.filter(is_active=True)
-            return queryset
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError({"msg": "Shipping Country doesn't exist! " })
         else:
             raise ValidationError({"msg": 'You can not see ticket list data, because you are not an Admin!'})
-
+# shipping related admin apies views............................ end
 
 class AdminSpecificationTitleListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -1417,7 +1545,7 @@ class AdminOrderDeleteAPIView(ListAPIView):
             raise ValidationError({"msg": 'You can not delete orders, because you are not an Admin!'})
 
 
-# coupon views
+# Coupon related admin apies views............................ start
 class AdminCouponCreateAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AdminCouponSerializer
@@ -1482,9 +1610,10 @@ class AdminCouponDeleteAPIView(ListAPIView):
                 )
         else:
             raise ValidationError({"msg": 'You can not delete coupon data, because you are not an Admin!'})
+# Coupon related admin apies views............................ end
 
 
-# offers views
+# Offers related admin apies views............................ start
 class AdminOffersListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AdminOfferSerializer
@@ -1568,8 +1697,10 @@ class AdminOffersDeleteAPIView(ListAPIView):
                 )
         else:
             raise ValidationError({"msg": 'You can not delete Offer data, because you are not an Admin!'})
+# Offers related admin apies views............................ end
 
 
+# POS related admin apies views............................ start
 class AdminPosProductListAPI(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AdminPosProductListSerializer
@@ -1587,6 +1718,7 @@ class AdminPosProductListAPI(ListAPIView):
         else:
             raise ValidationError(
                 {"msg": 'You can not show product list, because you are not an Admin!'})
+
 
 class AdminPosSearchAPI(ListAPIView):
     pagination_class = ProductCustomPagination
@@ -1612,11 +1744,133 @@ class AdminPosSearchAPI(ListAPIView):
             queryset = queryset.filter(brand_id=brand)
 
         return queryset
-    
-    
+# POS related admin apies views............................ end
+
+
+class AdminDiscountListAPIView(ListAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = DiscountTypeSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = DiscountTypes.objects.filter(is_active=True)
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError({"msg": "No discount available! " })
+        else:
+            raise ValidationError(
+                {"msg": 'You can not see discount list, because you are not an Admin!'})
+
+
+class AdminTagListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = TagsSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = Tags.objects.filter(is_active=True)
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError({"msg": "No tag available! " })
+        else:
+            raise ValidationError(
+                {"msg": 'You can not see tag list, because you are not an Admin!'})
+
+
+class AdminVideoProviderListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ProductVideoProviderSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = ProductVideoProvider.objects.filter(is_active=True)
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'Video provider data does not exist!'})
+        else:
+            raise ValidationError({"msg": 'You can not view video provider list, because you are not an Admin!'})
+
+
+# Vat Type related admin apies views............................ start
+class AdminVatTypeListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = VatTypeSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = VatType.objects.filter(is_active=True)
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'Vat types does not exist!'})
+        else:
+            raise ValidationError({"msg": 'You can not view Vat types list, because you are not an Admin!'})
+
+
+class AdminVatTypeAddAPIView(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = VatTypeSerializer
+
+    def post(self, request, *args, **kwargs):
+        if self.request.user.is_superuser == True:
+            return super(AdminVatTypeAddAPIView, self).post(request, *args, **kwargs)
+        else:
+            raise ValidationError(
+                {"msg": 'You can not create vat type, because you are not an Admin!'})
+
+
+class AdminVatTypeUpdateAPIView(RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = VatTypeSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        if self.request.user.is_superuser == True:
+            query = VatType.objects.filter(id=id)
+            if query:
+                return query
+            else:
+                raise ValidationError(
+                    {"msg": 'VatType does not found!'})
+        else:
+            raise ValidationError({"msg": 'You can not update VatType, because you are not an Admin!'})
+
+
+class AdminVatTypeDeleteAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = VatTypeSerializer
+    pagination_class = ProductCustomPagination
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        if self.request.user.is_superuser == True:
+            vat_type_obj_exist = VatType.objects.filter(id=id).exists()
+            if vat_type_obj_exist:
+                VatType.objects.filter(id=id).update(is_active=False)
+
+                queryset = VatType.objects.filter(is_active=True).order_by('-created_at')
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'VatType Does not exist!'})
+        else:
+            raise ValidationError({"msg": 'You can not delete VatType, because you are not an Admin!'})
+# Vat Type related admin apies views............................ end
+
+
+
 class AdminPosOrderAPIView(CreateAPIView):
     serializer_class = AdminPosOrderSerializer
-    
-    
+
+
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)

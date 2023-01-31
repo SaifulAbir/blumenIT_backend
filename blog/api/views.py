@@ -241,6 +241,8 @@ class CustomerBlogDetailsAPIView(RetrieveAPIView):
         slug = self.kwargs['slug']
         try:
             query = Blog.objects.get(slug=slug)
+            query.view_count += 1
+            query.save()
             return query
         except:
             raise ValidationError(

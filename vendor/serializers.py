@@ -8,7 +8,7 @@ from product.models import Brand, Category, DiscountTypes, FlashDealInfo, FlashD
     Product, ProductImages, ProductReview, ProductTags, ProductVariation, ProductVideoProvider, \
     ShippingClass, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units,\
     VatType, Attribute, FilterAttributes, ProductFilterAttributes, AttributeValues, ProductWarranty, Warranty, SpecificationTitle, \
-    Offer, OfferProduct
+    Offer, OfferProduct, ShippingCountry, ShippingState, ShippingCity
 from user.models import User, Subscription
 from cart.models import Order, Coupon, OrderItem, DeliveryAddress
 from user.serializers import CustomerProfileSerializer
@@ -525,8 +525,6 @@ class ProductCreateSerializer(serializers.ModelSerializer):
     minimum_purchase_quantity = serializers.IntegerField(required=True)
     price = serializers.FloatField(required=True)
     quantity = serializers.IntegerField(required=False, write_only=True)
-    shipping_class = serializers.PrimaryKeyRelatedField(queryset=ShippingClass.objects.all(), many=False, write_only=True, required= False)
-
     product_tags = serializers.ListField(
         child=serializers.CharField(), write_only=True, required=True)
     product_images = serializers.ListField(
@@ -578,8 +576,6 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             'is_featured',
             'todays_deal',
             'flash_deal',
-            'shipping_time',
-            'shipping_class',
             'vat',
             'vat_type',
             'product_filter_attributes',
@@ -892,8 +888,6 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
                     'todays_deal',
                     'existing_flash_deal',
                     'flash_deal',
-                    'shipping_time',
-                    'shipping_class',
                     'vat',
                     'vat_type',
                     'existing_product_filter_attributes',
@@ -1256,6 +1250,7 @@ class FlashDealProductSerializer(serializers.ModelSerializer):
                     'discount_amount',
                 ]
 
+
 class FlashDealInfoSerializer(serializers.ModelSerializer):
     flash_deal_products = FlashDealProductSerializer(many=True, required=False)
     existing_flash_deal_products = serializers.SerializerMethodField('get_flash_deal_products')
@@ -1566,10 +1561,30 @@ class AdminWarrantyListSerializer(serializers.ModelSerializer):
         fields = ['id', 'title']
 
 
+class AdminShippingCountrySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ShippingCountry
+        fields = [
+            'title',
+            'code',
+        ]
+
+
+class AdminShippingCitySerializer(serializers.ModelSerializer):
+    shipping_state_title = serializers.CharField(source='shipping_state.title',read_only=True)
+    class Meta:
+        model = ShippingCity
+        fields = [
+            'title',
+            'shipping_state',
+            'shipping_state_title'
+        ]
+
+
 class AdminShippingClassSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShippingClass
-        fields = ['id', 'title', 'description', 'delivery_charge']
+        fields = ['id', 'description', 'shipping_country', 'shipping_state', 'shipping_city', 'delivery_days', 'delivery_charge']
 
 
 class AdminSpecificationTitleSerializer(serializers.ModelSerializer):

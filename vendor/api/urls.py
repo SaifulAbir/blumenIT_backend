@@ -19,6 +19,9 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminSubscriberDeleteAPIView, AdminCorporateDealListAPIView, AdminCorporateDealDeleteAPIView, AdminAttributeDeleteAPIView, \
     AdminOrderDeleteAPIView, AdminCouponCreateAPIView, AdminCouponListAPIView, AdminCouponUpdateAPIView, AdminCouponDeleteAPIView, \
     AdminCustomerDeleteAPIView, AdminBrandUpdateAPIView, AdminOffersListAPIView, AdminOffersCreateAPIView, AdminOffersDetailsAPIView, \
+    AdminOffersUpdateAPIView, AdminOffersDeleteAPIView, AdminPosProductListAPI, AdminShippingCountryListAPIView, \
+    AdminShippingCountryListFilterAPIView, AdminShippingCountryAddAPIView, AdminShippingCountryUpdateAPIView, \
+    AdminShippingCountryDeleteAPIView, AdminShippingCityListAPIView
     AdminOffersUpdateAPIView, AdminOffersDeleteAPIView, AdminPosProductListAPI, AdminPosSearchAPI
 
 
@@ -36,7 +39,6 @@ urlpatterns = [
     path('admin/product-list-search/', AdminProductListSearchAPI.as_view()),
     path('admin/product-delete/<str:slug>/',AdminProductDeleteAPI.as_view()),
     path('admin/product-view/<str:slugi>/',AdminProductViewAPI.as_view()),
-    path('admin/filtering-attributes/<int:id>/<str:type>/', AdminFilterAttributesAPI.as_view()),
     path('admin/category-list/', AdminCategoryListAPIView.as_view()),
     path('admin/add-new-category/', AdminAddNewCategoryAPIView.as_view()),
     path('admin/update-category/<int:id>/', AdminUpdateCategoryAPIView.as_view()),
@@ -94,6 +96,13 @@ urlpatterns = [
 
 
     # shipping class apies
+    path('admin/shipping-country-add/', AdminShippingCountryAddAPIView.as_view()),
+    path('admin/shipping-country-list/', AdminShippingCountryListAPIView.as_view()),
+    path('admin/shipping-country-filter/', AdminShippingCountryListFilterAPIView.as_view()),
+    path('admin/shipping-country-update/<int:id>/', AdminShippingCountryUpdateAPIView.as_view()),
+    path('admin/shipping-country-delete/<int:id>/', AdminShippingCountryDeleteAPIView.as_view()),
+    path('admin/shipping-city-list/', AdminShippingCityListAPIView.as_view()),
+    # path('admin/shipping-city-add/', AdminShippingCityAddAPIView.as_view()),
     path('admin/shipping-class-list/', AdminShippingClassListAPIView.as_view()),
 
 
@@ -119,6 +128,25 @@ urlpatterns = [
     path('admin/offers-update/<int:id>/', AdminOffersUpdateAPIView.as_view()),
     path('admin/offers-delete/<int:id>/', AdminOffersDeleteAPIView.as_view()),
 
+    # corporate deal apies
+    path('admin/corporate-deal-list/', AdminCorporateDealListAPIView.as_view()),
+    path('admin/corporate-deal-delete/<int:id>/', AdminCorporateDealDeleteAPIView.as_view()),
+
+    # subscriber apies
+    path('admin/subscribers-list/', AdminSubscribersListAPIView.as_view()),
+    path('admin/subscriber-delete/<int:id>/', AdminSubscriberDeleteAPIView.as_view()),
+
+    # units apies
+    path('admin/product-unit-list/', AdminUnitListAPIView.as_view()),
+    path('admin/product-unit-add/', AdminUnitAddAPIView.as_view()),
+    path('admin/product-unit-update/<int:id>/', AdminUnitUpdateAPIView.as_view()),
+    path('admin/product-unit-delete/<int:id>/', AdminUnitDeleteAPIView.as_view()),
+
+    # vat apies
+    path('admin/product-vat-type-list/', AdminVatTypeListAPIView.as_view()),
+    path('admin/product-vat-type-add/', AdminVatTypeAddAPIView.as_view()),
+    path('admin/product-vat-type-update/<int:id>/', AdminVatTypeUpdateAPIView.as_view()),
+    path('admin/product-vat-type-delete/<int:id>/', AdminVatTypeDeleteAPIView.as_view()),
 
     # others
     path('admin/profile/', AdminProfileAPIView.as_view()),

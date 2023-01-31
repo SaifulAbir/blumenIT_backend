@@ -197,9 +197,54 @@ class VatType(AbstractTimeStamp):
         return self.title
 
 
+class ShippingCountry(AbstractTimeStamp):
+    title = models.CharField(max_length=100, null=False, blank=False, default='')
+    code = models.CharField(max_length=10, null=False, blank=False, default='')
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'ShippingCountry'
+        verbose_name_plural = 'ShippingCountries'
+        db_table = 'shipping_country'
+
+    def __str__(self):
+        return self.title
+
+
+class ShippingState(AbstractTimeStamp):
+    title = models.CharField(max_length=100, null=False, blank=False, default='')
+    shipping_country = models.ForeignKey(ShippingCountry, on_delete=models.CASCADE, related_name='shipping_state_shipping_country', blank=True, null=True)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'ShippingState'
+        verbose_name_plural = 'ShippingStates'
+        db_table = 'shipping_state'
+
+    def __str__(self):
+        return self.title
+
+
+class ShippingCity(AbstractTimeStamp):
+    title = models.CharField(max_length=100, null=False, blank=False, default='')
+    shipping_state = models.ForeignKey(ShippingState, on_delete=models.CASCADE, related_name='shipping_city_shipping_state', blank=True, null=True)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'ShippingCity'
+        verbose_name_plural = 'ShippingCities'
+        db_table = 'shipping_city'
+
+    def __str__(self):
+        return self.title
+
+
 class ShippingClass(AbstractTimeStamp):
-    title = models.CharField(max_length=800, default='', help_text="name")
     description = models.TextField(default='', null=False, blank=False)
+    shipping_country = models.ForeignKey(ShippingCountry, on_delete=models.CASCADE, related_name='shipping_class_shipping_country', blank=False, null=False)
+    shipping_state = models.ForeignKey(ShippingState, on_delete=models.CASCADE, related_name='shipping_class_shipping_state', blank=False, null=False)
+    shipping_city = models.ForeignKey(ShippingCity, on_delete=models.CASCADE, related_name='shipping_class_shipping_city', blank=False, null=False)
+    delivery_days = models.IntegerField(default=0, help_text="Minimum days to delivery")
     delivery_charge = models.FloatField(max_length=255, null=False, blank=False, default=0)
     is_active = models.BooleanField(null=False, blank=False, default=True)
     class Meta:
@@ -208,7 +253,7 @@ class ShippingClass(AbstractTimeStamp):
         db_table = 'shipping_class'
 
     def __str__(self):
-        return self.title
+        return f"{self.pk}"
 
 
 class ProductCondition(AbstractTimeStamp):
@@ -249,8 +294,6 @@ class Product(AbstractTimeStamp):
     is_featured = models.BooleanField(null=False, blank=False, default=False)
     cash_on_delivery = models.BooleanField(default=False)
     todays_deal = models.BooleanField(default=False)
-    shipping_time = models.IntegerField(
-        null=False, blank=False, default=0, help_text="eg: Days in count.")
     full_description = models.TextField(default='', null=True, blank=True)
     short_description = models.CharField(max_length=800, default='', null=True, blank=True)
     active_short_description = models.BooleanField(default=True)
@@ -280,8 +323,6 @@ class Product(AbstractTimeStamp):
     vat = models.FloatField(null=True, blank=True, default=0.0)
     vat_type = models.ForeignKey(
         VatType, related_name="product_vat_type", null=True, blank=True, on_delete=models.PROTECT)
-    shipping_class = models.ForeignKey(
-        ShippingClass, related_name="product_shipping_class", null=True, blank=True, on_delete=models.PROTECT)
     product_condition = models.ForeignKey(
         ProductCondition, related_name="product_product_condition", null=True, blank=True, on_delete=models.PROTECT)
     status = models.CharField(

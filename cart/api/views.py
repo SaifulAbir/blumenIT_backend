@@ -5,11 +5,11 @@ from rest_framework import status
 from rest_framework import serializers
 from product.serializers import DiscountTypeSerializer
 from cart.serializers import CheckoutDetailsSerializer, CheckoutSerializer, \
-     PaymentTypesListSerializer, ApplyCouponSerializer, DeliveryAddressSerializer
+     PaymentTypesListSerializer, ApplyCouponSerializer, DeliveryAddressSerializer, ShippingClassDataSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from product.models import Product, DiscountTypes
+from product.models import Product, DiscountTypes, ShippingClass
 from cart.models import BillingAddress, Order, PaymentType, Coupon, UseRecordOfCoupon, Wishlist, \
     DeliveryAddress
 from user.models import User
@@ -175,3 +175,12 @@ class BillingAddressDeleteAPIView(DestroyAPIView):
 
     def delete(self, request, *args, **kwargs):
         return super(BillingAddressDeleteAPIView, self).delete(request, *args, **kwargs)
+
+
+class ShippingClassDataAPIView(ListAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = ShippingClassDataSerializer
+
+    def get_queryset(self):
+        queryset = ShippingClass.objects.filter(is_active=True).order_by('-created_at')
+        return queryset

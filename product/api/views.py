@@ -407,11 +407,12 @@ class PcBuilderChooseAPIView(ListAPIView):
         if new_attr_value_ids:
             queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id__in = new_attr_value_ids)).order_by('-id').distinct("id")
 
+
         if price_low_to_high:
-            queryset = queryset.order_by('price')
+            queryset = queryset.order_by('price').distinct('price')
 
         if price_high_to_low:
-            queryset = queryset.order_by('-price')
+            queryset = queryset.order_by('-price').distinct('-price')
 
 
         return queryset

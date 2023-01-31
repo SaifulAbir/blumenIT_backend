@@ -21,7 +21,7 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminCustomerDeleteAPIView, AdminBrandUpdateAPIView, AdminOffersListAPIView, AdminOffersCreateAPIView, AdminOffersDetailsAPIView, \
     AdminOffersUpdateAPIView, AdminOffersDeleteAPIView, AdminPosProductListAPI, AdminShippingCountryListAPIView, \
     AdminShippingCountryListFilterAPIView, AdminShippingCountryAddAPIView, AdminShippingCountryUpdateAPIView, \
-    AdminShippingCountryDeleteAPIView
+    AdminShippingCountryDeleteAPIView, AdminShippingCityListAPIView
 
 
 urlpatterns = [
@@ -38,7 +38,6 @@ urlpatterns = [
     path('admin/product-list-search/', AdminProductListSearchAPI.as_view()),
     path('admin/product-delete/<str:slug>/',AdminProductDeleteAPI.as_view()),
     path('admin/product-view/<str:slugi>/',AdminProductViewAPI.as_view()),
-    path('admin/filtering-attributes/<int:id>/<str:type>/', AdminFilterAttributesAPI.as_view()),
     path('admin/category-list/', AdminCategoryListAPIView.as_view()),
     path('admin/add-new-category/', AdminAddNewCategoryAPIView.as_view()),
     path('admin/update-category/<int:id>/', AdminUpdateCategoryAPIView.as_view()),
@@ -101,6 +100,8 @@ urlpatterns = [
     path('admin/shipping-country-filter/', AdminShippingCountryListFilterAPIView.as_view()),
     path('admin/shipping-country-update/<int:id>/', AdminShippingCountryUpdateAPIView.as_view()),
     path('admin/shipping-country-delete/<int:id>/', AdminShippingCountryDeleteAPIView.as_view()),
+    path('admin/shipping-city-list/', AdminShippingCityListAPIView.as_view()),
+    # path('admin/shipping-city-add/', AdminShippingCityAddAPIView.as_view()),
     path('admin/shipping-class-list/', AdminShippingClassListAPIView.as_view()),
 
 

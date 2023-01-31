@@ -25,7 +25,7 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     AdminTicketListSerializer, AdminTicketDataSerializer, TicketStatusSerializer, CategoryWiseProductSaleSerializer, \
     CategoryWiseProductStockSerializer, AdminWarrantyListSerializer, AdminShippingClassSerializer, \
     AdminSpecificationTitleSerializer, AdminSubscribersListSerializer, AdminCorporateDealSerializer, AdminCouponSerializer, \
-    AdminOfferSerializer, AdminPosProductListSerializer, AdminShippingCountrySerializer
+    AdminOfferSerializer, AdminPosProductListSerializer, AdminShippingCountrySerializer, AdminShippingCitySerializer
 from cart.models import Order, OrderItem, Coupon
 from cart.models import Order, OrderItem, SubOrder
 from user.models import User, Subscription
@@ -33,7 +33,7 @@ from rest_framework.exceptions import ValidationError
 from vendor.pagination import OrderCustomPagination
 from support_ticket.models import Ticket
 
-
+# Seller related admin apies views............................ start
 class AdminSellerCreateAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = SellerCreateSerializer
@@ -126,6 +126,7 @@ class AdminSellerDeleteAPIView(ListAPIView):
         else:
             raise ValidationError(
                 {"msg": 'You can not delete seller, because you are not an Admin!'})
+# Seller related admin apies views............................ end
 
 
 class AdminProductCreateAPIView(CreateAPIView):
@@ -183,6 +184,7 @@ class AdminFilterAttributesAPI(ListAPIView):
             raise ValidationError({"msg": 'You can not see filtering attributes, because you are not an Admin!'})
 
 
+# Category,SubCategory,SubSubCategory related admin apies views............................ start
 class AdminCategoryListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AdminCategoryListSerializer
@@ -400,7 +402,7 @@ class AdminDeleteSubSubCategoryAPIView(ListAPIView):
                     {"msg": 'Sub Sub Category Does not exist!'})
         else:
             raise ValidationError({"msg": 'You can not delete sub sub category, because you are not an Admin!'})
-
+# Category,SubCategory,SubSubCategory related admin apies views............................ end
 
 class AdminBrandListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -1087,6 +1089,7 @@ class AdminCustomerDeleteAPIView(ListAPIView):
             raise ValidationError({"msg": 'You can not delete User, because you are not an Admin!'})
 
 
+# Ticket related admin apies views............................ start
 class AdminTicketListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     pagination_class = ProductCustomPagination
@@ -1130,6 +1133,7 @@ class AdminUpdateTicketStatusAPIView(RetrieveUpdateAPIView):
                     {"msg": 'Ticket does not found!'})
         else:
             raise ValidationError({"msg": 'You can not update ticket status, because you are not an Admin!'})
+# Ticket related admin apies views............................ end
 
 
 class AdminDashboardDataAPIView(APIView):
@@ -1230,6 +1234,7 @@ class AdminDashboardDataAPIView(APIView):
             raise ValidationError({"msg": 'You can not see dashboard data, because you are not an Admin!'})
 
 
+# brand related admin apies views............................ start
 class AdminBrandCreateAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = VendorBrandSerializer
@@ -1281,6 +1286,7 @@ class AdminBrandDeleteAPIView(ListAPIView):
             raise ValidationError(
                 {"msg": 'Brand Does not exist!'}
             )
+# brand related admin apies views............................ end
 
 
 class AdminWarrantyListAPIView(ListAPIView):
@@ -1296,6 +1302,8 @@ class AdminWarrantyListAPIView(ListAPIView):
             raise ValidationError({"msg": 'You can not see ticket list data, because you are not an Admin!'})
 
 
+
+# shipping related admin apies views............................ start
 class AdminShippingCountryAddAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AdminShippingCountrySerializer
@@ -1386,6 +1394,24 @@ class AdminShippingCountryDeleteAPIView(ListAPIView):
             raise ValidationError({"msg": 'You can not delete Shipping Country, because you are not an Admin!'})
 
 
+class AdminShippingCityListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminShippingCitySerializer
+    pagination_class = ProductCustomPagination
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = ShippingCity.objects.filter(is_active=True).order_by('-created_at')
+
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError({"msg": "Shipping City doesn't exist! " })
+        else:
+            raise ValidationError(
+                {"msg": 'You can not show Shipping City list, because you are not an Admin!'})
+
+
 class AdminShippingClassListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     pagination_class = ProductCustomPagination
@@ -1400,7 +1426,7 @@ class AdminShippingClassListAPIView(ListAPIView):
                 raise ValidationError({"msg": "Shipping Country doesn't exist! " })
         else:
             raise ValidationError({"msg": 'You can not see ticket list data, because you are not an Admin!'})
-
+# shipping related admin apies views............................ end
 
 class AdminSpecificationTitleListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -1514,7 +1540,7 @@ class AdminOrderDeleteAPIView(ListAPIView):
             raise ValidationError({"msg": 'You can not delete orders, because you are not an Admin!'})
 
 
-# coupon views
+# Coupon related admin apies views............................ start
 class AdminCouponCreateAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AdminCouponSerializer
@@ -1579,9 +1605,10 @@ class AdminCouponDeleteAPIView(ListAPIView):
                 )
         else:
             raise ValidationError({"msg": 'You can not delete coupon data, because you are not an Admin!'})
+# Coupon related admin apies views............................ end
 
 
-# offers views
+# Offers related admin apies views............................ start
 class AdminOffersListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AdminOfferSerializer
@@ -1665,8 +1692,10 @@ class AdminOffersDeleteAPIView(ListAPIView):
                 )
         else:
             raise ValidationError({"msg": 'You can not delete Offer data, because you are not an Admin!'})
+# Offers related admin apies views............................ end
 
 
+# POS related admin apies views............................ start
 class AdminPosProductListAPI(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AdminPosProductListSerializer
@@ -1689,4 +1718,4 @@ class AdminPosProductListAPI(ListAPIView):
 class AdminPosSearchAPI(ListAPIView):
     pagination_class = ProductCustomPagination
     serializer_class = AdminPosProductListSerializer
-
+# POS related admin apies views............................ end

@@ -2,10 +2,10 @@ from django.urls import path
 from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCategoryAPIView, AdminBrandListAPIView,\
     AdminCategoryListAPIView, AdminDeleteCategoryAPIView, AdminDeleteSubCategoryAPIView, \
     AdminDeleteSubSubCategoryAPIView, AdminProductDeleteAPI, AdminProductViewAPI, AdminSubCategoryListAPIView,\
-    AdminSubSubCategoryListAPIView, AdminTagListAPIView, AdminUnitListAPIView,\
-    AdminDiscountListAPIView,\
+    AdminSubSubCategoryListAPIView, AdminTagListAPIView, AdminUnitListAPIView, AdminUnitAddAPIView, AdminUnitUpdateAPIView, \
+    AdminUnitDeleteAPIView, AdminDiscountListAPIView,\
     AdminUpdateCategoryAPIView, AdminUpdateSubCategoryAPIView, AdminUpdateSubSubCategoryAPIView, \
-    AdminVatTypeListAPIView, AdminVideoProviderListAPIView, \
+    AdminVatTypeListAPIView, AdminVatTypeAddAPIView, AdminVatTypeUpdateAPIView, AdminVatTypeDeleteAPIView, AdminVideoProviderListAPIView, \
     AdminProductCreateAPIView, AdminSellerCreateAPIView, AdminSellerListAPIView, AdminSellerUpdateAPIView, AdminSellerDeleteAPIView,\
     AdminSellerDetailsAPIView, AdminProductUpdateAPIView, AdminAddNewCategoryAPIView, AdminProductListAPI, AdminFlashDealCreateAPIView,\
     AdminFilterAttributesAPI, AdminProfileAPIView, AdminReviewListAPIView, AdminReviewInactiveAPIView, ReviewSearchAPI, \
@@ -127,15 +127,31 @@ urlpatterns = [
     path('admin/offers-update/<int:id>/', AdminOffersUpdateAPIView.as_view()),
     path('admin/offers-delete/<int:id>/', AdminOffersDeleteAPIView.as_view()),
 
+    # corporate deal apies
+    path('admin/corporate-deal-list/', AdminCorporateDealListAPIView.as_view()),
+    path('admin/corporate-deal-delete/<int:id>/', AdminCorporateDealDeleteAPIView.as_view()),
+
+    # subscriber apies
+    path('admin/subscribers-list/', AdminSubscribersListAPIView.as_view()),
+    path('admin/subscriber-delete/<int:id>/', AdminSubscriberDeleteAPIView.as_view()),
+
+    # units apies
+    path('admin/product-unit-list/', AdminUnitListAPIView.as_view()),
+    path('admin/product-unit-add/', AdminUnitAddAPIView.as_view()),
+    path('admin/product-unit-update/<int:id>/', AdminUnitUpdateAPIView.as_view()),
+    path('admin/product-unit-delete/<int:id>/', AdminUnitDeleteAPIView.as_view()),
+
+    # vat apies
+    path('admin/product-vat-type-list/', AdminVatTypeListAPIView.as_view()),
+    path('admin/product-vat-type-add/', AdminVatTypeAddAPIView.as_view()),
+    path('admin/product-vat-type-update/<int:id>/', AdminVatTypeUpdateAPIView.as_view()),
+    path('admin/product-vat-type-delete/<int:id>/', AdminVatTypeDeleteAPIView.as_view()),
 
     # others
     path('admin/profile/', AdminProfileAPIView.as_view()),
     path('admin/dashboard-data/', AdminDashboardDataAPIView.as_view()),
 
-    path('admin/subscribers-list/', AdminSubscribersListAPIView.as_view()),
-    path('admin/subscriber-delete/<int:id>/', AdminSubscriberDeleteAPIView.as_view()),
-    path('admin/corporate-deal-list/', AdminCorporateDealListAPIView.as_view()),
-    path('admin/corporate-deal-delete/<int:id>/', AdminCorporateDealDeleteAPIView.as_view()),
+    # pos apies
     path('admin/pos-product-list/', AdminPosProductListAPI.as_view()),
 ]
 

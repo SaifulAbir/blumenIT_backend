@@ -186,7 +186,8 @@ class CheckoutSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['id', 'order_id', 'product_count', 'coupon', 'coupon_status', 'coupon_discount_amount', 'tax_amount', 'payment_type', 'shipping_cost', 'order_items', 'delivery_address', 'comment']
+        fields = ['id', 'order_id', 'product_count', 'coupon', 'coupon_status', 'coupon_discount_amount', 'tax_amount',
+                  'payment_type', 'shipping_cost', 'order_items', 'delivery_address', 'comment']
 
     def create(self, validated_data):
         order_items = validated_data.pop('order_items')

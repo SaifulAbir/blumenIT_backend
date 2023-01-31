@@ -25,7 +25,7 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     AdminTicketListSerializer, AdminTicketDataSerializer, TicketStatusSerializer, CategoryWiseProductSaleSerializer, \
     CategoryWiseProductStockSerializer, AdminWarrantyListSerializer, AdminShippingClassSerializer, \
     AdminSpecificationTitleSerializer, AdminSubscribersListSerializer, AdminCorporateDealSerializer, AdminCouponSerializer, \
-    AdminOfferSerializer, AdminPosProductListSerializer
+    AdminOfferSerializer, AdminPosProductListSerializer, AdminPosOrderSerializer
 from cart.models import Order, OrderItem, Coupon
 from cart.models import Order, OrderItem, SubOrder
 from user.models import User, Subscription
@@ -1575,7 +1575,7 @@ class AdminPosProductListAPI(ListAPIView):
     serializer_class = AdminPosProductListSerializer
     pagination_class = ProductCustomPagination
 
-    def get_object(self):
+    def get_queryset(self):
         if self.request.user.is_superuser == True:
             request = self.request
             queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
@@ -1591,3 +1591,32 @@ class AdminPosProductListAPI(ListAPIView):
 class AdminPosSearchAPI(ListAPIView):
     pagination_class = ProductCustomPagination
     serializer_class = AdminPosProductListSerializer
+    permission_classes = ()
+
+    def get_queryset(self):
+        request = self.request
+        query = request.GET.get('search')
+        category = request.GET.get('category_id')
+        brand = request.GET.get('brand_id')
+
+        queryset = Product.objects.filter(
+            status='PUBLISH').order_by('-created_at')
+
+        if query:
+            queryset = queryset.filter(Q(title__icontains=query))
+
+        if category:
+            queryset = queryset.filter(category__id=category)
+
+        if brand:
+            queryset = queryset.filter(brand_id=brand)
+
+        return queryset
+    
+    
+class AdminPosOrderAPIView(CreateAPIView):
+    serializer_class = AdminPosOrderSerializer
+    
+    
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)

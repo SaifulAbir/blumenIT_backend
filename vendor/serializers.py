@@ -1,6 +1,6 @@
 from cart.serializers import OrderItemSerializer
 from product.serializers import ProductImageSerializer, ProductReviewSerializer, BrandSerializer, UnitSerializer
-from cart.serializers import OrderItemSerializer, DeliveryAddressSerializer
+from cart.serializers import OrderItemSerializer, DeliveryAddressSerializer, ProductItemCheckoutSerializer
 from product.serializers import ProductImageSerializer, ProductReviewSerializer
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -1717,3 +1717,18 @@ class AdminPosProductListSerializer(serializers.ModelSerializer):
             'brand',
             'unit',
         ]
+
+class AdminPosOrderSerializer(serializers.ModelSerializer):
+    order_items = ProductItemCheckoutSerializer(many=True, required=False)
+
+    class Meta:
+        model = Order
+        fields = ['id', 'order_id', 'product_count ', 'order_items' ]
+
+
+    def create(self, validated_data):
+        order_items = validated_data.pop('order_items')
+
+
+        if order_items:
+            pass

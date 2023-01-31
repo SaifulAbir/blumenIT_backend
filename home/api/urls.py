@@ -6,6 +6,7 @@ urlpatterns = [
     path('contact-us/', ContactUsAPIView.as_view()),
     path('faq/', CreateGetFaqAPIView.as_view()),
     path('product-list-for-home-compare/', ProductListHomeCompareAPIView.as_view()),
+    path('request-quote/', RequestQuoteAPIView.as_view()),
 
     path('gaming-data/', GamingDataAPIView.as_view()),
     path('create-corporate-deal/', CorporateDealCreateAPIView.as_view()),

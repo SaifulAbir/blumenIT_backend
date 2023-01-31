@@ -154,3 +154,30 @@ class CorporateDeal(AbstractTimeStamp):
 
     def __str__(self):
         return 'First Name: ' + self.first_name + ' Last Name: ' + self.last_name + ' Company Name: ' + self.company_name + ' Phone:' + self.phone
+
+
+class RequestQuote(AbstractTimeStamp):
+    SERVICES = [
+        ('Wholesale Business Plan', 'Wholesale'),
+        ('Retail Business Plan', 'Retail'),
+        ('Reseller Business Plan', 'Reseller'),
+        ('Support Business Plan', 'Support'),
+        ('Sales Business Plan', 'Sales'),
+        ('Others', 'Others')
+    ]
+    name = models.CharField(max_length=255, blank=True)
+    email = models.EmailField(max_length=255)
+    phone = models.CharField(max_length=255, null=True, blank=True)
+    company_name = models.CharField(max_length=120, blank=True)
+    website = models.CharField(max_length=120, blank=True)
+    address = models.CharField(max_length=255, blank=True)
+    services = models.CharField(max_length=120, choices=SERVICES)
+    overview = models.TextField()
+
+    class Meta:
+        verbose_name = 'RequestQuote'
+        verbose_name_plural = 'RequestQuotes'
+        db_table = 'request_quote'
+
+    def __str__(self):
+        return self.name

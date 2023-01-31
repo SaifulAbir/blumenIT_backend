@@ -1,10 +1,10 @@
 from rest_framework.views import APIView
 from home.models import SliderImage, FAQ, ContactUs, HomeSingleRowData, PosterUnderSlider, PopularProductsUnderPoster, \
-    FeaturedProductsUnderPoster
+    FeaturedProductsUnderPoster, RequestQuote
 from home.serializers import SliderImagesListSerializer, product_catListSerializer,\
     ContactUsSerializer, FaqSerializer, SingleRowDataSerializer, PosterUnderSliderDataSerializer, PosterUnderPopularProductsDataSerializer, \
     PosterUnderFeaturedProductsDataSerializer, StoreCategoryAPIViewListSerializer, product_sub_catListSerializer, \
-    CorporateDealCreateSerializer
+    CorporateDealCreateSerializer, RequestQuoteSerializer
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.db.models import Q, Count
@@ -253,3 +253,31 @@ class CorporateDealCreateAPIView(CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         return super(CorporateDealCreateAPIView, self).post(request, *args, **kwargs)
+
+
+class RequestQuoteAPIView(APIView):
+    permission_classes = [AllowAny]
+    serializer_class = RequestQuoteSerializer
+
+    def post(self, request):
+        try:
+            name = request.data.get('name')
+            email = request.data.get('email')
+            phone = request.data.get('phone')
+            company_name = request.data.get('company_name')
+            website = request.data.get('website')
+            address = request.data.get('address')
+            services = request.data.get('services')
+            overview = request.data.get('overview')
+            request_quote = RequestQuote(name=name, email=email, phone=phone, company_name=company_name,
+                                         website=website,
+                                         address=address, services=services, overview=overview, )
+            request_quote.save()
+            return Response({"message": "Your quote has been sent successfully."})
+        except:
+            return Response({"message": "Fill up all the fields."})
+
+    def get(self, request):
+        request_quote = RequestQuote.objects.all()
+        quote_serializer = RequestQuoteSerializer(request_quote, many=True)
+        return Response(quote_serializer.data)

@@ -21,7 +21,9 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminCustomerDeleteAPIView, AdminBrandUpdateAPIView, AdminOffersListAPIView, AdminOffersCreateAPIView, AdminOffersDetailsAPIView, \
     AdminOffersUpdateAPIView, AdminOffersDeleteAPIView, AdminPosProductListAPI, AdminShippingCountryListAPIView, \
     AdminShippingCountryListFilterAPIView, AdminShippingCountryAddAPIView, AdminShippingCountryUpdateAPIView, \
-    AdminShippingCountryDeleteAPIView, AdminShippingCityListAPIView
+    AdminShippingCountryDeleteAPIView, AdminShippingCityListAPIView, AdminShippingCityAddAPIView, AdminShippingCityUpdateAPIView, \
+    AdminShippingCityDeleteAPIView, AdminShippingStateListAPIView, AdminShippingStateAddAPIView, AdminShippingStateUpdateAPIView, \
+    AdminShippingStateDeleteAPIView, AdminShippingClassAddAPIView, AdminShippingClassUpdateAPIView, AdminShippingClassDeleteAPIView
 
 
 urlpatterns = [
@@ -101,8 +103,17 @@ urlpatterns = [
     path('admin/shipping-country-update/<int:id>/', AdminShippingCountryUpdateAPIView.as_view()),
     path('admin/shipping-country-delete/<int:id>/', AdminShippingCountryDeleteAPIView.as_view()),
     path('admin/shipping-city-list/', AdminShippingCityListAPIView.as_view()),
-    # path('admin/shipping-city-add/', AdminShippingCityAddAPIView.as_view()),
+    path('admin/shipping-city-add/', AdminShippingCityAddAPIView.as_view()),
+    path('admin/shipping-city-update/<int:id>/', AdminShippingCityUpdateAPIView.as_view()),
+    path('admin/shipping-city-delete/<int:id>/', AdminShippingCityDeleteAPIView.as_view()),
+    path('admin/shipping-state-list/', AdminShippingStateListAPIView.as_view()),
+    path('admin/shipping-state-add/', AdminShippingStateAddAPIView.as_view()),
+    path('admin/shipping-state-update/<int:id>/', AdminShippingStateUpdateAPIView.as_view()),
+    path('admin/shipping-state-delete/<int:id>/', AdminShippingStateDeleteAPIView.as_view()),
     path('admin/shipping-class-list/', AdminShippingClassListAPIView.as_view()),
+    path('admin/shipping-class-add/', AdminShippingClassAddAPIView.as_view()),
+    path('admin/shipping-class-update/<int:id>/', AdminShippingClassUpdateAPIView.as_view()),
+    path('admin/shipping-class-delete/<int:id>/', AdminShippingClassDeleteAPIView.as_view()),
 
 
     # warranty apies

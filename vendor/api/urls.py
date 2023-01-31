@@ -1,36 +1,33 @@
 from django.urls import path
-from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCategoryAPIView, AdminBrandListAPIView, \
+from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCategoryAPIView, AdminBrandListAPIView,\
     AdminCategoryListAPIView, AdminDeleteCategoryAPIView, AdminDeleteSubCategoryAPIView, \
-    AdminDeleteSubSubCategoryAPIView, AdminProductDeleteAPI, AdminProductViewAPI, AdminSubCategoryListAPIView, \
-    AdminSubSubCategoryListAPIView, AdminTagListAPIView, AdminUnitListAPIView, \
-    AdminDiscountListAPIView, \
+    AdminDeleteSubSubCategoryAPIView, AdminProductDeleteAPI, AdminProductViewAPI, AdminSubCategoryListAPIView,\
+    AdminSubSubCategoryListAPIView, AdminTagListAPIView, AdminUnitListAPIView, AdminUnitAddAPIView, AdminUnitUpdateAPIView, \
+    AdminUnitDeleteAPIView, AdminDiscountListAPIView,\
     AdminUpdateCategoryAPIView, AdminUpdateSubCategoryAPIView, AdminUpdateSubSubCategoryAPIView, \
-    AdminVatTypeListAPIView, AdminVideoProviderListAPIView, \
-    AdminProductCreateAPIView, AdminSellerCreateAPIView, AdminSellerListAPIView, AdminSellerUpdateAPIView, \
-    AdminSellerDeleteAPIView, \
-    AdminSellerDetailsAPIView, AdminProductUpdateAPIView, AdminAddNewCategoryAPIView, AdminProductListAPI, \
-    AdminFlashDealCreateAPIView, \
+    AdminVatTypeListAPIView, AdminVatTypeAddAPIView, AdminVatTypeUpdateAPIView, AdminVatTypeDeleteAPIView, AdminVideoProviderListAPIView, \
+    AdminProductCreateAPIView, AdminSellerCreateAPIView, AdminSellerListAPIView, AdminSellerUpdateAPIView, AdminSellerDeleteAPIView,\
+    AdminSellerDetailsAPIView, AdminProductUpdateAPIView, AdminAddNewCategoryAPIView, AdminProductListAPI, AdminFlashDealCreateAPIView,\
     AdminFilterAttributesAPI, AdminProfileAPIView, AdminReviewListAPIView, AdminReviewInactiveAPIView, ReviewSearchAPI, \
     AdminAttributeListAPIView, AdminAddNewAttributeAPIView, AdminUpdateAttributeAPIView, \
-    AdminAddNewAttributeValueAPIView, AdminUpdateAttributeValueAPIView, AdminFilterAttributeListAPIView, \
-    AdminAddNewFilterAttributeAPIView, \
+    AdminAddNewAttributeValueAPIView, AdminUpdateAttributeValueAPIView, AdminFilterAttributeListAPIView, AdminAddNewFilterAttributeAPIView, \
     AdminProductListSearchAPI, AdminOrderList, AdminOrderViewAPI, OrderListSearchAPI, AdminOrderUpdateAPI, \
     AdminUpdateFilterAttributeAPIView, AdminCustomerListAPIView, AdminTicketListAPIView, AdminTicketDetailsAPIView, \
     AdminUpdateTicketStatusAPIView, AdminDashboardDataAPIView, AdminBrandCreateAPIView, AdminBrandDeleteAPIView, \
     AdminFlashDealListAPIView, AdminWarrantyListAPIView, AdminShippingClassListAPIView, \
-    AdminSpecificationTitleListAPIView, AdminFlashDealUpdateAPIView, AdminFlashDealDeleteAPIView, \
-    AdminSubscribersListAPIView, \
-    AdminSubscriberDeleteAPIView, AdminCorporateDealListAPIView, AdminCorporateDealDeleteAPIView, \
-    AdminAttributeDeleteAPIView, \
-    AdminOrderDeleteAPIView, AdminCouponCreateAPIView, AdminCouponListAPIView, AdminCouponUpdateAPIView, \
-    AdminCouponDeleteAPIView, \
-    AdminCustomerDeleteAPIView, AdminBrandUpdateAPIView, AdminOffersListAPIView, AdminOffersCreateAPIView, \
-    AdminOffersDetailsAPIView, \
+    AdminSpecificationTitleListAPIView, AdminFlashDealUpdateAPIView, AdminFlashDealDeleteAPIView, AdminSubscribersListAPIView, \
+    AdminSubscriberDeleteAPIView, AdminCorporateDealListAPIView, AdminCorporateDealDeleteAPIView, AdminAttributeDeleteAPIView, \
+    AdminOrderDeleteAPIView, AdminCouponCreateAPIView, AdminCouponListAPIView, AdminCouponUpdateAPIView, AdminCouponDeleteAPIView, \
+    AdminCustomerDeleteAPIView, AdminBrandUpdateAPIView, AdminOffersListAPIView, AdminOffersCreateAPIView, AdminOffersDetailsAPIView, \
     AdminOffersUpdateAPIView, AdminOffersDeleteAPIView, AdminPosProductListAPI, AdminShippingCountryListAPIView, \
     AdminShippingCountryListFilterAPIView, AdminShippingCountryAddAPIView, AdminShippingCountryUpdateAPIView, \
     AdminShippingCountryDeleteAPIView, AdminShippingCityListAPIView, AdminOffersUpdateAPIView, AdminOffersDeleteAPIView, \
     AdminPosProductListAPI, AdminPosSearchAPI, AdminUnitAddAPIView, AdminUnitUpdateAPIView, AdminUnitDeleteAPIView, \
     AdminVatTypeAddAPIView, AdminVatTypeUpdateAPIView, AdminVatTypeDeleteAPIView
+    AdminShippingCountryDeleteAPIView, AdminShippingCityListAPIView, AdminShippingCityAddAPIView, AdminShippingCityUpdateAPIView, \
+    AdminShippingCityDeleteAPIView, AdminShippingStateListAPIView, AdminShippingStateAddAPIView, AdminShippingStateUpdateAPIView, \
+    AdminShippingStateDeleteAPIView, AdminShippingClassAddAPIView, AdminShippingClassUpdateAPIView, AdminShippingClassDeleteAPIView
+
 
 urlpatterns = [
 
@@ -109,8 +106,17 @@ urlpatterns = [
     path('admin/shipping-country-update/<int:id>/', AdminShippingCountryUpdateAPIView.as_view()),
     path('admin/shipping-country-delete/<int:id>/', AdminShippingCountryDeleteAPIView.as_view()),
     path('admin/shipping-city-list/', AdminShippingCityListAPIView.as_view()),
-    # path('admin/shipping-city-add/', AdminShippingCityAddAPIView.as_view()),
+    path('admin/shipping-city-add/', AdminShippingCityAddAPIView.as_view()),
+    path('admin/shipping-city-update/<int:id>/', AdminShippingCityUpdateAPIView.as_view()),
+    path('admin/shipping-city-delete/<int:id>/', AdminShippingCityDeleteAPIView.as_view()),
+    path('admin/shipping-state-list/', AdminShippingStateListAPIView.as_view()),
+    path('admin/shipping-state-add/', AdminShippingStateAddAPIView.as_view()),
+    path('admin/shipping-state-update/<int:id>/', AdminShippingStateUpdateAPIView.as_view()),
+    path('admin/shipping-state-delete/<int:id>/', AdminShippingStateDeleteAPIView.as_view()),
     path('admin/shipping-class-list/', AdminShippingClassListAPIView.as_view()),
+    path('admin/shipping-class-add/', AdminShippingClassAddAPIView.as_view()),
+    path('admin/shipping-class-update/<int:id>/', AdminShippingClassUpdateAPIView.as_view()),
+    path('admin/shipping-class-delete/<int:id>/', AdminShippingClassDeleteAPIView.as_view()),
 
 
     # warranty apies

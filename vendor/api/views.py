@@ -2210,7 +2210,6 @@ class AdminFlashDealListAllAPIView(ListAPIView):
 
 class AdminWarrantyListAllAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
-    pagination_class = ProductCustomPagination
     serializer_class = AdminWarrantyListSerializer
 
     def get_queryset(self):

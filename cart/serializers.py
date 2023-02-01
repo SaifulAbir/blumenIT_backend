@@ -159,7 +159,7 @@ class DeliveryAddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeliveryAddress
         fields = ['id', 'user', 'name', 'address', 'phone',
-                  'email', 'zip_code', 'country', 'city', 'state']
+                  'email', 'zip_code', 'country', 'city', 'state', 'shipping_cost', 'shipping_class']
 
     def create(self, validated_data):
         address_instance = DeliveryAddress.objects.create(**validated_data, user=self.context['request'].user)

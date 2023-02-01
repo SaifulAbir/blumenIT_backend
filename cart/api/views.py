@@ -166,6 +166,16 @@ class DeliveryAddressListAPIView(ListAPIView):
         return queryset
 
 
+class DeliveryAddressDeleteAPIView(DestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = DeliveryAddressSerializer
+    queryset = DeliveryAddress.objects.filter(is_active=True)
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def delete(self, request, *args, **kwargs):
+        return super(DeliveryAddressDeleteAPIView, self).delete(request, *args, **kwargs)
+
 class BillingAddressDeleteAPIView(DestroyAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = DeliveryAddressSerializer

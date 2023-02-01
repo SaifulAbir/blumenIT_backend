@@ -23,7 +23,10 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminShippingCountryListFilterAPIView, AdminShippingCountryAddAPIView, AdminShippingCountryUpdateAPIView, \
     AdminShippingCountryDeleteAPIView, AdminShippingCityListAPIView, AdminShippingCityAddAPIView, AdminShippingCityUpdateAPIView, \
     AdminShippingCityDeleteAPIView, AdminShippingStateListAPIView, AdminShippingStateAddAPIView, AdminShippingStateUpdateAPIView, \
-    AdminShippingStateDeleteAPIView, AdminShippingClassAddAPIView, AdminShippingClassUpdateAPIView, AdminShippingClassDeleteAPIView
+    AdminShippingStateDeleteAPIView, AdminShippingClassAddAPIView, AdminShippingClassUpdateAPIView, AdminShippingClassDeleteAPIView, \
+    AdminCategoryAllListAPIView, AdminSubCategoryListAllAPIView, AdminSubSubCategoryAllListAPIView, AdminBrandListAllAPIView, \
+    AdminUnitListAllAPIView, AdminSellerListAllAPIView, AdminVatTypeListAllAPIView, AdminVideoProviderListAllAPIView, \
+    AdminDiscountTypeListAllAPIView, AdminFilterAttributeListAllAPIView, AdminFlashDealListAllAPIView, AdminWarrantyListAllAPIView
 
 
 urlpatterns = [
@@ -54,9 +57,25 @@ urlpatterns = [
     path('admin/delete-sub-sub-category/<int:id>/', AdminDeleteSubSubCategoryAPIView.as_view()),
 
 
+    # product create supportive list apies
+    path('admin/category-list-all/', AdminCategoryAllListAPIView.as_view()),
+    path('admin/sub-category-list-all/<int:cid>/', AdminSubCategoryListAllAPIView.as_view()),
+    path('admin/sub-sub-category-list-all/<int:sid>/',AdminSubSubCategoryAllListAPIView.as_view()),
+    path('admin/brand-list-all/', AdminBrandListAllAPIView.as_view()),
+    path('admin/unit-list-all/', AdminUnitListAllAPIView.as_view()),
+    path('admin/seller-list-all/', AdminSellerListAllAPIView.as_view()),
+    path('admin/vat-type-list-all/', AdminVatTypeListAllAPIView.as_view()),
+    path('admin/video-provider-list-all/', AdminVideoProviderListAllAPIView.as_view()),
+    path('admin/discount-type-list-all/', AdminDiscountTypeListAllAPIView.as_view()),
+    path('admin/filter-attribute-list-all/', AdminFilterAttributeListAllAPIView.as_view()),
+    path('admin/flash-deal-list-all/', AdminFlashDealListAllAPIView.as_view()),
+    path('admin/warranty-list-all/', AdminWarrantyListAllAPIView.as_view()),
+
+
     # order apies
     path('admin/all-order-list/', AdminOrderList.as_view()),
     path('admin/order-view/<int:id>/', AdminOrderViewAPI.as_view()),
+    path('admin/order-update/<int:id>/', AdminOrderUpdateAPI.as_view()),
 
     # flash deal apies
     path('admin/flash-deal-list/', AdminFlashDealListAPIView.as_view()),

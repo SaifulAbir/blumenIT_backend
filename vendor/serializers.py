@@ -1764,7 +1764,8 @@ class AdminPosOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ['id', 'order_id', 'product_count', 'tax_amount',
-                  'payment_type', 'shipping_class', 'shipping_cost', 'order_items', 'delivery_address', 'comment']
+                  'payment_type', 'shipping_class', 'shipping_cost', 'order_items', 'delivery_address', 'comment',
+                  'customer']
 
         def create(self, validated_data):
             order_items = validated_data.pop('order_items')

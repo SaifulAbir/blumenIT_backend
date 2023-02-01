@@ -3,7 +3,7 @@ from ecommerce.models import AbstractTimeStamp
 from vendor.models import Seller
 from .utils import unique_order_id_generator_for_order, unique_sub_order_id_generator_for_sub_order
 from django.db.models.signals import pre_save
-from user.models import User
+from user.models import User, CustomerProfile
 from django.utils.translation import gettext as _
 from product.models import Product, ShippingClass, DiscountTypes, ProductWarranty
 from django.utils import timezone
@@ -171,6 +171,7 @@ class Order(AbstractTimeStamp):
     delivery_agent = models.CharField(max_length=100, null=True, blank=True)
     delivery_date = models.DateTimeField(null=True, blank=True)
     comment = models.TextField(null=True, blank=True)
+    customer = models.ForeignKey(CustomerProfile, on_delete=models.CASCADE, blank=True, null=True)
     in_house_order = models.BooleanField(default=False)
     is_active = models.BooleanField(null=False, blank=False, default=True)
 

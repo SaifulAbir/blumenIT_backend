@@ -26,7 +26,8 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminShippingStateDeleteAPIView, AdminShippingClassAddAPIView, AdminShippingClassUpdateAPIView, AdminShippingClassDeleteAPIView, \
     AdminCategoryAllListAPIView, AdminSubCategoryListAllAPIView, AdminSubSubCategoryAllListAPIView, AdminBrandListAllAPIView, \
     AdminUnitListAllAPIView, AdminSellerListAllAPIView, AdminVatTypeListAllAPIView, AdminVideoProviderListAllAPIView, \
-    AdminDiscountTypeListAllAPIView, AdminFilterAttributeListAllAPIView, AdminFlashDealListAllAPIView, AdminWarrantyListAllAPIView
+    AdminDiscountTypeListAllAPIView, AdminFilterAttributeListAllAPIView, AdminFlashDealListAllAPIView, AdminWarrantyListAllAPIView, \
+    AdminSpecificationTitleListAllAPIView
 
 
 urlpatterns = [
@@ -70,6 +71,7 @@ urlpatterns = [
     path('admin/filter-attribute-list-all/', AdminFilterAttributeListAllAPIView.as_view()),
     path('admin/flash-deal-list-all/', AdminFlashDealListAllAPIView.as_view()),
     path('admin/warranty-list-all/', AdminWarrantyListAllAPIView.as_view()),
+    path('admin/specification-title-list-all/', AdminSpecificationTitleListAllAPIView.as_view()),
 
 
     # order apies

@@ -2220,4 +2220,15 @@ class AdminWarrantyListAllAPIView(ListAPIView):
         else:
             raise ValidationError({"msg": 'You can not see ticket list data, because you are not an Admin!'})
 
+
+class AdminSpecificationTitleListAllAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminSpecificationTitleSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = SpecificationTitle.objects.filter(is_active=True)
+            return queryset
+        else:
+            raise ValidationError({"msg": 'You can not see ticket list data, because you are not an Admin!'})
 # product create related apies................................. end

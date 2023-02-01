@@ -2193,7 +2193,7 @@ class AdminVideoProviderListAllAPIView(ListAPIView):
 
 
 class AdminDiscountTypeListAllAPIView(ListAPIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     serializer_class = DiscountTypeSerializer
 
     def get_queryset(self):

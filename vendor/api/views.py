@@ -172,7 +172,7 @@ class AdminProductListAPI(ListAPIView):
             request = self.request
             type = request.GET.get('type')
 
-            queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
+            queryset = Product.objects.filter(is_active=True).order_by('-created_at')
 
             if type == 'digital':
                 queryset = queryset.filter(digital=True)
@@ -982,7 +982,6 @@ class OrderListSearchAPI(ListAPIView):
         else:
             raise ValidationError(
                 {"msg": 'You can not show Order list, because you are not an Admin!'})
-# Order related admin apies views............................ end
 
 
 class AdminOrderUpdateAPI(RetrieveUpdateAPIView):
@@ -1052,6 +1051,7 @@ class AdminOrderUpdateAPI(RetrieveUpdateAPIView):
                 raise ValidationError({"msg": 'Order update failed!'})
         except KeyError:
             raise ValidationError({"msg": 'Order update failed. contact with developer!'})
+# Order related admin apies views............................ end
 
 
 # Customer related admin apies views............................ start
@@ -1293,6 +1293,7 @@ class AdminBrandDeleteAPIView(ListAPIView):
 # brand related admin apies views............................ end
 
 
+# Warranty admin apies views............................ start
 class AdminWarrantyListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     pagination_class = ProductCustomPagination
@@ -1304,7 +1305,7 @@ class AdminWarrantyListAPIView(ListAPIView):
             return queryset
         else:
             raise ValidationError({"msg": 'You can not see ticket list data, because you are not an Admin!'})
-
+# Warranty admin apies views............................ end
 
 
 # shipping related admin apies views............................ start
@@ -2052,3 +2053,211 @@ class AdminVatTypeDeleteAPIView(ListAPIView):
         else:
             raise ValidationError({"msg": 'You can not delete VatType, because you are not an Admin!'})
 # Vat Type related admin apies views............................ end
+
+
+# product create related apies................................. start
+class AdminCategoryAllListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminCategoryListSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = Category.objects.filter(is_active=True)
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError({"msg": "No category available!" })
+        else:
+            raise ValidationError(
+                {"msg": 'You can not see category list, because you are not an Admin!'})
+
+
+class AdminSubCategoryListAllAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminSubCategoryListSerializer
+    lookup_field = 'cid'
+    lookup_url_kwarg = "cid"
+
+    def get_queryset(self):
+        cid = self.kwargs['cid']
+        if self.request.user.is_superuser == True:
+            queryset = SubCategory.objects.filter(category=cid, is_active=True).order_by('-created_at')
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError({"msg": "No sub category available!" })
+        else:
+            raise ValidationError(
+                {"msg": 'You can not see sub category list, because you are not an Admin!'})
+
+
+class AdminSubSubCategoryAllListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminSubSubCategoryListSerializer
+    lookup_field = 'sid'
+    lookup_url_kwarg = "sid"
+
+    def get_queryset(self):
+        sid = self.kwargs['sid']
+        if self.request.user.is_superuser == True:
+            if sid:
+                queryset = SubSubCategory.objects.filter(
+                    sub_category=sid, is_active=True).order_by('-created_at')
+            else:
+                queryset = SubSubCategory.objects.filter(
+                    is_active=True).order_by('-created_at')
+            return queryset
+        else:
+            raise ValidationError(
+                {"msg": 'You can not see sub sub category list, because you are not an Admin!'})
+
+
+class AdminBrandListAllAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = VendorBrandSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = Brand.objects.filter(is_active=True)
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError({"msg": "No brand available! " })
+        else:
+            raise ValidationError(
+                {"msg": 'You can not see brand list, because you are not an Admin!'})
+
+
+class AdminUnitListAllAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = VendorUnitSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = Units.objects.filter(is_active=True)
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError({"msg": "No unit available! " })
+        else:
+            raise ValidationError(
+                {"msg": 'You can not see unit list, because you are not an Admin!'})
+
+
+class AdminSellerListAllAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = SellerSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = Seller.objects.filter(is_active=True)
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError({"msg": "No seller available! " })
+        else:
+            raise ValidationError(
+                {"msg": 'You can not see seller list, because you are not an Admin!'})
+
+
+class AdminVatTypeListAllAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = VatTypeSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = VatType.objects.filter(is_active=True)
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'Vat types does not exist!'})
+        else:
+            raise ValidationError({"msg": 'You can not view Vat types list, because you are not an Admin!'})
+
+
+class AdminVideoProviderListAllAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ProductVideoProviderSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = ProductVideoProvider.objects.filter(is_active=True)
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'Video provider data does not exist!'})
+        else:
+            raise ValidationError({"msg": 'You can not view video provider list, because you are not an Admin!'})
+
+
+class AdminDiscountTypeListAllAPIView(ListAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = DiscountTypeSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = DiscountTypes.objects.filter(is_active=True)
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError({"msg": "No discount available! " })
+        else:
+            raise ValidationError(
+                {"msg": 'You can not see discount list, because you are not an Admin!'})
+
+
+class AdminFilterAttributeListAllAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    pagination_class = ProductCustomPagination
+    serializer_class = AdminFilterAttributeSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = FilterAttributes.objects.filter(is_active=True).order_by('-created_at')
+            return queryset
+        else:
+            raise ValidationError({"msg": 'You can not see filter attribute data, because you are not an Admin!'})
+
+
+class AdminFlashDealListAllAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = FlashDealInfoSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = FlashDealInfo.objects.filter(is_active=True)
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'Flash Deal does not exist!'})
+        else:
+            raise ValidationError({"msg": 'You can not view Flash Deal list, because you are not an Admin!'})
+
+
+class AdminWarrantyListAllAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    pagination_class = ProductCustomPagination
+    serializer_class = AdminWarrantyListSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = Warranty.objects.filter(is_active=True)
+            return queryset
+        else:
+            raise ValidationError({"msg": 'You can not see ticket list data, because you are not an Admin!'})
+
+
+class AdminSpecificationTitleListAllAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminSpecificationTitleSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = SpecificationTitle.objects.filter(is_active=True)
+            return queryset
+        else:
+            raise ValidationError({"msg": 'You can not see ticket list data, because you are not an Admin!'})
+# product create related apies................................. end

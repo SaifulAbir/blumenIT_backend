@@ -113,6 +113,8 @@ class DeliveryAddress(AbstractTimeStamp):
     zip_code = models.CharField(
         max_length=100, blank=True, null=True, default='')
     default = models.BooleanField(default=False)
+    shipping_cost = models.FloatField(max_length=255, null=True, blank=True)
+    shipping_class = models.ForeignKey(ShippingClass, on_delete=models.SET_NULL, blank=True, null=True)
     is_active = models.BooleanField(default=True)
 
     class Meta:

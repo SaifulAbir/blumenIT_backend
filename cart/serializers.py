@@ -364,10 +364,13 @@ class CheckoutSerializer(serializers.ModelSerializer):
 
 
 class ShippingClassDataSerializer(serializers.ModelSerializer):
+    shipping_country_name = serializers.CharField(source='shipping_country.title',read_only=True)
+    shipping_state_name = serializers.CharField(source='shipping_state.title',read_only=True)
+    shipping_city_name = serializers.CharField(source='shipping_city.title',read_only=True)
     state_city_concate = serializers.SerializerMethodField('get_state_city_concate')
     class Meta:
         model = ShippingClass
-        fields = ['id', 'description', 'shipping_country', 'shipping_state', 'shipping_city', 'delivery_days', 'delivery_charge', 'state_city_concate']
+        fields = ['id', 'description', 'shipping_country', 'shipping_country_name', 'shipping_state', 'shipping_state_name', 'shipping_city', 'shipping_city_name', 'delivery_days', 'delivery_charge', 'state_city_concate']
 
     def get_state_city_concate(self, obj):
         c_name = obj.shipping_state.title + ' ' + obj.shipping_city.title

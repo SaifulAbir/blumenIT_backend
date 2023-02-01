@@ -54,6 +54,10 @@ urlpatterns = [
     path('admin/delete-sub-sub-category/<int:id>/', AdminDeleteSubSubCategoryAPIView.as_view()),
 
 
+    # order apies
+    path('admin/all-order-list/', AdminOrderList.as_view()),
+    path('admin/order-view/<int:id>/', AdminOrderViewAPI.as_view()),
+
     # flash deal apies
     path('admin/flash-deal-list/', AdminFlashDealListAPIView.as_view()),
     path('admin/flash-deal-create/', AdminFlashDealCreateAPIView.as_view()),

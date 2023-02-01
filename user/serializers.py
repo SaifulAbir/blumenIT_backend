@@ -3,9 +3,10 @@ from rest_framework import serializers
 from user import models as user_models
 from user.models import CustomerProfile, Subscription, User, OTPModel
 from cart.models import Order, OrderItem, DeliveryAddress
-from product.models import Product, SavePc, SavePcItems, SubCategory
+from product.models import Product, SavePc, SavePcItems, SubCategory, ShippingClass
 from cart.models import Wishlist
 from product.serializers import ProductListBySerializer
+import datetime
 
 
 class SetPasswordSerializer(serializers.ModelSerializer):
@@ -215,6 +216,18 @@ class CustomerOrderDetailsSerializer(serializers.ModelSerializer):
             total_price -= coupon_discount_amount
         return total_price
 
+    def get_delivery_date(self, obj):
+        try:
+            if obj.shipping_class:
+                delivery_days = ShippingClass.objects.get(id=obj.shipping_class.id).delivery_days
+                order_date = obj.order_date
+                order_date_c = datetime.datetime.strptime(str(order_date), "%Y-%m-%d")
+                delivery_date = order_date_c + datetime.timedelta(days=int(delivery_days))
+                return delivery_date.date()
+            else:
+                return ''
+        except:
+            return ''
 
 class CustomerProfileOtherDataSerializer(serializers.ModelSerializer):
     class Meta:

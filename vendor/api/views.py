@@ -26,7 +26,7 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     CategoryWiseProductStockSerializer, AdminWarrantyListSerializer, AdminShippingClassSerializer, \
     AdminSpecificationTitleSerializer, AdminSubscribersListSerializer, AdminCorporateDealSerializer, AdminCouponSerializer, VatTypeSerializer, \
     AdminOfferSerializer, AdminPosProductListSerializer, AdminShippingCountrySerializer, AdminShippingCitySerializer, \
-    AdminShippingStateSerializer
+    AdminShippingStateSerializer, AdminPosOrderSerializer
 from cart.models import Order, OrderItem, Coupon
 from cart.models import Order, OrderItem, SubOrder
 from user.models import User, Subscription
@@ -1902,6 +1902,35 @@ class AdminPosProductListAPI(ListAPIView):
 class AdminPosSearchAPI(ListAPIView):
     pagination_class = ProductCustomPagination
     serializer_class = AdminPosProductListSerializer
+
+    def get_queryset(self):
+        request = self.request
+        query = request.GET.get('search')
+        category = request.GET.get('category_id')
+        brand = request.GET.get('brand')
+
+        queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
+
+        if query:
+            queryset = queryset.filter(Q(title__icontains=query))
+
+        if category:
+            queryset = queryset.filter(category__id=category)
+
+        if brand:
+            if category:
+                queryset = queryset.filter(brand_id=brand)
+
+        return queryset
+
+
+
+class AdminPosOrderAPIView(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminPosOrderSerializer
+
+    def post(self, request, *args, **kwargs):
+        return super(AdminPosOrderAPIView, self).post(request, *args, **kwargs)
 # POS related admin apies views............................ end
 
 

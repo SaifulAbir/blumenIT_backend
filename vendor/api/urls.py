@@ -23,7 +23,8 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminShippingCountryListFilterAPIView, AdminShippingCountryAddAPIView, AdminShippingCountryUpdateAPIView, \
     AdminShippingCountryDeleteAPIView, AdminShippingCityListAPIView, AdminShippingCityAddAPIView, AdminShippingCityUpdateAPIView, \
     AdminShippingCityDeleteAPIView, AdminShippingStateListAPIView, AdminShippingStateAddAPIView, AdminShippingStateUpdateAPIView, \
-    AdminShippingStateDeleteAPIView, AdminShippingClassAddAPIView, AdminShippingClassUpdateAPIView, AdminShippingClassDeleteAPIView
+    AdminShippingStateDeleteAPIView, AdminShippingClassAddAPIView, AdminShippingClassUpdateAPIView, AdminShippingClassDeleteAPIView,\
+    AdminPosSearchAPI, AdminPosOrderAPIView
 
 
 urlpatterns = [
@@ -164,5 +165,8 @@ urlpatterns = [
 
     # pos apies
     path('admin/pos-product-list/', AdminPosProductListAPI.as_view()),
+    path('admin/pos-product-search-list/', AdminPosSearchAPI.as_view()),
+    path('admin/pos-order/', AdminPosOrderAPIView.as_view()),
+
 ]
 

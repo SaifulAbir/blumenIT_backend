@@ -14,7 +14,7 @@ from cart.models import Order, Coupon, OrderItem, DeliveryAddress, PaymentType
 from user.serializers import CustomerProfileSerializer
 from vendor.models import Seller
 from django.db.models import Avg
-# from django.utils import timezoneorder_items = validated_data.pop('order_items')
+from django.utils import timezone
 from support_ticket.models import Ticket, TicketConversation
 from home.models import CorporateDeal
 

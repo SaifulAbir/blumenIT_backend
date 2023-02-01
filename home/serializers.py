@@ -148,3 +148,18 @@ class CorporateDealCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = CorporateDeal
         fields = ['id', 'first_name', 'last_name', 'email', 'company_name', 'phone', 'region', 'details_text', 'attached_file']
+
+
+class RequestQuoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        Model = RequestQuote
+        fields = [
+            'name',
+            'email',
+            'phone',
+            'company_name',
+            'website',
+            'address',
+            'services',
+            'overview'
+        ]

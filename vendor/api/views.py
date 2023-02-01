@@ -962,8 +962,8 @@ class OrderListSearchAPI(ListAPIView):
             order_id = request.GET.get('order_id')
             order_status = request.GET.get('order_status')
             date = request.GET.get('order_date')
-            start_date = request.GET.get('start')
-            end_date = request.GET.get('end')
+            start_date = request.GET.get('start_date')
+            end_date = request.GET.get('end_date')
 
             queryset = Order.objects.filter(is_active=True).order_by('-created_at')
 
@@ -972,10 +972,11 @@ class OrderListSearchAPI(ListAPIView):
             if order_status:
                 queryset = queryset.filter(order_status__icontains=order_status)
             if date:
+                queryset = queryset.filter(Q(order_date__icontains=date))
+            if start_date and end_date:
                 queryset = queryset.filter(
                     Q(order_date__gte=start_date) & Q(order_date__lte=end_date)
                 )
-            
 
             return queryset
         else:

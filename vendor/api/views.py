@@ -172,7 +172,7 @@ class AdminProductListAPI(ListAPIView):
             request = self.request
             type = request.GET.get('type')
 
-            queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
+            queryset = Product.objects.filter(is_active=False).order_by('-created_at')
 
             if type == 'digital':
                 queryset = queryset.filter(digital=True)

@@ -21,10 +21,8 @@ from django.utils import timezone
 
 class Coupon(AbstractTimeStamp):
     code = models.CharField(max_length=15)
-    coupon_type = models.CharField(max_length=255, null=False, blank=False)
     min_shopping = models.IntegerField(default=0, null=True, blank=True)
     amount = models.FloatField(max_length=255, null=True, blank=True, default=0, help_text="Amount Coupon")
-    discount_type = models.ForeignKey(DiscountTypes, on_delete=models.CASCADE, related_name='discount_type_coupon', null=True, blank=True)
     number_of_uses = models.IntegerField(default=0, null=False, blank=False)
     start_time = models.DateTimeField(default=timezone.now)
     end_time = models.DateTimeField(default=timezone.now)

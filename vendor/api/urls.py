@@ -83,9 +83,9 @@ urlpatterns = [
 
 
     # Review related apies
-    path('admin/admin-review-list/', AdminReviewListAPIView.as_view()),
-    path('admin/admin-review-list/<int:id>/', AdminReviewInactiveAPIView.as_view()),
-    path('admin/admin-review-search/', ReviewSearchAPI.as_view()),
+    path('admin/review-list/', AdminReviewListAPIView.as_view()),
+    path('admin/review-list/<int:id>/', AdminReviewInactiveAPIView.as_view()),
+    path('admin/review-search/', ReviewSearchAPI.as_view()),
 
 
     # Video provider related apies

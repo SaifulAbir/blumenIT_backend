@@ -654,9 +654,6 @@ class ProductListForProductCompareAPIView(ListAPIView):
     lookup_url_kwarg = "id"
 
     def get_queryset(self):
-        queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
-
-
         # filtering start
         request = self.request
         product_ids = request.GET.get('product_ids')
@@ -670,5 +667,7 @@ class ProductListForProductCompareAPIView(ListAPIView):
 
         if new_product_ids:
             queryset = queryset.filter(Q(id__in = new_product_ids)).order_by('-created_at')
+        else:
+            queryset = []
 
         return queryset

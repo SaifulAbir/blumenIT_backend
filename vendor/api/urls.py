@@ -73,8 +73,29 @@ urlpatterns = [
     path('admin/warranty-list-all/', AdminWarrantyListAllAPIView.as_view()),
     path('admin/specification-title-list-all/', AdminSpecificationTitleListAllAPIView.as_view()),
 
+
+    # Tag related apies
+    path('admin/admin-tag-list/', AdminTagListAPIView.as_view()),
+
+
+    # Discount related apies
+    path('admin/admin-discount-list/', AdminDiscountListAPIView.as_view()),
+
+
+    # Review related apies
+    path('admin/admin-review-list/', AdminReviewListAPIView.as_view()),
+    path('admin/admin-review-list/<int:id>/', AdminReviewInactiveAPIView.as_view()),
+    path('admin/admin-review-search/', ReviewSearchAPI.as_view()),
+
+
+    # Video provider related apies
+    path('admin/admin-video-provider-list/', AdminVideoProviderListAPIView.as_view()),
+
+
     # Ticket related apies
     path('admin/admin-ticket-list/', AdminTicketListAPIView.as_view()),
+    path('admin/admin-ticket-details/<int:id>/', AdminTicketDetailsAPIView.as_view()),
+    path('admin/admin-ticket-status-update/<int:id>/', AdminUpdateTicketStatusAPIView.as_view()),
 
     # order apies
     path('admin/all-order-list/', AdminOrderList.as_view()),

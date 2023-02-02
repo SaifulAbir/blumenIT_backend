@@ -661,6 +661,7 @@ class ProductCreateSerializer(serializers.ModelSerializer):
         except:
             product_filter_attributes = ''
 
+
         # product_warranties
         try:
             product_warranties = validated_data.pop('product_warranties')
@@ -669,45 +670,45 @@ class ProductCreateSerializer(serializers.ModelSerializer):
 
         product_instance = Product.objects.create(**validated_data)
 
+        # tags
+        if product_tags:
+            for tag in product_tags:
+                tag_s = tag.lower()
+                if Tags.objects.filter(title=tag_s).exists():
+                    tag_obj = Tags.objects.get(title=tag_s)
+                    try:
+                        ProductTags.objects.create(
+                            tag=tag_obj, product=product_instance)
+                    except:
+                        pass
+                else:
+                    tag_instance = Tags.objects.create(title=tag_s)
+                    try:
+                        ProductTags.objects.create(
+                            tag=tag_instance, product=product_instance)
+                    except:
+                        pass
+
+        # product_images
+        if product_images:
+            for image in product_images:
+                ProductImages.objects.create(
+                    product=product_instance, file=image, status="COMPLETE")
+
+        # product with out variants
         try:
-            # tags
-            if product_tags:
-                for tag in product_tags:
-                    tag_s = tag.lower()
-                    if Tags.objects.filter(title=tag_s).exists():
-                        tag_obj = Tags.objects.get(title=tag_s)
-                        try:
-                            ProductTags.objects.create(
-                                tag=tag_obj, product=product_instance)
-                        except:
-                            pass
-                    else:
-                        tag_instance = Tags.objects.create(title=tag_s)
-                        try:
-                            ProductTags.objects.create(
-                                tag=tag_instance, product=product_instance)
-                        except:
-                            pass
+            single_quantity = validated_data["quantity"]
+        except:
+            single_quantity = ''
+        if single_quantity:
+            total_quan = 0
+            total_quan += single_quantity
+            Product.objects.filter(id=product_instance.id).update(total_quantity=total_quan)
+            # inventory update
+            Inventory.objects.create(product=product_instance, initial_quantity=single_quantity, current_quantity=single_quantity)
 
-            # product_images
-            if product_images:
-                for image in product_images:
-                    ProductImages.objects.create(
-                        product=product_instance, file=image, status="COMPLETE")
-
-            # product with out variants
-            try:
-                single_quantity = validated_data["quantity"]
-            except:
-                single_quantity = ''
-            if single_quantity:
-                total_quan = 0
-                total_quan += single_quantity
-                Product.objects.filter(id=product_instance.id).update(total_quantity=total_quan)
-                # inventory update
-                Inventory.objects.create(product=product_instance, initial_quantity=single_quantity, current_quantity=single_quantity)
-
-            # product_specification
+        # product_specification
+        try:
             if product_specification:
                 for p_specification in product_specification:
                     s_title = p_specification['title']
@@ -719,8 +720,11 @@ class ProductCreateSerializer(serializers.ModelSerializer):
                         key = specification_value['key']
                         value = specification_value['value']
                         product_specification_instance = SpecificationValue.objects.create(specification = specification_instance, key=key, value=value, product=product_instance )
+        except:
+            raise ValidationError('Problem of Product Specification info insert.')
 
-            # flash_deal
+        # flash_deal
+        try:
             flash_deal_add_count = 0
             if flash_deal:
                 for f_deal in flash_deal:
@@ -733,25 +737,31 @@ class ProductCreateSerializer(serializers.ModelSerializer):
                             flash_deal_add_count += 1
                         else:
                             pass
+        except:
+            raise ValidationError('Problem of Flash Deal info insert.')
 
-            # product_filter_attributes
+        # product_filter_attributes
+        try:
             if product_filter_attributes:
                 for product_filter_attribute in product_filter_attributes:
                     attribute_value = product_filter_attribute['attribute_value']
                     if attribute_value:
                         product_filter_attribute_instance = ProductFilterAttributes.objects.create(attribute_value=attribute_value,  product=product_instance)
+        except:
+            raise ValidationError('Problem of Product Filter Attributes info insert.')
 
-            # product_warranties
+        # product_warranties
+        try:
             if product_warranties:
                 for product_warranty in product_warranties:
                     warranty = product_warranty['warranty']
                     warranty_value = product_warranty['warranty_value']
                     warranty_value_type = product_warranty['warranty_value_type']
                     product_warranty_instance = ProductWarranty.objects.create(product=product_instance, warranty=warranty, warranty_value=warranty_value, warranty_value_type=warranty_value_type)
-
-            return product_instance
         except:
-            return product_instance
+            raise ValidationError('Problem of Product Product Warranties info insert.')
+
+        return product_instance
 # product create serializer end
 
 

@@ -28,6 +28,7 @@ urlpatterns = [
      path('offer-products-list/<int:id>/<int:pagination>/', OfferProductsListAPIView.as_view()),
      path('brand-list/', BrandListAPIView.as_view()),
      path('product-list-by-brand/<int:bid>/<int:pagination>/',ProductListByBrandAPI.as_view()),
+     path('product-list-for-compare/',ProductListForProductCompareAPIView.as_view()),
 
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

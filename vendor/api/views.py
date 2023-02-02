@@ -959,24 +959,24 @@ class OrderListSearchAPI(ListAPIView):
     def get_queryset(self):
         if self.request.user.is_superuser == True:
             request = self.request
-            query = request.GET.get('search')
-            orders = request.GET.get('order_status')
+            order_id = request.GET.get('order_id')
+            order_status = request.GET.get('order_status')
             date = request.GET.get('order_date')
-            start_date = request.GET.get('start')
-            end_date = request.GET.get('end')
+            start_date = request.GET.get('start_date')
+            end_date = request.GET.get('end_date')
 
             queryset = Order.objects.filter(is_active=True).order_by('-created_at')
 
-            if query:
-                queryset = queryset.filter(
-                    Q(order_id__icontains=query)
-                )
+            if order_id:
+                queryset = queryset.filter(Q(order_id__icontains=order_id))
+            if order_status:
+                queryset = queryset.filter(order_status__icontains=order_status)
             if date:
+                queryset = queryset.filter(Q(order_date__icontains=date))
+            if start_date and end_date:
                 queryset = queryset.filter(
                     Q(order_date__gte=start_date) & Q(order_date__lte=end_date)
                 )
-            if orders:
-                queryset = queryset.filter(order_status=orders)
 
             return queryset
         else:
@@ -2193,7 +2193,7 @@ class AdminVideoProviderListAllAPIView(ListAPIView):
 
 
 class AdminDiscountTypeListAllAPIView(ListAPIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     serializer_class = DiscountTypeSerializer
 
     def get_queryset(self):
@@ -2210,7 +2210,6 @@ class AdminDiscountTypeListAllAPIView(ListAPIView):
 
 class AdminFilterAttributeListAllAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
-    pagination_class = ProductCustomPagination
     serializer_class = AdminFilterAttributeSerializer
 
     def get_queryset(self):
@@ -2239,7 +2238,6 @@ class AdminFlashDealListAllAPIView(ListAPIView):
 
 class AdminWarrantyListAllAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
-    pagination_class = ProductCustomPagination
     serializer_class = AdminWarrantyListSerializer
 
     def get_queryset(self):

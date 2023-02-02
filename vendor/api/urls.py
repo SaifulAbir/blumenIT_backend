@@ -74,10 +74,35 @@ urlpatterns = [
     path('admin/specification-title-list-all/', AdminSpecificationTitleListAllAPIView.as_view()),
 
 
+    # Tag related apies
+    path('admin/admin-tag-list/', AdminTagListAPIView.as_view()),
+
+
+    # Discount related apies
+    path('admin/admin-discount-list/', AdminDiscountListAPIView.as_view()),
+
+
+    # Review related apies
+    path('admin/review-list/', AdminReviewListAPIView.as_view()),
+    path('admin/review-list/<int:id>/', AdminReviewInactiveAPIView.as_view()),
+    path('admin/review-search/', ReviewSearchAPI.as_view()),
+
+
+    # Video provider related apies
+    path('admin/admin-video-provider-list/', AdminVideoProviderListAPIView.as_view()),
+
+
+    # Ticket related apies
+    path('admin/admin-ticket-list/', AdminTicketListAPIView.as_view()),
+    path('admin/admin-ticket-details/<int:id>/', AdminTicketDetailsAPIView.as_view()),
+    path('admin/admin-ticket-status-update/<int:id>/', AdminUpdateTicketStatusAPIView.as_view()),
+
     # order apies
     path('admin/all-order-list/', AdminOrderList.as_view()),
     path('admin/order-view/<int:id>/', AdminOrderViewAPI.as_view()),
     path('admin/order-update/<int:id>/', AdminOrderUpdateAPI.as_view()),
+    path('admin/order-list-search/', OrderListSearchAPI.as_view()),
+    path('admin/order-delete/<int:id>/', AdminOrderDeleteAPIView.as_view()),
 
     # flash deal apies
     path('admin/flash-deal-list/', AdminFlashDealListAPIView.as_view()),

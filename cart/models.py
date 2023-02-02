@@ -123,7 +123,7 @@ class DeliveryAddress(AbstractTimeStamp):
         db_table = 'delivery_addresses'
 
     def __str__(self):
-        return f"{self.pk}"
+        return self.name
 
 
 class Order(AbstractTimeStamp):

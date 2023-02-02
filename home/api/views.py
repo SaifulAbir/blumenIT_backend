@@ -255,29 +255,32 @@ class CorporateDealCreateAPIView(CreateAPIView):
         return super(CorporateDealCreateAPIView, self).post(request, *args, **kwargs)
 
 
-class RequestQuoteAPIView(APIView):
+class RequestQuoteAPIView(CreateAPIView):
     permission_classes = [AllowAny]
     serializer_class = RequestQuoteSerializer
 
-    def post(self, request):
-        try:
-            name = request.data.get('name')
-            email = request.data.get('email')
-            phone = request.data.get('phone')
-            company_name = request.data.get('company_name')
-            website = request.data.get('website')
-            address = request.data.get('address')
-            services = request.data.get('services')
-            overview = request.data.get('overview')
-            request_quote = RequestQuote(name=name, email=email, phone=phone, company_name=company_name,
-                                         website=website,
-                                         address=address, services=services, overview=overview, )
-            request_quote.save()
-            return Response({"message": "Your quote has been sent successfully."})
-        except:
-            return Response({"message": "Fill up all the fields."})
+    def post(self, request, *args, **kwargs):
+        return super(RequestQuoteAPIView, self).post(request, *args, **kwargs)
 
-    def get(self, request):
-        request_quote = RequestQuote.objects.all()
-        quote_serializer = RequestQuoteSerializer(request_quote, many=True)
-        return Response(quote_serializer.data)
+    # def post(self, request):
+    #     try:
+    #         name = request.data.get('name')
+    #         email = request.data.get('email')
+    #         phone = request.data.get('phone')
+    #         company_name = request.data.get('company_name')
+    #         website = request.data.get('website')
+    #         address = request.data.get('address')
+    #         services = request.data.get('services')
+    #         overview = request.data.get('overview')
+    #         request_quote = RequestQuote(name=name, email=email, phone=phone, company_name=company_name,
+    #                                      website=website,
+    #                                      address=address, services=services, overview=overview, )
+    #         request_quote.save()
+    #         return Response({"message": "Your quote has been sent successfully."})
+    #     except:
+    #         return Response({"message": "Fill up all the fields."})
+    #
+    # def get(self, request):
+    #     request_quote = RequestQuote.objects.all()
+    #     quote_serializer = RequestQuoteSerializer(request_quote, many=True)
+    #     return Response(quote_serializer.data)

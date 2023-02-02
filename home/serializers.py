@@ -152,7 +152,7 @@ class CorporateDealCreateSerializer(serializers.ModelSerializer):
 
 class RequestQuoteSerializer(serializers.ModelSerializer):
     class Meta:
-        Model = RequestQuote
+        model = RequestQuote
         fields = [
             'name',
             'email',

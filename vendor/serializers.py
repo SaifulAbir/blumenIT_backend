@@ -1638,7 +1638,7 @@ class AdminCouponSerializer(serializers.ModelSerializer):
                     'number_of_uses',
                     'start_time',
                     'end_time',
-                    'min_shopping',
+                    'min_shopping_amount',
                     'is_active'
                 ]
 

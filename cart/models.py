@@ -20,8 +20,8 @@ from django.utils import timezone
 
 
 class Coupon(AbstractTimeStamp):
-    code = models.CharField(max_length=15)
-    min_shopping = models.IntegerField(default=0, null=True, blank=True)
+    code = models.CharField(max_length=15, help_text='title')
+    min_shopping_amount = models.IntegerField(default=0, null=False, blank=False)
     amount = models.FloatField(max_length=255, null=True, blank=True, default=0, help_text="Amount Coupon")
     number_of_uses = models.IntegerField(default=0, null=False, blank=False)
     start_time = models.DateTimeField(default=timezone.now)

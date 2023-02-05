@@ -217,5 +217,10 @@ urlpatterns = [
     path('admin/pos-product-search-list/', AdminPosSearchAPI.as_view()),
     path('admin/pos-order/', AdminPosOrderAPIView.as_view()),
 
+    # ticket apies
+    path('admin/ticket-list/', AdminTicketListAPIView.as_view()),
+    path('admin/ticket-details/<int:id>/', AdminTicketDetailsAPIView.as_view()),
+
+
 ]
 

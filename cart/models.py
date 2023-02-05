@@ -154,7 +154,7 @@ class Order(AbstractTimeStamp):
         Coupon, on_delete=models.SET_NULL, blank=True, null=True)
     coupon_discount_amount = models.FloatField(max_length=255, null=True, blank=True, default=0.0)
     coupon_status = models.BooleanField(default=False)
-    tax_amount = models.FloatField(max_length=255, null=True, blank=True, default=0.0)
+    vat_amount = models.FloatField(max_length=255, null=True, blank=True, default=0.0)
     shipping_cost = models.FloatField(max_length=255, null=True, blank=True, default=0.0)
     shipping_class = models.ForeignKey(
         ShippingClass, on_delete=models.SET_NULL, blank=True, null=True)

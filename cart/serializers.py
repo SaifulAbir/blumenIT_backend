@@ -60,9 +60,10 @@ class CheckoutDetailsSerializer(serializers.ModelSerializer):
     product_price = serializers.SerializerMethodField('get_product_price')
     total_price = serializers.SerializerMethodField('get_total_price')
     delivery_date = serializers.SerializerMethodField('get_delivery_date')
+    vat_amount =  serializers.FloatField(read_only=True)
     class Meta:
         model = Order
-        fields = ['id', 'user', 'user_email', 'user_phone', 'order_id', 'order_date', 'delivery_date', 'order_status', 'order_items', 'delivery_address', 'payment_type', 'payment_title', 'product_price', 'coupon_discount_amount', 'sub_total', 'shipping_class', 'shipping_cost', 'total_price', 'tax_amount']
+        fields = ['id', 'user', 'user_email', 'user_phone', 'order_id', 'order_date', 'delivery_date', 'order_status', 'order_items', 'delivery_address', 'payment_type', 'payment_title', 'product_price', 'coupon_discount_amount', 'sub_total', 'shipping_class', 'shipping_cost', 'total_price', 'vat_amount']
 
     def get_order_items(self, obj):
         queryset = OrderItem.objects.filter(order=obj)
@@ -90,8 +91,8 @@ class CheckoutDetailsSerializer(serializers.ModelSerializer):
             quantity = order_item.quantity
             t_price = float(price) * float(quantity)
             prices.append(t_price)
-        if obj.tax_amount:
-            sub_total = float(sum(prices)) + float(obj.tax_amount)
+        if obj.vat_amount:
+            sub_total = float(sum(prices)) + float(obj.vat_amount)
         else:
             sub_total = float(sum(prices))
         return sub_total
@@ -116,8 +117,8 @@ class CheckoutDetailsSerializer(serializers.ModelSerializer):
             quantity = order_item.quantity
             t_price = float(price) * float(quantity)
             prices.append(t_price)
-        if obj.tax_amount:
-            sub_total = float(sum(prices)) + float(obj.tax_amount)
+        if obj.vat_amount:
+            sub_total = float(sum(prices)) + float(obj.vat_amount)
         else:
             sub_total = float(sum(prices))
         if sub_total:
@@ -203,10 +204,11 @@ class CheckoutSerializer(serializers.ModelSerializer):
     order_items = ProductItemCheckoutSerializer(many=True, required=False)
     coupon_status = serializers.BooleanField(write_only=True, required=False)
     order_id = serializers.CharField(read_only=True)
+    vat_amount =  serializers.FloatField(read_only=True)
 
     class Meta:
         model = Order
-        fields = ['id', 'order_id', 'product_count', 'coupon', 'coupon_status', 'coupon_discount_amount', 'tax_amount', 'payment_type', 'shipping_class', 'shipping_cost', 'order_items', 'delivery_address', 'comment']
+        fields = ['id', 'order_id', 'product_count', 'coupon', 'coupon_status', 'coupon_discount_amount', 'vat_amount', 'payment_type', 'shipping_class', 'shipping_cost', 'order_items', 'delivery_address', 'comment']
 
     def create(self, validated_data):
         order_items = validated_data.pop('order_items')
@@ -232,34 +234,35 @@ class CheckoutSerializer(serializers.ModelSerializer):
                     raise ValidationError("Order didn't create. One of product out of stock.")
 
         # stop take order process if order items have in_house and also normal products
-        if order_items:
-            order_items_in_house_product = 0
-            order_items_not_in_house_product = 0
-            for order_item in order_items:
-                product = order_item['product']
-                if product.in_house_product == True:
-                    order_items_in_house_product += 1
-                if product.in_house_product == False:
-                    order_items_not_in_house_product += 1
+        # if order_items:
+        #     order_items_in_house_product = 0
+        #     order_items_not_in_house_product = 0
+        #     for order_item in order_items:
+        #         product = order_item['product']
+        #         if product.in_house_product == True:
+        #             order_items_in_house_product += 1
+        #         if product.in_house_product == False:
+        #             order_items_not_in_house_product += 1
 
-            total_order_items = int(len(order_items))
-            in_house_order = True
-            if order_items_in_house_product == total_order_items:
-                in_house_order = True
-                pass
-            elif order_items_not_in_house_product == total_order_items:
-                in_house_order = False
-                pass
-            else:
-                raise ValidationError("Order didn't create, Because of multiple products types available in order items.")
+        #     total_order_items = int(len(order_items))
+        #     in_house_order = True
+        #     if order_items_in_house_product == total_order_items:
+        #         in_house_order = True
+        #         pass
+        #     elif order_items_not_in_house_product == total_order_items:
+        #         in_house_order = False
+        #         pass
+        #     else:
+        #         raise ValidationError("Order didn't create, Because of multiple products types available in order items.")
 
 
         order_instance = Order.objects.create(
             **validated_data, user=self.context['request'].user, order_status=order_status,
-            payment_status=payment_status, in_house_order=in_house_order)
+            payment_status=payment_status)
 
         if order_items:
             count = 0
+            vat_amount_list = []
             for order_item in order_items:
                 product = order_item['product']
                 quantity = order_item['quantity']
@@ -286,44 +289,8 @@ class CheckoutSerializer(serializers.ModelSerializer):
                     total_price =  float(unit_price_after_add_warranty) * float(quantity)
 
                     OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty)
-
-                    # work with SubOrder start //
-                    # if product.in_house_product == True:
-                    #     if SubOrder.objects.filter(order_id=order_instance, in_house_order=True).exists():
-                    #         sub_order_instance = SubOrder.objects.get(order_id=order_instance, in_house_order=True)
-                    #         OrderItem.objects.create(order=order_instance, sub_order=sub_order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty)
-                    #     else:
-                    #         sub_order_instance = SubOrder.objects.create(order_id=order_instance, in_house_order=True)
-                    #         OrderItem.objects.create(order=order_instance, sub_order=sub_order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty)
-
-                    # if product.in_house_product == False:
-                    #     if SubOrder.objects.filter(order_id=order_instance, in_house_order=False).exists():
-                    #         sub_order_instance = SubOrder.objects.get(order_id=order_instance, in_house_order=False)
-                    #         OrderItem.objects.create(order=order_instance, sub_order=sub_order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty)
-                    #     else:
-                    #         sub_order_instance = SubOrder.objects.create(order_id=order_instance, in_house_order=False)
-                    #         OrderItem.objects.create(order=order_instance, sub_order=sub_order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty)
-                    # work with SubOrder end
                 else:
                     OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price)
-
-                    # work with SubOrder start
-                    # if product.in_house_product == True:
-                    #     if SubOrder.objects.filter(order_id=order_instance, in_house_order=True).exists():
-                    #         sub_order_instance = SubOrder.objects.get(order_id=order_instance, in_house_order=True)
-                    #         OrderItem.objects.create(order=order_instance, sub_order=sub_order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price)
-                    #     else:
-                    #         sub_order_instance = SubOrder.objects.create(order_id=order_instance, in_house_order=True)
-                    #         OrderItem.objects.create(order=order_instance, sub_order=sub_order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price)
-
-                    # if product.in_house_product == False:
-                    #     if SubOrder.objects.filter(order_id=order_instance, in_house_order=False).exists():
-                    #         sub_order_instance = SubOrder.objects.get(order_id=order_instance, in_house_order=False)
-                    #         OrderItem.objects.create(order=order_instance, sub_order=sub_order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price)
-                    #     else:
-                    #         sub_order_instance = SubOrder.objects.create(order_id=order_instance, in_house_order=False)
-                    #         OrderItem.objects.create(order=order_instance, sub_order=sub_order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price)
-                    # work with SubOrder end
 
                 # update inventory
                 inventory_obj = Inventory.objects.filter(product=product).latest('created_at')
@@ -339,6 +306,19 @@ class CheckoutSerializer(serializers.ModelSerializer):
                 product_sell_quan += 1
                 Product.objects.filter(slug=product.slug).update(
                     sell_count=product_sell_quan)
+
+                # vat calculation in percent logic
+                product_vat_value = Product.objects.filter(slug=product.slug)[0].vat
+                if product_vat_value:
+                    vat_amount = float((float(total_price) / 100) * float(product_vat_value))
+                    vat_amount_list.append(vat_amount)
+
+                print("vat_amount_list")
+                print(vat_amount_list)
+
+
+            Order.objects.filter(id=order_instance.id).update(vat_amount = sum(vat_amount_list))
+
 
         # work with coupon start
         try:

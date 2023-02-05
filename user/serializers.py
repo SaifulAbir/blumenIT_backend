@@ -96,7 +96,7 @@ class CustomerOrderListSerializer(serializers.ModelSerializer):
     total_price = serializers.SerializerMethodField('get_total_price')
     class Meta:
         model = Order
-        fields = ['id', 'user', 'order_id', 'order_date', 'order_status', 'total_price']
+        fields = ['id', 'user', 'order_id', 'order_date', 'order_status', 'vat_amount', 'total_price']
 
     def get_total_price(self, obj):
         order_items = OrderItem.objects.filter(order=obj)
@@ -109,8 +109,8 @@ class CustomerOrderListSerializer(serializers.ModelSerializer):
             quantity = order_item.quantity
             t_price = float(price) * float(quantity)
             prices.append(t_price)
-        if obj.tax_amount:
-            sub_total = float(sum(prices)) + float(obj.tax_amount)
+        if obj.vat_amount:
+            sub_total = float(sum(prices)) + float(obj.vat_amount)
         else:
             sub_total = float(sum(prices))
         if sub_total:
@@ -168,9 +168,10 @@ class CustomerOrderDetailsSerializer(serializers.ModelSerializer):
     payment_title = serializers.CharField(source='payment_type.type_name',read_only=True)
     total_price = serializers.SerializerMethodField('get_total_price')
     delivery_date = serializers.SerializerMethodField('get_delivery_date')
+    vat_amount =  serializers.FloatField(read_only=True)
     class Meta:
         model = Order
-        fields = ['user', 'order_id', 'order_date', 'delivery_date', 'order_status', 'order_items', 'delivery_address', 'payment_type', 'payment_title', 'sub_total', 'shipping_cost', 'coupon_discount_amount', 'total_price']
+        fields = ['user', 'order_id', 'order_date', 'delivery_date', 'order_status', 'order_items', 'delivery_address', 'payment_type', 'payment_title', 'sub_total', 'shipping_cost', 'coupon_discount_amount', 'total_price', 'vat_amount']
 
     def get_order_items(self, obj):
         queryset = OrderItem.objects.filter(order=obj)
@@ -193,8 +194,8 @@ class CustomerOrderDetailsSerializer(serializers.ModelSerializer):
             quantity = order_item.quantity
             t_price = float(price) * float(quantity)
             prices.append(t_price)
-        if obj.tax_amount:
-            sub_total = float(sum(prices)) + float(obj.tax_amount)
+        if obj.vat_amount:
+            sub_total = float(sum(prices)) + float(obj.vat_amount)
         else:
             sub_total = float(sum(prices))
         return sub_total
@@ -210,8 +211,8 @@ class CustomerOrderDetailsSerializer(serializers.ModelSerializer):
             quantity = order_item.quantity
             t_price = float(price) * float(quantity)
             prices.append(t_price)
-        if obj.tax_amount:
-            sub_total = float(sum(prices)) + float(obj.tax_amount)
+        if obj.vat_amount:
+            sub_total = float(sum(prices)) + float(obj.vat_amount)
         else:
             sub_total = float(sum(prices))
         if sub_total:

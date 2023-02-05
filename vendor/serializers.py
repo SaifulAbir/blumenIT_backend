@@ -1404,8 +1404,8 @@ class AdminOrderListSerializer(serializers.ModelSerializer):
             quantity = order_item.quantity
             t_price = float(price) * float(quantity)
             prices.append(t_price)
-        if obj.tax_amount:
-            sub_total = float(sum(prices)) + float(obj.tax_amount)
+        if obj.vat_amount:
+            sub_total = float(sum(prices)) + float(obj.vat_amount)
         else:
             sub_total = float(sum(prices))
         if sub_total:
@@ -1428,11 +1428,11 @@ class AdminOrderViewSerializer(serializers.ModelSerializer):
     total_price = serializers.SerializerMethodField('get_total_price')
     payment_method = serializers.CharField(source='payment_type.type_name',read_only=True)
     sub_total = serializers.SerializerMethodField('get_sub_total')
+    vat_amount = serializers.FloatField(read_only=True)
 
     class Meta:
         model = Order
-        fields = ['user', 'delivery_address', 'order_id', 'product_count', 'order_date', 'order_status', 'order_date', 'total_price',
-                  'payment_method', 'order_item_order', 'sub_total', 'tax_amount', 'shipping_cost', 'coupon_discount_amount']
+        fields = ['user', 'delivery_address', 'order_id', 'product_count', 'order_date', 'order_status', 'order_date', 'total_price','payment_method', 'order_item_order', 'sub_total', 'vat_amount', 'shipping_cost', 'coupon_discount_amount']
 
     def get_sub_total(self, obj):
         order_items = OrderItem.objects.filter(order=obj)
@@ -1444,8 +1444,8 @@ class AdminOrderViewSerializer(serializers.ModelSerializer):
             quantity = order_item.quantity
             t_price = float(price) * float(quantity)
             prices.append(t_price)
-        if obj.tax_amount:
-            sub_total = float(sum(prices)) + float(obj.tax_amount)
+        if obj.vat_amount:
+            sub_total = float(sum(prices)) + float(obj.vat_amount)
         else:
             sub_total = float(sum(prices))
         return sub_total
@@ -1461,8 +1461,8 @@ class AdminOrderViewSerializer(serializers.ModelSerializer):
             quantity = order_item.quantity
             t_price = float(price) * float(quantity)
             prices.append(t_price)
-        if obj.tax_amount:
-            sub_total = float(sum(prices)) + float(obj.tax_amount)
+        if obj.vat_amount:
+            sub_total = float(sum(prices)) + float(obj.vat_amount)
         else:
             sub_total = float(sum(prices))
         if sub_total:
@@ -1764,10 +1764,11 @@ class AdminPosOrderSerializer(serializers.ModelSerializer):
     order_items = AdminPosOrderItemSerializer(many=True, required=False)
     # coupon_status = serializers.BooleanField(write_only=True, required=False)
     order_id = serializers.CharField(read_only=True)
+    vat_amount =  serializers.FloatField(read_only=True)
 
     class Meta:
         model = Order
-        fields = ['id', 'order_id', 'product_count', 'tax_amount',
+        fields = ['id', 'order_id', 'product_count', 'vat_amount',
                   'payment_type', 'shipping_class', 'shipping_cost', 'order_items', 'delivery_address', 'comment',
                   'customer']
 

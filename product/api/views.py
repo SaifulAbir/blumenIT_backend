@@ -645,3 +645,30 @@ class OfferProductsListAPIView(ListAPIView):
             queryset = queryset.order_by('-price')
 
         return queryset
+
+
+class ProductListForProductCompareAPIView(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = ProductListBySerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        # filtering start
+        request = self.request
+        product_ids = request.GET.get('product_ids')
+
+        new_product_ids = []
+        if product_ids:
+            product_ids_list = product_ids.split(",")
+            for product_id in product_ids_list:
+                product_id = int(product_id)
+                new_product_ids.append(product_id)
+
+        if new_product_ids:
+            queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
+            queryset = queryset.filter(Q(id__in = new_product_ids)).order_by('-created_at')
+        else:
+            queryset = []
+
+        return queryset

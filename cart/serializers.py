@@ -152,7 +152,7 @@ class PaymentTypesListSerializer(serializers.ModelSerializer):
 class ApplyCouponSerializer(serializers.ModelSerializer):
     class Meta:
         model = Coupon
-        fields = ['id', 'amount']
+        fields = ['id', 'code', 'min_shopping_amount', 'amount', 'quantity', 'number_of_uses', 'start_time', 'is_active']
 
 
 class DeliveryAddressSerializer(serializers.ModelSerializer):
@@ -350,13 +350,13 @@ class CheckoutSerializer(serializers.ModelSerializer):
             if check_in_use_coupon_record:
                 pass
             else:
-                UseRecordOfCoupon.objects.create(
-                    coupon_id=coupon_id, user_id=user_id)
+                UseRecordOfCoupon.objects.create(coupon_id=coupon_id, user_id=user_id)
+                quantity = int(coupon_obj[0].quantity)
                 number_of_uses = int(coupon_obj[0].number_of_uses)
-                coupon_obj.update(number_of_uses=number_of_uses - 1, is_active=True)
-                number_of_uses = Coupon.objects.get(
+                coupon_obj.update(number_of_uses=number_of_uses + 1, is_active=True)
+                number_of_uses_after_update = Coupon.objects.get(
                     code=coupon_obj[0].code).number_of_uses
-                if number_of_uses < 1:
+                if quantity < number_of_uses_after_update :
                     coupon_obj.update(is_active=False)
         # work with coupon end
 

@@ -67,8 +67,9 @@ class ApplyCouponAPIView(APIView):
                 current_time = timezone.now()
 
                 if current_time > start_date_time and current_time < end_date_time:
+                    quantity = int(coupon_obj[0].quantity)
                     number_of_uses = int(coupon_obj[0].number_of_uses)
-                    if number_of_uses > 0:
+                    if quantity > number_of_uses:
                         user = User.objects.filter(id=uid).exists()
                         if user:
                             user_obj = User.objects.filter(id=uid)
@@ -77,10 +78,11 @@ class ApplyCouponAPIView(APIView):
                             if check_in_use_coupon_record:
                                 return Response({"status": "You already used this coupon!"})
                             else:
-                                return Response({"status": "Authentic coupon.", "amount": coupon_obj[0].amount, "coupon_id": coupon_obj[0].id})
+                                return Response({"status": "Authentic coupon.", "amount": coupon_obj[0].amount, "coupon_id": coupon_obj[0].id, "code": coupon_obj[0].code, "min_shopping_amount": coupon_obj[0].min_shopping_amount, "quantity": coupon_obj[0].quantity, "number_of_uses": coupon_obj[0].number_of_uses, "start_time": coupon_obj[0].start_time, "end_time": coupon_obj[0].end_time, "is_active": coupon_obj[0].is_active})
                         else:
                             return Response({"status": "User doesn't exist!"})
                     else:
+                        coupon_obj.update(is_active=False)
                         return Response({"status": "Invalid coupon!"})
                 else:
                     if current_time > end_date_time:

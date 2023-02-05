@@ -208,14 +208,17 @@ urlpatterns = [
     path('admin/product-vat-type-update/<int:id>/', AdminVatTypeUpdateAPIView.as_view()),
     path('admin/product-vat-type-delete/<int:id>/', AdminVatTypeDeleteAPIView.as_view()),
 
+
     # others
     path('admin/profile/', AdminProfileAPIView.as_view()),
     path('admin/dashboard-data/', AdminDashboardDataAPIView.as_view()),
+
 
     # pos apies
     path('admin/pos-product-list/', AdminPosProductListAPI.as_view()),
     path('admin/pos-product-search-list/', AdminPosSearchAPI.as_view()),
     path('admin/pos-order/', AdminPosOrderAPIView.as_view()),
+
 
     # ticket apies
     path('admin/ticket-list/', AdminTicketListAPIView.as_view()),

@@ -381,9 +381,3 @@ class ShippingClassDataSerializer(serializers.ModelSerializer):
     def get_state_city_concate(self, obj):
         c_name = obj.shipping_state.title + ' ' + obj.shipping_city.title
         return c_name
-
-
-class TaxDataSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tax
-        fields = ['id', 'type', 'value', 'value_type']

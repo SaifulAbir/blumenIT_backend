@@ -1423,9 +1423,6 @@ class AdminOrderListSerializer(serializers.ModelSerializer):
 
 class AdminOrderViewSerializer(serializers.ModelSerializer):
     order_item_order = OrderItemSerializer(many=True, read_only=True)
-    # user = serializers.SerializerMethodField('get_user')
-    # order_id = serializers.SerializerMethodField('get_order_id')
-
     user = CustomerProfileSerializer(read_only=True)
     delivery_address = DeliveryAddressSerializer(read_only=True)
     total_price = serializers.SerializerMethodField('get_total_price')
@@ -1433,20 +1430,9 @@ class AdminOrderViewSerializer(serializers.ModelSerializer):
     sub_total = serializers.SerializerMethodField('get_sub_total')
 
     class Meta:
-        # model = SubOrder
-        # fields = ['id', 'user', 'order_id']
-
         model = Order
         fields = ['user', 'delivery_address', 'order_id', 'product_count', 'order_date', 'order_status', 'order_date', 'total_price',
                   'payment_method', 'order_item_order', 'sub_total', 'tax_amount', 'shipping_cost', 'coupon_discount_amount']
-
-    # def get_user(self, obj):
-    #     user = obj.order_id.user
-    #     return CustomerProfileSerializer(user, many=False).data
-
-    # def get_order_id(self, obj):
-    #     order_id = obj.sub_order_id
-    #     return order_id
 
     def get_sub_total(self, obj):
         order_items = OrderItem.objects.filter(order=obj)
@@ -1773,6 +1759,7 @@ class AdminPosOrderItemSerializer(serializers.ModelSerializer):
                   'unit_price',
                   'product_warranty',
                   ]
+
 class AdminPosOrderSerializer(serializers.ModelSerializer):
     order_items = AdminPosOrderItemSerializer(many=True, required=False)
     # coupon_status = serializers.BooleanField(write_only=True, required=False)

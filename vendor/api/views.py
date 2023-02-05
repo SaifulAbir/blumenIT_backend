@@ -1925,7 +1925,6 @@ class AdminPosSearchAPI(ListAPIView):
         return queryset
 
 
-
 class AdminPosOrderAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AdminPosOrderSerializer

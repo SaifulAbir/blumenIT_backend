@@ -3,7 +3,6 @@ from .views import *
 
 urlpatterns = [
     path('shipping-class-data/', ShippingClassDataAPIView.as_view()),
-    path('tax-data/', TaxDataAPIView.as_view()),
     path('checkout/', CheckoutAPIView.as_view()),
     path('checkout-details/<str:o_id>/', CheckoutDetailsAPIView.as_view()),
     path('apply-coupon/<str:code>/<int:uid>/', ApplyCouponAPIView.as_view()),

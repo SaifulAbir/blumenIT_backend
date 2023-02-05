@@ -5,13 +5,13 @@ from rest_framework import status
 from rest_framework import serializers
 from product.serializers import DiscountTypeSerializer
 from cart.serializers import CheckoutDetailsSerializer, CheckoutSerializer, \
-     PaymentTypesListSerializer, ApplyCouponSerializer, DeliveryAddressSerializer, ShippingClassDataSerializer
+     PaymentTypesListSerializer, ApplyCouponSerializer, DeliveryAddressSerializer, ShippingClassDataSerializer, TaxDataSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from product.models import Product, DiscountTypes, ShippingClass
 from cart.models import BillingAddress, Order, PaymentType, Coupon, UseRecordOfCoupon, Wishlist, \
-    DeliveryAddress
+    DeliveryAddress, Tax
 from user.models import User
 from django.db.models import Q
 
@@ -196,3 +196,9 @@ class ShippingClassDataAPIView(ListAPIView):
     def get_queryset(self):
         queryset = ShippingClass.objects.filter(is_active=True).order_by('-created_at')
         return queryset
+
+
+class TaxDataAPIView(ListAPIView):
+    permission_classes = [AllowAny]
+    queryset = Tax.objects.filter(is_active=True).order_by('-created_at')[:1]
+    serializer_class = TaxDataSerializer

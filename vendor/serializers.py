@@ -1396,7 +1396,7 @@ class AdminOrderListSerializer(serializers.ModelSerializer):
     def get_total_price(self, obj):
         order_items = OrderItem.objects.filter(order=obj)
         prices = []
-        total_price = 0
+        total_price = 0.0
         for order_item in order_items:
             price = order_item.unit_price
             if order_item.unit_price_after_add_warranty != 0.0:
@@ -1404,7 +1404,10 @@ class AdminOrderListSerializer(serializers.ModelSerializer):
             quantity = order_item.quantity
             t_price = float(price) * float(quantity)
             prices.append(t_price)
-        sub_total = sum(prices)
+        if obj.tax_amount:
+            sub_total = float(sum(prices)) + float(obj.tax_amount)
+        else:
+            sub_total = float(sum(prices))
         if sub_total:
             total_price += sub_total
 
@@ -1455,7 +1458,10 @@ class AdminOrderViewSerializer(serializers.ModelSerializer):
             quantity = order_item.quantity
             t_price = float(price) * float(quantity)
             prices.append(t_price)
-        sub_total = sum(prices)
+        if obj.tax_amount:
+            sub_total = float(sum(prices)) + float(obj.tax_amount)
+        else:
+            sub_total = float(sum(prices))
         return sub_total
 
     def get_total_price(self, obj):
@@ -1469,7 +1475,10 @@ class AdminOrderViewSerializer(serializers.ModelSerializer):
             quantity = order_item.quantity
             t_price = float(price) * float(quantity)
             prices.append(t_price)
-        sub_total = sum(prices)
+        if obj.tax_amount:
+            sub_total = float(sum(prices)) + float(obj.tax_amount)
+        else:
+            sub_total = float(sum(prices))
         if sub_total:
             total_price += sub_total
 

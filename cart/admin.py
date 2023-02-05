@@ -1,6 +1,6 @@
 from django.contrib import admin
 from cart.models import BillingAddress, PaymentType, ShippingType, Coupon, UseRecordOfCoupon, Order, \
-     OrderItem, DeliveryAddress, Wishlist, SubOrder
+     OrderItem, DeliveryAddress, Wishlist, SubOrder, Tax
 
 
 # Register your models here.
@@ -11,6 +11,7 @@ admin.site.register(PaymentType)
 admin.site.register(BillingAddress)
 admin.site.register(DeliveryAddress)
 admin.site.register(Wishlist)
+admin.site.register(Tax)
 
 
 class OrderItemInline(admin.TabularInline):

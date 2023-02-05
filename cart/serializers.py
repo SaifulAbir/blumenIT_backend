@@ -62,7 +62,7 @@ class CheckoutDetailsSerializer(serializers.ModelSerializer):
     delivery_date = serializers.SerializerMethodField('get_delivery_date')
     class Meta:
         model = Order
-        fields = ['id', 'user', 'user_email', 'user_phone', 'order_id', 'order_date', 'delivery_date', 'order_status', 'order_items', 'delivery_address', 'payment_type', 'payment_title', 'product_price', 'coupon_discount_amount', 'sub_total', 'shipping_class', 'shipping_cost', 'total_price']
+        fields = ['id', 'user', 'user_email', 'user_phone', 'order_id', 'order_date', 'delivery_date', 'order_status', 'order_items', 'delivery_address', 'payment_type', 'payment_title', 'product_price', 'coupon_discount_amount', 'sub_total', 'shipping_class', 'shipping_cost', 'total_price', 'tax_amount']
 
     def get_order_items(self, obj):
         queryset = OrderItem.objects.filter(order=obj)
@@ -90,7 +90,10 @@ class CheckoutDetailsSerializer(serializers.ModelSerializer):
             quantity = order_item.quantity
             t_price = float(price) * float(quantity)
             prices.append(t_price)
-        sub_total = sum(prices)
+        if obj.tax_amount:
+            sub_total = float(sum(prices)) + float(obj.tax_amount)
+        else:
+            sub_total = float(sum(prices))
         return sub_total
 
     def get_product_price(self, obj):
@@ -105,7 +108,7 @@ class CheckoutDetailsSerializer(serializers.ModelSerializer):
     def get_total_price(self, obj):
         order_items = OrderItem.objects.filter(order=obj)
         prices = []
-        total_price = 0
+        total_price = 0.0
         for order_item in order_items:
             price = order_item.unit_price
             if order_item.unit_price_after_add_warranty != 0.0:
@@ -113,7 +116,10 @@ class CheckoutDetailsSerializer(serializers.ModelSerializer):
             quantity = order_item.quantity
             t_price = float(price) * float(quantity)
             prices.append(t_price)
-        sub_total = sum(prices)
+        if obj.tax_amount:
+            sub_total = float(sum(prices)) + float(obj.tax_amount)
+        else:
+            sub_total = float(sum(prices))
         if sub_total:
             total_price += sub_total
 
@@ -375,3 +381,9 @@ class ShippingClassDataSerializer(serializers.ModelSerializer):
     def get_state_city_concate(self, obj):
         c_name = obj.shipping_state.title + ' ' + obj.shipping_city.title
         return c_name
+
+
+class TaxDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tax
+        fields = ['id', 'type', 'value', 'value_type']

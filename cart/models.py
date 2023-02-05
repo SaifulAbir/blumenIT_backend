@@ -154,7 +154,7 @@ class Order(AbstractTimeStamp):
         Coupon, on_delete=models.SET_NULL, blank=True, null=True)
     coupon_discount_amount = models.FloatField(max_length=255, null=True, blank=True, default=0.0)
     coupon_status = models.BooleanField(default=False)
-    tax_amount = models.FloatField(max_length=255, null=True, blank=True, default=0.0)
+    vat_amount = models.FloatField(max_length=255, null=True, blank=True, default=0.0)
     shipping_cost = models.FloatField(max_length=255, null=True, blank=True, default=0.0)
     shipping_class = models.ForeignKey(
         ShippingClass, on_delete=models.SET_NULL, blank=True, null=True)
@@ -342,26 +342,3 @@ class BillingAddress(AbstractTimeStamp):
 
     def __str__(self):
         return f"{self.pk}"
-
-
-class Tax(AbstractTimeStamp):
-    TYPES = [
-        ('VAT', 'vat'),
-    ]
-    VALUE_TYPES = [
-        ('PERCENT', '%'),
-    ]
-    type = models.CharField(
-        max_length=20, choices=TYPES, default=TYPES[0][0])
-    value = models.FloatField(max_length=100, null=False, blank=False, default=0.0)
-    value_type = models.CharField(
-        max_length=20, choices=VALUE_TYPES, default=VALUE_TYPES[0][0])
-    is_active = models.BooleanField(null=False, blank=False, default=True)
-
-    class Meta:
-        verbose_name = 'Tax'
-        verbose_name_plural = 'Tax'
-        db_table = 'tax'
-
-    def __str__(self):
-        return self.type + ' ' + str(self.value) + ' ' + str(self.value_type)

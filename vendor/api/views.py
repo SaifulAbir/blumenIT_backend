@@ -1966,6 +1966,7 @@ class AdminTagListAPIView(ListAPIView):
                 {"msg": 'You can not see tag list, because you are not an Admin!'})
 
 
+# Video Provider related admin apies views............................ start
 class AdminVideoProviderListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ProductVideoProviderSerializer
@@ -1980,6 +1981,58 @@ class AdminVideoProviderListAPIView(ListAPIView):
                     {"msg": 'Video provider data does not exist!'})
         else:
             raise ValidationError({"msg": 'You can not view video provider list, because you are not an Admin!'})
+
+
+class AdminVideoProviderCreateAPIView(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ProductVideoProviderSerializer
+
+    def post(self, request, *args, **kwargs):
+        if self.request.user.is_superuser == True:
+            return super(AdminVideoProviderCreateAPIView, self).post(request, *args, **kwargs)
+        else:
+            raise ValidationError(
+                {"msg": 'You can not create video provider, because you are not an Admin!'})
+
+
+class AdminVideoProviderUpdateAPIView(RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ProductVideoProviderSerializer
+    queryset = ProductVideoProvider.objects.filter(is_active=True)
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def put(self, request, *args, **kwargs):
+        if self.request.user.is_superuser == True:
+            return super(AdminVideoProviderUpdateAPIView, self).put(request, *args, **kwargs)
+        else:
+            raise ValidationError(
+                {"msg": 'You can not update video provider, because you are not an Admin!'})
+
+
+class AdminVideoProviderDeleteAPI(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ProductVideoProviderSerializer
+    pagination_class = ProductCustomPagination
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        if self.request.user.is_superuser == True:
+            product_obj_exist = ProductVideoProvider.objects.filter(id=id).exists()
+            if product_obj_exist:
+                product_obj = ProductVideoProvider.objects.filter(id=id).update(is_active=False)
+
+                queryset = ProductVideoProvider.objects.filter(is_active=True).order_by('-created_at')
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'Video Provider Data Does not exist!'})
+        else:
+            raise ValidationError(
+                {"msg": 'You can not delete Video Provider data, because you are not an Admin!'})
+# Video Provider related admin apies views............................ end
 
 
 # Vat Type related admin apies views............................ start

@@ -16,6 +16,7 @@ from user.models import User
 from django.db.models import Q
 
 
+
 class DiscountTypeCreateAPIView(CreateAPIView):
 
     permission_classes = [AllowAny]

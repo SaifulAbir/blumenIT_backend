@@ -4,8 +4,9 @@ from product.models import Product, Inventory, Specification, ShippingClass
 from product.serializers import SpecificationSerializer
 from rest_framework.exceptions import ValidationError
 import datetime
-
-
+from django.template.loader import render_to_string
+from django.core.mail import send_mail
+from django.conf import settings
 
 
 
@@ -27,10 +28,11 @@ class CheckoutDetailsOrderItemSerializer(serializers.ModelSerializer):
     product_price = serializers.SerializerMethodField()
     product_specification = serializers.SerializerMethodField('get_product_specification')
     product_warranty_title = serializers.CharField(source='product_warranty.warranty.title',read_only=True)
+    product_vat = serializers.CharField(source='product.vat',read_only=True)
 
     class Meta:
         model = OrderItem
-        fields = ['id', 'product_title', 'product_thumb', 'product_price', 'product_sku', 'product_specification', 'quantity', 'unit_price', 'unit_price_after_add_warranty', 'total_price', 'product_warranty', 'product_warranty_title']
+        fields = ['id', 'product_title', 'product_thumb', 'product_price', 'product_sku', 'product_specification', 'quantity', 'unit_price', 'unit_price_after_add_warranty', 'total_price', 'product_warranty', 'product_warranty_title', 'product_vat']
 
     def get_product_price(self, obj):
         product_price = Product.objects.filter(id=obj.product.id)[
@@ -180,11 +182,9 @@ class OrderSerializer(serializers.ModelSerializer):
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
-    # order = OrderSerializer(read_only=True)
     product = ProductSerializer(read_only=True)
     class Meta:
         model = OrderItem
-        # fields = ['id', 'order', 'product', 'quantity', 'subtotal']
         fields = ['id', 'product', 'quantity', 'unit_price', 'unit_price_after_add_warranty', 'subtotal']
 
 
@@ -312,8 +312,6 @@ class CheckoutSerializer(serializers.ModelSerializer):
                     vat_amount = float((float(total_price) / 100) * float(product_vat_value))
                     vat_amount_list.append(vat_amount)
 
-                print("vat_amount_list")
-                print(vat_amount_list)
 
 
             Order.objects.filter(id=order_instance.id).update(vat_amount = sum(vat_amount_list))
@@ -344,6 +342,24 @@ class CheckoutSerializer(serializers.ModelSerializer):
                 if quantity < number_of_uses_after_update :
                     coupon_obj.update(is_active=False)
         # work with coupon end
+
+        # send email to the user
+        # user = User.objects.get(user=self.context['request'].user)
+        user = self.context['request'].user
+        username = user.username
+        email = user.email
+        name = user.name
+        subject = "Your order has been successfully placed."
+        # html_message = render_to_string('dedication_info.html', {'username':username, 'dedicated_name' : name})
+        html_message = 'hello'
+
+        send_mail(
+            subject=subject,
+            message=None,
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[email],
+            html_message=html_message
+        )
 
         return order_instance
 

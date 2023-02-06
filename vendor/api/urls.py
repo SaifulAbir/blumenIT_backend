@@ -27,7 +27,7 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminCategoryAllListAPIView, AdminSubCategoryListAllAPIView, AdminSubSubCategoryAllListAPIView, AdminBrandListAllAPIView, \
     AdminUnitListAllAPIView, AdminSellerListAllAPIView, AdminVatTypeListAllAPIView, AdminVideoProviderListAllAPIView, \
     AdminDiscountTypeListAllAPIView, AdminFilterAttributeListAllAPIView, AdminFlashDealListAllAPIView, AdminWarrantyListAllAPIView, \
-    AdminSpecificationTitleListAllAPIView
+    AdminVideoProviderCreateAPIView, AdminVideoProviderUpdateAPIView, AdminSpecificationTitleListAllAPIView, AdminVideoProviderDeleteAPI
 
 
 urlpatterns = [
@@ -90,6 +90,9 @@ urlpatterns = [
 
     # Video provider related apies
     path('admin/admin-video-provider-list/', AdminVideoProviderListAPIView.as_view()),
+    path('admin/admin-video-provider-create/', AdminVideoProviderCreateAPIView.as_view()),
+    path('admin/admin-video-provider-update/<int:id>/', AdminVideoProviderUpdateAPIView.as_view()),
+    path('admin/admin-video-provider-delete/<int:id>/', AdminVideoProviderDeleteAPI.as_view()),
 
 
     # Ticket related apies

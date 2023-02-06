@@ -57,9 +57,10 @@ class VendorProductReportSerializer(serializers.ModelSerializer):
     order_date = serializers.CharField(source="order.order_date", read_only=True)
     order_status = serializers.CharField(source="order.order_status", read_only=True)
     seller = serializers.CharField(source="order.vendor.name", read_only=True)
+    product_vat = serializers.CharField(source='product.vat',read_only=True)
     class Meta:
         model = OrderItem
-        fields = ['id', 'order_id', 'product_title', 'product_price', 'quantity', 'order_date', 'order_status', 'seller']
+        fields = ['id', 'order_id', 'product_title', 'product_price', 'quantity', 'order_date', 'order_status', 'seller', 'product_vat']
 
 
 class InHouseProductSerializer(serializers.ModelSerializer):

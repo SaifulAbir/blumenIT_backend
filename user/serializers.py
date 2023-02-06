@@ -133,11 +133,11 @@ class CustomerOrderItemsSerializer(serializers.ModelSerializer):
     product_slug = serializers.CharField(source='product.slug',read_only=True)
     product_warranty_title = serializers.CharField(source='product_warranty.warranty.title',read_only=True)
     unit_price = serializers.SerializerMethodField('get_unit_price')
+    product_vat = serializers.CharField(source='product.vat',read_only=True)
 
     class Meta:
         model = OrderItem
-        # fields = ['id', 'product_name', 'product_thumb', 'product_slug', 'product_price', 'quantity', 'unit_price', 'unit_price_after_add_warranty', 'total_price', 'product_warranty', 'product_warranty_title']
-        fields = ['id', 'product_name', 'product_thumb', 'product_slug', 'product_price', 'quantity', 'unit_price', 'total_price', 'product_warranty', 'product_warranty_title']
+        fields = ['id', 'product_name', 'product_thumb', 'product_slug', 'product_price', 'quantity', 'unit_price', 'total_price', 'product_warranty', 'product_warranty_title', 'product_vat']
 
     def get_product_name(self, obj):
         product_name = Product.objects.filter(id=obj.product.id)[0].title

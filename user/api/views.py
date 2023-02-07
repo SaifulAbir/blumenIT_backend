@@ -8,7 +8,7 @@ from datetime import datetime
 from rest_framework import viewsets, mixins, status, generics
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import ValidationError
-from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView, ListAPIView, RetrieveAPIView
+from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView, ListAPIView, RetrieveAPIView, UpdateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
@@ -29,7 +29,7 @@ from rest_framework.views import APIView
 from user.serializers import  SubscriptionSerializer,  \
     ChangePasswordSerializer, OTPSendSerializer, OTPVerifySerializer, OTPReSendSerializer, SetPasswordSerializer, CustomerOrderListSerializer, \
     CustomerOrderDetailsSerializer, CustomerProfileSerializer, CustomerAddressListSerializer, CustomerAddressSerializer, \
-    WishlistDataSerializer, SavePcCreateSerializer, SavaPcDataSerializer, SavePcDetailsSerializer
+    WishlistDataSerializer, SavePcCreateSerializer, SavaPcDataSerializer, SavePcDetailsSerializer, AccountDeleteRequestSerializer
 
 from vendor.pagination import OrderCustomPagination
 from cart.models import Order, DeliveryAddress, Wishlist
@@ -525,3 +525,22 @@ class SavePcDeleteAPIView(ListAPIView):
         else:
             raise ValidationError(
                 {"msg": 'You can not delete this Save PC data, because you are not an Customer!'})
+
+
+class AccountDeleteRequestAPIView(UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AccountDeleteRequestSerializer
+    queryset = User.objects.all()
+
+
+class AdminAccountDeleteRequestListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AccountDeleteRequestSerializer
+    pagination_class = OrderCustomPagination
+    queryset = User.objects.filter(delete_request=True)
+
+
+class AdminAccountDeleteAPIView(UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AccountDeleteRequestSerializer
+    queryset = User.objects.all()

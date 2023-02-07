@@ -417,3 +417,10 @@ class SavePcDetailsSerializer(serializers.ModelSerializer):
     def get_save_pc_items(self, obj):
         selected_save_pc_items = SavePcItems.objects.filter(save_pc=obj, is_active=True)
         return SavePcItemsDetailsSerializer(selected_save_pc_items, many=True, context={'request': self.context['request']}).data
+
+
+class AccountDeleteRequestSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ['id', 'name','delete_request', 'is_active']

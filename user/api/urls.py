@@ -3,7 +3,8 @@ from user.api.views import LoginUser,  \
     SubscriptionAPIView,  ChangePasswordView, SendOTPAPIView, OTPVerifyAPIVIEW, ReSendOTPAPIView, \
     SetPasswordAPIView, SuperUserLoginUser, CustomerOrdersList, CustomerOrderDetails, CustomerProfile, CustomerAddressListAPIView, \
     CustomerAddressAddAPIView, CustomerAddressUpdateAPIView, CustomerAddressDeleteAPIView, DashboardDataAPIView, WishlistDataAPIView, \
-    SavePcAPIView, SavePcListAPIView, SavePcViewAPIView, SavePcDeleteAPIView
+    SavePcAPIView, SavePcListAPIView, SavePcViewAPIView, SavePcDeleteAPIView, AccountDeleteRequestAPIView, AdminAccountDeleteRequestListAPIView, \
+    AdminAccountDeleteAPIView
 
 urlpatterns = [
     path('login/', LoginUser.as_view({'post': 'create'}), name='login_user'),
@@ -28,5 +29,11 @@ urlpatterns = [
     path('customer/save-pc-list/', SavePcListAPIView.as_view()),
     path('customer/save-pc-view/<int:id>/', SavePcViewAPIView.as_view()),
     path('customer/save-pc-delete/<int:id>/', SavePcDeleteAPIView.as_view()),
+
+    #admin account delete request
+    path('customer/account-delete-request/<int:pk>/', AccountDeleteRequestAPIView.as_view()),
+    path('admin/account-delete-request-list/', AdminAccountDeleteRequestListAPIView.as_view()),
+    path('admin/account-delete/<int:pk>/', AdminAccountDeleteAPIView.as_view()),
+
 
 ]

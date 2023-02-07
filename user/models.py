@@ -53,6 +53,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     phone = models.CharField(max_length=255, validators=[phone_regex], null=True, blank=True)
     date_joined = models.DateTimeField(('date joined'), auto_now_add=True)
     role = models.ForeignKey(Role, on_delete=models.CASCADE, related_name='add_role_in_user_role', blank=True, null=True)
+    delete_request = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email', ]

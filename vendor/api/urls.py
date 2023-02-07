@@ -226,8 +226,7 @@ urlpatterns = [
     # ticket apies
     path('admin/ticket-list/', AdminTicketListAPIView.as_view()),
     path('admin/ticket-details/<int:id>/', AdminTicketDetailsAPIView.as_view()),
-    
-    
+
     #toggle apies
     path('admin/toggle-category/<int:pk>/', AdminCategoryToggleUpdateAPIView.as_view()),
     path('admin/toggle-product/<int:pk>/', AdminProductToggleUpdateAPIView.as_view()),

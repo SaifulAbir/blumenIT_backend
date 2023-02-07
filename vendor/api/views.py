@@ -919,6 +919,7 @@ class AdminOrderList(ListAPIView):
         if self.request.user.is_superuser == True:
             request = self.request
             type = request.GET.get('type')
+            order_status = request.GET.get('order_status')
 
             queryset = Order.objects.filter(is_active=True).order_by('-created_at')
 
@@ -928,6 +929,20 @@ class AdminOrderList(ListAPIView):
                 queryset = queryset.filter(is_active=True, vendor__isnull=False).order_by('vendor')
             if type == 'pick_up_point_order':
                 queryset = queryset.filter(is_active=True, delivery_address__isnull=True).order_by('vendor')
+
+            if order_status == 'PENDING':
+                queryset = queryset.filter(order_status = 'PENDING', is_active=True)
+            if order_status == 'CONFIRMED':
+                queryset = queryset.filter(order_status = 'CONFIRMED', is_active=True)
+            if order_status == 'PICKED-UP':
+                queryset = queryset.filter(order_status = 'PICKED-UP', is_active=True)
+            if order_status == 'DELIVERED':
+                queryset = queryset.filter(order_status = 'DELIVERED', is_active=True)
+            if order_status == 'RETURN':
+                queryset = queryset.filter(order_status = 'RETURN', is_active=True)
+            if order_status == 'CANCEL':
+                queryset = queryset.filter(order_status = 'CANCEL', is_active=True)
+
             if queryset:
                 return queryset
             else:

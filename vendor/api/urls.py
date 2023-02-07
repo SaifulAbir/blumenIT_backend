@@ -27,8 +27,8 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminCategoryAllListAPIView, AdminSubCategoryListAllAPIView, AdminSubSubCategoryAllListAPIView, AdminBrandListAllAPIView, \
     AdminUnitListAllAPIView, AdminSellerListAllAPIView, AdminVatTypeListAllAPIView, AdminVideoProviderListAllAPIView, \
     AdminDiscountTypeListAllAPIView, AdminFilterAttributeListAllAPIView, AdminFlashDealListAllAPIView, AdminWarrantyListAllAPIView, \
-    AdminVideoProviderCreateAPIView, AdminVideoProviderUpdateAPIView, AdminSpecificationTitleListAllAPIView, AdminVideoProviderDeleteAPI
-
+    AdminVideoProviderCreateAPIView, AdminVideoProviderUpdateAPIView, AdminSpecificationTitleListAllAPIView, AdminVideoProviderDeleteAPI, \
+    AdminProductToggleUpdateAPIView, AdminCategoryToggleUpdateAPIView, AdminBlogToggleUpdateAPIView
 
 urlpatterns = [
 
@@ -226,6 +226,12 @@ urlpatterns = [
     # ticket apies
     path('admin/ticket-list/', AdminTicketListAPIView.as_view()),
     path('admin/ticket-details/<int:id>/', AdminTicketDetailsAPIView.as_view()),
+    
+    
+    #toggle apies
+    path('admin/toggle-category/<int:pk>/', AdminCategoryToggleUpdateAPIView.as_view()),
+    path('admin/toggle-product/<int:pk>/', AdminProductToggleUpdateAPIView.as_view()),
+    path('admin/toggle-blog/<int:pk>/', AdminBlogToggleUpdateAPIView.as_view()),
 
 
 ]

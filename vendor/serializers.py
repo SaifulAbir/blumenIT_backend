@@ -1,3 +1,4 @@
+from blog.models import Blog
 from cart.serializers import OrderItemSerializer
 from product.serializers import ProductImageSerializer, ProductReviewSerializer, BrandSerializer, UnitSerializer
 from cart.serializers import OrderItemSerializer, DeliveryAddressSerializer
@@ -1886,3 +1887,21 @@ class AdminPosOrderSerializer(serializers.ModelSerializer):
             #     pass
 
             return order_instance
+
+class AdminCategoryToggleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id', 'title', 'is_featured']
+
+
+class AdminProductToggleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ['id', 'slug', 'title', 'status', 'is_featured']
+
+
+class AdminBlogToggleSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Blog
+        fields = ['id', 'is_active','status']

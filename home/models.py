@@ -94,7 +94,7 @@ class HomeSingleRowData(AbstractTimeStamp):
 class CorporateDeal(AbstractTimeStamp):
     first_name = models.CharField(max_length=20, blank=True)
     last_name = models.CharField(max_length=20, blank=True)
-    email = models.EmailField(max_length=255, unique=True)
+    email = models.EmailField(max_length=255)
     company_name = models.CharField(max_length=120, blank=True)
     phone = models.CharField(max_length=255, null=True, blank=True)
     region = models.CharField(max_length=255, null=True, blank=True)

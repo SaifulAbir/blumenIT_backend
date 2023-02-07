@@ -30,7 +30,7 @@ urlpatterns = [
     path('customer/save-pc-view/<int:id>/', SavePcViewAPIView.as_view()),
     path('customer/save-pc-delete/<int:id>/', SavePcDeleteAPIView.as_view()),
 
-    #admin account delete request
+    #admin account delete request apis
     path('customer/account-delete-request/<int:pk>/', AccountDeleteRequestAPIView.as_view()),
     path('admin/account-delete-request-list/', AdminAccountDeleteRequestListAPIView.as_view()),
     path('admin/account-delete/<int:pk>/', AdminAccountDeleteAPIView.as_view()),

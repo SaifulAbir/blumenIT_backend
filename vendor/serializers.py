@@ -1912,3 +1912,7 @@ class AdvertisementPosterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Advertisement
         fields = ['id', 'image', 'bold_text', 'small_text', 'is_gaming', 'work_for']
+class AdminProductReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductReview
+        fields = ['id', 'is_active']

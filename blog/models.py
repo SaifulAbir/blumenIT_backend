@@ -20,6 +20,9 @@ class BlogCategory(AbstractTimeStamp):
 
 
 class Blog(AbstractTimeStamp):
+    BLOG_STATUSES = [
+        ('PUBLISH', 'Publish'),
+        ('UNPUBLISH', 'UnPublish')]
     title = models.CharField(max_length=100, help_text="name")
     slug = models.SlugField(
         null=False, allow_unicode=True, blank=True, max_length=255)
@@ -37,6 +40,8 @@ class Blog(AbstractTimeStamp):
     meta_description = models.TextField(default='', null=True, blank=True)
     meta_keywords = models.CharField(max_length=100, help_text="name", default='')
     is_active = models.BooleanField(default=True)
+    status = models.CharField(
+        max_length=20, choices=BLOG_STATUSES, default=BLOG_STATUSES[1][1])
 
     class Meta:
         verbose_name = 'Blog'

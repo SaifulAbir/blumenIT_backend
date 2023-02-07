@@ -1,9 +1,11 @@
 from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework import status
+
+from blog.models import Blog
 from product.pagination import ProductCustomPagination
 from product.serializers import DiscountTypeSerializer, TagsSerializer, ProductListBySerializer
-from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView, RetrieveAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView, RetrieveAPIView, UpdateAPIView
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from product.models import Brand, Category, DiscountTypes, Product, ProductReview, SubCategory, SubSubCategory, Tags, Units, \
@@ -12,21 +14,25 @@ from product.models import Brand, Category, DiscountTypes, Product, ProductRevie
 from user.models import User
 from vendor.models import Seller
 from home.models import CorporateDeal
-from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategorySerializer,\
-    VendorBrandSerializer, AdminCategoryListSerializer, VendorProductListSerializer,\
+from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategorySerializer, \
+    VendorBrandSerializer, AdminCategoryListSerializer, VendorProductListSerializer, \
     ProductUpdateSerializer, VendorProductViewSerializer, AdminSubCategoryListSerializer, \
     AdminSubSubCategoryListSerializer, VendorUnitSerializer, SellerSerializer, \
-    ProductVideoProviderSerializer, ProductVatProviderSerializer, UpdateCategorySerializer,\
+    ProductVideoProviderSerializer, ProductVatProviderSerializer, UpdateCategorySerializer, \
     UpdateSubSubCategorySerializer, ProductCreateSerializer, AddNewCategorySerializer, \
-    SellerCreateSerializer, FlashDealInfoSerializer, UpdateSubCategorySerializer, FilteringAttributesSerializer, AdminProfileSerializer, \
+    SellerCreateSerializer, FlashDealInfoSerializer, UpdateSubCategorySerializer, FilteringAttributesSerializer, \
+    AdminProfileSerializer, \
     ReviewListSerializer, AttributeSerializer, AttributeValuesSerializer, AdminFilterAttributeSerializer, \
     SellerCreateSerializer, UpdateSubCategorySerializer, FilteringAttributesSerializer, \
-    AdminProfileSerializer, AdminOrderViewSerializer, AdminOrderListSerializer, AdminOrderUpdateSerializer, AdminCustomerListSerializer, \
+    AdminProfileSerializer, AdminOrderViewSerializer, AdminOrderListSerializer, AdminOrderUpdateSerializer, \
+    AdminCustomerListSerializer, \
     AdminTicketListSerializer, AdminTicketDataSerializer, TicketStatusSerializer, CategoryWiseProductSaleSerializer, \
     CategoryWiseProductStockSerializer, AdminWarrantyListSerializer, AdminShippingClassSerializer, \
-    AdminSpecificationTitleSerializer, AdminSubscribersListSerializer, AdminCorporateDealSerializer, AdminCouponSerializer, VatTypeSerializer, \
+    AdminSpecificationTitleSerializer, AdminSubscribersListSerializer, AdminCorporateDealSerializer, \
+    AdminCouponSerializer, VatTypeSerializer, \
     AdminOfferSerializer, AdminPosProductListSerializer, AdminShippingCountrySerializer, AdminShippingCitySerializer, \
-    AdminShippingStateSerializer, AdminPosOrderSerializer
+    AdminShippingStateSerializer, AdminPosOrderSerializer, AdminCategoryToggleSerializer, AdminProductToggleSerializer, \
+    AdminBlogToggleSerializer
 from cart.models import Order, OrderItem, Coupon
 from cart.models import Order, OrderItem, SubOrder
 from user.models import User, Subscription
@@ -919,7 +925,7 @@ class AdminOrderList(ListAPIView):
             if type == 'in_house_order':
                 queryset = queryset.filter(in_house_order=True)
             if type == 'seller_order':
-                queryset = queryset.filter(is_active=True).order_by('vendor')
+                queryset = queryset.filter(is_active=True,).order_by('vendor')
             if type == 'pick_up_point_order':
                 queryset = queryset.filter(is_active=True, delivery_address__isnull=True).order_by('vendor')
             if queryset:
@@ -2259,3 +2265,20 @@ class AdminSpecificationTitleListAllAPIView(ListAPIView):
         else:
             raise ValidationError({"msg": 'You can not see ticket list data, because you are not an Admin!'})
 # product create related apies................................. end
+
+#toggle button
+class AdminCategoryToggleUpdateAPIView(UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminCategoryToggleSerializer
+    queryset = Category.objects.all()
+
+class AdminProductToggleUpdateAPIView(UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminProductToggleSerializer
+    queryset = Product.objects.all()
+
+
+class AdminBlogToggleUpdateAPIView(UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminBlogToggleSerializer
+    queryset = Blog.objects.all()

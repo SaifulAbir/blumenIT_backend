@@ -17,7 +17,7 @@ from vendor.models import Seller
 from django.db.models import Avg
 from django.utils import timezone
 from support_ticket.models import Ticket, TicketConversation
-from home.models import CorporateDeal
+from home.models import CorporateDeal, Advertisement
 
 
 class SellerCreateSerializer(serializers.ModelSerializer):
@@ -1905,3 +1905,10 @@ class AdminBlogToggleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Blog
         fields = ['id', 'is_active','status']
+
+
+class AdvertisementPosterSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Advertisement
+        fields = ['id', 'image', 'bold_text', 'small_text', 'is_gaming', 'work_for']

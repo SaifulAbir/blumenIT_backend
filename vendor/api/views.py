@@ -13,7 +13,7 @@ from product.models import Brand, Category, DiscountTypes, Product, ProductRevie
     ShippingClass, SpecificationTitle, Offer, ShippingCountry, ShippingState, ShippingCity
 from user.models import User
 from vendor.models import Seller
-from home.models import CorporateDeal
+from home.models import CorporateDeal, Advertisement
 from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategorySerializer, \
     VendorBrandSerializer, AdminCategoryListSerializer, VendorProductListSerializer, \
     ProductUpdateSerializer, VendorProductViewSerializer, AdminSubCategoryListSerializer, \
@@ -32,7 +32,7 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     AdminCouponSerializer, VatTypeSerializer, \
     AdminOfferSerializer, AdminPosProductListSerializer, AdminShippingCountrySerializer, AdminShippingCitySerializer, \
     AdminShippingStateSerializer, AdminPosOrderSerializer, AdminCategoryToggleSerializer, AdminProductToggleSerializer, \
-    AdminBlogToggleSerializer
+    AdminBlogToggleSerializer, AdvertisementPosterSerializer
 from cart.models import Order, OrderItem, Coupon
 from cart.models import Order, OrderItem, SubOrder
 from user.models import User, Subscription
@@ -497,6 +497,7 @@ class AdminDeleteSubSubCategoryAPIView(ListAPIView):
         else:
             raise ValidationError({"msg": 'You can not delete sub sub category, because you are not an Admin!'})
 # Category,SubCategory,SubSubCategory related admin apies views............................ end
+
 
 class AdminBrandListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -2334,11 +2335,12 @@ class AdminSpecificationTitleListAllAPIView(ListAPIView):
 # product create related apies................................. end
 
 
-#toggle button
+#toggle button related apies................................... start
 class AdminCategoryToggleUpdateAPIView(UpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AdminCategoryToggleSerializer
     queryset = Category.objects.all()
+
 
 class AdminProductToggleUpdateAPIView(UpdateAPIView):
     permission_classes = [IsAuthenticated]
@@ -2350,6 +2352,61 @@ class AdminBlogToggleUpdateAPIView(UpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AdminBlogToggleSerializer
     queryset = Blog.objects.all()
+#toggle button related apies................................... end
 
 
-# class
+#Advertisement related apies................................... start
+class AdminAdvertisementListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdvertisementPosterSerializer
+    pagination_class = ProductCustomPagination
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = Advertisement.objects.filter(is_active=True)
+            return queryset
+        else:
+            raise ValidationError({"msg": 'You can not see advertisement list data, because you are not an Admin!'})
+
+
+class AdminAdvertisementCreateAPIView(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdvertisementPosterSerializer
+
+    def post(self, request, *args, **kwargs):
+        if self.request.user.is_superuser == True:
+            return super(AdminAdvertisementCreateAPIView, self).post(request, *args, **kwargs)
+        else:
+            raise ValidationError(
+                {"msg": 'You can not create Advertisement Poster, because you are not an Admin!'})
+
+
+class AdminAdvertisementUpdateAPIView(UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdvertisementPosterSerializer
+    queryset = Advertisement.objects.all()
+
+
+class AdminAdvertisementDeleteAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdvertisementPosterSerializer
+    pagination_class = ProductCustomPagination
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        if self.request.user.is_superuser == True:
+            advertisement_obj_exist = Advertisement.objects.filter(id=id).exists()
+            if advertisement_obj_exist:
+                Advertisement.objects.filter(id=id).update(is_active=False)
+
+                queryset = Advertisement.objects.filter(is_active=True).order_by('-created_at')
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'Advertisement Does not exist!'})
+        else:
+            raise ValidationError({"msg": 'You can not delete Advertisement, because you are not an Admin!'})
+
+#Advertisement related apies................................... end

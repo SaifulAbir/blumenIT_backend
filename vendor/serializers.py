@@ -1905,3 +1905,9 @@ class AdminBlogToggleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Blog
         fields = ['id', 'is_active','status']
+
+
+class AdminProductReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductReview
+        fields = ['id', 'is_active']

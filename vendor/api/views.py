@@ -32,7 +32,7 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     AdminCouponSerializer, VatTypeSerializer, \
     AdminOfferSerializer, AdminPosProductListSerializer, AdminShippingCountrySerializer, AdminShippingCitySerializer, \
     AdminShippingStateSerializer, AdminPosOrderSerializer, AdminCategoryToggleSerializer, AdminProductToggleSerializer, \
-    AdminBlogToggleSerializer
+    AdminBlogToggleSerializer, AdminProductReviewSerializer
 from cart.models import Order, OrderItem, Coupon
 from cart.models import Order, OrderItem, SubOrder
 from user.models import User, Subscription
@@ -75,6 +75,7 @@ class AdminSellerDetailsAPIView(RetrieveAPIView):
 class AdminSellerListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = SellerSerializer
+    pagination_class = ProductCustomPagination
 
     def get_queryset(self):
         if self.request.user.is_superuser == True:
@@ -283,6 +284,7 @@ class AdminProductDeleteAPI(ListAPIView):
 class AdminCategoryListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AdminCategoryListSerializer
+    pagination_class = OrderCustomPagination
 
     def get_queryset(self):
         if self.request.user.is_superuser == True:
@@ -501,6 +503,7 @@ class AdminDeleteSubSubCategoryAPIView(ListAPIView):
 class AdminBrandListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = VendorBrandSerializer
+    pagination_class = OrderCustomPagination
 
     def get_queryset(self):
         if self.request.user.is_superuser == True:
@@ -518,6 +521,7 @@ class AdminBrandListAPIView(ListAPIView):
 class AdminUnitListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = VendorUnitSerializer
+    pagination_class = OrderCustomPagination
 
     def get_queryset(self):
         if self.request.user.is_superuser == True:
@@ -647,6 +651,7 @@ class AdminFlashDealDeleteAPIView(ListAPIView):
 class AdminFlashDealListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = FlashDealInfoSerializer
+    pagination_class = ProductCustomPagination
 
     def get_queryset(self):
         if self.request.user.is_superuser == True:
@@ -681,6 +686,7 @@ class AdminProfileAPIView(RetrieveAPIView):
 class AdminReviewListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ReviewListSerializer
+    pagination_class = ProductCustomPagination
 
     def get_queryset(self):
         if self.request.user.is_superuser == True:
@@ -1747,6 +1753,7 @@ class AdminCouponCreateAPIView(CreateAPIView):
 class AdminCouponListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AdminCouponSerializer
+    pagination_class = ProductCustomPagination
 
     def get_queryset(self):
         if self.request.user.is_superuser == True:
@@ -2337,4 +2344,7 @@ class AdminBlogToggleUpdateAPIView(UpdateAPIView):
     queryset = Blog.objects.all()
 
 
-# class
+class AdminProductReviewToggleAPIView(UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminProductReviewSerializer
+    queryset = ProductReview.objects.all()

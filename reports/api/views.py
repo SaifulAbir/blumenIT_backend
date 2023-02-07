@@ -17,11 +17,11 @@ class SalesReportAPI(ListAPIView):
     def get_queryset(self):
         if self.request.user.is_superuser == True:
             # work with dynamic pagination page_size
-            try:
-                pagination = self.kwargs['pagination']
-            except:
-                pagination = 10
-            self.pagination_class.page_size = pagination
+            # try:
+            #     pagination = self.kwargs['pagination']
+            # except:
+            #     pagination = 10
+            # self.pagination_class.page_size = pagination
 
             queryset = Order.objects.all().order_by('-created_at')
 
@@ -91,11 +91,11 @@ class VendorProductReportAPI(ListAPIView):
     def get_queryset(self):
         if self.request.user.is_superuser == True:
             # work with dynamic pagination page_size
-            try:
-                pagination = self.kwargs['pagination']
-            except:
-                pagination = 10
-            self.pagination_class.page_size = pagination
+            # try:
+            #     pagination = self.kwargs['pagination']
+            # except:
+            #     pagination = 10
+            # self.pagination_class.page_size = pagination
 
             queryset = OrderItem.objects.all().order_by('-created_at')
 
@@ -116,11 +116,11 @@ class VendorProductReportSearchAPI(ListAPIView):
     def get_queryset(self):
         if self.request.user.is_superuser == True:
             # work with dynamic pagination page_size
-            try:
-                pagination = self.kwargs['pagination']
-            except:
-                pagination = 10
-            self.pagination_class.page_size = pagination
+            # try:
+            #     pagination = self.kwargs['pagination']
+            # except:
+            #     pagination = 10
+            # self.pagination_class.page_size = pagination
 
 
             request = self.request
@@ -156,11 +156,11 @@ class InHouseProductReportAPI(ListAPIView):
     def get_queryset(self):
         if self.request.user.is_superuser == True:
             # work with dynamic pagination page_size
-            try:
-                pagination = self.kwargs['pagination']
-            except:
-                pagination = 10
-            self.pagination_class.page_size = pagination
+            # try:
+            #     pagination = self.kwargs['pagination']
+            # except:
+            #     pagination = 10
+            # self.pagination_class.page_size = pagination
 
             queryset = Product.objects.filter(in_house_product=True).order_by('-created_at')
 
@@ -181,11 +181,11 @@ class InHouseProductReportSearchAPI(ListAPIView):
     def get_queryset(self):
         if self.request.user.is_superuser == True:
             # work with dynamic pagination page_size
-            try:
-                pagination = self.kwargs['pagination']
-            except:
-                pagination = 10
-            self.pagination_class.page_size = pagination
+            # try:
+            #     pagination = self.kwargs['pagination']
+            # except:
+            #     pagination = 10
+            # self.pagination_class.page_size = pagination
 
 
             request = self.request
@@ -211,11 +211,11 @@ class SellerProductsSaleReportAPI(ListAPIView):
     def get_queryset(self):
         if self.request.user.is_superuser == True:
             # work with dynamic pagination page_size
-            try:
-                pagination = self.kwargs['pagination']
-            except:
-                pagination = 10
-            self.pagination_class.page_size = pagination
+            # try:
+            #     pagination = self.kwargs['pagination']
+            # except:
+            #     pagination = 10
+            # self.pagination_class.page_size = pagination
 
             queryset = Seller.objects.all().order_by('-created_at')
 
@@ -236,11 +236,11 @@ class SellerProductsSaleReportSearchAPI(ListAPIView):
     def get_queryset(self):
         if self.request.user.is_superuser == True:
             # work with dynamic pagination page_size
-            try:
-                pagination = self.kwargs['pagination']
-            except:
-                pagination = 10
-            self.pagination_class.page_size = pagination
+            # try:
+            #     pagination = self.kwargs['pagination']
+            # except:
+            #     pagination = 10
+            # self.pagination_class.page_size = pagination
 
 
             request = self.request
@@ -266,11 +266,11 @@ class ProductStockReportAPI(ListAPIView):
     def get_queryset(self):
         if self.request.user.is_superuser == True:
             # work with dynamic pagination page_size
-            try:
-                pagination = self.kwargs['pagination']
-            except:
-                pagination = 10
-            self.pagination_class.page_size = pagination
+            # try:
+            #     pagination = self.kwargs['pagination']
+            # except:
+            #     pagination = 10
+            # self.pagination_class.page_size = pagination
 
             queryset = Product.objects.all().order_by('-created_at')
 
@@ -291,11 +291,11 @@ class ProductStockReportSearchAPI(ListAPIView):
     def get_queryset(self):
         if self.request.user.is_superuser == True:
             # work with dynamic pagination page_size
-            try:
-                pagination = self.kwargs['pagination']
-            except:
-                pagination = 10
-            self.pagination_class.page_size = pagination
+            # try:
+            #     pagination = self.kwargs['pagination']
+            # except:
+            #     pagination = 10
+            # self.pagination_class.page_size = pagination
 
 
             request = self.request
@@ -321,11 +321,11 @@ class ProductWishlistReportAPI(ListAPIView):
     def get_queryset(self):
         if self.request.user.is_superuser == True:
             # work with dynamic pagination page_size
-            try:
-                pagination = self.kwargs['pagination']
-            except:
-                pagination = 10
-            self.pagination_class.page_size = pagination
+            # try:
+            #     pagination = self.kwargs['pagination']
+            # except:
+            #     pagination = 10
+            # self.pagination_class.page_size = pagination
 
             queryset = Product.objects.all().order_by('-created_at')
 
@@ -346,11 +346,7 @@ class ProductWishlistReportSearchAPI(ListAPIView):
     def get_queryset(self):
         if self.request.user.is_superuser == True:
             # work with dynamic pagination page_size
-            try:
-                pagination = self.kwargs['pagination']
-            except:
-                pagination = 10
-            self.pagination_class.page_size = pagination
+
 
 
             request = self.request

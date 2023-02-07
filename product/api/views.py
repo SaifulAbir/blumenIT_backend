@@ -409,10 +409,10 @@ class PcBuilderChooseAPIView(ListAPIView):
 
 
         if price_low_to_high:
-            queryset = queryset.order_by('price').distinct('price')
+            queryset = queryset.order_by('price').distinct()
 
         if price_high_to_low:
-            queryset = queryset.order_by('-price').distinct('-price')
+            queryset = queryset.order_by('-price').distinct()
 
 
         return queryset

@@ -71,9 +71,9 @@ class SingleRowDataSerializer(serializers.ModelSerializer):
                 ]
 
 
-class PosterUnderSliderDataSerializer(serializers.ModelSerializer):
+class SliderAdvertisementDataSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PosterUnderSlider
+        model = Advertisement
         fields = [
                 'id',
                 'image',
@@ -81,21 +81,9 @@ class PosterUnderSliderDataSerializer(serializers.ModelSerializer):
                 ]
 
 
-class PosterUnderPopularProductsDataSerializer(serializers.ModelSerializer):
+class AdvertisementDataSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PopularProductsUnderPoster
-        fields = [
-                'id',
-                'image',
-                'bold_text',
-                'small_text',
-                'is_active',
-                ]
-
-
-class PosterUnderFeaturedProductsDataSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = FeaturedProductsUnderPoster
+        model = Advertisement
         fields = [
                 'id',
                 'image',
@@ -103,7 +91,6 @@ class PosterUnderFeaturedProductsDataSerializer(serializers.ModelSerializer):
                 'small_text',
                 'is_active',
                 ]
-
 
 
 class GamingSubSubCategorySerializer(serializers.ModelSerializer):

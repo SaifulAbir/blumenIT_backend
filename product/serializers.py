@@ -7,6 +7,7 @@ from user.models import User
 from vendor.models import StoreSettings
 from django.db.models import Avg
 from rest_framework.exceptions import ValidationError
+from datetime import datetime
 
 class SellerDataSerializer(serializers.ModelSerializer):
     logo = serializers.ImageField(allow_null=True)
@@ -209,7 +210,7 @@ class ProductListBySerializer(serializers.ModelSerializer):
     avg_rating = serializers.SerializerMethodField()
     brand_title= serializers.CharField(source="brand.title",read_only=True)
     product_condition_title= serializers.CharField(source="product_condition.title",read_only=True)
-    review_count = serializers.SerializerMethodField('get_review_count')
+    review_count = serializers.SerializerMethodField('get_is_new')
     product_reviews = serializers.SerializerMethodField()
     seller = SellerDataSerializer()
     category = CategorySerializer()
@@ -218,6 +219,7 @@ class ProductListBySerializer(serializers.ModelSerializer):
     brand = BrandSerializer()
     unit = UnitSerializer()
     total_quantity = serializers.SerializerMethodField()
+    is_new = serializers.SerializerMethodField('get_is_new')
 
     class Meta:
         model = Product
@@ -254,11 +256,27 @@ class ProductListBySerializer(serializers.ModelSerializer):
             'warranty',
             'short_description',
             'full_description',
-            'in_house_product'
+            'in_house_product',
+            'is_new'
+
         ]
 
-    def get_avg_rating(self, ob):
-        return ob.product_review_product.all().aggregate(Avg('rating_number'))['rating_number__avg']
+    def get_is_new(self, obj):
+        create_date = obj.created_at
+        created_month_number = create_date.month
+        created_year_number = create_date.year
+
+        today = datetime.now()
+        today_month = today.month
+        today_year = today.year
+
+        if created_month_number == today_month and created_year_number == today_year:
+            return True
+        else:
+            return False
+
+    def get_avg_rating(self, obj):
+        return obj.product_review_product.all().aggregate(Avg('rating_number'))['rating_number__avg']
 
     def get_product_tags(self, obj):
         selected_product_tags = ProductTags.objects.filter(
@@ -287,6 +305,7 @@ class ProductListBySerializer(serializers.ModelSerializer):
 class ProductListBySerializerForHomeData(serializers.ModelSerializer):
     discount_type = DiscountTypeSerializer()
     total_quantity = serializers.SerializerMethodField()
+    is_new = serializers.SerializerMethodField('get_is_new')
 
     class Meta:
         model = Product
@@ -303,8 +322,23 @@ class ProductListBySerializerForHomeData(serializers.ModelSerializer):
             'discount_amount',
             'thumbnail',
             'warranty',
-            'in_house_product'
+            'in_house_product',
+            'is_new'
         ]
+
+    def get_is_new(self, obj):
+        create_date = obj.created_at
+        created_month_number = create_date.month
+        created_year_number = create_date.year
+
+        today = datetime.now()
+        today_month = today.month
+        today_year = today.year
+
+        if created_month_number == today_month and created_year_number == today_year:
+            return True
+        else:
+            return False
 
     def get_total_quantity(self, obj):
         quantity = Product.objects.get(id=obj.id).quantity

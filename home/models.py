@@ -91,51 +91,6 @@ class HomeSingleRowData(AbstractTimeStamp):
         return f"{self.pk}"
 
 
-class PosterUnderSlider(AbstractTimeStamp):
-    image = models.ImageField(upload_to='HomeImage', default="")
-    is_active = models.BooleanField(null=False, blank=False, default=True)
-
-    class Meta:
-        verbose_name = 'PosterUnderSlider'
-        verbose_name_plural = 'PosterUnderSliders'
-        db_table = 'poster_under_slider'
-
-    def __str__(self):
-        return f"{self.pk}"
-
-
-class PopularProductsUnderPoster(AbstractTimeStamp):
-    image = models.ImageField(upload_to='HomeImage', default="")
-    bold_text = models.TextField(null=True, blank=True)
-    small_text = models.TextField(null=True, blank=True)
-    is_active = models.BooleanField(null=False, blank=False, default=True)
-    is_gaming = models.BooleanField(null=False, blank=False, default=False)
-
-    class Meta:
-        verbose_name = 'PopularProductsUnderPoster'
-        verbose_name_plural = 'PopularProductsUnderPosters'
-        db_table = 'popular_products_under_poster'
-
-    def __str__(self):
-        return f"{self.pk}"
-
-
-class FeaturedProductsUnderPoster(AbstractTimeStamp):
-    image = models.ImageField(upload_to='HomeImage', default="")
-    bold_text = models.TextField(null=True, blank=True)
-    small_text = models.TextField(null=True, blank=True)
-    is_active = models.BooleanField(null=False, blank=False, default=True)
-    is_gaming = models.BooleanField(null=False, blank=False, default=False)
-
-    class Meta:
-        verbose_name = 'FeaturedProductsUnderPoster'
-        verbose_name_plural = 'FeaturedProductsUnderPosters'
-        db_table = 'featured_products_under_poster'
-
-    def __str__(self):
-        return f"{self.pk}"
-
-
 class CorporateDeal(AbstractTimeStamp):
     first_name = models.CharField(max_length=20, blank=True)
     last_name = models.CharField(max_length=20, blank=True)
@@ -181,3 +136,26 @@ class RequestQuote(AbstractTimeStamp):
 
     def __str__(self):
         return self.name
+
+
+class Advertisement(AbstractTimeStamp):
+    WORK_FOR = [
+        ('SLIDER', 'slider'),
+        ('POPULAR_PRODUCT_POSTER', 'popular_product_poster'),
+        ('FEATURED_PRODUCT_POSTER', 'featured_product_poster'),
+    ]
+
+    image = models.ImageField(upload_to='HomeImage', default="")
+    bold_text = models.TextField(null=True, blank=True)
+    small_text = models.TextField(null=True, blank=True)
+    is_gaming = models.BooleanField(null=False, blank=False, default=False)
+    work_for = models.CharField(max_length=30, choices=WORK_FOR, default=WORK_FOR[0][0])
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'Advertisement'
+        verbose_name_plural = 'Advertisements'
+        db_table = 'advertisement'
+
+    def __str__(self):
+        return self.work_for

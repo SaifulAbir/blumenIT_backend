@@ -1,9 +1,8 @@
 from rest_framework.views import APIView
-from home.models import SliderImage, FAQ, ContactUs, HomeSingleRowData, PosterUnderSlider, PopularProductsUnderPoster, \
-    FeaturedProductsUnderPoster, RequestQuote
+from home.models import SliderImage, FAQ, ContactUs, HomeSingleRowData, Advertisement, RequestQuote
 from home.serializers import SliderImagesListSerializer, product_catListSerializer,\
-    ContactUsSerializer, FaqSerializer, SingleRowDataSerializer, PosterUnderSliderDataSerializer, PosterUnderPopularProductsDataSerializer, \
-    PosterUnderFeaturedProductsDataSerializer, StoreCategoryAPIViewListSerializer, product_sub_catListSerializer, \
+    ContactUsSerializer, FaqSerializer, SingleRowDataSerializer, SliderAdvertisementDataSerializer, AdvertisementDataSerializer, \
+    StoreCategoryAPIViewListSerializer, product_sub_catListSerializer, \
     CorporateDealCreateSerializer, RequestQuoteSerializer
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -50,16 +49,16 @@ class   HomeDataAPIView(APIView):
         single_row_data_serializer = SingleRowDataSerializer(single_row_data, many=True, context={"request": request})
 
         # poster under slider
-        poster_under_data = PosterUnderSlider.objects.filter(Q(is_active=True)).order_by('-created_at')[:3]
-        poster_under_data_serializer = PosterUnderSliderDataSerializer(poster_under_data, many=True, context={"request": request})
+        poster_under_data = Advertisement.objects.filter(Q(work_for='SLIDER'), Q(is_active=True), Q(is_gaming=False)).order_by('-created_at')[:3]
+        poster_under_data_serializer = SliderAdvertisementDataSerializer(poster_under_data, many=True, context={"request": request})
 
         # poster under popular products
-        poster_under_popular_products_data = PopularProductsUnderPoster.objects.filter(Q(is_active=True)).order_by('-created_at')[:3]
-        poster_under_popular_products_data_serializer = PosterUnderPopularProductsDataSerializer(poster_under_popular_products_data, many=True, context={"request": request})
+        poster_under_popular_products_data = Advertisement.objects.filter(Q(work_for='POPULAR_PRODUCT_POSTER'), Q(is_active=True), Q(is_gaming=False)).order_by('-created_at')[:3]
+        poster_under_popular_products_data_serializer = AdvertisementDataSerializer(poster_under_popular_products_data, many=True, context={"request": request})
 
         # poster under featured products
-        poster_under_featured_products_data = FeaturedProductsUnderPoster.objects.filter(Q(is_active=True)).order_by('-created_at')[:3]
-        poster_under_featured_products_data_serializer = PosterUnderFeaturedProductsDataSerializer(poster_under_featured_products_data, many=True, context={"request": request})
+        poster_under_featured_products_data = Advertisement.objects.filter(Q(work_for='FEATURED_PRODUCT_POSTER'), Q(is_active=True), Q(is_gaming=False)).order_by('-created_at')[:3]
+        poster_under_featured_products_data_serializer = AdvertisementDataSerializer(poster_under_featured_products_data, many=True, context={"request": request})
 
         return Response({
             "slider_images": slider_images_serializer.data,

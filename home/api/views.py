@@ -96,16 +96,16 @@ class  GamingDataAPIView(APIView):
         popular_serializer = ProductListBySerializer(popular, many=True, context={"request": request})
 
         # poster under popular products
-        poster_under_popular_products_data = PopularProductsUnderPoster.objects.filter(Q(is_active=True), Q(is_gaming=True)).order_by('-created_at')[:3]
-        poster_under_popular_products_data_serializer = PosterUnderPopularProductsDataSerializer(poster_under_popular_products_data, many=True, context={"request": request})
+        poster_under_popular_products_data = Advertisement.objects.filter(Q(work_for='POPULAR_PRODUCT_POSTER'), Q(is_active=True), Q(is_gaming=True)).order_by('-created_at')[:3]
+        poster_under_popular_products_data_serializer = AdvertisementDataSerializer(poster_under_popular_products_data, many=True, context={"request": request})
 
         # featured
         featured = Product.objects.filter(category__is_gaming__icontains=True, status='PUBLISH', is_featured=True).order_by('-created_at')
         featured_serializer = ProductListBySerializer(featured, many=True, context={"request": request})
 
         # poster under featured products
-        poster_under_featured_products_data = FeaturedProductsUnderPoster.objects.filter(Q(is_active=True), Q(is_gaming=True)).order_by('-created_at')[:3]
-        poster_under_featured_products_data_serializer = PosterUnderFeaturedProductsDataSerializer(poster_under_featured_products_data, many=True, context={"request": request})
+        poster_under_featured_products_data = Advertisement.objects.filter(Q(work_for='FEATURED_PRODUCT_POSTER'), Q(is_active=True), Q(is_gaming=True)).order_by('-created_at')[:3]
+        poster_under_featured_products_data_serializer = AdvertisementDataSerializer(poster_under_featured_products_data, many=True, context={"request": request})
 
         # brand list
         brand_list = Brand.objects.filter(is_active=True, is_gaming=True).order_by('-created_at')

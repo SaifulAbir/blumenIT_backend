@@ -550,14 +550,13 @@ class AdminAccountDeleteAPIView(UpdateAPIView):
     # user = User.objects.get(pk=pk)
     # print(name)
     subject = "Confirmation of account deletion"
-    html_message = 'Hello User,' \
-                   'Your account delete request has been approved'
+    html_message = render_to_string('confirmation_of_account_delete.html')
 
     send_mail(
         subject=subject,
-        message=html_message,
+        message=None,
         from_email=settings.EMAIL_HOST_USER,
         recipient_list=[email],
-        # html_message=html_message
+        html_message=html_message
     )
 

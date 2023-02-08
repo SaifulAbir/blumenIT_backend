@@ -1571,6 +1571,7 @@ class AdminShippingCountrySerializer(serializers.ModelSerializer):
     class Meta:
         model = ShippingCountry
         fields = [
+            'id',
             'title',
             'code',
         ]

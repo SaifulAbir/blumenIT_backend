@@ -13,7 +13,7 @@ from product.models import Brand, Category, DiscountTypes, Product, ProductRevie
     ShippingClass, SpecificationTitle, Offer, ShippingCountry, ShippingState, ShippingCity
 from user.models import User
 from vendor.models import Seller
-from home.models import CorporateDeal
+from home.models import CorporateDeal, Advertisement
 from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategorySerializer, \
     VendorBrandSerializer, AdminCategoryListSerializer, VendorProductListSerializer, \
     ProductUpdateSerializer, VendorProductViewSerializer, AdminSubCategoryListSerializer, \
@@ -32,7 +32,7 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     AdminCouponSerializer, VatTypeSerializer, \
     AdminOfferSerializer, AdminPosProductListSerializer, AdminShippingCountrySerializer, AdminShippingCitySerializer, \
     AdminShippingStateSerializer, AdminPosOrderSerializer, AdminCategoryToggleSerializer, AdminProductToggleSerializer, \
-    AdminBlogToggleSerializer, AdminProductReviewSerializer
+    AdminBlogToggleSerializer, AdminProductReviewSerializer, AdvertisementPosterSerializer
 from cart.models import Order, OrderItem, Coupon
 from cart.models import Order, OrderItem, SubOrder
 from user.models import User, Subscription
@@ -500,6 +500,7 @@ class AdminDeleteSubSubCategoryAPIView(ListAPIView):
             raise ValidationError({"msg": 'You can not delete sub sub category, because you are not an Admin!'})
 # Category,SubCategory,SubSubCategory related admin apies views............................ end
 
+
 class AdminBrandListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = VendorBrandSerializer
@@ -925,6 +926,7 @@ class AdminOrderList(ListAPIView):
         if self.request.user.is_superuser == True:
             request = self.request
             type = request.GET.get('type')
+            order_status = request.GET.get('order_status')
 
             queryset = Order.objects.filter(is_active=True).order_by('-created_at')
 
@@ -934,6 +936,20 @@ class AdminOrderList(ListAPIView):
                 queryset = queryset.filter(is_active=True, vendor__isnull=False).order_by('vendor')
             if type == 'pick_up_point_order':
                 queryset = queryset.filter(is_active=True, delivery_address__isnull=True).order_by('vendor')
+
+            if order_status == 'PENDING':
+                queryset = queryset.filter(order_status = 'PENDING', is_active=True)
+            if order_status == 'CONFIRMED':
+                queryset = queryset.filter(order_status = 'CONFIRMED', is_active=True)
+            if order_status == 'PICKED-UP':
+                queryset = queryset.filter(order_status = 'PICKED-UP', is_active=True)
+            if order_status == 'DELIVERED':
+                queryset = queryset.filter(order_status = 'DELIVERED', is_active=True)
+            if order_status == 'RETURN':
+                queryset = queryset.filter(order_status = 'RETURN', is_active=True)
+            if order_status == 'CANCEL':
+                queryset = queryset.filter(order_status = 'CANCEL', is_active=True)
+
             if queryset:
                 return queryset
             else:
@@ -2326,11 +2342,12 @@ class AdminSpecificationTitleListAllAPIView(ListAPIView):
 # product create related apies................................. end
 
 
-#toggle button
+#toggle button related apies................................... start
 class AdminCategoryToggleUpdateAPIView(UpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AdminCategoryToggleSerializer
     queryset = Category.objects.all()
+
 
 class AdminProductToggleUpdateAPIView(UpdateAPIView):
     permission_classes = [IsAuthenticated]
@@ -2342,9 +2359,65 @@ class AdminBlogToggleUpdateAPIView(UpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AdminBlogToggleSerializer
     queryset = Blog.objects.all()
+#toggle button related apies................................... end
 
 
 class AdminProductReviewToggleAPIView(UpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AdminProductReviewSerializer
     queryset = ProductReview.objects.all()
+#Advertisement related apies................................... start
+class AdminAdvertisementListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdvertisementPosterSerializer
+    pagination_class = ProductCustomPagination
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = Advertisement.objects.filter(is_active=True)
+            return queryset
+        else:
+            raise ValidationError({"msg": 'You can not see advertisement list data, because you are not an Admin!'})
+
+
+class AdminAdvertisementCreateAPIView(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdvertisementPosterSerializer
+
+    def post(self, request, *args, **kwargs):
+        if self.request.user.is_superuser == True:
+            return super(AdminAdvertisementCreateAPIView, self).post(request, *args, **kwargs)
+        else:
+            raise ValidationError(
+                {"msg": 'You can not create Advertisement Poster, because you are not an Admin!'})
+
+
+class AdminAdvertisementUpdateAPIView(UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdvertisementPosterSerializer
+    queryset = Advertisement.objects.all()
+
+
+class AdminAdvertisementDeleteAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdvertisementPosterSerializer
+    pagination_class = ProductCustomPagination
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        if self.request.user.is_superuser == True:
+            advertisement_obj_exist = Advertisement.objects.filter(id=id).exists()
+            if advertisement_obj_exist:
+                Advertisement.objects.filter(id=id).update(is_active=False)
+
+                queryset = Advertisement.objects.filter(is_active=True).order_by('-created_at')
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'Advertisement Does not exist!'})
+        else:
+            raise ValidationError({"msg": 'You can not delete Advertisement, because you are not an Admin!'})
+
+#Advertisement related apies................................... end

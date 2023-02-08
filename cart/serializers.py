@@ -344,14 +344,14 @@ class CheckoutSerializer(serializers.ModelSerializer):
         # work with coupon end
 
         # send email to the user
-        # user = User.objects.get(user=self.context['request'].user)
         user = self.context['request'].user
         username = user.username
         email = user.email
         name = user.name
         subject = "Your order has been successfully placed."
-        # html_message = render_to_string('dedication_info.html', {'username':username, 'dedicated_name' : name})
-        html_message = 'hello'
+        # html_message = render_to_string('order_details.html', {'username':username, 'dedicated_name' : name})
+        html_message = render_to_string('order_details.html', {'username':username, 'dedicated_name' : name})
+        # html_message = 'hello'
 
         send_mail(
             subject=subject,

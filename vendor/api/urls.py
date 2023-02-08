@@ -28,7 +28,8 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminUnitListAllAPIView, AdminSellerListAllAPIView, AdminVatTypeListAllAPIView, AdminVideoProviderListAllAPIView, \
     AdminDiscountTypeListAllAPIView, AdminFilterAttributeListAllAPIView, AdminFlashDealListAllAPIView, AdminWarrantyListAllAPIView, \
     AdminVideoProviderCreateAPIView, AdminVideoProviderUpdateAPIView, AdminSpecificationTitleListAllAPIView, AdminVideoProviderDeleteAPI, \
-    AdminProductToggleUpdateAPIView, AdminCategoryToggleUpdateAPIView, AdminBlogToggleUpdateAPIView, AdminProductReviewToggleAPIView
+    AdminProductToggleUpdateAPIView, AdminCategoryToggleUpdateAPIView, AdminBlogToggleUpdateAPIView, AdminProductReviewToggleAPIView, AdminAdvertisementListAPIView, \
+    AdminAdvertisementCreateAPIView, AdminAdvertisementUpdateAPIView, AdminAdvertisementDeleteAPIView
 
 urlpatterns = [
 
@@ -226,14 +227,18 @@ urlpatterns = [
     # ticket apies
     path('admin/ticket-list/', AdminTicketListAPIView.as_view()),
     path('admin/ticket-details/<int:id>/', AdminTicketDetailsAPIView.as_view()),
-    
-    
+
     #toggle apies
     path('admin/toggle-category/<int:pk>/', AdminCategoryToggleUpdateAPIView.as_view()),
     path('admin/toggle-product/<int:pk>/', AdminProductToggleUpdateAPIView.as_view()),
     path('admin/toggle-blog/<int:pk>/', AdminBlogToggleUpdateAPIView.as_view()),
     path('admin/toggle-product-review/<int:pk>/', AdminProductReviewToggleAPIView.as_view()),
 
+    # advertisement apies
+    path('admin/advertisement-poster-list/', AdminAdvertisementListAPIView.as_view()),
+    path('admin/advertisement-poster-create/', AdminAdvertisementCreateAPIView.as_view()),
+    path('admin/advertisement-poster-update/<int:id>/', AdminAdvertisementUpdateAPIView.as_view()),
+    path('admin/advertisement-poster-delete/<int:id>/', AdminAdvertisementDeleteAPIView.as_view()),
 
 ]
 

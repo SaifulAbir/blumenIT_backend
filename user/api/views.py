@@ -541,22 +541,30 @@ class AdminAccountDeleteRequestListAPIView(ListAPIView):
     queryset = User.objects.filter(delete_request=True)
 
 
-class AdminAccountDeleteAPIView(UpdateAPIView):
+class AdminAccountDeleteAPIView(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AccountDeleteSerializer
-    queryset = User.objects.all()
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
     # print(queryset)
-    email = 'islam.jubayedul@gonsave.co'
+    def get_object(self):
+        id = self.kwargs['id']
+        user = User.objects.get(id=id)
+        print(user.is_active)
+        print(user.email)
+
+
+    # email = ''
     # user = User.objects.get(pk=pk)
     # print(name)
-    subject = "Confirmation of account deletion"
-    html_message = render_to_string('confirmation_of_account_delete.html')
-
-    send_mail(
-        subject=subject,
-        message=None,
-        from_email=settings.EMAIL_HOST_USER,
-        recipient_list=[email],
-        html_message=html_message
-    )
+    # subject = "Confirmation of account deletion"
+    # html_message = render_to_string('confirmation_of_account_delete.html')
+    #
+    # send_mail(
+    #     subject=subject,
+    #     message=None,
+    #     from_email=settings.EMAIL_HOST_USER,
+    #     recipient_list=[email],
+    #     html_message=html_message
+    # )
 

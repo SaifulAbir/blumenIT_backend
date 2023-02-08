@@ -424,3 +424,12 @@ class AccountDeleteRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'name','delete_request', 'is_active']
+
+
+class AccountDeleteSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ['id', 'name','delete_request', 'is_active']
+
+

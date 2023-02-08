@@ -3,6 +3,7 @@ from time import time
 import pytz
 from django.conf import settings
 from django.contrib.auth.hashers import check_password, make_password
+from django.core.mail import send_mail
 from django.db.models import Q
 from datetime import datetime
 from rest_framework import viewsets, mixins, status, generics
@@ -29,7 +30,7 @@ from rest_framework.views import APIView
 from user.serializers import  SubscriptionSerializer,  \
     ChangePasswordSerializer, OTPSendSerializer, OTPVerifySerializer, OTPReSendSerializer, SetPasswordSerializer, CustomerOrderListSerializer, \
     CustomerOrderDetailsSerializer, CustomerProfileSerializer, CustomerAddressListSerializer, CustomerAddressSerializer, \
-    WishlistDataSerializer, SavePcCreateSerializer, SavaPcDataSerializer, SavePcDetailsSerializer, AccountDeleteRequestSerializer
+    WishlistDataSerializer, SavePcCreateSerializer, SavaPcDataSerializer, SavePcDetailsSerializer, AccountDeleteRequestSerializer, AccountDeleteSerializer
 
 from vendor.pagination import OrderCustomPagination
 from cart.models import Order, DeliveryAddress, Wishlist
@@ -542,5 +543,21 @@ class AdminAccountDeleteRequestListAPIView(ListAPIView):
 
 class AdminAccountDeleteAPIView(UpdateAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = AccountDeleteRequestSerializer
+    serializer_class = AccountDeleteSerializer
     queryset = User.objects.all()
+    # print(queryset)
+    email = 'islam.jubayedul@gonsave.co'
+    # user = User.objects.get(pk=pk)
+    # print(name)
+    subject = "Confirmation of account deletion"
+    html_message = 'Hello User,' \
+                   'Your account delete request has been approved'
+
+    send_mail(
+        subject=subject,
+        message=html_message,
+        from_email=settings.EMAIL_HOST_USER,
+        recipient_list=[email],
+        # html_message=html_message
+    )
+

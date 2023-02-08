@@ -141,7 +141,7 @@ class AdminBlogListAPIView(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True:
-            queryset = Blog.objects.filter(is_active=True)
+            queryset = Blog.objects.filter(is_active=True).order_by('-created_at')
             if queryset:
                 return queryset
             else:

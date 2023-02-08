@@ -558,7 +558,7 @@ class OffersListAPIView(ListAPIView):
     serializer_class = AdminOfferSerializer
 
     def get_queryset(self):
-        queryset = Offer.objects.filter(is_active=True)
+        queryset = Offer.objects.filter(is_active=True).order_by('-created_at')
         if queryset:
             return queryset
         else:

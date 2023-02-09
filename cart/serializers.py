@@ -262,6 +262,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
         if order_items:
             count = 0
             vat_amount_list = []
+            sub_total = 0.0
             for order_item in order_items:
                 product = order_item['product']
                 quantity = order_item['quantity']
@@ -286,9 +287,11 @@ class CheckoutSerializer(serializers.ModelSerializer):
                         unit_price_after_add_warranty = unit_price + unit_price_after_add_warranty
 
                     total_price =  float(unit_price_after_add_warranty) * float(quantity)
+                    sub_total += total_price
 
                     OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty)
                 else:
+                    sub_total += total_price
                     OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price)
 
                 # update inventory
@@ -348,9 +351,24 @@ class CheckoutSerializer(serializers.ModelSerializer):
         username = user.username
         email = user.email
         name = user.name
+        order_id = order_instance.order_id
+        created_at = order_instance.created_at.strftime("%Y-%m-%d, %H:%M:%S")
+        payment_type = order_instance.payment_type.type_name
+        vat_amount = sum(vat_amount_list)
+        shipping_cost = order_instance.shipping_cost
+        coupon_discount_amount = order_instance.coupon_discount_amount
+        grand_total_price = (float(sub_total) + float(vat_amount) + float(shipping_cost)) - float(coupon_discount_amount)
+        delivery_days = ShippingClass.objects.get(id=order_instance.shipping_class.id).delivery_days
+        order_date = order_instance.order_date
+        order_date_c = datetime.datetime.strptime(str(order_date), "%Y-%m-%d")
+        delivery_date = order_date_c + datetime.timedelta(days=int(delivery_days))
+        delivery_date = delivery_date.date()
+        print("delivery_date")
+        print(delivery_date)
+        order_items = OrderItem.objects.filter(order=order_instance)
         subject = "Your order has been successfully placed."
         # html_message = render_to_string('order_details.html', {'username':username, 'dedicated_name' : name})
-        html_message = render_to_string('order_details.html', {'username':username, 'dedicated_name' : name})
+        html_message = render_to_string('order_details.html', {'username':username, 'email' : email, 'name': name, 'order_id': order_id, 'created_at': created_at, 'order_items': order_items, 'payment_type': payment_type, 'sub_total': sub_total, 'shipping_cost': shipping_cost, 'vat_amount': vat_amount, 'coupon_discount_amount': coupon_discount_amount, 'grand_total_price': grand_total_price, 'delivery_date': delivery_date})
         # html_message = 'hello'
 
         send_mail(

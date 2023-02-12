@@ -352,7 +352,7 @@ class VendorProductListForFrondEndAPI(ListAPIView):
             try:
                 vendor = Vendor.objects.get(id=vid)
                 queryset = Product.objects.filter(
-                    vendor=vendor, status='ACTIVE').order_by('-created_at')
+                    vendor=vendor, status='PUBLISH').order_by('-created_at')
             except:
                 raise ValidationError({"details": "Vendor Not Valid.!"})
         else:

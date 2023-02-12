@@ -547,24 +547,36 @@ class AdminAccountDeleteAPIView(RetrieveUpdateAPIView):
     lookup_field = 'id'
     lookup_url_kwarg = "id"
     # print(queryset)
-    def get_object(self):
+    def get_queryset(self):
         id = self.kwargs['id']
         user = User.objects.get(id=id)
         print(user.is_active)
         print(user.email)
+        return user
+
+    def put(self, request, *args, **kwargs):
+        user = self.get_queryset()
+        request = self.request
+
+        active = request.GET.get('is_active')
+        print(active)
+        print(user.email)
+        # return render_to_string('confirmation_of_account_delete.html', {'active' : active})
 
 
-    # email = ''
-    # user = User.objects.get(pk=pk)
-    # print(name)
-    # subject = "Confirmation of account deletion"
-    # html_message = render_to_string('confirmation_of_account_delete.html')
-    #
-    # send_mail(
-    #     subject=subject,
-    #     message=None,
-    #     from_email=settings.EMAIL_HOST_USER,
-    #     recipient_list=[email],
-    #     html_message=html_message
-    # )
+        email = user.email
+        # user = User.objects.get(pk=pk)
+        # print(user.name)
+        subject = "Confirmation of account deletion"
+        html_message = render_to_string('confirmation_of_account_delete.html', {'active' : active, 'user':user})
+
+        send_mail(
+            subject=subject,
+            message=None,
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[email],
+            html_message=html_message
+        )
+
+        return user
 

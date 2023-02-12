@@ -28,7 +28,7 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminUnitListAllAPIView, AdminSellerListAllAPIView, AdminVatTypeListAllAPIView, AdminVideoProviderListAllAPIView, \
     AdminDiscountTypeListAllAPIView, AdminFilterAttributeListAllAPIView, AdminFlashDealListAllAPIView, AdminWarrantyListAllAPIView, \
     AdminVideoProviderCreateAPIView, AdminVideoProviderUpdateAPIView, AdminSpecificationTitleListAllAPIView, AdminVideoProviderDeleteAPI, \
-    AdminProductToggleUpdateAPIView, AdminCategoryToggleUpdateAPIView, AdminBlogToggleUpdateAPIView, AdminProductReviewToggleAPIView, AdminAdvertisementListAPIView, \
+    AdminProductToggleUpdateAPIView, AdminCategoryToggleUpdateAPIView, AdminBlogToggleUpdateAPIView, AdminProductReviewToggleAPIView, AdminAdvertisementListAPIView, AdminProductUpdateDetailsAPIView, \
     AdminAdvertisementCreateAPIView, AdminAdvertisementUpdateAPIView, AdminAdvertisementDeleteAPIView
 
 urlpatterns = [
@@ -41,6 +41,7 @@ urlpatterns = [
     path('admin/seller-details/<int:id>/', AdminSellerDetailsAPIView.as_view()),
     path('admin/product-create/', AdminProductCreateAPIView.as_view()),
     path('admin/product-update/<str:slug>/',AdminProductUpdateAPIView.as_view()),
+    path('admin/product-update-details/<str:slug>/',AdminProductUpdateDetailsAPIView.as_view()),
     path('admin/product-list/', AdminProductListAPI.as_view()),
     path('admin/product-list-search/', AdminProductListSearchAPI.as_view()),
     path('admin/product-delete/<str:slug>/',AdminProductDeleteAPI.as_view()),
@@ -85,7 +86,7 @@ urlpatterns = [
 
     # Review related apies
     path('admin/review-list/', AdminReviewListAPIView.as_view()),
-    path('admin/review-list/<int:id>/', AdminReviewInactiveAPIView.as_view()),
+    path('admin/review-inactive/<int:id>/', AdminReviewInactiveAPIView.as_view()),
     path('admin/review-search/', ReviewSearchAPI.as_view()),
 
 

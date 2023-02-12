@@ -104,7 +104,7 @@ class AdminCategoryListSerializer(serializers.ModelSerializer):
     class Meta:
         ref_name = "admin category list serializer"
         model = Category
-        fields = ['id', 'title', 'ordering_number', 'type', 'banner', 'icon']
+        fields = ['id', 'title', 'ordering_number', 'type', 'banner', 'icon', 'is_featured']
 
 
 class AddNewCategorySerializer(serializers.ModelSerializer):
@@ -416,7 +416,8 @@ class VendorProductListSerializer(serializers.ModelSerializer):
             'todays_deal',
             'is_featured',
             'is_active',
-            'in_house_product'
+            'in_house_product',
+            'status'
         ]
 
     def get_avg_rating(self, obj):

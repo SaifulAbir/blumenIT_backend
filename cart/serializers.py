@@ -357,14 +357,35 @@ class CheckoutSerializer(serializers.ModelSerializer):
         vat_amount = sum(vat_amount_list)
         shipping_cost = order_instance.shipping_cost
         coupon_discount_amount = order_instance.coupon_discount_amount
-        grand_total_price = (float(sub_total) + float(vat_amount) + float(shipping_cost)) - float(coupon_discount_amount)
-        delivery_days = ShippingClass.objects.get(id=order_instance.shipping_class.id).delivery_days
-        order_date = order_instance.order_date
-        order_date_c = datetime.datetime.strptime(str(order_date), "%Y-%m-%d")
-        delivery_date = order_date_c + datetime.timedelta(days=int(delivery_days))
-        delivery_date = delivery_date.date()
-        print("delivery_date")
-        print(delivery_date)
+
+        # grand total price calculation start
+        try:
+            sub_total_amount = float(sub_total)
+        except:
+            sub_total_amount = 0.0
+        try:
+            vat_amount_data = float(vat_amount)
+        except:
+            vat_amount_data = 0.0
+        try:
+            shipping_cost_amount = float(shipping_cost)
+        except:
+            shipping_cost_amount = 0.0
+        try:
+            coupon_discount_amount_data = float(coupon_discount_amount)
+        except:
+            coupon_discount_amount_data = 0.0
+        grand_total_price = (sub_total_amount + vat_amount_data + shipping_cost_amount) - coupon_discount_amount_data
+        # grand total price calculation end
+
+        try:
+            delivery_days = ShippingClass.objects.get(id=order_instance.shipping_class.id).delivery_days
+            order_date = order_instance.order_date
+            order_date_c = datetime.datetime.strptime(str(order_date), "%Y-%m-%d")
+            delivery_date = order_date_c + datetime.timedelta(days=int(delivery_days))
+            delivery_date = delivery_date.date()
+        except:
+            delivery_date = None
         order_items = OrderItem.objects.filter(order=order_instance)
         subject = "Your order has been successfully placed."
         # html_message = render_to_string('order_details.html', {'username':username, 'dedicated_name' : name})

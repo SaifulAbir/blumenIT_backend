@@ -59,7 +59,7 @@ class ProductDetailsAPI(RetrieveAPIView):
 
 class ProductListAPI(ListAPIView):
     permission_classes = (AllowAny,)
-    queryset = Product.objects.filter(status='ACTIVE').order_by('-created_at')
+    queryset = Product.objects.filter(Q(status='PUBLISH') | Q(is_active=True)).order_by('-created_at')
     serializer_class = ProductListBySerializer
     pagination_class = ProductCustomPagination
 

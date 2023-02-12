@@ -823,167 +823,60 @@ class VendorProductViewSerializer(serializers.ModelSerializer):
 
 # product update serializer start
 class ProductUpdateSerializer(serializers.ModelSerializer):
-    product_category_name = serializers.SerializerMethodField()
-    product_sub_category_name = serializers.SerializerMethodField()
-    product_sub_sub_category_name = serializers.SerializerMethodField()
-    product_brand_name = serializers.SerializerMethodField()
-    product_unit_name = serializers.SerializerMethodField()
-    existing_product_tags = serializers.SerializerMethodField()
     product_tags = serializers.ListField(child=serializers.CharField(), write_only=True, required=False)
-    existing_product_images = serializers.SerializerMethodField()
-    product_images = serializers.ListField(
-        child=serializers.FileField(), write_only=True, required=False)
-    existing_product_specification = serializers.SerializerMethodField('get_product_specification')
-    product_specification = ProductSpecificationSerializer(
-        many=True, required=False)
-    existing_flash_deal = serializers.SerializerMethodField('get_flash_deal')
-    flash_deal = FlashDealSerializer(
-        many=True, required=False)
-    update_quantity = serializers.IntegerField(required=False, write_only=True)
-    vat_type = VatTypeSerializer(many=False, required=False)
-    existing_product_filter_attributes = serializers.SerializerMethodField('get_product_filter_attributes')
+    product_images = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
+    product_specification = ProductSpecificationSerializer(many=True, required=False)
+    flash_deal = FlashDealSerializer(many=True, required=False)
+    quantity = serializers.IntegerField(required=False, write_only=True)
     product_filter_attributes = ProductFilterAttributesSerializer(many=True, required=False)
-    existing_product_warranties = serializers.SerializerMethodField('get_product_warranties')
     product_warranties = ProductWarrantiesSerializer(many=True, required=False)
-    old_price = serializers.FloatField(read_only=True)
-
 
     class Meta:
         model = Product
         fields =[
                     'id',
                     'title',
-                    'product_category_name',
                     'category',
-                    'product_sub_category_name',
                     'sub_category',
-                    'product_sub_sub_category_name',
                     'sub_sub_category',
-                    'product_brand_name',
                     'brand',
-                    'seller',
-                    'product_unit_name',
                     'unit',
+                    'seller',
                     'minimum_purchase_quantity',
-                    'existing_product_tags',
                     'product_tags',
                     'bar_code',
                     'refundable',
-                    'existing_product_images',
-                    'product_images',
-                    'thumbnail',
                     'video_provider',
                     'video_link',
                     'price',
-                    'old_price',
                     'pre_payment_amount',
                     'discount_start_date',
                     'discount_end_date',
                     'discount_amount',
                     'discount_type',
-                    'update_quantity',
+                    'quantity',
                     'sku',
                     'external_link',
                     'external_link_button_text',
-                    'full_description',
-                    'active_short_description',
-                    'short_description',
-                    'existing_product_specification',
-                    'product_specification',
                     'low_stock_quantity_warning',
+                    'vat',
+                    'vat_type',
+                    'active_short_description',
                     'show_stock_quantity',
                     'in_house_product',
                     'whole_sale_product',
                     'cash_on_delivery',
                     'is_featured',
                     'todays_deal',
-                    'existing_flash_deal',
-                    'flash_deal',
-                    'vat',
-                    'vat_type',
-                    'existing_product_filter_attributes',
+                    'full_description',
+                    'short_description',
+                    'thumbnail',
+                    'product_images',
                     'product_filter_attributes',
-                    'existing_product_warranties',
-                    'product_warranties'
+                    'flash_deal',
+                    'product_warranties',
+                    'product_specification',
                 ]
-
-    def get_product_category_name(self, obj):
-        try:
-            get_cat=Category.objects.get(id= obj.category.id)
-            return get_cat.title
-        except:
-            return ''
-
-    def get_product_sub_category_name(self, obj):
-        try:
-            get_sub_cat=SubCategory.objects.get(id= obj.sub_category.id)
-            return get_sub_cat.title
-        except:
-            return ''
-
-    def get_product_sub_sub_category_name(self, obj):
-        try:
-            get_sub_sub_cat=SubSubCategory.objects.get(id= obj.sub_sub_category.id)
-            return get_sub_sub_cat.title
-        except:
-            return ''
-
-    def get_product_brand_name(self, obj):
-        try:
-            get_brand=Brand.objects.get(id= obj.brand.id)
-            return get_brand.title
-        except:
-            return ''
-
-    def get_product_unit_name(self, obj):
-        try:
-            get_unit=Units.objects.get(id= obj.unit.id)
-            return get_unit.title
-        except:
-            return ''
-
-    def get_existing_product_tags(self, obj):
-        tags_list = []
-        try:
-            selected_product_tags = ProductTags.objects.filter(
-                product=obj, is_active=True).distinct()
-            for s_p_t in selected_product_tags:
-                tag_title = s_p_t.tag.title
-                tags_list.append(tag_title)
-            return tags_list
-        except:
-            return tags_list
-
-    def get_existing_product_images(self, obj):
-        try:
-            queryset = ProductImages.objects.filter(
-                product=obj, is_active=True).distinct()
-            serializer = ProductImageSerializer(instance=queryset, many=True, context={
-                                                'request': self.context['request']})
-            return serializer.data
-        except:
-            return []
-
-    def get_product_specification(self, product):
-        queryset = Specification.objects.filter(product=product, is_active = True)
-        serializer = ProductExistingSpecificationSerializer(instance=queryset, many=True)
-        return serializer.data
-
-    def get_flash_deal(self, product):
-        queryset = FlashDealProduct.objects.filter(product=product, is_active = True)
-        serializer = FlashDealExistingSerializer(instance=queryset, many=True)
-        return serializer.data
-
-    def get_product_filter_attributes(self, product):
-        queryset = ProductFilterAttributes.objects.filter(product=product, is_active = True)
-        serializer = ProductFilterAttributesSerializer(instance=queryset, many=True)
-        return serializer.data
-
-    def get_product_warranties(self, product):
-        queryset = ProductWarranty.objects.filter(product=product, is_active = True)
-        serializer = ProductWarrantiesSerializer(instance=queryset, many=True)
-        return serializer.data
-
 
     def update(self, instance, validated_data):
         # validation for sku start
@@ -1075,8 +968,8 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
             price = ''
 
 
+        # tags
         try:
-            # tags
             if product_tags:
                 ProductTags.objects.filter(product=instance).delete()
                 for tag in product_tags:
@@ -1097,20 +990,25 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
                             pass
             else:
                 ProductTags.objects.filter(product=instance).delete()
+        except:
+            raise ValidationError('Problem of Product Tags update.')
 
-            # product_images
+        # product_images
+        try:
             if product_images:
                 for image in product_images:
                     ProductImages.objects.create(
                         product=instance, file=image, status="COMPLETE")
+        except:
+            raise ValidationError('Problem of Product Image update.')
 
-            # product with out variants
-            try:
-                single_quantity = validated_data["update_quantity"]
-            except:
-                single_quantity = ''
+        # product with out variants
+        try:
+            single_quantity = validated_data["quantity"]
+        except:
+            single_quantity = ''
 
-
+        try:
             if single_quantity:
                 quan = Product.objects.get(id=instance.id).quantity
                 total_quan = Product.objects.get(id=instance.id).total_quantity
@@ -1123,8 +1021,11 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
                     current_qun = int(latest_inventory_obj.current_quantity) + int(single_quantity)
                     Inventory.objects.create(product=instance, initial_quantity=single_quantity, current_quantity=current_qun)
                     validated_data.update({"quantity" : quan, "total_quantity": total_quan})
+        except:
+            raise ValidationError('Problem of Product Quantity update.')
 
-            # product_specification
+        # product_specification
+        try:
             if product_specification:
                 specification_value = SpecificationValue.objects.filter(
                     product=instance).exists()
@@ -1160,8 +1061,11 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
                 if specification == True:
                     Specification.objects.filter(
                         product=instance).delete()
+        except:
+            raise ValidationError('Problem of Product specification update.')
 
-            # flash_deal
+        # flash_deal
+        try:
             if flash_deal:
                 f_p = FlashDealProduct.objects.filter(
                     product=instance).exists()
@@ -1181,8 +1085,11 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
                 if f_p == True:
                     FlashDealProduct.objects.filter(
                         product=instance).delete()
+        except:
+            raise ValidationError('Problem of Product flash deal update.')
 
-            # product_filter_attributes
+        # product_filter_attributes
+        try:
             if product_filter_attributes:
                 p_f_a = ProductFilterAttributes.objects.filter(
                     product=instance).exists()
@@ -1200,8 +1107,11 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
                 if p_f_a == True:
                     ProductFilterAttributes.objects.filter(
                         product=instance).delete()
+        except:
+            raise ValidationError('Problem of Product attributes update.')
 
-            # product_warranties
+        # product_warranties
+        try:
             if product_warranties:
                 p_w = ProductWarranty.objects.filter(
                     product=instance).exists()
@@ -1220,20 +1130,123 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
                 if p_w == True:
                     ProductWarranty.objects.filter(
                         product=instance).delete()
+        except:
+            raise ValidationError('Problem of Product warranties update.')
 
-            # work with price
+        # work with price
+        try:
             if price:
                 existing_price = Product.objects.get(id=instance.id).price
                 if price != existing_price:
                     validated_data.update({"price" : price, "old_price" : existing_price})
-
-            validated_data.update({"updated_at": timezone.now()})
-            return super().update(instance, validated_data)
         except:
-            validated_data.update({"updated_at": timezone.now()})
-            return super().update(instance, validated_data)
+            raise ValidationError('Problem of Product price update.')
+
+        validated_data.update({"updated_at": timezone.now()})
+        return super().update(instance, validated_data)
+
 # product update serializer end
 
+
+# product update details serializer start
+class ProductUpdateDetailsSerializer(serializers.ModelSerializer):
+    product_tags = serializers.SerializerMethodField()
+    product_images = serializers.SerializerMethodField()
+    product_specification = serializers.SerializerMethodField('get_product_specification')
+    flash_deal = serializers.SerializerMethodField('get_flash_deal')
+    product_filter_attributes = serializers.SerializerMethodField('get_product_filter_attributes')
+    product_warranties = serializers.SerializerMethodField('get_product_warranties')
+
+
+    class Meta:
+        model = Product
+        fields =[
+                    'id',
+                    'title',
+                    'category',
+                    'sub_category',
+                    'sub_sub_category',
+                    'brand',
+                    'unit',
+                    'seller',
+                    'minimum_purchase_quantity',
+                    'product_tags',
+                    'bar_code',
+                    'refundable',
+                    'video_provider',
+                    'video_link',
+                    'price',
+                    'pre_payment_amount',
+                    'discount_start_date',
+                    'discount_end_date',
+                    'discount_amount',
+                    'discount_type',
+                    'quantity',
+                    'sku',
+                    'external_link',
+                    'external_link_button_text',
+                    'low_stock_quantity_warning',
+                    'vat',
+                    'vat_type',
+                    'active_short_description',
+                    'show_stock_quantity',
+                    'in_house_product',
+                    'whole_sale_product',
+                    'cash_on_delivery',
+                    'is_featured',
+                    'todays_deal',
+                    'full_description',
+                    'short_description',
+                    'thumbnail',
+                    'product_images',
+                    'product_filter_attributes',
+                    'flash_deal',
+                    'product_warranties',
+                    'product_specification',
+                ]
+
+    def get_product_tags(self, obj):
+        tags_list = []
+        try:
+            selected_product_tags = ProductTags.objects.filter(
+                product=obj, is_active=True).distinct()
+            for s_p_t in selected_product_tags:
+                tag_title = s_p_t.tag.title
+                tags_list.append(tag_title)
+            return tags_list
+        except:
+            return tags_list
+
+    def get_product_images(self, obj):
+        try:
+            queryset = ProductImages.objects.filter(
+                product=obj, is_active=True).distinct()
+            serializer = ProductImageSerializer(instance=queryset, many=True, context={
+                                                'request': self.context['request']})
+            return serializer.data
+        except:
+            return []
+
+    def get_product_specification(self, product):
+        queryset = Specification.objects.filter(product=product, is_active = True)
+        serializer = ProductExistingSpecificationSerializer(instance=queryset, many=True)
+        return serializer.data
+
+    def get_flash_deal(self, product):
+        queryset = FlashDealProduct.objects.filter(product=product, is_active = True)
+        serializer = FlashDealExistingSerializer(instance=queryset, many=True)
+        return serializer.data
+
+    def get_product_filter_attributes(self, product):
+        queryset = ProductFilterAttributes.objects.filter(product=product, is_active = True)
+        serializer = ProductFilterAttributesSerializer(instance=queryset, many=True)
+        return serializer.data
+
+    def get_product_warranties(self, product):
+        queryset = ProductWarranty.objects.filter(product=product, is_active = True)
+        serializer = ProductWarrantiesSerializer(instance=queryset, many=True)
+        return serializer.data
+# product update details serializer end
 
 class ProductVideoProviderSerializer(serializers.ModelSerializer):
     class Meta:

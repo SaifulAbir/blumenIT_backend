@@ -511,7 +511,7 @@ class ProductReview(AbstractTimeStamp):
         db_table = 'product_review'
 
     def __str__(self):
-        return 'Product: '+ str(self.product.title)
+        return 'Review Text: '+ str(self.review_text)
 
     def save(self, *args, **kwargs):
         super(ProductReview,self).save(*args, **kwargs)

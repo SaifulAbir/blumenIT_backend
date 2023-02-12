@@ -32,7 +32,7 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     AdminCouponSerializer, VatTypeSerializer, \
     AdminOfferSerializer, AdminPosProductListSerializer, AdminShippingCountrySerializer, AdminShippingCitySerializer, \
     AdminShippingStateSerializer, AdminPosOrderSerializer, AdminCategoryToggleSerializer, AdminProductToggleSerializer, \
-    AdminBlogToggleSerializer, AdminProductReviewSerializer, AdvertisementPosterSerializer
+    AdminBlogToggleSerializer, AdminProductReviewSerializer, AdvertisementPosterSerializer, ProductUpdateDetailsSerializer
 from cart.models import Order, OrderItem, Coupon
 from cart.models import Order, OrderItem, SubOrder
 from user.models import User, Subscription
@@ -150,9 +150,29 @@ class AdminProductCreateAPIView(CreateAPIView):
                 {"msg": 'You can not create product, because you are not an Admin!'})
 
 
-class AdminProductUpdateAPIView(RetrieveUpdateAPIView):
+# class AdminProductUpdateAPIView(RetrieveUpdateAPIView):
+class AdminProductUpdateAPIView(UpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = ProductUpdateSerializer
+    lookup_field = 'slug'
+    lookup_url_kwarg = "slug"
+
+    def get_queryset(self):
+        slug = self.kwargs['slug']
+        if self.request.user.is_superuser == True:
+            query = Product.objects.filter(slug=slug)
+            if query:
+                return query
+            else:
+                raise ValidationError(
+                    {"msg": 'Product does not exist!'})
+        else:
+            raise ValidationError({"msg": 'You can not update this product, because you are not an Admin!'})
+
+
+class AdminProductUpdateDetailsAPIView(RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = ProductUpdateDetailsSerializer
     lookup_field = 'slug'
     lookup_url_kwarg = "slug"
 

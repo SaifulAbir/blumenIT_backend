@@ -1571,6 +1571,7 @@ class AdminShippingCountrySerializer(serializers.ModelSerializer):
     class Meta:
         model = ShippingCountry
         fields = [
+            'id',
             'title',
             'code',
         ]
@@ -1581,6 +1582,7 @@ class AdminShippingCitySerializer(serializers.ModelSerializer):
     class Meta:
         model = ShippingCity
         fields = [
+            'id',
             'title',
             'shipping_state',
             'shipping_state_title'
@@ -1592,6 +1594,7 @@ class AdminShippingStateSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShippingState
         fields = [
+            'id',
             'title',
             'shipping_country',
             'shipping_country_title'

@@ -111,12 +111,6 @@
                                 <img src="https://blumanit.vercel.app/assets/images/header_logo.png"
                                     style="width: 100%; max-width: 300px" />
                             </td>
-
-                            <td>
-                                Invoice #: OBD_as<br />
-                                Created: as<br />
-                                &nbsp;
-                            </td>
                         </tr>
                     </table>
                 </td>
@@ -127,15 +121,9 @@
                     <table>
                         <tr>
                             <td>
-                                Road # 19/A, House # 8<br />
-                                Banani, Dhaka-1213<br />
-                                +88 0187 2634 967
-                            </td>
-
-                            <td>
-                                as<br />
-                                as<br />
-                                as
+                                Order ID : <span style="font-weight: bold;">{{ order_id }}</span><br />
+                                Order Date: {{ created_at }}<br />
+                                Customer Email: {{ email }}<br />
                             </td>
                         </tr>
                     </table>
@@ -144,42 +132,69 @@
             <tr class="heading">
                 <td>Item</td>
 
-                <td>OBD Credit</td>
+                <td>Warranty</td>
+
+                <td>Quantity</td>
+
+                <td>Unit Price</td>
             </tr>
 
-            <tr class="item">
-                <td>as </td>
+            {% for order_item in order_items %}
+                <tr class="item">
+                    <td>{{ order_item.product.title }} </td>
 
-                <td>as</td>
-            </tr>
+                    <td>{{ order_item.product_warranty.warranty.title }}</td>
+
+                    <td>{{ order_item.quantity }}</td>
+
+                    {% if order_item.product_warranty %}
+                        <td>{{ order_item.unit_price_after_add_warranty }}</td>
+                    {% else %}
+                        <td>{{ order_item.unit_price }}</td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
             <tr class="heading">
-                <td>Payment Method(bKash)</td>
-
-                <td>Amount(BDT)</td>
+                <td>Payment Method</td>
+                <td></td>
+                <td colspan="2">{{ payment_type }}</td>
             </tr>
             <tr class="">
-                <td>Price</td>
-
-                <td>BDT</td>
+                <td>Sub Total</td>
+                <td></td>
+                <td></td>
+                <td>{{ sub_total }} AED</td>
             </tr>
             <tr class="">
-                <td>Vat(0%)</td>
-
-                <td>0BDT</td>
+                <td>Shipping Cost</td>
+                <td></td>
+                <td></td>
+                <td>{{ shipping_cost }} AED</td>
             </tr>
             <tr class="">
-                <td>bKash Charge(0%)</td>
-
-                <td>0BDT</td>
+                <td>Vat Amount</td>
+                <td></td>
+                <td></td>
+                <td>{{ vat_amount }} AED</td>
+            </tr>
+            <tr class="">
+                <td>Coupon Discount Amount</td>
+                <td></td>
+                <td></td>
+                <td>{{ coupon_discount_amount }} AED</td>
             </tr>
 
             <tr class="total">
+                <td style="font-weight: bold;">Total</td>
+                <td></td>
                 <td></td>
 
-                <td>Total: BDT</td>
+                <td>{{ grand_total_price }} AED</td>
             </tr>
         </table>
-        <p style="font-size: 10px;">*Validity: Days & Valid Till</p>
+        {% if delivery_date %}
+            <p style="font-size: 10px;">Approx delivery date {{ delivery_date }}</p>
+        {% endif %}
     </div>
 </body>
 

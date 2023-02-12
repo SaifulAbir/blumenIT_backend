@@ -86,7 +86,7 @@ urlpatterns = [
 
     # Review related apies
     path('admin/review-list/', AdminReviewListAPIView.as_view()),
-    path('admin/review-list/<int:id>/', AdminReviewInactiveAPIView.as_view()),
+    path('admin/review-inactive/<int:id>/', AdminReviewInactiveAPIView.as_view()),
     path('admin/review-search/', ReviewSearchAPI.as_view()),
 
 

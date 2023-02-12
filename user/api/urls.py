@@ -33,7 +33,7 @@ urlpatterns = [
     #admin account delete request apis
     path('customer/account-delete-request/<int:pk>/', AccountDeleteRequestAPIView.as_view()),
     path('admin/account-delete-request-list/', AdminAccountDeleteRequestListAPIView.as_view()),
-    path('admin/account-delete/<int:pk>/', AdminAccountDeleteAPIView.as_view()),
+    path('admin/account-delete/<int:id>/', AdminAccountDeleteAPIView.as_view()),
 
 
 ]

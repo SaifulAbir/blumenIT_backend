@@ -3,6 +3,7 @@ from time import time
 import pytz
 from django.conf import settings
 from django.contrib.auth.hashers import check_password, make_password
+from django.core.mail import send_mail
 from django.db.models import Q
 from datetime import datetime
 from rest_framework import viewsets, mixins, status, generics
@@ -29,7 +30,7 @@ from rest_framework.views import APIView
 from user.serializers import  SubscriptionSerializer,  \
     ChangePasswordSerializer, OTPSendSerializer, OTPVerifySerializer, OTPReSendSerializer, SetPasswordSerializer, CustomerOrderListSerializer, \
     CustomerOrderDetailsSerializer, CustomerProfileSerializer, CustomerAddressListSerializer, CustomerAddressSerializer, \
-    WishlistDataSerializer, SavePcCreateSerializer, SavaPcDataSerializer, SavePcDetailsSerializer, AccountDeleteRequestSerializer
+    WishlistDataSerializer, SavePcCreateSerializer, SavaPcDataSerializer, SavePcDetailsSerializer, AccountDeleteRequestSerializer, AccountDeleteSerializer
 
 from vendor.pagination import OrderCustomPagination
 from cart.models import Order, DeliveryAddress, Wishlist
@@ -540,7 +541,42 @@ class AdminAccountDeleteRequestListAPIView(ListAPIView):
     queryset = User.objects.filter(delete_request=True)
 
 
-class AdminAccountDeleteAPIView(UpdateAPIView):
+class AdminAccountDeleteAPIView(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = AccountDeleteRequestSerializer
-    queryset = User.objects.all()
+    serializer_class = AccountDeleteSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+    # print(queryset)
+    def get_queryset(self):
+        id = self.kwargs['id']
+        user = User.objects.get(id=id)
+        print(user.is_active)
+        print(user.email)
+        return user
+
+    def put(self, request, *args, **kwargs):
+        user = self.get_queryset()
+        request = self.request
+
+        active = request.GET.get('is_active')
+        print(active)
+        print(user.email)
+        # return render_to_string('confirmation_of_account_delete.html', {'active' : active})
+
+
+        email = user.email
+        # user = User.objects.get(pk=pk)
+        # print(user.name)
+        subject = "Confirmation of account deletion"
+        html_message = render_to_string('confirmation_of_account_delete.html', {'active' : active, 'user':user})
+
+        send_mail(
+            subject=subject,
+            message=None,
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[email],
+            html_message=html_message
+        )
+
+        return user
+

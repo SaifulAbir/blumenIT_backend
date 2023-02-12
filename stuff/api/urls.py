@@ -4,7 +4,7 @@ from stuff.api.views import StuffListAPI, CreateStuffAPI, UpdateStuffAPIView, Ro
     AdminStuffDeleteAPIView
 
 urlpatterns = [
-    path('admin/staff/staff-list/<int:pagination>/', StuffListAPI.as_view(), name='stuff_list'),
+    path('admin/staff/staff-list/', StuffListAPI.as_view(), name='stuff_list'),
     path('admin/staff/create-staff/', CreateStuffAPI.as_view(), name='create_stuff'),
     path('admin/staff/update-staff/<int:id>/', UpdateStuffAPIView.as_view(), name='update_stuff'),
     path('admin/staff/staff-delete/<int:id>/', AdminStuffDeleteAPIView.as_view()),

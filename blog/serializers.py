@@ -17,7 +17,8 @@ class BlogSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Blog
-        fields = ['id','title', 'slug', 'blog_category', 'banner', 'banner', 'short_description', 'full_description', 'meta_title', 'meta_image', 'meta_description', 'meta_keywords', 'is_active']
+        fields = ['id','title', 'slug', 'blog_category', 'banner', 'banner', 'short_description', 'full_description',
+                  'meta_title', 'meta_image', 'meta_description', 'meta_keywords', 'is_active', 'status']
 
     def create(self, validated_data):
         blog_instance = Blog.objects.create(**validated_data, created_by=self.context['request'].user)

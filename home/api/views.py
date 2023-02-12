@@ -29,7 +29,7 @@ class   HomeDataAPIView(APIView):
         featured_categories_serializer = product_catListSerializer(featured_categories, many=True, context={"request": request})
 
         # featured
-        featured = Product.objects.filter(status='PUBLISH', is_featured=True).order_by('-created_at')
+        featured = Product.objects.filter(status='PUBLISH', is_featured=True, is_active=True).order_by('-created_at')
         featured_serializer = ProductListBySerializerForHomeData(featured, many=True, context={"request": request})
 
         # most popular

@@ -504,7 +504,8 @@ class ProductFilterAttributesSerializer(serializers.ModelSerializer):
 
 
 class ProductWarrantiesSerializer(serializers.ModelSerializer):
-    warranty = serializers.PrimaryKeyRelatedField(queryset=Warranty.objects.filter(is_active=True), many=False, write_only=True, required= True)
+    # warranty = serializers.PrimaryKeyRelatedField(queryset=Warranty.objects.filter(is_active=True), many=False, write_only=True, required= True)
+    warranty = serializers.PrimaryKeyRelatedField(queryset=Warranty.objects.filter(is_active=True), many=False, required= True)
     class Meta:
         model = ProductWarranty
         fields = [

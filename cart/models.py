@@ -180,7 +180,7 @@ class Order(AbstractTimeStamp):
         db_table = 'orders'
 
     def __str__(self):
-        return self.order_id
+        return self.order_id + ' ' + str(self.delivery_date)
 
 
 def pre_save_order(sender, instance, *args, **kwargs):

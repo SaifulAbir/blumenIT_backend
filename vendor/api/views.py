@@ -2315,8 +2315,22 @@ class AdminFilterAttributeListAllAPIView(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True:
-            queryset = FilterAttributes.objects.filter(is_active=True).order_by('-created_at')
-            return queryset
+            request = self.request
+            cid = request.GET.get('cid')
+            s_cid = request.GET.get('s_cid')
+            s_s_cid = request.GET.get('s_s_cid')
+            if cid:
+                queryset = FilterAttributes.objects.filter(category=cid, is_active=True).order_by('-created_at')
+                return queryset
+            if s_cid:
+                queryset = FilterAttributes.objects.filter(sub_category=s_cid, is_active=True).order_by('-created_at')
+                return queryset
+            if s_s_cid:
+                queryset = FilterAttributes.objects.filter(sub_sub_category=s_s_cid, is_active=True).order_by('-created_at')
+                return queryset
+            else:
+                queryset = FilterAttributes.objects.filter(is_active=True).order_by('-created_at')
+                return queryset
         else:
             raise ValidationError({"msg": 'You can not see filter attribute data, because you are not an Admin!'})
 

@@ -122,7 +122,7 @@ class FilterAttributes(AbstractTimeStamp):
         db_table = 'filter_attributes'
 
     def __str__(self):
-        return  'id: '+ str(self.id) + ' Attribute Title : '+ self.attribute.title
+        return  'id: '+ str(self.id) + ' Attribute Title : '+ self.attribute.title + ' category: ' + str(self.category) + ' sub category: ' + str(self.sub_category) + ' sub sub category: ' + str(self.sub_sub_category)
 
 
 class Brand(AbstractTimeStamp):

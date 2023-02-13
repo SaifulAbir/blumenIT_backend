@@ -1935,7 +1935,7 @@ class AdminPosProductListAPI(ListAPIView):
     serializer_class = AdminPosProductListSerializer
     pagination_class = ProductCustomPagination
 
-    def get_object(self):
+    def get_queryset(self):
         if self.request.user.is_superuser == True:
             request = self.request
             queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')

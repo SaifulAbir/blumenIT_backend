@@ -23,7 +23,7 @@ class Coupon(AbstractTimeStamp):
     code = models.CharField(max_length=15, help_text='title')
     min_shopping_amount = models.IntegerField(default=0, null=False, blank=False)
     amount = models.FloatField(max_length=255, null=False, blank=False, default=0, help_text="Amount Coupon")
-    quantity = models.IntegerField(default=0, null=False, blank=False)
+    quantity = models.IntegerField(default=0, null=False, blank=False, help_text="Maximum number of coupon use by the user.")
     number_of_uses = models.IntegerField(default=0, null=False, blank=False)
     start_time = models.DateTimeField(default=timezone.now)
     end_time = models.DateTimeField(default=timezone.now)

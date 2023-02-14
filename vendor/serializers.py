@@ -1105,9 +1105,10 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
                         product=instance).delete()
 
                 for product_filter_attribute in product_filter_attributes:
+                    filter_attribute = product_filter_attribute['filter_attribute']
                     attribute_value = product_filter_attribute['attribute_value']
                     if attribute_value:
-                        product_filter_attr = ProductFilterAttributes.objects.create(attribute_value=attribute_value, product=instance)
+                        ProductFilterAttributes.objects.create(filter_attribute=filter_attribute, attribute_value=attribute_value, product=instance)
             else:
                 p_f_a = ProductFilterAttributes.objects.filter(
                     product=instance).exists()

@@ -52,7 +52,7 @@ class SpecificationInline(admin.TabularInline):
 
 class ProductFilterAttributesInline(admin.TabularInline):
     model = ProductFilterAttributes
-    fields = ['attribute_value', 'is_active']
+    fields = ['filter_attribute', 'attribute_value', 'is_active']
 
 
 class ProductWarrantyInline(admin.TabularInline):

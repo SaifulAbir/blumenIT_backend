@@ -97,7 +97,8 @@ class FilteringAttributesSerializer(serializers.ModelSerializer):
     attribute_title = serializers.CharField(source='attribute.title',read_only=True)
     class Meta:
         model = FilterAttributes
-        fields = ['id', 'attribute', 'attribute_title', 'category', 'sub_category', 'sub_sub_category']
+        fields = ['id', 'attribute', 'attribute_title']
+        read_only_fields = ['category', 'sub_category', 'sub_sub_category']
 
 
 class AdminCategoryListSerializer(serializers.ModelSerializer):
@@ -496,10 +497,13 @@ class FlashDealExistingSerializer(serializers.ModelSerializer):
 
 
 class ProductFilterAttributesSerializer(serializers.ModelSerializer):
+    filter_attribute = serializers.PrimaryKeyRelatedField(queryset=FilterAttributes.objects.all(), many=False, required= True)
+    attribute_value = serializers.PrimaryKeyRelatedField(queryset=AttributeValues.objects.all(), many=False, required= True)
     class Meta:
         model = ProductFilterAttributes
         fields = [
             'id',
+            'filter_attribute',
             'attribute_value'
         ]
 
@@ -585,7 +589,7 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             'product_warranties'
         ]
 
-        read_only_fields = ('slug', 'sell_count')
+        read_only_fields = ['slug', 'sell_count']
 
     def create(self, validated_data):
         # validation for sku start
@@ -747,9 +751,10 @@ class ProductCreateSerializer(serializers.ModelSerializer):
         try:
             if product_filter_attributes:
                 for product_filter_attribute in product_filter_attributes:
+                    filter_attribute = product_filter_attribute['filter_attribute']
                     attribute_value = product_filter_attribute['attribute_value']
                     if attribute_value:
-                        product_filter_attribute_instance = ProductFilterAttributes.objects.create(attribute_value=attribute_value,  product=product_instance)
+                        ProductFilterAttributes.objects.create(filter_attribute=filter_attribute, attribute_value=attribute_value,  product=product_instance)
         except:
             raise ValidationError('Problem of Product Filter Attributes info insert.')
 
@@ -1389,14 +1394,18 @@ class AttributeSerializer(serializers.ModelSerializer):
 
 
 class AdminFilterAttributeSerializer(serializers.ModelSerializer):
+    attribute_values = serializers.SerializerMethodField('get_attribute_values')
     attribute_title = serializers.CharField(source='attribute.title',read_only=True)
     category_title = serializers.CharField(source='category.title',read_only=True)
     sub_category_title = serializers.CharField(source='sub_category.title',read_only=True)
     sub_sub_category_title = serializers.CharField(source='sub_sub_category.title',read_only=True)
     class Meta:
         model = FilterAttributes
-        fields = ['id', 'attribute', 'attribute_title', 'category', 'category_title', 'sub_category',
+        fields = ['id', 'attribute', 'attribute_title', 'attribute_values', 'category', 'category_title', 'sub_category',
                   'sub_category_title', 'sub_sub_category', 'sub_sub_category_title', 'is_active']
+    def get_attribute_values(self, obj):
+        values = AttributeValues.objects.filter(attribute=obj.attribute, is_active=True)
+        return AttributeValuesSerializer(values, many=True, context={'request': self.context['request']}).data
 
 
 class AdminOrderListSerializer(serializers.ModelSerializer):
@@ -1649,12 +1658,12 @@ class AdminCouponSerializer(serializers.ModelSerializer):
         fields = [  'id',
                     'code',
                     'amount',
-                    'number_of_uses',
                     'start_time',
                     'end_time',
                     'min_shopping_amount',
                     'is_active'
                 ]
+        read_only_fields = ['number_of_uses']
 
 
 class AdminOfferProductsSerializer(serializers.ModelSerializer):

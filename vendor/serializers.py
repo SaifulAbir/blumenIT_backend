@@ -1649,12 +1649,12 @@ class AdminCouponSerializer(serializers.ModelSerializer):
         fields = [  'id',
                     'code',
                     'amount',
-                    'number_of_uses',
                     'start_time',
                     'end_time',
                     'min_shopping_amount',
                     'is_active'
                 ]
+        read_only_fields = ('number_of_uses')
 
 
 class AdminOfferProductsSerializer(serializers.ModelSerializer):

@@ -1938,12 +1938,25 @@ class AdminPosProductListAPI(ListAPIView):
     def get_queryset(self):
         if self.request.user.is_superuser == True:
             request = self.request
+            query = request.GET.get('search')
+            category = request.GET.get('category_id')
+            brand = request.GET.get('brand')
+
             queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
 
-            if queryset:
-                return queryset
-            else:
-                raise ValidationError({"msg": "Product doesn't exist! " })
+            if query:
+                queryset = queryset.filter(Q(title__icontains=query))
+
+            if category:
+                queryset = queryset.filter(category__id=category)
+
+            if brand:
+                if category:
+                    queryset = queryset.filter(brand_id=brand)
+
+            return queryset
+            # else:
+            #     raise ValidationError({"msg": "Product doesn't exist! " })
         else:
             raise ValidationError(
                 {"msg": 'You can not show product list, because you are not an Admin!'})

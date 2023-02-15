@@ -23,7 +23,7 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminShippingCountryListFilterAPIView, AdminShippingCountryAddAPIView, AdminShippingCountryUpdateAPIView, \
     AdminShippingCountryDeleteAPIView, AdminShippingCityListAPIView, AdminShippingCityAddAPIView, AdminShippingCityUpdateAPIView, \
     AdminShippingCityDeleteAPIView, AdminShippingStateListAPIView, AdminShippingStateAddAPIView, AdminShippingStateUpdateAPIView, \
-    AdminPosSearchAPI, AdminPosOrderAPIView, AdminShippingStateDeleteAPIView, AdminShippingClassAddAPIView, AdminShippingClassUpdateAPIView, AdminShippingClassDeleteAPIView, \
+    AdminPosSearchAPI, AdminPosOrderAPIView, AdminShippingStateDeleteAPIView, AdminShippingClassAddAPIView, AdminShippingClassUpdateAPIView, AdminShippingClassDeleteAPIView, AdminAttributeListAllAPIView, \
     AdminCategoryAllListAPIView, AdminSubCategoryListAllAPIView, AdminSubSubCategoryAllListAPIView, AdminBrandListAllAPIView, \
     AdminUnitListAllAPIView, AdminSellerListAllAPIView, AdminVatTypeListAllAPIView, AdminVideoProviderListAllAPIView, \
     AdminDiscountTypeListAllAPIView, AdminFilterAttributeListAllAPIView, AdminFlashDealListAllAPIView, AdminWarrantyListAllAPIView, \
@@ -74,6 +74,7 @@ urlpatterns = [
     path('admin/flash-deal-list-all/', AdminFlashDealListAllAPIView.as_view()),
     path('admin/warranty-list-all/', AdminWarrantyListAllAPIView.as_view()),
     path('admin/specification-title-list-all/', AdminSpecificationTitleListAllAPIView.as_view()),
+    path('admin/attribute-list-all/', AdminAttributeListAllAPIView.as_view()),
 
 
     # Tag related apies

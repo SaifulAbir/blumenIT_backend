@@ -763,6 +763,18 @@ class ReviewSearchAPI(ListAPIView):
 
 
 # Attribute, AttributeValue related admin apies views............................ start
+class AdminAttributeListAllAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AttributeSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = Attribute.objects.filter(is_active=True).order_by('-created_at')
+            return queryset
+        else:
+            raise ValidationError({"msg": 'You can not see attribute data, because you are not an Admin!'})
+
+
 class AdminAttributeListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     pagination_class = ProductCustomPagination

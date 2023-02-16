@@ -307,8 +307,12 @@ class AdminCategoryListAPIView(ListAPIView):
     pagination_class = OrderCustomPagination
 
     def get_queryset(self):
+        request = self.request
+        search = request.GET.get('search')
         if self.request.user.is_superuser == True:
             queryset = Category.objects.filter(is_active=True)
+            if search:
+                queryset = queryset.filter(Q(title__icontains=search))
             if queryset:
                 return queryset
             else:
@@ -527,8 +531,12 @@ class AdminBrandListAPIView(ListAPIView):
     pagination_class = OrderCustomPagination
 
     def get_queryset(self):
+        request = self.request
+        search = request.GET.get('search')
         if self.request.user.is_superuser == True:
             queryset = Brand.objects.filter(is_active=True)
+            if search:
+                queryset = queryset.filter(Q(title__icontains=search))
             if queryset:
                 return queryset
             else:
@@ -710,8 +718,18 @@ class AdminReviewListAPIView(ListAPIView):
     pagination_class = ProductCustomPagination
 
     def get_queryset(self):
+        request = self.request
+        rating_high_to_low = request.GET.get('rating_high_to_low')
+        rating_low_to_high = request.GET.get('rating_low_to_high')
         if self.request.user.is_superuser == True:
             queryset = ProductReview.objects.all().order_by('-created_at')
+
+            if rating_high_to_low:
+                queryset = queryset.order_by('-rating_number').distinct()
+
+            if rating_low_to_high:
+                queryset = queryset.order_by('rating_number').distinct()
+
             if queryset:
                 return queryset
             else:
@@ -781,8 +799,12 @@ class AdminAttributeListAPIView(ListAPIView):
     serializer_class = AttributeSerializer
 
     def get_queryset(self):
+        request = self.request
+        search = request.GET.get('search')
         if self.request.user.is_superuser == True:
             queryset = Attribute.objects.filter(is_active=True).order_by('-created_at')
+            if search:
+                queryset = queryset.filter(Q(title__icontains=search))
             return queryset
         else:
             raise ValidationError({"msg": 'You can not see attribute data, because you are not an Admin!'})
@@ -1160,8 +1182,12 @@ class AdminTicketListAPIView(ListAPIView):
     serializer_class = AdminTicketListSerializer
 
     def get_queryset(self):
+        request = self.request
+        status = request.GET.get('status')
         if self.request.user.is_superuser == True:
             queryset = Ticket.objects.all().order_by('-created_at')
+            if status:
+                queryset = queryset.filter(Q(status=status))
             return queryset
         else:
             raise ValidationError({"msg": 'You can not see ticket list data, because you are not an Admin!'})
@@ -1387,8 +1413,13 @@ class AdminShippingCountryListAPIView(ListAPIView):
     pagination_class = ProductCustomPagination
 
     def get_queryset(self):
+        request = self.request
+        search = request.GET.get('search')
         if self.request.user.is_superuser == True:
             queryset = ShippingCountry.objects.filter(is_active=True).order_by('-created_at')
+
+            if search:
+                queryset = queryset.filter(Q(title__icontains=search))
 
             if queryset:
                 return queryset
@@ -1465,8 +1496,13 @@ class AdminShippingCityListAPIView(ListAPIView):
     pagination_class = ProductCustomPagination
 
     def get_queryset(self):
+        request = self.request
+        search = request.GET.get('search')
         if self.request.user.is_superuser == True:
             queryset = ShippingCity.objects.filter(is_active=True).order_by('-created_at')
+
+            if search:
+                queryset = queryset.filter(Q(title__icontains=search))
 
             if queryset:
                 return queryset
@@ -1537,8 +1573,13 @@ class AdminShippingStateListAPIView(ListAPIView):
     pagination_class = ProductCustomPagination
 
     def get_queryset(self):
+        request = self.request
+        search = request.GET.get('search')
         if self.request.user.is_superuser == True:
             queryset = ShippingState.objects.filter(is_active=True).order_by('-created_at')
+
+            if search:
+                queryset = queryset.filter(Q(title__icontains=search))
 
             if queryset:
                 return queryset

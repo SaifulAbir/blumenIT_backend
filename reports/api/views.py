@@ -189,12 +189,12 @@ class InHouseProductReportSearchAPI(ListAPIView):
 
 
             request = self.request
-            category_id = request.GET.get('category_id')
+            search = request.GET.get('search')
 
             queryset = Product.objects.all().order_by('-created_at')
 
-            if category_id:
-                queryset = queryset.filter(Q(category__exact=category_id))
+            if search:
+                queryset = queryset.filter(Q(title__icontains=search))
 
             return queryset
 
@@ -299,12 +299,12 @@ class ProductStockReportSearchAPI(ListAPIView):
 
 
             request = self.request
-            category_id = request.GET.get('category_id')
+            search = request.GET.get('search')
 
             queryset = Product.objects.all().order_by('-created_at')
 
-            if category_id:
-                queryset = queryset.filter(Q(category=category_id))
+            if search:
+                queryset = queryset.filter(Q(title__icontains=search))
 
             return queryset
 
@@ -350,12 +350,12 @@ class ProductWishlistReportSearchAPI(ListAPIView):
 
 
             request = self.request
-            category_id = request.GET.get('category_id')
+            search = request.GET.get('search')
 
             queryset = Product.objects.all().order_by('-created_at')
 
-            if category_id:
-                queryset = queryset.filter(Q(category=category_id))
+            if search:
+                queryset = queryset.filter(Q(title__icontains=search))
 
             return queryset
 

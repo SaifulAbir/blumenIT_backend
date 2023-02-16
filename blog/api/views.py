@@ -156,7 +156,7 @@ class AdminBlogSearchAPI(ListAPIView):
     pagination_class = BlogCustomPagination
     serializer_class = BlogSerializer
 
-    def get_object(self):
+    def get_queryset(self):
         if self.request.user.is_superuser == True:
             request = self.request
             query = request.GET.get('search')

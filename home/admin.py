@@ -1,8 +1,7 @@
 from django.contrib import admin
-from home.models import SliderImage, ProductView, FAQ, ContactUs, HomeSingleRowData, \
+from home.models import ProductView, FAQ, ContactUs, HomeSingleRowData, \
 CorporateDeal, RequestQuote, Advertisement
 
-admin.site.register(SliderImage)
 admin.site.register(ProductView)
 admin.site.register(FAQ)
 admin.site.register(ContactUs)

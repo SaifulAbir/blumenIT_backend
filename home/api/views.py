@@ -1,6 +1,6 @@
 from rest_framework.views import APIView
-from home.models import SliderImage, FAQ, ContactUs, HomeSingleRowData, Advertisement, RequestQuote
-from home.serializers import SliderImagesListSerializer, product_catListSerializer,\
+from home.models import  FAQ, ContactUs, HomeSingleRowData, Advertisement, RequestQuote
+from home.serializers import product_catListSerializer,\
     ContactUsSerializer, FaqSerializer, SingleRowDataSerializer, SliderAdvertisementDataSerializer, AdvertisementDataSerializer, \
     StoreCategoryAPIViewListSerializer, product_sub_catListSerializer, \
     CorporateDealCreateSerializer, RequestQuoteSerializer
@@ -21,8 +21,8 @@ class   HomeDataAPIView(APIView):
     def get(self, request):
 
         # slider images
-        slider_images = SliderImage.objects.filter(Q(is_active=True))
-        slider_images_serializer = SliderImagesListSerializer(slider_images, many=True, context={"request": request})
+        slider_images = Advertisement.objects.filter(Q(work_for='SLIDER'), Q(is_active=True), Q(is_gaming=False)).order_by('-created_at')
+        slider_images_serializer = AdvertisementDataSerializer(slider_images, many=True, context={"request": request})
 
         # featured_categories
         featured_categories = Category.objects.filter(is_featured=True, is_active=True).order_by('-created_at')
@@ -49,7 +49,7 @@ class   HomeDataAPIView(APIView):
         single_row_data_serializer = SingleRowDataSerializer(single_row_data, many=True, context={"request": request})
 
         # poster under slider
-        poster_under_data = Advertisement.objects.filter(Q(work_for='SLIDER'), Q(is_active=True), Q(is_gaming=False)).order_by('-created_at')[:3]
+        poster_under_data = Advertisement.objects.filter(Q(work_for='SLIDER_SMALL'), Q(is_active=True), Q(is_gaming=False)).order_by('-created_at')[:3]
         poster_under_data_serializer = SliderAdvertisementDataSerializer(poster_under_data, many=True, context={"request": request})
 
         # poster under popular products
@@ -80,8 +80,8 @@ class  GamingDataAPIView(APIView):
     def get(self, request):
 
         # slider images
-        slider_images = SliderImage.objects.filter(Q(is_active=True), Q(is_gaming=True))
-        slider_images_serializer = SliderImagesListSerializer(slider_images, many=True, context={"request": request})
+        slider_images = Advertisement.objects.filter(Q(work_for='SLIDER'), Q(is_active=True), Q(is_gaming=True)).order_by('-created_at')
+        slider_images_serializer = AdvertisementDataSerializer(slider_images, many=True, context={"request": request})
 
         # sub_categories_with_logo
         categories_with_logo = SubCategory.objects.filter(category__is_gaming__icontains=True, is_active=True).order_by('-created_at')[:8]

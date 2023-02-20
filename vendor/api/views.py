@@ -29,7 +29,7 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     AdminTicketListSerializer, AdminTicketDataSerializer, TicketStatusSerializer, CategoryWiseProductSaleSerializer, \
     CategoryWiseProductStockSerializer, AdminWarrantyListSerializer, AdminShippingClassSerializer, \
     AdminSpecificationTitleSerializer, AdminSubscribersListSerializer, AdminCorporateDealSerializer, \
-    AdminCouponSerializer, VatTypeSerializer, WebsiteConfigurationSerializer, \
+    AdminCouponSerializer, VatTypeSerializer, WebsiteConfigurationSerializer, AdminSubCategoryToggleSerializer, \
     AdminOfferSerializer, AdminPosProductListSerializer, AdminShippingCountrySerializer, AdminShippingCitySerializer, \
     AdminShippingStateSerializer, AdminPosOrderSerializer, AdminCategoryToggleSerializer, AdminProductToggleSerializer, \
     AdminBlogToggleSerializer, AdminProductReviewSerializer, AdvertisementPosterSerializer, ProductUpdateDetailsSerializer
@@ -2530,6 +2530,12 @@ class AdminCategoryToggleUpdateAPIView(UpdateAPIView):
     queryset = Category.objects.all()
 
 
+class AdminSubCategoryToggleUpdateAPIView(UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminSubCategoryToggleSerializer
+    queryset = Category.objects.all()
+
+
 class AdminProductToggleUpdateAPIView(UpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AdminProductToggleSerializer
@@ -2615,4 +2621,35 @@ class AdminWebsiteConfigurationCreateAPIView(CreateAPIView):
         else:
             raise ValidationError(
                 {"msg": 'You can not create Advertisement Poster, because you are not an Admin!'})
+
+
+class AdminWebsiteConfigurationListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = WebsiteConfigurationSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = Advertisement.objects.filter(is_active=True)
+            return queryset
+        else:
+            raise ValidationError({"msg": 'You can not see advertisement list data, because you are not an Admin!'})
+
+
+class AdminWebsiteConfigurationUpdateAPIView(UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = WebsiteConfigurationSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        if self.request.user.is_superuser == True:
+            query = Advertisement.objects.filter(id=id)
+            if query:
+                return query
+            else:
+                raise ValidationError(
+                    {"msg": 'Advertisement does not found!'})
+        else:
+            raise ValidationError({"msg": 'You can not update Advertisement, because you are not an Admin!'})
 #website-configuration related apies................................... end

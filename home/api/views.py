@@ -25,8 +25,17 @@ class   HomeDataAPIView(APIView):
         slider_images_serializer = AdvertisementDataSerializer(slider_images, many=True, context={"request": request})
 
         # featured_categories
-        featured_categories = Category.objects.filter(is_featured=True, is_active=True).order_by('-created_at')
-        featured_categories_serializer = product_catListSerializer(featured_categories, many=True, context={"request": request})
+        # featured_categories = Category.objects.filter(is_featured=True, is_active=True).order_by('-created_at')
+        # featured_categories_serializer = product_catListSerializer(featured_categories, many=True, context={"request": request})
+
+        categories = Category.objects.filter(is_featured=True, is_active=True).order_by('-created_at')
+        categories_serializer = product_catListSerializer(categories, many=True, context={"request": request})
+
+        # featured_sub_categories
+        sub_categories = SubCategory.objects.filter(is_featured=True, is_active=True).order_by('-created_at')
+        sub_categories_serializer = product_sub_catListSerializer(sub_categories, many=True, context={"request": request})
+
+        featured_categories = categories_serializer.data + sub_categories_serializer.data
 
         # featured
         featured = Product.objects.filter(status='PUBLISH', is_featured=True, is_active=True).order_by('-created_at')
@@ -62,7 +71,7 @@ class   HomeDataAPIView(APIView):
 
         return Response({
             "slider_images": slider_images_serializer.data,
-            "featured_categories": featured_categories_serializer.data,
+            "featured_categories": featured_categories,
             "featured_products": featured_serializer.data,
             "popular_product": popular_serializer.data,
             "gaming_product": gaming_serializer.data,

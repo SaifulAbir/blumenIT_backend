@@ -29,7 +29,8 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminDiscountTypeListAllAPIView, AdminFilterAttributeListAllAPIView, AdminFlashDealListAllAPIView, AdminWarrantyListAllAPIView, \
     AdminVideoProviderCreateAPIView, AdminVideoProviderUpdateAPIView, AdminSpecificationTitleListAllAPIView, AdminVideoProviderDeleteAPI, \
     AdminProductToggleUpdateAPIView, AdminCategoryToggleUpdateAPIView, AdminBlogToggleUpdateAPIView, AdminProductReviewToggleAPIView, AdminAdvertisementListAPIView, AdminProductUpdateDetailsAPIView, AdminShippingCountryListAllAPIView, \
-    AdminAdvertisementCreateAPIView, AdminAdvertisementUpdateAPIView, AdminAdvertisementDeleteAPIView
+    AdminAdvertisementCreateAPIView, AdminAdvertisementUpdateAPIView, AdminAdvertisementDeleteAPIView, AdminSubCategoryToggleUpdateAPIView, \
+        AdminWebsiteConfigurationListAPIView, AdminWebsiteConfigurationUpdateAPIView
 
 urlpatterns = [
 
@@ -236,6 +237,7 @@ urlpatterns = [
 
     #toggle apies
     path('admin/toggle-category/<int:pk>/', AdminCategoryToggleUpdateAPIView.as_view()),
+    path('admin/toggle-sub-category/<int:pk>/', AdminSubCategoryToggleUpdateAPIView.as_view()),
     path('admin/toggle-product/<int:pk>/', AdminProductToggleUpdateAPIView.as_view()),
     path('admin/toggle-blog/<int:pk>/', AdminBlogToggleUpdateAPIView.as_view()),
     path('admin/toggle-product-review/<int:pk>/', AdminProductReviewToggleAPIView.as_view()),
@@ -249,6 +251,8 @@ urlpatterns = [
 
     # website-configuration apies
     path('admin/website-configuration/', AdminWebsiteConfigurationCreateAPIView.as_view()),
+    path('admin/website-configuration-list/', AdminWebsiteConfigurationListAPIView.as_view()),
+    path('admin/website-configuration-update/<int:id>/', AdminWebsiteConfigurationUpdateAPIView.as_view()),
 
 ]
 

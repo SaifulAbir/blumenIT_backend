@@ -30,10 +30,11 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     AdminTicketListSerializer, AdminTicketDataSerializer, TicketStatusSerializer, CategoryWiseProductSaleSerializer, \
     CategoryWiseProductStockSerializer, AdminWarrantyListSerializer, AdminShippingClassSerializer, \
     AdminSpecificationTitleSerializer, AdminSubscribersListSerializer, AdminCorporateDealSerializer, \
-    AdminCouponSerializer, VatTypeSerializer, WebsiteConfigurationSerializer, AdminSubCategoryToggleSerializer, \
+    AdminCouponSerializer, VatTypeSerializer, WebsiteConfigurationSerializer, \
     AdminOfferSerializer, AdminPosProductListSerializer, AdminShippingCountrySerializer, AdminShippingCitySerializer, \
     AdminShippingStateSerializer, AdminPosOrderSerializer, AdminCategoryToggleSerializer, AdminProductToggleSerializer, \
-    AdminBlogToggleSerializer, AdminProductReviewSerializer, AdvertisementPosterSerializer, ProductUpdateDetailsSerializer
+    AdminBlogToggleSerializer, AdminProductReviewSerializer, AdvertisementPosterSerializer, ProductUpdateDetailsSerializer, \
+    AdminPosCustomerCreateSerializer
 from cart.models import Order, OrderItem, Coupon
 from cart.models import Order, OrderItem, SubOrder
 from user.models import User, Subscription
@@ -2065,6 +2066,21 @@ class AdminOffersDeleteAPIView(ListAPIView):
 
 
 # POS related admin apies views............................ start
+
+class AdminPosCustomerCreateAPIView(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    # queryset = User
+    serializer_class = AdminPosCustomerCreateSerializer
+
+    def perform_create(self, serializer):
+        is_customer = self.request.data.get('is_customer', True)
+        serializer.save(is_customer=is_customer)
+
+    def post(self, request, *args, **kwargs):
+
+        return super(AdminPosCustomerCreateAPIView, self).post(request, *args, **kwargs)
+
+
 class AdminPosCustomerProfileAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = CustomerProfileSerializer
@@ -2537,12 +2553,6 @@ class AdminCategoryToggleUpdateAPIView(UpdateAPIView):
     queryset = Category.objects.all()
 
 
-class AdminSubCategoryToggleUpdateAPIView(UpdateAPIView):
-    permission_classes = [IsAuthenticated]
-    serializer_class = AdminSubCategoryToggleSerializer
-    queryset = Category.objects.all()
-
-
 class AdminProductToggleUpdateAPIView(UpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AdminProductToggleSerializer
@@ -2628,35 +2638,4 @@ class AdminWebsiteConfigurationCreateAPIView(CreateAPIView):
         else:
             raise ValidationError(
                 {"msg": 'You can not create Advertisement Poster, because you are not an Admin!'})
-
-
-class AdminWebsiteConfigurationListAPIView(ListAPIView):
-    permission_classes = [IsAuthenticated]
-    serializer_class = WebsiteConfigurationSerializer
-
-    def get_queryset(self):
-        if self.request.user.is_superuser == True:
-            queryset = Advertisement.objects.filter(is_active=True)
-            return queryset
-        else:
-            raise ValidationError({"msg": 'You can not see advertisement list data, because you are not an Admin!'})
-
-
-class AdminWebsiteConfigurationUpdateAPIView(UpdateAPIView):
-    permission_classes = [IsAuthenticated]
-    serializer_class = WebsiteConfigurationSerializer
-    lookup_field = 'id'
-    lookup_url_kwarg = "id"
-
-    def get_queryset(self):
-        id = self.kwargs['id']
-        if self.request.user.is_superuser == True:
-            query = Advertisement.objects.filter(id=id)
-            if query:
-                return query
-            else:
-                raise ValidationError(
-                    {"msg": 'Advertisement does not found!'})
-        else:
-            raise ValidationError({"msg": 'You can not update Advertisement, because you are not an Admin!'})
 #website-configuration related apies................................... end

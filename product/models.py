@@ -71,7 +71,6 @@ class SubCategory(AbstractTimeStamp):
         upload_to='product_sub_category', blank=True, null=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
     pc_builder = models.BooleanField(null=False, blank=False, default=False)
-    is_featured = models.BooleanField(null=False, blank=False, default=False)
     category = models.ForeignKey(
         Category, on_delete=models.PROTECT, related_name='sub_category_category')
 

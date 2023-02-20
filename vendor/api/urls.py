@@ -19,7 +19,7 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminAddNewFilterAttributeAPIView, \
     AdminProductListSearchAPI, AdminOrderList, AdminOrderViewAPI, OrderListSearchAPI, AdminOrderUpdateAPI, \
     AdminUpdateFilterAttributeAPIView, AdminCustomerListAPIView, AdminTicketListAPIView, AdminTicketDetailsAPIView, \
-    AdminUpdateTicketStatusAPIView, AdminDashboardDataAPIView, AdminBrandCreateAPIView, AdminBrandDeleteAPIView, \
+    AdminTicketStatusUpdateAPIView, AdminDashboardDataAPIView, AdminBrandCreateAPIView, AdminBrandDeleteAPIView, \
     AdminFlashDealListAPIView, AdminWarrantyListAPIView, AdminShippingClassListAPIView, \
     AdminSpecificationTitleListAPIView, AdminFlashDealUpdateAPIView, AdminFlashDealDeleteAPIView, \
     AdminSubscribersListAPIView, \
@@ -44,12 +44,13 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminDiscountTypeListAllAPIView, AdminFilterAttributeListAllAPIView, AdminFlashDealListAllAPIView, \
     AdminWarrantyListAllAPIView, \
     AdminVideoProviderCreateAPIView, AdminVideoProviderUpdateAPIView, AdminSpecificationTitleListAllAPIView, \
-    AdminVideoProviderDeleteAPI, \
+    AdminVideoProviderDeleteAPI, AdminTicketDeleteAPIView, AdminTicketReplyCreateAPIView, \
     AdminProductToggleUpdateAPIView, AdminCategoryToggleUpdateAPIView, AdminBlogToggleUpdateAPIView, \
     AdminProductReviewToggleAPIView, AdminAdvertisementListAPIView, AdminProductUpdateDetailsAPIView, \
-    AdminShippingCountryListAllAPIView, \
-    AdminAdvertisementCreateAPIView, AdminAdvertisementUpdateAPIView, AdminAdvertisementDeleteAPIView, \
-    AdminPosCustomerProfileAPIView, AdminPosCustomerCreateAPIView
+    AdminShippingCountryListAllAPIView, AdminRequestQuoteDetailsAPIView, AdminRequestQuoteDeleteAPIView, \
+    AdminAdvertisementCreateAPIView, AdminAdvertisementUpdateAPIView, AdminAdvertisementDeleteAPIView, AdminContactUsListAPIView, \
+    AdminPosCustomerProfileAPIView, AdminCorporateDealDetailsAPIView, AdminRequestQuoteListAPIView, AdminContactUsDetailsAPIView, \
+        AdminContactUsDeleteAPIView, AdminPosCustomerCreateAPIView
 
 urlpatterns = [
 
@@ -83,7 +84,7 @@ urlpatterns = [
     # product create supportive list apies
     path('admin/category-list-all/', AdminCategoryAllListAPIView.as_view()),
     path('admin/sub-category-list-all/<int:cid>/', AdminSubCategoryListAllAPIView.as_view()),
-    path('admin/sub-sub-category-list-all/<int:sid>/',AdminSubSubCategoryAllListAPIView.as_view()),
+    path('admin/sub-sub-category-list-all/<int:sid>/', AdminSubSubCategoryAllListAPIView.as_view()),
     path('admin/brand-list-all/', AdminBrandListAllAPIView.as_view()),
     path('admin/unit-list-all/', AdminUnitListAllAPIView.as_view()),
     path('admin/seller-list-all/', AdminSellerListAllAPIView.as_view()),
@@ -118,17 +119,13 @@ urlpatterns = [
     path('admin/admin-video-provider-delete/<int:id>/', AdminVideoProviderDeleteAPI.as_view()),
 
 
-    # Ticket related apies
-    path('admin/admin-ticket-list/', AdminTicketListAPIView.as_view()),
-    path('admin/admin-ticket-details/<int:id>/', AdminTicketDetailsAPIView.as_view()),
-    path('admin/admin-ticket-status-update/<int:id>/', AdminUpdateTicketStatusAPIView.as_view()),
-
     # order apies
     path('admin/all-order-list/', AdminOrderList.as_view()),
     path('admin/order-view/<int:id>/', AdminOrderViewAPI.as_view()),
     path('admin/order-update/<int:id>/', AdminOrderUpdateAPI.as_view()),
     path('admin/order-list-search/', OrderListSearchAPI.as_view()),
     path('admin/order-delete/<int:id>/', AdminOrderDeleteAPIView.as_view()),
+
 
     # flash deal apies
     path('admin/flash-deal-list/', AdminFlashDealListAPIView.as_view()),
@@ -159,7 +156,20 @@ urlpatterns = [
 
     # corporate apies
     path('admin/corporate-deal-list/', AdminCorporateDealListAPIView.as_view()),
+    path('admin/corporate-deal-details/<int:id>/', AdminCorporateDealDetailsAPIView.as_view()),
     path('admin/corporate-deal-delete/<int:id>/', AdminCorporateDealDeleteAPIView.as_view()),
+
+
+    # Request quote apies
+    path('admin/request-quote-list/', AdminRequestQuoteListAPIView.as_view()),
+    path('admin/request-quote-details/<int:id>/', AdminRequestQuoteDetailsAPIView.as_view()),
+    path('admin/request-quote-delete/<int:id>/', AdminRequestQuoteDeleteAPIView.as_view()),
+
+
+    # Contact Us apies
+    path('admin/contact-us-list/', AdminContactUsListAPIView.as_view()),
+    path('admin/contact-us-details/<int:id>/', AdminContactUsDetailsAPIView.as_view()),
+    path('admin/contact-us-delete/<int:id>/', AdminContactUsDeleteAPIView.as_view()),
 
 
     # subscribers apies
@@ -218,19 +228,18 @@ urlpatterns = [
     path('admin/offers-update/<int:id>/', AdminOffersUpdateAPIView.as_view()),
     path('admin/offers-delete/<int:id>/', AdminOffersDeleteAPIView.as_view()),
 
-    # corporate deal apies
-    path('admin/corporate-deal-list/', AdminCorporateDealListAPIView.as_view()),
-    path('admin/corporate-deal-delete/<int:id>/', AdminCorporateDealDeleteAPIView.as_view()),
 
     # subscriber apies
     path('admin/subscribers-list/', AdminSubscribersListAPIView.as_view()),
     path('admin/subscriber-delete/<int:id>/', AdminSubscriberDeleteAPIView.as_view()),
+
 
     # units apies
     path('admin/product-unit-list/', AdminUnitListAPIView.as_view()),
     path('admin/product-unit-add/', AdminUnitAddAPIView.as_view()),
     path('admin/product-unit-update/<int:id>/', AdminUnitUpdateAPIView.as_view()),
     path('admin/product-unit-delete/<int:id>/', AdminUnitDeleteAPIView.as_view()),
+
 
     # vat apies
     path('admin/product-vat-type-list/', AdminVatTypeListAPIView.as_view()),
@@ -256,12 +265,17 @@ urlpatterns = [
     # ticket apies
     path('admin/ticket-list/', AdminTicketListAPIView.as_view()),
     path('admin/ticket-details/<int:id>/', AdminTicketDetailsAPIView.as_view()),
+    path('admin/ticket-status-update/<int:id>/', AdminTicketStatusUpdateAPIView.as_view()),
+    path('admin/ticket-delete/<int:id>/', AdminTicketDeleteAPIView.as_view()),
+    path('admin/ticket-reply-create/', AdminTicketReplyCreateAPIView.as_view()),
+
 
     #toggle apies
     path('admin/toggle-category/<int:pk>/', AdminCategoryToggleUpdateAPIView.as_view()),
     path('admin/toggle-product/<int:pk>/', AdminProductToggleUpdateAPIView.as_view()),
     path('admin/toggle-blog/<int:pk>/', AdminBlogToggleUpdateAPIView.as_view()),
     path('admin/toggle-product-review/<int:pk>/', AdminProductReviewToggleAPIView.as_view()),
+
 
     # advertisement apies
     path('admin/advertisement-poster-list/', AdminAdvertisementListAPIView.as_view()),
@@ -272,6 +286,8 @@ urlpatterns = [
 
     # website-configuration apies
     path('admin/website-configuration/', AdminWebsiteConfigurationCreateAPIView.as_view()),
+    path('admin/website-configuration-list/', AdminWebsiteConfigurationListAPIView.as_view()),
+    path('admin/website-configuration-update/<int:pk>/', AdminWebsiteConfigurationUpdateAPIView.as_view()),
 
 ]
 

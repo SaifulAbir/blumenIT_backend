@@ -17,7 +17,7 @@ from vendor.models import Seller
 from django.db.models import Avg
 from django.utils import timezone
 from support_ticket.models import Ticket, TicketConversation
-from home.models import CorporateDeal, Advertisement, HomeSingleRowData, SliderImage
+from home.models import CorporateDeal, Advertisement, HomeSingleRowData, SliderImage, RequestQuote, ContactUs
 
 
 class SellerCreateSerializer(serializers.ModelSerializer):
@@ -1535,10 +1535,15 @@ class AdminTicketListSerializer(serializers.ModelSerializer):
 
 class AdminTicketConversationSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(read_only=True)
-    user_name = serializers.CharField(source='ticket.user.username',read_only=True)
+    creator_user_name = serializers.CharField(source='ticket.user.username',read_only=True)
+    replier_user_name = serializers.CharField(source='replier_user.username',read_only=True)
     class Meta:
         model = TicketConversation
-        fields = ['id', 'conversation_text', 'conversation_photo', 'created_at', 'user_name' ]
+        fields = ['id', 'conversation_text', 'conversation_photo', 'created_at', 'creator_user_name', 'replier_user_name', 'ticket' ]
+
+    def create(self, validated_data):
+        ticket_conversation_instance = TicketConversation.objects.create(**validated_data, replier_user=self.context['request'].user)
+        return ticket_conversation_instance
 
 
 class AdminTicketDataSerializer(serializers.ModelSerializer):
@@ -1550,8 +1555,7 @@ class AdminTicketDataSerializer(serializers.ModelSerializer):
         fields = ['id', 'ticket_id', 'user_name', 'created_at', 'status', 'ticket_subject', 'ticket_conversation']
 
     def get_ticket_conversation(self, obj):
-        selected_ticket_conversation = TicketConversation.objects.filter(
-            ticket=obj, is_active=True).order_by('-created_at')
+        selected_ticket_conversation = TicketConversation.objects.filter(ticket=obj, is_active=True)
         return AdminTicketConversationSerializer(selected_ticket_conversation, many=True).data
 
 
@@ -1648,6 +1652,18 @@ class AdminCorporateDealSerializer(serializers.ModelSerializer):
     class Meta:
         model = CorporateDeal
         fields = ['id', 'first_name', 'last_name', 'email', 'company_name', 'phone', 'region', 'details_text', 'attached_file']
+
+
+class AdminRequestQuoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RequestQuote
+        fields = ['id', 'name', 'email', 'phone', 'company_name', 'website', 'address', 'services', 'overview']
+
+
+class AdminContactUsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContactUs
+        fields = ['id', 'name', 'email', 'phone', 'message']
 
 
 class AdminCouponSerializer(serializers.ModelSerializer):
@@ -1991,6 +2007,7 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
     class Meta:
         model = HomeSingleRowData
         fields = [
+            'id',
             'phone',
             'whats_app_number',
             'email',
@@ -2077,3 +2094,89 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
                 Advertisement.objects.create(image=feature_products_banner, work_for='FEATURED_PRODUCT_POSTER', is_gaming=False)
 
         return home_single_row_data_instance
+
+    def update(self, instance, validated_data):
+        print('hello')
+
+        # home_slider_images
+        try:
+            home_slider_images = validated_data.pop('home_slider_images')
+        except:
+            home_slider_images = ''
+
+        # gaming_slider_images
+        try:
+            gaming_slider_images = validated_data.pop('gaming_slider_images')
+        except:
+            gaming_slider_images = ''
+
+        # small_banners
+        try:
+            small_banners = validated_data.pop('small_banners')
+        except:
+            small_banners = ''
+
+        # popular_products_banners
+        try:
+            popular_products_banners = validated_data.pop('popular_products_banners')
+        except:
+            popular_products_banners = ''
+
+        # feature_products_banners
+        try:
+            feature_products_banners = validated_data.pop('feature_products_banners')
+        except:
+            feature_products_banners = ''
+
+
+        # home_slider_images
+        try:
+            if home_slider_images:
+                for home_slider_image in home_slider_images:
+                    image = home_slider_image['image']
+                    bold_text = home_slider_image['bold_text']
+                    small_text = home_slider_image['small_text']
+                    Advertisement.objects.create(image=image, bold_text=bold_text, small_text=small_text, is_gaming=False, work_for='SLIDER')
+        except:
+            raise ValidationError('Problem of Home Slider Images update.')
+
+        # gaming_slider_images
+        try:
+            if gaming_slider_images:
+                for gaming_slider_image in gaming_slider_images:
+                    image = gaming_slider_image['image']
+                    bold_text = gaming_slider_image['bold_text']
+                    small_text = gaming_slider_image['small_text']
+                    Advertisement.objects.create(image=image, bold_text=bold_text, small_text=small_text, is_gaming=True, work_for='SLIDER')
+        except:
+            raise ValidationError('Problem of Home Gaming Images insert.')
+
+        # small_banners
+        if small_banners:
+            for small_banner in small_banners:
+                Advertisement.objects.create(image=small_banner, work_for='SLIDER_SMALL', is_gaming=False)
+
+        # popular_products_banners
+        try:
+            if popular_products_banners:
+                for popular_products_banner in popular_products_banners:
+                    image = popular_products_banner['image']
+                    bold_text = popular_products_banner['bold_text']
+                    small_text = popular_products_banner['small_text']
+                    Advertisement.objects.create(image=image, bold_text=bold_text, small_text=small_text, is_gaming=True, work_for='POPULAR_PRODUCT_POSTER')
+        except:
+            raise ValidationError('Problem of Home Gaming Images insert.')
+
+        # feature_products_banners
+        try:
+            if feature_products_banners:
+                for feature_products_banner in feature_products_banners:
+                    image = feature_products_banner['image']
+                    bold_text = feature_products_banner['bold_text']
+                    small_text = feature_products_banner['small_text']
+                    Advertisement.objects.create(image=image, bold_text=bold_text, small_text=small_text, is_gaming=True, work_for='FEATURED_PRODUCT_POSTER')
+        except:
+            raise ValidationError('Problem of Home Gaming Images insert.')
+
+        validated_data.update({"updated_at": timezone.now()})
+        return super().update(instance, validated_data)

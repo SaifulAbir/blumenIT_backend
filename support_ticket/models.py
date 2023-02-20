@@ -23,7 +23,7 @@ class Ticket(AbstractTimeStamp):
         db_table = 'ticket'
 
     def __str__(self):
-        return self.ticket_subject + ' ticket_id: '+ self.ticket_id
+        return self.ticket_subject + ' ticket_id: '+ self.ticket_id + ' id: ' + str(self.id)
 
 def pre_save_ticket(sender, instance, *args, **kwargs):
     if not instance.ticket_id:
@@ -43,4 +43,4 @@ class TicketConversation(AbstractTimeStamp):
         db_table = 'ticket_conversation'
 
     def __str__(self):
-        return self.ticket.ticket_id
+        return self.ticket.ticket_id + ' id: ' + str(self.id)

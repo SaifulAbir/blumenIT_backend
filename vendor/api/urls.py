@@ -42,7 +42,7 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminBrandListAllAPIView, \
     AdminUnitListAllAPIView, AdminSellerListAllAPIView, AdminVatTypeListAllAPIView, AdminVideoProviderListAllAPIView, \
     AdminDiscountTypeListAllAPIView, AdminFilterAttributeListAllAPIView, AdminFlashDealListAllAPIView, \
-    AdminWarrantyListAllAPIView, \
+    AdminWarrantyListAllAPIView, AdminWebsiteConfigurationUpdateAPIView, \
     AdminVideoProviderCreateAPIView, AdminVideoProviderUpdateAPIView, AdminSpecificationTitleListAllAPIView, \
     AdminVideoProviderDeleteAPI, AdminTicketDeleteAPIView, AdminTicketReplyCreateAPIView, \
     AdminProductToggleUpdateAPIView, AdminCategoryToggleUpdateAPIView, AdminBlogToggleUpdateAPIView, \
@@ -50,7 +50,7 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminShippingCountryListAllAPIView, AdminRequestQuoteDetailsAPIView, AdminRequestQuoteDeleteAPIView, \
     AdminAdvertisementCreateAPIView, AdminAdvertisementUpdateAPIView, AdminAdvertisementDeleteAPIView, AdminContactUsListAPIView, \
     AdminPosCustomerProfileAPIView, AdminCorporateDealDetailsAPIView, AdminRequestQuoteListAPIView, AdminContactUsDetailsAPIView, \
-        AdminContactUsDeleteAPIView, AdminPosCustomerCreateAPIView
+        AdminContactUsDeleteAPIView, AdminPosCustomerCreateAPIView, AdminWebsiteConfigurationListAPIView
 
 urlpatterns = [
 

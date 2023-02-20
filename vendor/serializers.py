@@ -1802,7 +1802,7 @@ class AdminPosOrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['id', 'order_id', 'product_count', 'vat_amount',
+        fields = ['id', 'order_id', 'product_count', 'vat_amount', 'discount_amount',
                   'payment_type', 'shipping_class', 'shipping_cost', 'order_items', 'delivery_address', 'comment',
                   'customer']
 

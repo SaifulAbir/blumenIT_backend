@@ -48,10 +48,9 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminProductToggleUpdateAPIView, AdminCategoryToggleUpdateAPIView, AdminBlogToggleUpdateAPIView, \
     AdminProductReviewToggleAPIView, AdminAdvertisementListAPIView, AdminProductUpdateDetailsAPIView, \
     AdminShippingCountryListAllAPIView, AdminRequestQuoteDetailsAPIView, AdminRequestQuoteDeleteAPIView, \
-    AdminAdvertisementCreateAPIView, AdminAdvertisementUpdateAPIView, AdminAdvertisementDeleteAPIView, AdminSubCategoryToggleUpdateAPIView, \
-        AdminWebsiteConfigurationListAPIView, AdminWebsiteConfigurationUpdateAPIView, AdminContactUsListAPIView, \
+    AdminAdvertisementCreateAPIView, AdminAdvertisementUpdateAPIView, AdminAdvertisementDeleteAPIView, AdminContactUsListAPIView, \
     AdminPosCustomerProfileAPIView, AdminCorporateDealDetailsAPIView, AdminRequestQuoteListAPIView, AdminContactUsDetailsAPIView, \
-        AdminContactUsDeleteAPIView
+        AdminContactUsDeleteAPIView, AdminPosCustomerCreateAPIView
 
 urlpatterns = [
 
@@ -259,6 +258,8 @@ urlpatterns = [
     path('admin/pos-product-search-list/', AdminPosSearchAPI.as_view()),
     path('admin/pos-order/', AdminPosOrderAPIView.as_view()),
     path('admin/pos-customer-list/', AdminPosCustomerProfileAPIView.as_view()),
+    path('admin/pos-customer-create/', AdminPosCustomerCreateAPIView.as_view()),
+
 
 
     # ticket apies
@@ -271,7 +272,6 @@ urlpatterns = [
 
     #toggle apies
     path('admin/toggle-category/<int:pk>/', AdminCategoryToggleUpdateAPIView.as_view()),
-    path('admin/toggle-sub-category/<int:pk>/', AdminSubCategoryToggleUpdateAPIView.as_view()),
     path('admin/toggle-product/<int:pk>/', AdminProductToggleUpdateAPIView.as_view()),
     path('admin/toggle-blog/<int:pk>/', AdminBlogToggleUpdateAPIView.as_view()),
     path('admin/toggle-product-review/<int:pk>/', AdminProductReviewToggleAPIView.as_view()),

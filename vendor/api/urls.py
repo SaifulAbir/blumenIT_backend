@@ -1,9 +1,9 @@
 from django.urls import path
 from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCategoryAPIView, AdminBrandListAPIView,\
-    AdminCategoryListAPIView, AdminDeleteCategoryAPIView, AdminDeleteSubCategoryAPIView, \
+    AdminCategoryListAPIView, AdminDeleteCategoryAPIView, AdminDeleteSubCategoryAPIView, AdminShippingClassListAllAPIView, \
     AdminDeleteSubSubCategoryAPIView, AdminProductDeleteAPI, AdminProductViewAPI, AdminSubCategoryListAPIView,\
     AdminSubSubCategoryListAPIView, AdminTagListAPIView, AdminUnitListAPIView, AdminUnitAddAPIView, AdminUnitUpdateAPIView, \
-    AdminUnitDeleteAPIView, AdminDiscountListAPIView,\
+    AdminUnitDeleteAPIView, AdminDiscountListAPIView, AdminShippingCityListAllAPIView, AdminShippingStateListAllAPIView,\
     AdminUpdateCategoryAPIView, AdminUpdateSubCategoryAPIView, AdminUpdateSubSubCategoryAPIView, \
     AdminVatTypeListAPIView, AdminVatTypeAddAPIView, AdminVatTypeUpdateAPIView, AdminVatTypeDeleteAPIView, AdminVideoProviderListAPIView, \
     AdminProductCreateAPIView, AdminSellerCreateAPIView, AdminSellerListAPIView, AdminSellerUpdateAPIView, AdminSellerDeleteAPIView,\
@@ -23,12 +23,12 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminShippingCountryListFilterAPIView, AdminShippingCountryAddAPIView, AdminShippingCountryUpdateAPIView, \
     AdminShippingCountryDeleteAPIView, AdminShippingCityListAPIView, AdminShippingCityAddAPIView, AdminShippingCityUpdateAPIView, \
     AdminShippingCityDeleteAPIView, AdminShippingStateListAPIView, AdminShippingStateAddAPIView, AdminShippingStateUpdateAPIView, \
-    AdminPosSearchAPI, AdminPosOrderAPIView, AdminShippingStateDeleteAPIView, AdminShippingClassAddAPIView, AdminShippingClassUpdateAPIView, AdminShippingClassDeleteAPIView, AdminAttributeListAllAPIView, \
+    AdminPosSearchAPI, AdminPosOrderAPIView, AdminShippingStateDeleteAPIView, AdminShippingClassAddAPIView, AdminShippingClassUpdateAPIView, AdminShippingClassDeleteAPIView, AdminAttributeListAllAPIView, AdminWebsiteConfigurationCreateAPIView, \
     AdminCategoryAllListAPIView, AdminSubCategoryListAllAPIView, AdminSubSubCategoryAllListAPIView, AdminBrandListAllAPIView, \
     AdminUnitListAllAPIView, AdminSellerListAllAPIView, AdminVatTypeListAllAPIView, AdminVideoProviderListAllAPIView, \
     AdminDiscountTypeListAllAPIView, AdminFilterAttributeListAllAPIView, AdminFlashDealListAllAPIView, AdminWarrantyListAllAPIView, \
     AdminVideoProviderCreateAPIView, AdminVideoProviderUpdateAPIView, AdminSpecificationTitleListAllAPIView, AdminVideoProviderDeleteAPI, \
-    AdminProductToggleUpdateAPIView, AdminCategoryToggleUpdateAPIView, AdminBlogToggleUpdateAPIView, AdminProductReviewToggleAPIView, AdminAdvertisementListAPIView, AdminProductUpdateDetailsAPIView, \
+    AdminProductToggleUpdateAPIView, AdminCategoryToggleUpdateAPIView, AdminBlogToggleUpdateAPIView, AdminProductReviewToggleAPIView, AdminAdvertisementListAPIView, AdminProductUpdateDetailsAPIView, AdminShippingCountryListAllAPIView, \
     AdminAdvertisementCreateAPIView, AdminAdvertisementUpdateAPIView, AdminAdvertisementDeleteAPIView
 
 urlpatterns = [
@@ -155,18 +155,22 @@ urlpatterns = [
     # shipping class apies
     path('admin/shipping-country-add/', AdminShippingCountryAddAPIView.as_view()),
     path('admin/shipping-country-list/', AdminShippingCountryListAPIView.as_view()),
+    path('admin/shipping-country-list-all/', AdminShippingCountryListAllAPIView.as_view()),
     path('admin/shipping-country-filter/', AdminShippingCountryListFilterAPIView.as_view()),
     path('admin/shipping-country-update/<int:id>/', AdminShippingCountryUpdateAPIView.as_view()),
     path('admin/shipping-country-delete/<int:id>/', AdminShippingCountryDeleteAPIView.as_view()),
     path('admin/shipping-city-list/', AdminShippingCityListAPIView.as_view()),
+    path('admin/shipping-city-list-all/', AdminShippingCityListAllAPIView.as_view()),
     path('admin/shipping-city-add/', AdminShippingCityAddAPIView.as_view()),
     path('admin/shipping-city-update/<int:id>/', AdminShippingCityUpdateAPIView.as_view()),
     path('admin/shipping-city-delete/<int:id>/', AdminShippingCityDeleteAPIView.as_view()),
     path('admin/shipping-state-list/', AdminShippingStateListAPIView.as_view()),
+    path('admin/shipping-state-list-all/', AdminShippingStateListAllAPIView.as_view()),
     path('admin/shipping-state-add/', AdminShippingStateAddAPIView.as_view()),
     path('admin/shipping-state-update/<int:id>/', AdminShippingStateUpdateAPIView.as_view()),
     path('admin/shipping-state-delete/<int:id>/', AdminShippingStateDeleteAPIView.as_view()),
     path('admin/shipping-class-list/', AdminShippingClassListAPIView.as_view()),
+    path('admin/shipping-class-list-all/', AdminShippingClassListAllAPIView.as_view()),
     path('admin/shipping-class-add/', AdminShippingClassAddAPIView.as_view()),
     path('admin/shipping-class-update/<int:id>/', AdminShippingClassUpdateAPIView.as_view()),
     path('admin/shipping-class-delete/<int:id>/', AdminShippingClassDeleteAPIView.as_view()),
@@ -241,6 +245,10 @@ urlpatterns = [
     path('admin/advertisement-poster-create/', AdminAdvertisementCreateAPIView.as_view()),
     path('admin/advertisement-poster-update/<int:id>/', AdminAdvertisementUpdateAPIView.as_view()),
     path('admin/advertisement-poster-delete/<int:id>/', AdminAdvertisementDeleteAPIView.as_view()),
+
+
+    # website-configuration apies
+    path('admin/website-configuration/', AdminWebsiteConfigurationCreateAPIView.as_view()),
 
 ]
 

@@ -2,16 +2,6 @@ from rest_framework import serializers
 from .models import *
 from product.models import Category, SubCategory, SubSubCategory
 
-class SliderImagesListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SliderImage
-        fields = [
-                'id',
-                'image',
-                'bold_text',
-                'small_text',
-                ]
-
 
 class product_catListSerializer(serializers.ModelSerializer):
     class Meta:

@@ -80,6 +80,7 @@ class HomeSingleRowData(AbstractTimeStamp):
     whats_app_number = models.CharField(max_length=20, null=True, blank=True)
     email = models.EmailField(null=True, blank=True)
     bottom_banner = models.ImageField(upload_to='HomeImage', default="")
+    shop_address = models.TextField(default='', null=True, blank=True)
     is_active = models.BooleanField(default=True)
 
     class Meta:
@@ -141,6 +142,7 @@ class RequestQuote(AbstractTimeStamp):
 class Advertisement(AbstractTimeStamp):
     WORK_FOR = [
         ('SLIDER', 'slider'),
+        ('SLIDER_SMALL', 'slider_small'),
         ('POPULAR_PRODUCT_POSTER', 'popular_product_poster'),
         ('FEATURED_PRODUCT_POSTER', 'featured_product_poster'),
     ]
@@ -148,9 +150,9 @@ class Advertisement(AbstractTimeStamp):
     image = models.ImageField(upload_to='HomeImage', default="")
     bold_text = models.TextField(null=True, blank=True)
     small_text = models.TextField(null=True, blank=True)
-    is_gaming = models.BooleanField(null=False, blank=False, default=False)
     work_for = models.CharField(max_length=30, choices=WORK_FOR, default=WORK_FOR[0][0])
     is_active = models.BooleanField(null=False, blank=False, default=True)
+    is_gaming = models.BooleanField(null=False, blank=False, default=False)
 
     class Meta:
         verbose_name = 'Advertisement'

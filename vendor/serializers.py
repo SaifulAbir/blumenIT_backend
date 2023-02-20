@@ -17,7 +17,7 @@ from vendor.models import Seller
 from django.db.models import Avg
 from django.utils import timezone
 from support_ticket.models import Ticket, TicketConversation
-from home.models import CorporateDeal, Advertisement, HomeSingleRowData
+from home.models import CorporateDeal, Advertisement, HomeSingleRowData, RequestQuote, ContactUs
 
 
 class SellerCreateSerializer(serializers.ModelSerializer):
@@ -1535,10 +1535,15 @@ class AdminTicketListSerializer(serializers.ModelSerializer):
 
 class AdminTicketConversationSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(read_only=True)
-    user_name = serializers.CharField(source='ticket.user.username',read_only=True)
+    creator_user_name = serializers.CharField(source='ticket.user.username',read_only=True)
+    replier_user_name = serializers.CharField(source='replier_user.username',read_only=True)
     class Meta:
         model = TicketConversation
-        fields = ['id', 'conversation_text', 'conversation_photo', 'created_at', 'user_name' ]
+        fields = ['id', 'conversation_text', 'conversation_photo', 'created_at', 'creator_user_name', 'replier_user_name', 'ticket' ]
+
+    def create(self, validated_data):
+        ticket_conversation_instance = TicketConversation.objects.create(**validated_data, replier_user=self.context['request'].user)
+        return ticket_conversation_instance
 
 
 class AdminTicketDataSerializer(serializers.ModelSerializer):
@@ -1550,8 +1555,7 @@ class AdminTicketDataSerializer(serializers.ModelSerializer):
         fields = ['id', 'ticket_id', 'user_name', 'created_at', 'status', 'ticket_subject', 'ticket_conversation']
 
     def get_ticket_conversation(self, obj):
-        selected_ticket_conversation = TicketConversation.objects.filter(
-            ticket=obj, is_active=True).order_by('-created_at')
+        selected_ticket_conversation = TicketConversation.objects.filter(ticket=obj, is_active=True)
         return AdminTicketConversationSerializer(selected_ticket_conversation, many=True).data
 
 
@@ -1648,6 +1652,18 @@ class AdminCorporateDealSerializer(serializers.ModelSerializer):
     class Meta:
         model = CorporateDeal
         fields = ['id', 'first_name', 'last_name', 'email', 'company_name', 'phone', 'region', 'details_text', 'attached_file']
+
+
+class AdminRequestQuoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RequestQuote
+        fields = ['id', 'name', 'email', 'phone', 'company_name', 'website', 'address', 'services', 'overview']
+
+
+class AdminContactUsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContactUs
+        fields = ['id', 'name', 'email', 'phone', 'message']
 
 
 class AdminCouponSerializer(serializers.ModelSerializer):
@@ -2083,6 +2099,7 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
         return home_single_row_data_instance
 
     def update(self, instance, validated_data):
+        print('hello')
 
         # home_slider_images
         try:

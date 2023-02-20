@@ -129,6 +129,7 @@ class RequestQuote(AbstractTimeStamp):
     address = models.CharField(max_length=255, blank=True)
     services = models.CharField(max_length=120, choices=SERVICES)
     overview = models.TextField()
+    is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
         verbose_name = 'RequestQuote'

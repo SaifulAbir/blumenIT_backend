@@ -17,7 +17,7 @@ from vendor.models import Seller
 from django.db.models import Avg
 from django.utils import timezone
 from support_ticket.models import Ticket, TicketConversation
-from home.models import CorporateDeal, Advertisement, HomeSingleRowData, SliderImage
+from home.models import CorporateDeal, Advertisement, HomeSingleRowData
 
 
 class SellerCreateSerializer(serializers.ModelSerializer):
@@ -208,7 +208,7 @@ class AddNewSubCategorySerializer(serializers.ModelSerializer):
     sub_category_filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
     class Meta:
         model = SubCategory
-        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category_filtering_attributes']
+        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category_filtering_attributes', 'is_featured', 'icon']
 
     def create(self, validated_data):
         try:
@@ -251,7 +251,7 @@ class UpdateSubCategorySerializer(serializers.ModelSerializer):
     filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
     class Meta:
         model = SubCategory
-        fields = ['id', 'title', 'ordering_number', 'category', 'is_active', 'existing_filtering_attributes', 'filtering_attributes']
+        fields = ['id', 'title', 'ordering_number', 'category', 'is_active', 'existing_filtering_attributes', 'filtering_attributes', 'icon']
 
     def get_existing_filtering_attributes(self, obj):
         try:
@@ -301,7 +301,7 @@ class AddNewSubSubCategorySerializer(serializers.ModelSerializer):
     sub_sub_category_filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
     class Meta:
         model = SubSubCategory
-        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category', 'sub_sub_category_filtering_attributes']
+        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category', 'sub_sub_category_filtering_attributes', 'icon']
 
     def create(self, validated_data):
         try:
@@ -344,7 +344,7 @@ class UpdateSubSubCategorySerializer(serializers.ModelSerializer):
     filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
     class Meta:
         model = SubSubCategory
-        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category', 'is_active', 'existing_filtering_attributes', 'filtering_attributes']
+        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category', 'is_active', 'existing_filtering_attributes', 'filtering_attributes', 'icon']
 
     def get_existing_filtering_attributes(self, obj):
         try:
@@ -1757,6 +1757,7 @@ class AdminOfferSerializer(serializers.ModelSerializer):
             validated_data.update({"updated_at": timezone.now()})
             return super().update(instance, validated_data)
 
+
 class AdminPosProductListSerializer(serializers.ModelSerializer):
     brand_title = serializers.CharField(source="brand.title", read_only=True)
     brand = BrandSerializer()
@@ -1778,6 +1779,7 @@ class AdminPosProductListSerializer(serializers.ModelSerializer):
             'vat'
         ]
 
+
 class AdminPosOrderItemSerializer(serializers.ModelSerializer):
     product_warranty = serializers.PrimaryKeyRelatedField(queryset=ProductWarranty.objects.all(), many=False,
                                                           write_only=True, required=False)
@@ -1790,6 +1792,7 @@ class AdminPosOrderItemSerializer(serializers.ModelSerializer):
                   'unit_price',
                   'product_warranty',
                   ]
+
 
 class AdminPosOrderSerializer(serializers.ModelSerializer):
     order_items = AdminPosOrderItemSerializer(many=True, required=False)
@@ -1918,10 +1921,17 @@ class AdminPosOrderSerializer(serializers.ModelSerializer):
 
             return order_instance
 
+
 class AdminCategoryToggleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ['id', 'title', 'is_featured']
+
+
+class AdminSubCategoryToggleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubCategory
+        fields = ['id', 'title', 'is_featured', 'category']
 
 
 class AdminProductToggleSerializer(serializers.ModelSerializer):
@@ -1953,7 +1963,7 @@ class AdminProductReviewSerializer(serializers.ModelSerializer):
 
 class SliderSerializer(serializers.ModelSerializer):
     class Meta:
-        model = SliderImage
+        model = Advertisement
         fields = [
             'id',
             'image',
@@ -1966,8 +1976,8 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
     home_slider_images = SliderSerializer(many=True, required=False)
     gaming_slider_images = SliderSerializer(many=True, required=False)
     small_banners = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
-    popular_products_banners = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
-    feature_products_banners = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
+    popular_products_banners = SliderSerializer(many=True, required=False)
+    feature_products_banners = SliderSerializer(many=True, required=False)
 
     class Meta:
         model = HomeSingleRowData
@@ -2048,13 +2058,110 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
                 Advertisement.objects.create(image=small_banner, work_for='SLIDER_SMALL', is_gaming=False)
 
         # popular_products_banners
-        if popular_products_banners:
-            for popular_products_banner in popular_products_banners:
-                Advertisement.objects.create(image=popular_products_banner, work_for='POPULAR_PRODUCT_POSTER', is_gaming=False)
+        try:
+            if popular_products_banners:
+                for popular_products_banner in popular_products_banners:
+                    image = popular_products_banner['image']
+                    bold_text = popular_products_banner['bold_text']
+                    small_text = popular_products_banner['small_text']
+                    Advertisement.objects.create(image=image, bold_text=bold_text, small_text=small_text, is_gaming=True, work_for='POPULAR_PRODUCT_POSTER')
+        except:
+            raise ValidationError('Problem of Home Gaming Images insert.')
 
         # feature_products_banners
-        if feature_products_banners:
-            for feature_products_banner in feature_products_banners:
-                Advertisement.objects.create(image=feature_products_banner, work_for='FEATURED_PRODUCT_POSTER', is_gaming=False)
+        try:
+            if feature_products_banners:
+                for feature_products_banner in feature_products_banners:
+                    image = feature_products_banner['image']
+                    bold_text = feature_products_banner['bold_text']
+                    small_text = feature_products_banner['small_text']
+                    Advertisement.objects.create(image=image, bold_text=bold_text, small_text=small_text, is_gaming=True, work_for='FEATURED_PRODUCT_POSTER')
+        except:
+            raise ValidationError('Problem of Home Gaming Images insert.')
 
         return home_single_row_data_instance
+
+    def update(self, instance, validated_data):
+
+        # home_slider_images
+        try:
+            home_slider_images = validated_data.pop('home_slider_images')
+        except:
+            home_slider_images = ''
+
+        # gaming_slider_images
+        try:
+            gaming_slider_images = validated_data.pop('gaming_slider_images')
+        except:
+            gaming_slider_images = ''
+
+        # small_banners
+        try:
+            small_banners = validated_data.pop('small_banners')
+        except:
+            small_banners = ''
+
+        # popular_products_banners
+        try:
+            popular_products_banners = validated_data.pop('popular_products_banners')
+        except:
+            popular_products_banners = ''
+
+        # feature_products_banners
+        try:
+            feature_products_banners = validated_data.pop('feature_products_banners')
+        except:
+            feature_products_banners = ''
+
+
+        # home_slider_images
+        try:
+            if home_slider_images:
+                for home_slider_image in home_slider_images:
+                    image = home_slider_image['image']
+                    bold_text = home_slider_image['bold_text']
+                    small_text = home_slider_image['small_text']
+                    Advertisement.objects.create(image=image, bold_text=bold_text, small_text=small_text, is_gaming=False, work_for='SLIDER')
+        except:
+            raise ValidationError('Problem of Home Slider Images update.')
+
+        # gaming_slider_images
+        try:
+            if gaming_slider_images:
+                for gaming_slider_image in gaming_slider_images:
+                    image = gaming_slider_image['image']
+                    bold_text = gaming_slider_image['bold_text']
+                    small_text = gaming_slider_image['small_text']
+                    Advertisement.objects.create(image=image, bold_text=bold_text, small_text=small_text, is_gaming=True, work_for='SLIDER')
+        except:
+            raise ValidationError('Problem of Home Gaming Images insert.')
+
+        # small_banners
+        if small_banners:
+            for small_banner in small_banners:
+                Advertisement.objects.create(image=small_banner, work_for='SLIDER_SMALL', is_gaming=False)
+
+        # popular_products_banners
+        try:
+            if popular_products_banners:
+                for popular_products_banner in popular_products_banners:
+                    image = popular_products_banner['image']
+                    bold_text = popular_products_banner['bold_text']
+                    small_text = popular_products_banner['small_text']
+                    Advertisement.objects.create(image=image, bold_text=bold_text, small_text=small_text, is_gaming=True, work_for='POPULAR_PRODUCT_POSTER')
+        except:
+            raise ValidationError('Problem of Home Gaming Images insert.')
+
+        # feature_products_banners
+        try:
+            if feature_products_banners:
+                for feature_products_banner in feature_products_banners:
+                    image = feature_products_banner['image']
+                    bold_text = feature_products_banner['bold_text']
+                    small_text = feature_products_banner['small_text']
+                    Advertisement.objects.create(image=image, bold_text=bold_text, small_text=small_text, is_gaming=True, work_for='FEATURED_PRODUCT_POSTER')
+        except:
+            raise ValidationError('Problem of Home Gaming Images insert.')
+
+        validated_data.update({"updated_at": timezone.now()})
+        return super().update(instance, validated_data)

@@ -1757,6 +1757,25 @@ class AdminOfferSerializer(serializers.ModelSerializer):
             validated_data.update({"updated_at": timezone.now()})
             return super().update(instance, validated_data)
 
+
+class AdminPosCustomerCreateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = [
+            'username', 'email', 'phone', 'is_customer'
+        ]
+
+    # def create(self, validated_data):
+    #     username = validated_data.pop('username')
+    #     phone = validated_data.pop('phone')
+    #     email = validated_data.pop('email')
+    #     is_customer = validated_data.pop('is_customer')
+    #
+    #     query = User.objects.all()
+    #
+    #     query.username = username
+    #     query.phone =
 class AdminPosProductListSerializer(serializers.ModelSerializer):
     brand_title = serializers.CharField(source="brand.title", read_only=True)
     brand = BrandSerializer()

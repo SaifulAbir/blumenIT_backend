@@ -49,7 +49,7 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminProductReviewToggleAPIView, AdminAdvertisementListAPIView, AdminProductUpdateDetailsAPIView, \
     AdminShippingCountryListAllAPIView, \
     AdminAdvertisementCreateAPIView, AdminAdvertisementUpdateAPIView, AdminAdvertisementDeleteAPIView, \
-    AdminPosCustomerProfileAPIView
+    AdminPosCustomerProfileAPIView, AdminPosCustomerCreateAPIView
 
 urlpatterns = [
 
@@ -249,6 +249,8 @@ urlpatterns = [
     path('admin/pos-product-search-list/', AdminPosSearchAPI.as_view()),
     path('admin/pos-order/', AdminPosOrderAPIView.as_view()),
     path('admin/pos-customer-list/', AdminPosCustomerProfileAPIView.as_view()),
+    path('admin/pos-customer-create/', AdminPosCustomerCreateAPIView.as_view()),
+
 
 
     # ticket apies

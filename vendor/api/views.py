@@ -33,7 +33,8 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     AdminCouponSerializer, VatTypeSerializer, WebsiteConfigurationSerializer, \
     AdminOfferSerializer, AdminPosProductListSerializer, AdminShippingCountrySerializer, AdminShippingCitySerializer, \
     AdminShippingStateSerializer, AdminPosOrderSerializer, AdminCategoryToggleSerializer, AdminProductToggleSerializer, \
-    AdminBlogToggleSerializer, AdminProductReviewSerializer, AdvertisementPosterSerializer, ProductUpdateDetailsSerializer
+    AdminBlogToggleSerializer, AdminProductReviewSerializer, AdvertisementPosterSerializer, ProductUpdateDetailsSerializer, \
+    AdminPosCustomerCreateSerializer
 from cart.models import Order, OrderItem, Coupon
 from cart.models import Order, OrderItem, SubOrder
 from user.models import User, Subscription
@@ -2065,6 +2066,21 @@ class AdminOffersDeleteAPIView(ListAPIView):
 
 
 # POS related admin apies views............................ start
+
+class AdminPosCustomerCreateAPIView(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    # queryset = User
+    serializer_class = AdminPosCustomerCreateSerializer
+
+    def perform_create(self, serializer):
+        is_customer = self.request.data.get('is_customer', True)
+        serializer.save(is_customer=is_customer)
+
+    def post(self, request, *args, **kwargs):
+
+        return super(AdminPosCustomerCreateAPIView, self).post(request, *args, **kwargs)
+
+
 class AdminPosCustomerProfileAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = CustomerProfileSerializer

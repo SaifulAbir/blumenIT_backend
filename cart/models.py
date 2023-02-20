@@ -171,7 +171,7 @@ class Order(AbstractTimeStamp):
     delivery_agent = models.CharField(max_length=100, null=True, blank=True)
     delivery_date = models.DateTimeField(null=True, blank=True)
     comment = models.TextField(null=True, blank=True)
-    customer = models.ForeignKey(CustomerProfile, on_delete=models.CASCADE, blank=True, null=True)
+    customer = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     in_house_order = models.BooleanField(default=False)
     is_active = models.BooleanField(null=False, blank=False, default=True)
 

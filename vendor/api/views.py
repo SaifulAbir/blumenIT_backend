@@ -14,7 +14,7 @@ from product.models import Brand, Category, DiscountTypes, Product, ProductRevie
 from user.models import User
 from user.serializers import CustomerProfileSerializer
 from vendor.models import Seller
-from home.models import CorporateDeal, Advertisement
+from home.models import CorporateDeal, Advertisement, HomeSingleRowData
 from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategorySerializer, \
     VendorBrandSerializer, AdminCategoryListSerializer, VendorProductListSerializer, \
     ProductUpdateSerializer, VendorProductViewSerializer, AdminSubCategoryListSerializer, \
@@ -2636,10 +2636,10 @@ class AdminWebsiteConfigurationListAPIView(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True:
-            queryset = Advertisement.objects.filter(is_active=True)
+            queryset = HomeSingleRowData.objects.filter(is_active=True)
             return queryset
         else:
-            raise ValidationError({"msg": 'You can not see advertisement list data, because you are not an Admin!'})
+            raise ValidationError({"msg": 'You can not see Website Configuration list data, because you are not an Admin!'})
 
 
 class AdminWebsiteConfigurationUpdateAPIView(UpdateAPIView):
@@ -2651,12 +2651,12 @@ class AdminWebsiteConfigurationUpdateAPIView(UpdateAPIView):
     def get_queryset(self):
         id = self.kwargs['id']
         if self.request.user.is_superuser == True:
-            query = Advertisement.objects.filter(id=id)
+            query = HomeSingleRowData.objects.filter(id=id)
             if query:
                 return query
             else:
                 raise ValidationError(
-                    {"msg": 'Advertisement does not found!'})
+                    {"msg": 'Website Configuration data does not found!'})
         else:
-            raise ValidationError({"msg": 'You can not update Advertisement, because you are not an Admin!'})
+            raise ValidationError({"msg": 'You can not update Website Configuration, because you are not an Admin!'})
 #website-configuration related apies................................... end

@@ -1982,6 +1982,7 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
     class Meta:
         model = HomeSingleRowData
         fields = [
+            'id',
             'phone',
             'whats_app_number',
             'email',

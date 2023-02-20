@@ -12,6 +12,7 @@ from product.models import Brand, Category, DiscountTypes, Product, ProductRevie
     ProductVideoProvider, VatType, FilterAttributes, Attribute, AttributeValues, Inventory, FlashDealInfo, Warranty, \
     ShippingClass, SpecificationTitle, Offer, ShippingCountry, ShippingState, ShippingCity
 from user.models import User
+from user.serializers import CustomerProfileSerializer
 from vendor.models import Seller
 from home.models import CorporateDeal, Advertisement
 from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategorySerializer, \
@@ -2064,6 +2065,12 @@ class AdminOffersDeleteAPIView(ListAPIView):
 
 
 # POS related admin apies views............................ start
+class AdminPosCustomerProfileAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = CustomerProfileSerializer
+    queryset = User.objects.filter(is_customer=True)
+
+
 class AdminPosProductListAPI(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AdminPosProductListSerializer

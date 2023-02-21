@@ -8,9 +8,10 @@ from product.serializers import DiscountTypeSerializer, TagsSerializer, ProductL
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView, RetrieveAPIView, UpdateAPIView
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from product.models import Brand, Category, DiscountTypes, Product, ProductReview, SubCategory, SubSubCategory, Tags, Units, \
+from product.models import Brand, Category, DiscountTypes, Product, ProductReview, SubCategory, SubSubCategory, Tags, \
+    Units, \
     ProductVideoProvider, VatType, FilterAttributes, Attribute, AttributeValues, Inventory, FlashDealInfo, Warranty, \
-    ShippingClass, SpecificationTitle, Offer, ShippingCountry, ShippingState, ShippingCity
+    ShippingClass, SpecificationTitle, Offer, ShippingCountry, ShippingState, ShippingCity, OfferCategory
 from user.models import User
 from user.serializers import CustomerProfileSerializer
 from vendor.models import Seller
@@ -33,8 +34,9 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     AdminCouponSerializer, VatTypeSerializer, WebsiteConfigurationSerializer, \
     AdminOfferSerializer, AdminPosProductListSerializer, AdminShippingCountrySerializer, AdminShippingCitySerializer, \
     AdminShippingStateSerializer, AdminPosOrderSerializer, AdminCategoryToggleSerializer, AdminProductToggleSerializer, \
-    AdminBlogToggleSerializer, AdminProductReviewSerializer, AdvertisementPosterSerializer, ProductUpdateDetailsSerializer, \
-    AdminPosCustomerCreateSerializer
+    AdminBlogToggleSerializer, AdminProductReviewSerializer, AdvertisementPosterSerializer, \
+    ProductUpdateDetailsSerializer, \
+    AdminPosCustomerCreateSerializer, AdminOfferCategoryListSerializer
 from cart.models import Order, OrderItem, Coupon
 from cart.models import Order, OrderItem, SubOrder
 from user.models import User, Subscription
@@ -2152,6 +2154,11 @@ class AdminCouponDeleteAPIView(ListAPIView):
 
 
 # Offers related admin apies views............................ start
+class AdminOfferCategoryListAPIView(ListAPIView):
+    serializer_class = AdminOfferCategoryListSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = OfferCategory.objects.all()
+
 class AdminOffersListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AdminOfferSerializer

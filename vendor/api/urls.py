@@ -48,9 +48,12 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminProductToggleUpdateAPIView, AdminCategoryToggleUpdateAPIView, AdminBlogToggleUpdateAPIView, \
     AdminProductReviewToggleAPIView, AdminAdvertisementListAPIView, AdminProductUpdateDetailsAPIView, \
     AdminShippingCountryListAllAPIView, AdminRequestQuoteDetailsAPIView, AdminRequestQuoteDeleteAPIView, \
-    AdminAdvertisementCreateAPIView, AdminAdvertisementUpdateAPIView, AdminAdvertisementDeleteAPIView, AdminContactUsListAPIView, \
-    AdminPosCustomerProfileAPIView, AdminCorporateDealDetailsAPIView, AdminRequestQuoteListAPIView, AdminContactUsDetailsAPIView, \
-        AdminContactUsDeleteAPIView, AdminPosCustomerCreateAPIView, AdminWebsiteConfigurationListAPIView
+    AdminAdvertisementCreateAPIView, AdminAdvertisementUpdateAPIView, AdminAdvertisementDeleteAPIView, \
+    AdminContactUsListAPIView, \
+    AdminPosCustomerProfileAPIView, AdminCorporateDealDetailsAPIView, AdminRequestQuoteListAPIView, \
+    AdminContactUsDetailsAPIView, \
+    AdminContactUsDeleteAPIView, AdminPosCustomerCreateAPIView, AdminWebsiteConfigurationListAPIView, \
+    AdminOfferCategoryListAPIView
 
 urlpatterns = [
 
@@ -222,6 +225,7 @@ urlpatterns = [
 
 
     # offers apies
+    path('admin/offers-category-list/', AdminOfferCategoryListAPIView.as_view()),
     path('admin/offers-list/', AdminOffersListAPIView.as_view()),
     path('admin/offers-details/<int:id>/', AdminOffersDetailsAPIView.as_view()),
     path('admin/offers-create/', AdminOffersCreateAPIView.as_view()),

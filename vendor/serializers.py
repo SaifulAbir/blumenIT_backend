@@ -7,9 +7,10 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from product.models import Brand, Category, DiscountTypes, FlashDealInfo, FlashDealProduct, Inventory, \
     Product, ProductImages, ProductReview, ProductTags, ProductVariation, ProductVideoProvider, \
-    ShippingClass, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units,\
-    VatType, Attribute, FilterAttributes, ProductFilterAttributes, AttributeValues, ProductWarranty, Warranty, SpecificationTitle, \
-    Offer, OfferProduct, ShippingCountry, ShippingState, ShippingCity
+    ShippingClass, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units, \
+    VatType, Attribute, FilterAttributes, ProductFilterAttributes, AttributeValues, ProductWarranty, Warranty, \
+    SpecificationTitle, \
+    Offer, OfferProduct, ShippingCountry, ShippingState, ShippingCity, OfferCategory
 from user.models import User, Subscription
 from cart.models import Order, Coupon, OrderItem, DeliveryAddress, PaymentType
 from user.serializers import CustomerProfileSerializer
@@ -1690,6 +1691,15 @@ class AdminOfferProductsSerializer(serializers.ModelSerializer):
         fields = [  'id',
                     'product',
         ]
+
+class AdminOfferCategoryListSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = OfferCategory
+        fields = [
+            'id', 'title'
+        ]
+
 
 
 class AdminOfferSerializer(serializers.ModelSerializer):

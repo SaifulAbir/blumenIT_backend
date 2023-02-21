@@ -73,6 +73,7 @@ class SubCategory(AbstractTimeStamp):
     pc_builder = models.BooleanField(null=False, blank=False, default=False)
     category = models.ForeignKey(
         Category, on_delete=models.PROTECT, related_name='sub_category_category')
+    is_featured = models.BooleanField(null=False, blank=False, default=False)
 
     class Meta:
         verbose_name = 'SubCategory'

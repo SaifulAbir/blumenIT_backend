@@ -39,7 +39,7 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminShippingClassUpdateAPIView, AdminShippingClassDeleteAPIView, AdminAttributeListAllAPIView, \
     AdminWebsiteConfigurationCreateAPIView, \
     AdminCategoryAllListAPIView, AdminSubCategoryListAllAPIView, AdminSubSubCategoryAllListAPIView, \
-    AdminBrandListAllAPIView, \
+    AdminBrandListAllAPIView, AdminSubCategoryToggleUpdateAPIView, \
     AdminUnitListAllAPIView, AdminSellerListAllAPIView, AdminVatTypeListAllAPIView, AdminVideoProviderListAllAPIView, \
     AdminDiscountTypeListAllAPIView, AdminFilterAttributeListAllAPIView, AdminFlashDealListAllAPIView, \
     AdminWarrantyListAllAPIView, AdminWebsiteConfigurationUpdateAPIView, \
@@ -272,6 +272,7 @@ urlpatterns = [
 
     #toggle apies
     path('admin/toggle-category/<int:pk>/', AdminCategoryToggleUpdateAPIView.as_view()),
+    path('admin/toggle-sub-category/<int:pk>/', AdminSubCategoryToggleUpdateAPIView.as_view()),
     path('admin/toggle-product/<int:pk>/', AdminProductToggleUpdateAPIView.as_view()),
     path('admin/toggle-blog/<int:pk>/', AdminBlogToggleUpdateAPIView.as_view()),
     path('admin/toggle-product-review/<int:pk>/', AdminProductReviewToggleAPIView.as_view()),

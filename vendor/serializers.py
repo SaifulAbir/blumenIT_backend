@@ -1699,6 +1699,7 @@ class AdminOfferSerializer(serializers.ModelSerializer):
     existing_offer_products = serializers.SerializerMethodField('get_existing_offer_products')
     start_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", required=False)
     end_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", required=False)
+    discount_price_title = serializers.CharField(source='discount_price_type.title', read_only=True)
 
     class Meta:
         model = Offer
@@ -1717,7 +1718,8 @@ class AdminOfferSerializer(serializers.ModelSerializer):
                     'discount_price',
                     'discount_price_type',
                     'offer_products',
-                    'existing_offer_products'
+                    'existing_offer_products',
+                    'discount_price_title'
                 ]
 
     def get_existing_offer_products(self, obj):

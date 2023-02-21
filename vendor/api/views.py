@@ -2155,6 +2155,7 @@ class AdminCouponDeleteAPIView(ListAPIView):
 class AdminOffersListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AdminOfferSerializer
+    pagination_class = ProductCustomPagination
 
     def get_queryset(self):
         if self.request.user.is_superuser == True:

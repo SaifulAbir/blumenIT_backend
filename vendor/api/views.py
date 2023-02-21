@@ -2321,6 +2321,10 @@ class AdminPosOrderAPIView(CreateAPIView):
     permission_classes = [AllowAny]
     serializer_class = AdminPosOrderSerializer
 
+    def perform_create(self, serializer):
+        in_house_order = self.request.data.get('in_house_order', True)
+        serializer.save(in_house_order=in_house_order)
+
     def post(self, request, *args, **kwargs):
         return super(AdminPosOrderAPIView, self).post(request, *args, **kwargs)
 # POS related admin apies views............................ end

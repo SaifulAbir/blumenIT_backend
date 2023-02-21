@@ -1827,7 +1827,7 @@ class AdminPosOrderItemSerializer(serializers.ModelSerializer):
                   ]
 
 class AdminPosOrderSerializer(serializers.ModelSerializer):
-    order_items = AdminPosOrderItemSerializer(many=True, required=False)
+    order_items = AdminPosOrderItemSerializer(many=True, required=False, read_only=True)
     # coupon_status = serializers.BooleanField(write_only=True, required=False)
     order_id = serializers.CharField(read_only=True)
     vat_amount =  serializers.FloatField(read_only=True)
@@ -1836,7 +1836,7 @@ class AdminPosOrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = ['id', 'order_id', 'product_count', 'vat_amount', 'discount_amount',
                   'payment_type', 'shipping_class', 'shipping_cost', 'order_items', 'delivery_address', 'comment',
-                  'customer']
+                  'customer', 'in_house_order']
 
     def create(self, validated_data):
         order_items = validated_data.pop('order_items')

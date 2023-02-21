@@ -2318,7 +2318,7 @@ class AdminPosSearchAPI(ListAPIView):
 
 
 class AdminPosOrderAPIView(CreateAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     serializer_class = AdminPosOrderSerializer
 
     def post(self, request, *args, **kwargs):

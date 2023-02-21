@@ -1838,120 +1838,83 @@ class AdminPosOrderSerializer(serializers.ModelSerializer):
                   'payment_type', 'shipping_class', 'shipping_cost', 'order_items', 'delivery_address', 'comment',
                   'customer']
 
-        def create(self, validated_data):
-            order_items = validated_data.pop('order_items')
-            payment_type = validated_data.get('payment_type')
-            order_status = "PENDING"
-            payment_status = "UN-PAID"
+    def create(self, validated_data):
+        order_items = validated_data.pop('order_items')
+        payment_type = validated_data.get('payment_type')
+        order_status = "PENDING"
+        payment_status = "UN-PAID"
 
-            if payment_type:
-                type_name_org = PaymentType.objects.get(id=payment_type.id).type_name
-                type_name = type_name_org.lower()
-                if type_name != 'cash on delivery':
-                    order_status = "CONFIRMED"
-                    payment_status = "PAID"
+        if payment_type:
+            type_name_org = PaymentType.objects.get(id=payment_type.id).type_name
+            type_name = type_name_org.lower()
+            if type_name != 'cash on delivery':
+                order_status = "CONFIRMED"
+                payment_status = "PAID"
 
-            # stop take order process if any product out of stock
-            if order_items:
-                for order_item in order_items:
-                    product = order_item['product']
-                    quantity = order_item['quantity']
-                    inventory_obj = Inventory.objects.filter(product=product).latest('created_at')
-                    new_update_quantity = int(inventory_obj.current_quantity) - int(quantity)
-                    if int(new_update_quantity) < 0:
-                        raise ValidationError("Order didn't create. One of product out of stock.")
+        # stop take order process if any product out of stock
+        if order_items:
+            for order_item in order_items:
+                product = order_item['product']
+                quantity = order_item['quantity']
+                inventory_obj = Inventory.objects.filter(product=product).latest('created_at')
+                new_update_quantity = int(inventory_obj.current_quantity) - int(quantity)
+                if int(new_update_quantity) < 0:
+                    raise ValidationError("Order didn't create. One of product out of stock.")
 
-            # stop take order process if order items have in_house and also normal products
-            # if order_items:
-            #     order_items_in_house_product = 0
-            #     order_items_not_in_house_product = 0
-            #     for order_item in order_items:
-            #         product = order_item['product']
-            #         if product.in_house_product == True:
-            #             order_items_in_house_product += 1
-            #         if product.in_house_product == False:
-            #             order_items_not_in_house_product += 1
-            #
-            #     total_order_items = int(len(order_items))
-            #     in_house_order = True
-            #     if order_items_in_house_product == total_order_items:
-            #         in_house_order = True
-            #         pass
-            #     elif order_items_not_in_house_product == total_order_items:
-            #         in_house_order = False
-            #         pass
-            #     else:
-            #         raise ValidationError(
-            #             "Order didn't create, Because of multiple products types available in order items.")
+        order_instance = Order.objects.create(**validated_data, order_status=order_status,payment_status=payment_status)
 
-            # order_instance = Order.objects.create(
-            #     **validated_data, user=self.context['request'].user, order_status=order_status,
-            #     payment_status=payment_status, in_house_order=in_house_order)
-            order_instance = Order.objects.create(
-                **validated_data, user=self.context['request'].user, order_status=order_status,
-                payment_status=payment_status)
+        if order_items:
+            count = 0
+            for order_item in order_items:
+                product = order_item['product']
+                quantity = order_item['quantity']
+                unit_price = order_item['unit_price']
 
-            if order_items:
-                count = 0
-                for order_item in order_items:
-                    product = order_item['product']
-                    quantity = order_item['quantity']
-                    unit_price = order_item['unit_price']
+                total_price = float(unit_price) * float(quantity)
 
-                    total_price = float(unit_price) * float(quantity)
+                try:
+                    product_warranty = order_item['product_warranty']
+                except:
+                    product_warranty = None
 
-                    try:
-                        product_warranty = order_item['product_warranty']
-                    except:
-                        product_warranty = None
+                if product_warranty:
+                    warranty_value = product_warranty.warranty_value
+                    warranty_value_type = product_warranty.warranty_value_type
 
-                    if product_warranty:
-                        warranty_value = product_warranty.warranty_value
-                        warranty_value_type = product_warranty.warranty_value_type
+                    if warranty_value_type == 'PERCENTAGE':
+                        unit_price_after_add_warranty = float((float(unit_price) / 100) * float(warranty_value))
+                        unit_price_after_add_warranty = unit_price + unit_price_after_add_warranty
+                    elif warranty_value_type == 'FIX':
+                        unit_price_after_add_warranty = float(float(unit_price) + float(warranty_value))
+                        unit_price_after_add_warranty = unit_price + unit_price_after_add_warranty
 
-                        if warranty_value_type == 'PERCENTAGE':
-                            unit_price_after_add_warranty = float((float(unit_price) / 100) * float(warranty_value))
-                            unit_price_after_add_warranty = unit_price + unit_price_after_add_warranty
-                        elif warranty_value_type == 'FIX':
-                            unit_price_after_add_warranty = float(float(unit_price) + float(warranty_value))
-                            unit_price_after_add_warranty = unit_price + unit_price_after_add_warranty
+                    total_price = float(unit_price_after_add_warranty) * float(quantity)
 
-                        total_price = float(unit_price_after_add_warranty) * float(quantity)
-
-                        OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity),
-                                                 unit_price=unit_price, total_price=total_price,
-                                                 product_warranty=product_warranty,
-                                                 unit_price_after_add_warranty=unit_price_after_add_warranty)
-                    else:
-                        OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity),
-                                                 unit_price=unit_price, total_price=total_price)
+                    OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity),
+                                                unit_price=unit_price, total_price=total_price,
+                                                product_warranty=product_warranty,
+                                                unit_price_after_add_warranty=unit_price_after_add_warranty)
+                else:
+                    OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity),
+                                                unit_price=unit_price, total_price=total_price)
 
 
-                    # update inventory
-                    inventory_obj = Inventory.objects.filter(product=product).latest('created_at')
-                    new_update_quantity = int(inventory_obj.current_quantity) - int(quantity)
-                    Product.objects.filter(id=product.id).update(quantity=new_update_quantity)
-                    inventory_obj.current_quantity = new_update_quantity
-                    inventory_obj.save()
+                # update inventory
+                inventory_obj = Inventory.objects.filter(product=product).latest('created_at')
+                new_update_quantity = int(inventory_obj.current_quantity) - int(quantity)
+                Product.objects.filter(id=product.id).update(quantity=new_update_quantity)
+                inventory_obj.current_quantity = new_update_quantity
+                inventory_obj.save()
 
-                    # product sell count update
-                    count += 1
-                    product_sell_quan = Product.objects.filter(
-                        slug=product.slug)[0].sell_count
-                    product_sell_quan += 1
-                    Product.objects.filter(slug=product.slug).update(
-                        sell_count=product_sell_quan)
+                # product sell count update
+                count += 1
+                product_sell_quan = Product.objects.filter(
+                    slug=product.slug)[0].sell_count
+                product_sell_quan += 1
+                Product.objects.filter(slug=product.slug).update(
+                    sell_count=product_sell_quan)
 
-            #discount
-            # try:
-            #     discount = validated_data.pop('discount')
-            # except:
-            #     discount = None
-            #
-            # if discount == True:
-            #     pass
-
-            return order_instance
+        return order_instance
 
 class AdminCategoryToggleSerializer(serializers.ModelSerializer):
     class Meta:

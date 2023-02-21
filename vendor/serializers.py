@@ -1827,8 +1827,7 @@ class AdminPosOrderItemSerializer(serializers.ModelSerializer):
                   ]
 
 class AdminPosOrderSerializer(serializers.ModelSerializer):
-    order_items = AdminPosOrderItemSerializer(many=True, required=False, read_only=True)
-    # coupon_status = serializers.BooleanField(write_only=True, required=False)
+    order_items = AdminPosOrderItemSerializer(many=True, required=False)
     order_id = serializers.CharField(read_only=True)
     vat_amount =  serializers.FloatField(read_only=True)
 

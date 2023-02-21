@@ -34,9 +34,8 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     AdminCouponSerializer, VatTypeSerializer, WebsiteConfigurationSerializer, \
     AdminOfferSerializer, AdminPosProductListSerializer, AdminShippingCountrySerializer, AdminShippingCitySerializer, \
     AdminShippingStateSerializer, AdminPosOrderSerializer, AdminCategoryToggleSerializer, AdminProductToggleSerializer, \
-    AdminBlogToggleSerializer, AdminProductReviewSerializer, AdvertisementPosterSerializer, \
-    ProductUpdateDetailsSerializer, \
-    AdminPosCustomerCreateSerializer, AdminOfferCategoryListSerializer
+    AdminBlogToggleSerializer, AdminProductReviewSerializer, AdvertisementPosterSerializer, ProductUpdateDetailsSerializer, \
+    AdminPosCustomerCreateSerializer, AdminSubCategoryToggleSerializer, AdminOfferCategoryListSerializer
 from cart.models import Order, OrderItem, Coupon
 from cart.models import Order, OrderItem, SubOrder
 from user.models import User, Subscription
@@ -2736,6 +2735,12 @@ class AdminCategoryToggleUpdateAPIView(UpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AdminCategoryToggleSerializer
     queryset = Category.objects.all()
+
+
+class AdminSubCategoryToggleUpdateAPIView(UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminSubCategoryToggleSerializer
+    queryset = SubCategory.objects.all()
 
 
 class AdminProductToggleUpdateAPIView(UpdateAPIView):

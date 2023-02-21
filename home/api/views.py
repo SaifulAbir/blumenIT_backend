@@ -24,9 +24,15 @@ class   HomeDataAPIView(APIView):
         slider_images = Advertisement.objects.filter(Q(work_for='SLIDER'), Q(is_active=True), Q(is_gaming=False)).order_by('-created_at')
         slider_images_serializer = AdvertisementDataSerializer(slider_images, many=True, context={"request": request})
 
-        # featured_categories
-        featured_categories = Category.objects.filter(is_featured=True, is_active=True).order_by('-created_at')
-        featured_categories_serializer = product_catListSerializer(featured_categories, many=True, context={"request": request})
+        # categories
+        categories = Category.objects.filter(is_featured=True, is_active=True).order_by('-created_at')
+        categories_serializer = product_catListSerializer(categories, many=True, context={"request": request})
+
+        # categories
+        sub_categories = SubCategory.objects.filter(is_featured=True, is_active=True).order_by('-created_at')
+        sub_categories_serializer = product_sub_catListSerializer(sub_categories, many=True, context={"request": request})
+
+        featured_categories_serializer = categories_serializer.data + sub_categories_serializer.data
 
         # featured
         featured = Product.objects.filter(status='PUBLISH', is_featured=True, is_active=True).order_by('-created_at')
@@ -62,7 +68,7 @@ class   HomeDataAPIView(APIView):
 
         return Response({
             "slider_images": slider_images_serializer.data,
-            "featured_categories": featured_categories_serializer.data,
+            "featured_categories": featured_categories_serializer,
             "featured_products": featured_serializer.data,
             "popular_product": popular_serializer.data,
             "gaming_product": gaming_serializer.data,
@@ -87,7 +93,7 @@ class  GamingDataAPIView(APIView):
         categories_with_logo = SubCategory.objects.filter(category__is_gaming__icontains=True, is_active=True).order_by('-created_at')[:8]
         categories_with_logo_serializer = product_sub_catListSerializer(categories_with_logo, many=True, context={"request": request})
 
-        # popular_categories
+        # popular_sub_categories
         popular_categories = SubCategory.objects.filter(category__is_gaming__icontains=True, is_active=True).order_by('-created_at')
         popular_categories_serializer = product_sub_catListSerializer(popular_categories, many=True, context={"request": request})
 

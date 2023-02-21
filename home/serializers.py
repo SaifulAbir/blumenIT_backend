@@ -4,6 +4,7 @@ from product.models import Category, SubCategory, SubSubCategory
 
 
 class product_catListSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField('get_type')
     class Meta:
         model = Category
         fields = [
@@ -11,17 +12,23 @@ class product_catListSerializer(serializers.ModelSerializer):
                 'title',
                 'icon',
                 'banner',
+                'type'
                 ]
-
+    def get_type(self, obj):
+        return 'cate'
 
 class product_sub_catListSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField('get_type')
     class Meta:
         model = SubCategory
         fields = [
                 'id',
                 'title',
-                'icon'
+                'icon',
+                'type'
                 ]
+    def get_type(self, obj):
+        return 'sub'
 
 
 class FaqSerializer(serializers.ModelSerializer):

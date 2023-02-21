@@ -200,7 +200,7 @@ class UpdateCategorySerializer(serializers.ModelSerializer):
 class AdminSubCategoryListSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubCategory
-        fields = ['id', 'title', 'ordering_number', 'category']
+        fields = ['id', 'title', 'ordering_number', 'category', 'is_featured']
 
 
 class AddNewSubCategorySerializer(serializers.ModelSerializer):
@@ -1930,6 +1930,12 @@ class AdminPosOrderSerializer(serializers.ModelSerializer):
 class AdminCategoryToggleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
+        fields = ['id', 'title', 'is_featured']
+
+
+class AdminSubCategoryToggleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubCategory
         fields = ['id', 'title', 'is_featured']
 
 

@@ -546,27 +546,18 @@ class AdminAccountDeleteAPIView(RetrieveUpdateAPIView):
     serializer_class = AccountDeleteSerializer
     lookup_field = 'id'
     lookup_url_kwarg = "id"
-    # print(queryset)
     def get_queryset(self):
         id = self.kwargs['id']
-        user = User.objects.get(id=id)
-        print(user.is_active)
-        print(user.email)
+        user = User.objects.filter(id=id)
         return user
 
     def put(self, request, *args, **kwargs):
-        user = self.get_queryset()
+        user = self.get_queryset().first()
         request = self.request
 
         active = request.GET.get('is_active')
-        print(active)
-        print(user.email)
-        # return render_to_string('confirmation_of_account_delete.html', {'active' : active})
-
 
         email = user.email
-        # user = User.objects.get(pk=pk)
-        # print(user.name)
         subject = "Confirmation of account deletion"
         html_message = render_to_string('confirmation_of_account_delete.html', {'active' : active, 'user':user})
 
@@ -578,5 +569,5 @@ class AdminAccountDeleteAPIView(RetrieveUpdateAPIView):
             html_message=html_message
         )
 
-        return user
+        return self.update(request, *args, **kwargs)
 

@@ -22,7 +22,7 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     ProductVideoProviderSerializer, ProductVatProviderSerializer, UpdateCategorySerializer, \
     UpdateSubSubCategorySerializer, ProductCreateSerializer, AddNewCategorySerializer, \
     SellerCreateSerializer, FlashDealInfoSerializer, UpdateSubCategorySerializer, FilteringAttributesSerializer, \
-    AdminProfileSerializer, AdminContactUsSerializer, \
+    AdminProfileSerializer, AdminContactUsSerializer, AdminOfferDetailsSerializer, \
     ReviewListSerializer, AttributeSerializer, AttributeValuesSerializer, AdminFilterAttributeSerializer, \
     SellerCreateSerializer, UpdateSubCategorySerializer, FilteringAttributesSerializer, \
     AdminProfileSerializer, AdminOrderViewSerializer, AdminOrderListSerializer, AdminOrderUpdateSerializer, \
@@ -2170,7 +2170,7 @@ class AdminOffersListAPIView(ListAPIView):
 
 class AdminOffersDetailsAPIView(RetrieveAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = AdminOfferSerializer
+    serializer_class = AdminOfferDetailsSerializer
     lookup_field = 'id'
     lookup_url_kwarg = "id"
 

@@ -280,6 +280,8 @@ urlpatterns = [
     path('admin/toggle-product/<int:pk>/', AdminProductToggleUpdateAPIView.as_view()),
     path('admin/toggle-blog/<int:pk>/', AdminBlogToggleUpdateAPIView.as_view()),
     path('admin/toggle-product-review/<int:pk>/', AdminProductReviewToggleAPIView.as_view()),
+    # path('admin/toggle-sub-category-pcbuilder/<int:pk>/', AdminSubCategoryToggleUpdateAPIView.as_view()),
+
 
 
     # advertisement apies

@@ -1938,7 +1938,7 @@ class AdminCategoryToggleSerializer(serializers.ModelSerializer):
 class AdminSubCategoryToggleSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubCategory
-        fields = ['id', 'title', 'is_featured']
+        fields = ['id', 'title', 'is_featured', 'pc_builder']
 
 
 class AdminProductToggleSerializer(serializers.ModelSerializer):

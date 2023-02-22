@@ -284,3 +284,6 @@ class AdminPermissionUpdateAPIView(RetrieveUpdateAPIView):
                     {"msg": 'Permission Modules does not exist!'})
         else:
             raise ValidationError({"msg": 'You can not update permission modules, because you are not an Admin!'})
+
+    def put(self, request, *args, **kwargs):
+        return super(AdminPermissionUpdateAPIView, self).put(request, *args, **kwargs)

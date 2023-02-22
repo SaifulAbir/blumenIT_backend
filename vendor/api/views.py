@@ -23,7 +23,7 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     ProductVideoProviderSerializer, ProductVatProviderSerializer, UpdateCategorySerializer, \
     UpdateSubSubCategorySerializer, ProductCreateSerializer, AddNewCategorySerializer, \
     SellerCreateSerializer, FlashDealInfoSerializer, UpdateSubCategorySerializer, FilteringAttributesSerializer, \
-    AdminProfileSerializer, AdminContactUsSerializer, \
+    AdminProfileSerializer, AdminContactUsSerializer, AdminOfferDetailsSerializer, \
     ReviewListSerializer, AttributeSerializer, AttributeValuesSerializer, AdminFilterAttributeSerializer, \
     SellerCreateSerializer, UpdateSubCategorySerializer, FilteringAttributesSerializer, \
     AdminProfileSerializer, AdminOrderViewSerializer, AdminOrderListSerializer, AdminOrderUpdateSerializer, \
@@ -2177,7 +2177,7 @@ class AdminOffersListAPIView(ListAPIView):
 
 class AdminOffersDetailsAPIView(RetrieveAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = AdminOfferSerializer
+    serializer_class = AdminOfferDetailsSerializer
     lookup_field = 'id'
     lookup_url_kwarg = "id"
 
@@ -2703,6 +2703,22 @@ class AdminFlashDealListAllAPIView(ListAPIView):
                     {"msg": 'Flash Deal does not exist!'})
         else:
             raise ValidationError({"msg": 'You can not view Flash Deal list, because you are not an Admin!'})
+
+
+class AdminOffersListAllAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminOfferSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = Offer.objects.filter(is_active=True).order_by('-created_at')
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'Offers does not exist!'})
+        else:
+            raise ValidationError({"msg": 'You can not view offers list, because you are not an Admin!'})
 
 
 class AdminWarrantyListAllAPIView(ListAPIView):

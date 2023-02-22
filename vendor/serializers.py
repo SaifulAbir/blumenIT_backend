@@ -1842,6 +1842,7 @@ class AdminPosOrderSerializer(serializers.ModelSerializer):
     order_items = AdminPosOrderItemSerializer(many=True, required=False)
     order_id = serializers.CharField(read_only=True)
     vat_amount =  serializers.FloatField(read_only=True)
+    product_count = serializers.IntegerField(required=True)
 
     class Meta:
         model = Order
@@ -1872,7 +1873,8 @@ class AdminPosOrderSerializer(serializers.ModelSerializer):
                 if int(new_update_quantity) < 0:
                     raise ValidationError("Order didn't create. One of product out of stock.")
 
-        order_instance = Order.objects.create(**validated_data, order_status=order_status,payment_status=payment_status)
+        order_instance = Order.objects.create(**validated_data, order_status=order_status,payment_status=payment_status, user=validated_data.get('customer'))
+
 
         if order_items:
             count = 0

@@ -499,18 +499,15 @@ class FlashDealExistingSerializer(serializers.ModelSerializer):
 
 class ProductFilterAttributesSerializer(serializers.ModelSerializer):
     filter_attribute = serializers.PrimaryKeyRelatedField(queryset=FilterAttributes.objects.all(), many=False, required= True)
-    attribute_value = serializers.PrimaryKeyRelatedField(queryset=AttributeValues.objects.all(), many=False, required= True)
     class Meta:
         model = ProductFilterAttributes
         fields = [
             'id',
             'filter_attribute',
-            'attribute_value'
         ]
 
 
 class ProductWarrantiesSerializer(serializers.ModelSerializer):
-    # warranty = serializers.PrimaryKeyRelatedField(queryset=Warranty.objects.filter(is_active=True), many=False, write_only=True, required= True)
     warranty = serializers.PrimaryKeyRelatedField(queryset=Warranty.objects.filter(is_active=True), many=False, required= True)
     class Meta:
         model = ProductWarranty
@@ -521,6 +518,27 @@ class ProductWarrantiesSerializer(serializers.ModelSerializer):
             'warranty_value_type'
         ]
 
+
+class OfferProductSerializer(serializers.ModelSerializer):
+    offer = serializers.PrimaryKeyRelatedField(queryset=Offer.objects.all(), many=False, required= False)
+    class Meta:
+        model = OfferProduct
+        fields = [
+            'id',
+            'offer'
+        ]
+
+# class FlashDealSerializer(serializers.ModelSerializer):
+#     flash_deal_info = serializers.PrimaryKeyRelatedField(queryset=FlashDealInfo.objects.all(), many=False, write_only=True, required= False)
+#     discount_type = serializers.PrimaryKeyRelatedField(queryset=DiscountTypes.objects.all(), many=False, write_only=True, required= False)
+#     class Meta:
+#         model = FlashDealProduct
+#         fields = [
+#             'id',
+#             'flash_deal_info',
+#             'discount_amount',
+#             'discount_type'
+#         ]
 
 # product create serializer start
 class ProductCreateSerializer(serializers.ModelSerializer):
@@ -539,7 +557,8 @@ class ProductCreateSerializer(serializers.ModelSerializer):
         child=serializers.FileField(), write_only=True, required=False)
     product_specification = ProductSpecificationSerializer(
         many=True, required=False)
-    flash_deal = FlashDealSerializer(many=True, required=False)
+    # flash_deal = FlashDealSerializer(many=True, required=False)
+    offers = OfferProductSerializer(many=True, required=False)
     product_filter_attributes = ProductFilterAttributesSerializer(many=True, required=False)
     product_warranties = ProductWarrantiesSerializer(many=True, required=False)
 
@@ -583,7 +602,7 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             'cash_on_delivery',
             'is_featured',
             'todays_deal',
-            'flash_deal',
+            'offers',
             'vat',
             'vat_type',
             'product_filter_attributes',
@@ -658,10 +677,16 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             product_specification = ''
 
         # flash_deal
+        # try:
+        #     flash_deal = validated_data.pop('flash_deal')
+        # except:
+        #     flash_deal = ''
+
+        # offers
         try:
-            flash_deal = validated_data.pop('flash_deal')
+            offers = validated_data.pop('offers')
         except:
-            flash_deal = ''
+            offers = ''
 
         # product_filter_attributes
         try:
@@ -732,30 +757,38 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             raise ValidationError('Problem of Product Specification info insert.')
 
         # flash_deal
+        # try:
+        #     flash_deal_add_count = 0
+        #     if flash_deal:
+        #         for f_deal in flash_deal:
+        #             flash_deal_info = f_deal['flash_deal_info']
+        #             discount_type = f_deal['discount_type']
+        #             discount_amount = f_deal['discount_amount']
+        #             if flash_deal_info:
+        #                 if flash_deal_add_count <= 0:
+        #                     flash_deal_product_instance = FlashDealProduct.objects.create(product=product_instance, flash_deal_info=flash_deal_info, discount_type=discount_type, discount_amount=discount_amount)
+        #                     flash_deal_add_count += 1
+        #                 else:
+        #                     pass
+        # except:
+        #     raise ValidationError('Problem of Flash Deal info insert.')
+
+        # offers
         try:
-            flash_deal_add_count = 0
-            if flash_deal:
-                for f_deal in flash_deal:
-                    flash_deal_info = f_deal['flash_deal_info']
-                    discount_type = f_deal['discount_type']
-                    discount_amount = f_deal['discount_amount']
-                    if flash_deal_info:
-                        if flash_deal_add_count <= 0:
-                            flash_deal_product_instance = FlashDealProduct.objects.create(product=product_instance, flash_deal_info=flash_deal_info, discount_type=discount_type, discount_amount=discount_amount)
-                            flash_deal_add_count += 1
-                        else:
-                            pass
+            if offers:
+                for offer in offers:
+                    offer = offer['offer']
+                    if offer:
+                        OfferProduct.objects.create(product=product_instance, offer=offer)
         except:
-            raise ValidationError('Problem of Flash Deal info insert.')
+            raise ValidationError('Problem of Offer product info insert.')
 
         # product_filter_attributes
         try:
             if product_filter_attributes:
                 for product_filter_attribute in product_filter_attributes:
                     filter_attribute = product_filter_attribute['filter_attribute']
-                    attribute_value = product_filter_attribute['attribute_value']
-                    if attribute_value:
-                        ProductFilterAttributes.objects.create(filter_attribute=filter_attribute, attribute_value=attribute_value,  product=product_instance)
+                    ProductFilterAttributes.objects.create(filter_attribute=filter_attribute, product=product_instance)
         except:
             raise ValidationError('Problem of Product Filter Attributes info insert.')
 
@@ -834,7 +867,8 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
     product_tags = serializers.ListField(child=serializers.CharField(), write_only=True, required=False)
     product_images = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
     product_specification = ProductSpecificationSerializer(many=True, required=False)
-    flash_deal = FlashDealSerializer(many=True, required=False)
+    # flash_deal = FlashDealSerializer(many=True, required=False)
+    offers = OfferProductSerializer(many=True, required=False)
     quantity = serializers.IntegerField(required=False, write_only=True)
     product_filter_attributes = ProductFilterAttributesSerializer(many=True, required=False)
     product_warranties = ProductWarrantiesSerializer(many=True, required=False)
@@ -881,7 +915,7 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
                     'thumbnail',
                     'product_images',
                     'product_filter_attributes',
-                    'flash_deal',
+                    'offers',
                     'product_warranties',
                     'product_specification',
                 ]
@@ -952,10 +986,16 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
             product_specification = ''
 
         # flash_deal
+        # try:
+        #     flash_deal = validated_data.pop('flash_deal')
+        # except:
+        #     flash_deal = ''
+
+        # offers
         try:
-            flash_deal = validated_data.pop('flash_deal')
+            offers = validated_data.pop('offers')
         except:
-            flash_deal = ''
+            offers = ''
 
         # product_filter_attributes
         try:
@@ -1073,28 +1113,39 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
             raise ValidationError('Problem of Product specification update.')
 
         # flash_deal
-        try:
-            if flash_deal:
-                f_p = FlashDealProduct.objects.filter(
-                    product=instance).exists()
-                if f_p == True:
-                    FlashDealProduct.objects.filter(
-                        product=instance).delete()
+        # try:
+        #     if flash_deal:
+        #         f_p = FlashDealProduct.objects.filter(
+        #             product=instance).exists()
+        #         if f_p == True:
+        #             FlashDealProduct.objects.filter(
+        #                 product=instance).delete()
 
-                for f_deal in flash_deal:
-                    flash_deal_info = f_deal['flash_deal_info']
-                    discount_type = f_deal['discount_type']
-                    discount_amount = f_deal['discount_amount']
-                    if flash_deal_info:
-                        flash_deal_product_instance = FlashDealProduct.objects.create(product=instance, flash_deal_info=flash_deal_info, discount_type=discount_type, discount_amount=discount_amount)
-            else:
-                f_p = FlashDealProduct.objects.filter(
-                    product=instance).exists()
-                if f_p == True:
-                    FlashDealProduct.objects.filter(
-                        product=instance).delete()
+        #         for f_deal in flash_deal:
+        #             flash_deal_info = f_deal['flash_deal_info']
+        #             discount_type = f_deal['discount_type']
+        #             discount_amount = f_deal['discount_amount']
+        #             if flash_deal_info:
+        #                 flash_deal_product_instance = FlashDealProduct.objects.create(product=instance, flash_deal_info=flash_deal_info, discount_type=discount_type, discount_amount=discount_amount)
+        #     else:
+        #         f_p = FlashDealProduct.objects.filter(
+        #             product=instance).exists()
+        #         if f_p == True:
+        #             FlashDealProduct.objects.filter(
+        #                 product=instance).delete()
+        # except:
+        #     raise ValidationError('Problem of Product flash deal update.')
+
+
+        # offers
+        try:
+            if offers:
+                for offer in offers:
+                    offer = offer['offer']
+                    if offer:
+                        OfferProduct.objects.create(product=instance, offer=offer)
         except:
-            raise ValidationError('Problem of Product flash deal update.')
+            raise ValidationError('Problem of Product Offer product update.')
 
         # product_filter_attributes
         try:
@@ -1107,9 +1158,7 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
 
                 for product_filter_attribute in product_filter_attributes:
                     filter_attribute = product_filter_attribute['filter_attribute']
-                    attribute_value = product_filter_attribute['attribute_value']
-                    if attribute_value:
-                        ProductFilterAttributes.objects.create(filter_attribute=filter_attribute, attribute_value=attribute_value, product=instance)
+                    ProductFilterAttributes.objects.create(filter_attribute=filter_attribute, product=instance)
             else:
                 p_f_a = ProductFilterAttributes.objects.filter(
                     product=instance).exists()
@@ -1162,7 +1211,8 @@ class ProductUpdateDetailsSerializer(serializers.ModelSerializer):
     product_tags = serializers.SerializerMethodField()
     product_images = serializers.SerializerMethodField()
     product_specification = serializers.SerializerMethodField('get_product_specification')
-    flash_deal = serializers.SerializerMethodField('get_flash_deal')
+    # flash_deal = serializers.SerializerMethodField('get_flash_deal')
+    offers = serializers.SerializerMethodField('get_offers')
     product_filter_attributes = serializers.SerializerMethodField('get_product_filter_attributes')
     product_warranties = serializers.SerializerMethodField('get_product_warranties')
 
@@ -1209,7 +1259,7 @@ class ProductUpdateDetailsSerializer(serializers.ModelSerializer):
                     'thumbnail',
                     'product_images',
                     'product_filter_attributes',
-                    'flash_deal',
+                    'offers',
                     'product_warranties',
                     'product_specification',
                 ]
@@ -1241,9 +1291,14 @@ class ProductUpdateDetailsSerializer(serializers.ModelSerializer):
         serializer = ProductExistingSpecificationSerializer(instance=queryset, many=True)
         return serializer.data
 
-    def get_flash_deal(self, product):
-        queryset = FlashDealProduct.objects.filter(product=product, is_active = True)
-        serializer = FlashDealExistingSerializer(instance=queryset, many=True)
+    # def get_flash_deal(self, product):
+    #     queryset = FlashDealProduct.objects.filter(product=product, is_active = True)
+    #     serializer = FlashDealExistingSerializer(instance=queryset, many=True)
+    #     return serializer.data
+
+    def get_offers(self, product):
+        queryset = OfferProduct.objects.filter(product=product, is_active=True)
+        serializer = OfferProductSerializer(instance=queryset, many=True)
         return serializer.data
 
     def get_product_filter_attributes(self, product):

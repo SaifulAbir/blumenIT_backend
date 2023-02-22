@@ -2705,6 +2705,22 @@ class AdminFlashDealListAllAPIView(ListAPIView):
             raise ValidationError({"msg": 'You can not view Flash Deal list, because you are not an Admin!'})
 
 
+class AdminOffersListAllAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminOfferSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            queryset = Offer.objects.filter(is_active=True).order_by('-created_at')
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'Offers does not exist!'})
+        else:
+            raise ValidationError({"msg": 'You can not view offers list, because you are not an Admin!'})
+
+
 class AdminWarrantyListAllAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AdminWarrantyListSerializer

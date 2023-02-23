@@ -200,7 +200,7 @@ class UpdateCategorySerializer(serializers.ModelSerializer):
 class AdminSubCategoryListSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubCategory
-        fields = ['id', 'title', 'ordering_number', 'category', 'is_featured']
+        fields = ['id', 'title', 'ordering_number', 'category', 'is_featured', 'pc_builder']
 
 
 class AddNewSubCategorySerializer(serializers.ModelSerializer):

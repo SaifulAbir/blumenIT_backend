@@ -1172,10 +1172,10 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
                         product=instance).delete()
 
                 for product_warranties in product_warranties:
-                    warranty = product_filter_attribute['warranty']
-                    warranty_value = product_filter_attribute['warranty_value']
-                    warranty_value_type = product_filter_attribute['warranty_value_type']
-                    product_warranty_instance = p_w.objects.create(product=instance, warranty=warranty, warranty_value=warranty_value, warranty_value_type=warranty_value_type)
+                    warranty = product_warranties['warranty']
+                    warranty_value = product_warranties['warranty_value']
+                    warranty_value_type = product_warranties['warranty_value_type']
+                    ProductWarranty.objects.create(product=instance, warranty=warranty, warranty_value=warranty_value, warranty_value_type=warranty_value_type)
             else:
                 p_w = ProductWarranty.objects.filter(
                     product=instance).exists()

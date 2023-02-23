@@ -499,11 +499,13 @@ class FlashDealExistingSerializer(serializers.ModelSerializer):
 
 class ProductFilterAttributesSerializer(serializers.ModelSerializer):
     filter_attribute = serializers.PrimaryKeyRelatedField(queryset=FilterAttributes.objects.all(), many=False, required= True)
+    attribute_value = serializers.PrimaryKeyRelatedField(queryset=AttributeValues.objects.all(), many=False, required= True)
     class Meta:
         model = ProductFilterAttributes
         fields = [
             'id',
             'filter_attribute',
+            'attribute_value'
         ]
 
 
@@ -784,7 +786,8 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             if product_filter_attributes:
                 for product_filter_attribute in product_filter_attributes:
                     filter_attribute = product_filter_attribute['filter_attribute']
-                    ProductFilterAttributes.objects.create(filter_attribute=filter_attribute, product=product_instance)
+                    attribute_value = product_filter_attribute['attribute_value']
+                    ProductFilterAttributes.objects.create(filter_attribute=filter_attribute, attribute_value=attribute_value, product=product_instance)
         except:
             raise ValidationError('Problem of Product Filter Attributes info insert.')
 
@@ -1152,7 +1155,8 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
 
                 for product_filter_attribute in product_filter_attributes:
                     filter_attribute = product_filter_attribute['filter_attribute']
-                    ProductFilterAttributes.objects.create(filter_attribute=filter_attribute, product=instance)
+                    attribute_value = product_filter_attribute['attribute_value']
+                    ProductFilterAttributes.objects.create(filter_attribute=filter_attribute, attribute_value=attribute_value, product=instance)
             else:
                 p_f_a = ProductFilterAttributes.objects.filter(
                     product=instance).exists()
@@ -1452,6 +1456,13 @@ class AdminFilterAttributeSerializer(serializers.ModelSerializer):
     def get_attribute_values(self, obj):
         values = AttributeValues.objects.filter(attribute=obj.attribute, is_active=True)
         return AttributeValuesSerializer(values, many=True, context={'request': self.context['request']}).data
+
+
+class AdminFilterAttributeValueSerializer(serializers.ModelSerializer):
+    attribute_title = serializers.CharField(source='attribute.title',read_only=True)
+    class Meta:
+        model = AttributeValues
+        fields = ['id', 'attribute', 'attribute_title', 'value']
 
 
 class AdminOrderListSerializer(serializers.ModelSerializer):

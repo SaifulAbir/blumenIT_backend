@@ -31,7 +31,7 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     AdminTicketListSerializer, AdminTicketDataSerializer, TicketStatusSerializer, CategoryWiseProductSaleSerializer, \
     CategoryWiseProductStockSerializer, AdminWarrantyListSerializer, AdminShippingClassSerializer, \
     AdminSpecificationTitleSerializer, AdminSubscribersListSerializer, AdminCorporateDealSerializer, \
-    AdminCouponSerializer, VatTypeSerializer, WebsiteConfigurationSerializer, \
+    AdminCouponSerializer, VatTypeSerializer, WebsiteConfigurationSerializer, AdminFilterAttributeValueSerializer, \
     AdminOfferSerializer, AdminPosProductListSerializer, AdminShippingCountrySerializer, AdminShippingCitySerializer, \
     AdminShippingStateSerializer, AdminPosOrderSerializer, AdminCategoryToggleSerializer, AdminProductToggleSerializer, \
     AdminBlogToggleSerializer, AdminProductReviewSerializer, AdvertisementPosterSerializer, ProductUpdateDetailsSerializer, \
@@ -2688,6 +2688,23 @@ class AdminFilterAttributeListAllAPIView(ListAPIView):
         else:
             raise ValidationError({"msg": 'You can not see filter attribute data, because you are not an Admin!'})
 
+
+class AdminFilterAttributeValueListAllAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminFilterAttributeValueSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True:
+            request = self.request
+            atid = self.kwargs['atid']
+            if atid:
+                queryset = AttributeValues.objects.filter(attribute=atid, is_active=True).order_by('-created_at')
+                return queryset
+            else:
+                queryset = AttributeValues.objects.filter(is_active=True).order_by('-created_at')
+                return queryset
+        else:
+            raise ValidationError({"msg": 'You can not see filter attribute values data, because you are not an Admin!'})
 
 class AdminFlashDealListAllAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]

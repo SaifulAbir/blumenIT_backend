@@ -49,7 +49,7 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminProductReviewToggleAPIView, AdminAdvertisementListAPIView, AdminProductUpdateDetailsAPIView, \
     AdminShippingCountryListAllAPIView, AdminRequestQuoteDetailsAPIView, AdminRequestQuoteDeleteAPIView, \
     AdminAdvertisementCreateAPIView, AdminAdvertisementUpdateAPIView, AdminAdvertisementDeleteAPIView, \
-    AdminContactUsListAPIView, \
+    AdminContactUsListAPIView, AdminFilterAttributeValueListAllAPIView, \
     AdminPosCustomerProfileAPIView, AdminCorporateDealDetailsAPIView, AdminRequestQuoteListAPIView, \
     AdminContactUsDetailsAPIView, AdminOffersListAllAPIView, \
     AdminContactUsDeleteAPIView, AdminPosCustomerCreateAPIView, AdminWebsiteConfigurationListAPIView, \
@@ -95,6 +95,7 @@ urlpatterns = [
     path('admin/video-provider-list-all/', AdminVideoProviderListAllAPIView.as_view()),
     path('admin/discount-type-list-all/', AdminDiscountTypeListAllAPIView.as_view()),
     path('admin/filter-attribute-list-all/', AdminFilterAttributeListAllAPIView.as_view()),
+    path('admin/filter-attribute-value-list-all/<int:atid>/', AdminFilterAttributeValueListAllAPIView.as_view()),
     path('admin/flash-deal-list-all/', AdminFlashDealListAllAPIView.as_view()),
     path('admin/offers-list-all/', AdminOffersListAllAPIView.as_view()),
     path('admin/warranty-list-all/', AdminWarrantyListAllAPIView.as_view()),

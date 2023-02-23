@@ -1687,9 +1687,13 @@ class AdminShippingStateSerializer(serializers.ModelSerializer):
 
 
 class AdminShippingClassSerializer(serializers.ModelSerializer):
+    shipping_country_title = serializers.CharField(source='shipping_country.title', read_only=True)
+    shipping_state_title = serializers.CharField(source='shipping_state.title', read_only=True)
+    shipping_city_title = serializers.CharField(source='shipping_city.title', read_only=True)
     class Meta:
         model = ShippingClass
-        fields = ['id', 'description', 'shipping_country', 'shipping_state', 'shipping_city', 'delivery_days', 'delivery_charge']
+        fields = ['id', 'description', 'shipping_country', 'shipping_state', 'shipping_city', 'delivery_days',
+                  'delivery_charge', 'shipping_country_title', 'shipping_state_title', 'shipping_city_title']
 
 
 class AdminSpecificationTitleSerializer(serializers.ModelSerializer):

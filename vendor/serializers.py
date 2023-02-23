@@ -561,6 +561,7 @@ class ProductCreateSerializer(serializers.ModelSerializer):
     offers = OfferProductSerializer(many=True, required=False)
     product_filter_attributes = ProductFilterAttributesSerializer(many=True, required=False)
     product_warranties = ProductWarrantiesSerializer(many=True, required=False)
+    video_provider = serializers.PrimaryKeyRelatedField(queryset=ProductVideoProvider.objects.all(), many=False, write_only=True, required= False)
 
     class Meta:
         model = Product
@@ -583,10 +584,6 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             'video_link',
             'price',
             'pre_payment_amount',
-            'discount_start_date',
-            'discount_end_date',
-            'discount_amount',
-            'discount_type',
             'quantity',
             'sku',
             'external_link',
@@ -595,7 +592,6 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             'active_short_description',
             'short_description',
             'product_specification',
-            'low_stock_quantity_warning',
             'show_stock_quantity',
             'in_house_product',
             'whole_sale_product',
@@ -864,6 +860,8 @@ class VendorProductViewSerializer(serializers.ModelSerializer):
 
 # product update serializer start
 class ProductUpdateSerializer(serializers.ModelSerializer):
+    sub_category = serializers.PrimaryKeyRelatedField(queryset=SubCategory.objects.all(), many=False, write_only=True, required= False)
+    sub_sub_category = serializers.PrimaryKeyRelatedField(queryset=SubSubCategory.objects.all(), many=False, write_only=True, required= False)
     product_tags = serializers.ListField(child=serializers.CharField(), write_only=True, required=False)
     product_images = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
     product_specification = ProductSpecificationSerializer(many=True, required=False)
@@ -872,6 +870,7 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
     quantity = serializers.IntegerField(required=False, write_only=True)
     product_filter_attributes = ProductFilterAttributesSerializer(many=True, required=False)
     product_warranties = ProductWarrantiesSerializer(many=True, required=False)
+    video_provider = serializers.PrimaryKeyRelatedField(queryset=ProductVideoProvider.objects.all(), many=False, write_only=True, required= False)
 
     class Meta:
         model = Product
@@ -892,15 +891,10 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
                     'video_link',
                     'price',
                     'pre_payment_amount',
-                    'discount_start_date',
-                    'discount_end_date',
-                    'discount_amount',
-                    'discount_type',
                     'quantity',
                     'sku',
                     'external_link',
                     'external_link_button_text',
-                    'low_stock_quantity_warning',
                     'vat',
                     'vat_type',
                     'active_short_description',
@@ -1236,15 +1230,10 @@ class ProductUpdateDetailsSerializer(serializers.ModelSerializer):
                     'video_link',
                     'price',
                     'pre_payment_amount',
-                    'discount_start_date',
-                    'discount_end_date',
-                    'discount_amount',
-                    'discount_type',
                     'quantity',
                     'sku',
                     'external_link',
                     'external_link_button_text',
-                    'low_stock_quantity_warning',
                     'vat',
                     'vat_type',
                     'active_short_description',

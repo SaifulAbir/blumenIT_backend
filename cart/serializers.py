@@ -388,9 +388,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
             delivery_date = None
         order_items = OrderItem.objects.filter(order=order_instance)
         subject = "Your order has been successfully placed."
-        # html_message = render_to_string('order_details.html', {'username':username, 'dedicated_name' : name})
         html_message = render_to_string('order_details.html', {'username':username, 'email' : email, 'name': name, 'order_id': order_id, 'created_at': created_at, 'order_items': order_items, 'payment_type': payment_type, 'sub_total': sub_total, 'shipping_cost': shipping_cost, 'vat_amount': vat_amount, 'coupon_discount_amount': coupon_discount_amount, 'grand_total_price': grand_total_price, 'delivery_date': delivery_date})
-        # html_message = 'hello'
 
         send_mail(
             subject=subject,

@@ -860,7 +860,6 @@ class VendorProductViewSerializer(serializers.ModelSerializer):
 
 # product update serializer start
 class ProductUpdateSerializer(serializers.ModelSerializer):
-    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=False, write_only=True, required= True)
     sub_category = serializers.PrimaryKeyRelatedField(queryset=SubCategory.objects.all(), many=False, write_only=True, required= False)
     sub_sub_category = serializers.PrimaryKeyRelatedField(queryset=SubSubCategory.objects.all(), many=False, write_only=True, required= False)
     product_tags = serializers.ListField(child=serializers.CharField(), write_only=True, required=False)

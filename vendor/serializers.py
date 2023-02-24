@@ -19,6 +19,7 @@ from django.db.models import Avg
 from django.utils import timezone
 from support_ticket.models import Ticket, TicketConversation
 from home.models import CorporateDeal, Advertisement, HomeSingleRowData, SliderImage, RequestQuote, ContactUs
+from django.db.models import Q
 
 
 class SellerCreateSerializer(serializers.ModelSerializer):
@@ -505,7 +506,7 @@ class ProductFilterAttributesSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'filter_attribute',
-            'attribute_value'
+            'attribute_value',
         ]
 
 
@@ -925,7 +926,7 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
             sku = ''
 
         if sku:
-            product_check_sku = Product.objects.filter(sku=sku)
+            product_check_sku = Product.objects.filter(Q(sku=sku), ~Q(id = instance.id))
             if product_check_sku:
                 raise ValidationError('This SKU already exist in product.')
             variation_check_sku = ProductVariation.objects.filter(sku=sku)
@@ -1204,6 +1205,29 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
 # product update serializer end
 
 
+class ProductFilterAttributesForUpdateDetailsSerializer(serializers.ModelSerializer):
+    filter_attribute = serializers.PrimaryKeyRelatedField(queryset=FilterAttributes.objects.all(), many=False, required= True)
+    attribute_title = serializers.CharField(source="filter_attribute.attribute.title",read_only=True)
+    attribute_value = serializers.SerializerMethodField('get_attribute_value')
+    # attribute_value = serializers.PrimaryKeyRelatedField(queryset=AttributeValues.objects.all(), many=False, required= True)
+    # attribute_value_title = serializers.CharField(source="attribute_value.attribute.title",read_only=True)
+    class Meta:
+        model = ProductFilterAttributes
+        fields = [
+            'id',
+            'filter_attribute',
+            'attribute_title',
+            'attribute_value',
+            # 'attribute_value_title'
+        ]
+
+    def get_attribute_value(self, instance):
+        queryset = AttributeValues.objects.filter(id=instance.attribute_value.id, is_active = True)
+        serializer = AttributeValuesSerializer(instance=queryset, many=True)
+        return serializer.data
+
+
+
 # product update details serializer start
 class ProductUpdateDetailsSerializer(serializers.ModelSerializer):
     product_tags = serializers.SerializerMethodField()
@@ -1284,11 +1308,6 @@ class ProductUpdateDetailsSerializer(serializers.ModelSerializer):
         serializer = ProductExistingSpecificationSerializer(instance=queryset, many=True)
         return serializer.data
 
-    # def get_flash_deal(self, product):
-    #     queryset = FlashDealProduct.objects.filter(product=product, is_active = True)
-    #     serializer = FlashDealExistingSerializer(instance=queryset, many=True)
-    #     return serializer.data
-
     def get_offers(self, product):
         queryset = OfferProduct.objects.filter(product=product, is_active=True)
         serializer = OfferProductSerializer(instance=queryset, many=True)
@@ -1296,7 +1315,7 @@ class ProductUpdateDetailsSerializer(serializers.ModelSerializer):
 
     def get_product_filter_attributes(self, product):
         queryset = ProductFilterAttributes.objects.filter(product=product, is_active = True)
-        serializer = ProductFilterAttributesSerializer(instance=queryset, many=True)
+        serializer = ProductFilterAttributesForUpdateDetailsSerializer(instance=queryset, many=True)
         return serializer.data
 
     def get_product_warranties(self, product):
@@ -1583,10 +1602,13 @@ class AdminTicketListSerializer(serializers.ModelSerializer):
         fields = ['id', 'ticket_id', 'created_at', 'ticket_subject', 'user_name', 'user_email', 'status', 'last_reply']
 
     def get_last_reply(self, obj):
-        selected_last_ticket_conversation = TicketConversation.objects.filter(
-            ticket=obj).order_by('-created_at').latest('id').created_at
-        data = selected_last_ticket_conversation.strftime("%Y-%m-%d, %H:%M:%S")
-        return data
+        try:
+            selected_last_ticket_conversation = TicketConversation.objects.filter(
+                ticket=obj).order_by('-created_at').latest('id').created_at
+            data = selected_last_ticket_conversation.strftime("%Y-%m-%d, %H:%M:%S")
+            return data
+        except:
+            return ''
 
 
 class AdminTicketConversationSerializer(serializers.ModelSerializer):

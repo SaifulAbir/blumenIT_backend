@@ -1205,28 +1205,6 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
 # product update serializer end
 
 
-class ProductFilterAttributesForUpdateDetailsSerializer(serializers.ModelSerializer):
-    filter_attribute = serializers.PrimaryKeyRelatedField(queryset=FilterAttributes.objects.all(), many=False, required= True)
-    attribute_title = serializers.CharField(source="filter_attribute.attribute.title",read_only=True)
-    attribute_value = serializers.SerializerMethodField('get_attribute_value')
-    # attribute_value = serializers.PrimaryKeyRelatedField(queryset=AttributeValues.objects.all(), many=False, required= True)
-    # attribute_value_title = serializers.CharField(source="attribute_value.attribute.title",read_only=True)
-    class Meta:
-        model = ProductFilterAttributes
-        fields = [
-            'id',
-            'filter_attribute',
-            'attribute_title',
-            'attribute_value',
-            # 'attribute_value_title'
-        ]
-
-    def get_attribute_value(self, instance):
-        queryset = AttributeValues.objects.filter(id=instance.attribute_value.id, is_active = True)
-        serializer = AttributeValuesSerializer(instance=queryset, many=True)
-        return serializer.data
-
-
 
 # product update details serializer start
 class ProductUpdateDetailsSerializer(serializers.ModelSerializer):
@@ -1315,7 +1293,7 @@ class ProductUpdateDetailsSerializer(serializers.ModelSerializer):
 
     def get_product_filter_attributes(self, product):
         queryset = ProductFilterAttributes.objects.filter(product=product, is_active = True)
-        serializer = ProductFilterAttributesForUpdateDetailsSerializer(instance=queryset, many=True)
+        serializer = ProductFilterAttributesSerializer(instance=queryset, many=True)
         return serializer.data
 
     def get_product_warranties(self, product):

@@ -2732,6 +2732,7 @@ class AdminFilterAttributeValueListAllAPIView(ListAPIView):
             request = self.request
             atid = self.kwargs['atid']
             if atid:
+                print(atid)
                 queryset = AttributeValues.objects.filter(attribute=atid, is_active=True).order_by('-created_at')
                 return queryset
             else:

@@ -49,9 +49,9 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminProductReviewToggleAPIView, AdminAdvertisementListAPIView, AdminProductUpdateDetailsAPIView, \
     AdminShippingCountryListAllAPIView, AdminRequestQuoteDetailsAPIView, AdminRequestQuoteDeleteAPIView, \
     AdminAdvertisementCreateAPIView, AdminAdvertisementUpdateAPIView, AdminAdvertisementDeleteAPIView, \
-    AdminContactUsListAPIView, AdminFilterAttributeValueListAllAPIView, \
+    AdminContactUsListAPIView, AdminFilterAttributeValueListAllAPIView, AdminSpecificationDeleteAPIView, \
     AdminPosCustomerProfileAPIView, AdminCorporateDealDetailsAPIView, AdminRequestQuoteListAPIView, \
-    AdminContactUsDetailsAPIView, AdminOffersListAllAPIView, \
+    AdminContactUsDetailsAPIView, AdminOffersListAllAPIView, AdminSpecificationCreateAPIView, \
     AdminContactUsDeleteAPIView, AdminPosCustomerCreateAPIView, AdminWebsiteConfigurationListAPIView, \
     AdminOfferCategoryListAPIView
 
@@ -217,6 +217,8 @@ urlpatterns = [
 
     # specification apies
     path('admin/specification-title-list/', AdminSpecificationTitleListAPIView.as_view()),
+    path('admin/specification-create/', AdminSpecificationCreateAPIView.as_view()),
+    path('admin/specification-delete/<int:id>/', AdminSpecificationDeleteAPIView.as_view()),
 
 
     # coupon apies

@@ -1847,6 +1847,40 @@ class AdminSpecificationTitleListAPIView(ListAPIView):
             raise ValidationError({"msg": 'You can not see ticket list data, because you are not an Admin!'})
 
 
+class AdminSpecificationCreateAPIView(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminSpecificationTitleSerializer
+
+    def post(self, request, *args, **kwargs):
+        if self.request.user.is_superuser == True:
+            return super(AdminSpecificationCreateAPIView, self).post(request, *args, **kwargs)
+        else:
+            raise ValidationError(
+                {"msg": 'You can not create Specification title, because you are not an Admin!'})
+
+
+class AdminSpecificationDeleteAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    pagination_class = ProductCustomPagination
+    serializer_class = AdminSpecificationTitleSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = 'id'
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        if self.request.user.is_superuser == True:
+            specification_title_obj = SpecificationTitle.objects.filter(id=id).exists()
+            if specification_title_obj:
+                SpecificationTitle.objects.filter(id=id).update(is_active=False)
+                queryset = SpecificationTitle.objects.filter(is_active=True).order_by('-created_at')
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'Specification Title data Does not exist!'}
+                )
+        else:
+            raise ValidationError({"msg": 'You can not delete Specification Title data, because you are not an Admin!'})
+
 class AdminSubscribersListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     pagination_class = ProductCustomPagination

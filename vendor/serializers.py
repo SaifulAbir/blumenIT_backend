@@ -1431,9 +1431,12 @@ class AdminProfileSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'email', 'username', 'phone', 'date_joined', 'staff_role']
 
     def get_staff_role(self, obj):
-        queryset = Role.objects.filter(id=obj.role.id, is_active = True)
-        serializer = RoleDataSerializer(instance=queryset, many=True)
-        return serializer.data
+        try:
+            queryset = Role.objects.filter(id=obj.role.id, is_active = True)
+            serializer = RoleDataSerializer(instance=queryset, many=True)
+            return serializer.data
+        except:
+            return []
 
 
 class ReviewListSerializer(serializers.ModelSerializer):

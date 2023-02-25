@@ -703,15 +703,15 @@ class AdminProfileAPIView(RetrieveAPIView):
     serializer_class = AdminProfileSerializer
 
     def get_object(self):
-        if self.request.user.is_staff == True:
-            query = User.objects.get(id=self.request.user.id)
-            if query:
-                return query
-            else:
-                raise ValidationError(
-                    {"msg": 'User does not exist!'})
+        # if self.request.user.is_staff == True:
+        query = User.objects.get(id=self.request.user.id)
+        if query:
+            return query
         else:
-            raise ValidationError({"msg": 'You can not view your profile, because you are not a Staff!'})
+            raise ValidationError(
+                {"msg": 'User does not exist!'})
+        # else:
+        #     raise ValidationError({"msg": 'You can not view your profile, because you are not a Staff!'})
 
 
 # Review related admin apies views............................ start

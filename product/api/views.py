@@ -26,7 +26,7 @@ class StoreCategoryListAPIView(ListAPIView):
     serializer_class = StoreCategoryAPIViewListSerializer
 
     def get_queryset(self):
-        queryset = Category.objects.filter(is_active=True).order_by('ordering_number')
+        queryset = Category.objects.filter(is_active=True).order_by('id')
         return queryset
 
 
@@ -423,19 +423,19 @@ class PcBuilderCategoryAPIView(APIView):
 
     def get(self, request):
         data_list = []
-        category_queryset = Category.objects.filter(is_active=True, pc_builder=True).order_by('ordering_number')
+        category_queryset = Category.objects.filter(is_active=True, pc_builder=True).order_by('id')
         category_serializer = PcBuilderCategoryListSerializer(category_queryset, many=True, context={"request": request})
 
         for cat_data_l in category_serializer.data:
             data_list.append(cat_data_l)
 
-        sub_category_queryset = SubCategory.objects.filter(is_active=True, pc_builder=True).order_by('ordering_number')
+        sub_category_queryset = SubCategory.objects.filter(is_active=True, pc_builder=True).order_by('id')
         sub_category_serializer = PcBuilderSubCategoryListSerializer(sub_category_queryset, many=True, context={"request": request})
 
         for sub_cat_data_l in sub_category_serializer.data:
             data_list.append(sub_cat_data_l)
 
-        sub_sub_category_queryset = SubSubCategory.objects.filter(is_active=True, pc_builder=True).order_by('ordering_number')
+        sub_sub_category_queryset = SubSubCategory.objects.filter(is_active=True, pc_builder=True).order_by('id')
         sub_sub_category_serializer = PcBuilderSubSubCategoryListSerializer(sub_sub_category_queryset, many=True, context={"request": request})
 
         for sub_sub_cat_data_l in sub_sub_category_serializer.data:

@@ -18,6 +18,7 @@ from vendor.models import Seller
 from django.db.models import Avg
 from django.utils import timezone
 from support_ticket.models import Ticket, TicketConversation
+from stuff.models import Role, RolePermissions
 from home.models import CorporateDeal, Advertisement, HomeSingleRowData, SliderImage, RequestQuote, ContactUs
 from django.db.models import Q
 
@@ -112,7 +113,7 @@ class AdminCategoryListSerializer(serializers.ModelSerializer):
 
 class AddNewCategorySerializer(serializers.ModelSerializer):
     title = serializers.CharField(required= True)
-    ordering_number = serializers.CharField(required= True)
+    ordering_number = serializers.CharField(required= False)
     category_filter_attributes = FilteringAttributesSerializer(many=True, required=False)
 
     class Meta:
@@ -127,22 +128,22 @@ class AddNewCategorySerializer(serializers.ModelSerializer):
             category_filter_attributes = ''
 
         # work with category title 
-        title_get = validated_data.pop('title')
-        title_get_data = title_get.lower()
-        if title_get:
-            title_get_for_check = Category.objects.filter(title=title_get.lower())
-            if title_get_for_check:
-                raise ValidationError('This category title already exist in Category.')
+        # title_get = validated_data.pop('title')
+        # title_get_data = title_get.lower()
+        # if title_get:
+        #     title_get_for_check = Category.objects.filter(title=title_get.lower())
+        #     if title_get_for_check:
+        #         raise ValidationError('This category title already exist in Category.')
 
         # work with order number
-        ordering_number_get = validated_data.pop('ordering_number')
-        ordering_number_get_data = ordering_number_get.lower()
-        if ordering_number_get:
-            ordering_number_get_for_check = Category.objects.filter(ordering_number=ordering_number_get)
-            if ordering_number_get_for_check:
-                raise ValidationError('This category ordering number already exist in Category.')
+        # ordering_number_get = validated_data.pop('ordering_number')
+        # ordering_number_get_data = ordering_number_get.lower()
+        # if ordering_number_get:
+        #     ordering_number_get_for_check = Category.objects.filter(ordering_number=ordering_number_get)
+        #     if ordering_number_get_for_check:
+        #         raise ValidationError('This category ordering number already exist in Category.')
 
-        category_instance = Category.objects.create(**validated_data, title=title_get_data, ordering_number=ordering_number_get_data )
+        category_instance = Category.objects.create(**validated_data)
 
         if category_filter_attributes:
             for f_attr in category_filter_attributes:
@@ -206,11 +207,11 @@ class AdminSubCategoryListSerializer(serializers.ModelSerializer):
 
 class AddNewSubCategorySerializer(serializers.ModelSerializer):
     title = serializers.CharField(required= True)
-    ordering_number = serializers.CharField(required= True)
+    ordering_number = serializers.CharField(required= False)
     sub_category_filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
     class Meta:
         model = SubCategory
-        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category_filtering_attributes']
+        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category_filtering_attributes', 'icon']
 
     def create(self, validated_data):
         try:
@@ -219,23 +220,23 @@ class AddNewSubCategorySerializer(serializers.ModelSerializer):
             sub_category_filtering_attributes = ''
 
         # work with category title 
-        title_get = validated_data.pop('title')
-        title_get_data = title_get.lower()
-        if title_get:
-            title_get_for_check = SubCategory.objects.filter(title=title_get.lower())
-            if title_get_for_check:
-                raise ValidationError('This Sub category title already exist in Sub Category.')
+        # title_get = validated_data.pop('title')
+        # title_get_data = title_get.lower()
+        # if title_get:
+        #     title_get_for_check = SubCategory.objects.filter(title=title_get.lower())
+        #     if title_get_for_check:
+        #         raise ValidationError('This Sub category title already exist in Sub Category.')
 
         # work with order number
-        ordering_number_get = validated_data.pop('ordering_number')
-        ordering_number_get_data = ordering_number_get.lower()
-        if ordering_number_get:
-            ordering_number_get_for_check = SubCategory.objects.filter(ordering_number=ordering_number_get)
-            if ordering_number_get_for_check:
-                raise ValidationError('This Sub category ordering number already exist in SubCategory.')
+        # ordering_number_get = validated_data.pop('ordering_number')
+        # ordering_number_get_data = ordering_number_get.lower()
+        # if ordering_number_get:
+        #     ordering_number_get_for_check = SubCategory.objects.filter(ordering_number=ordering_number_get)
+        #     if ordering_number_get_for_check:
+        #         raise ValidationError('This Sub category ordering number already exist in SubCategory.')
 
 
-        sub_category_instance = SubCategory.objects.create(**validated_data, title=title_get_data, ordering_number=ordering_number_get_data )
+        sub_category_instance = SubCategory.objects.create(**validated_data)
 
         # filtering_attributes
         if sub_category_filtering_attributes:
@@ -253,7 +254,7 @@ class UpdateSubCategorySerializer(serializers.ModelSerializer):
     filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
     class Meta:
         model = SubCategory
-        fields = ['id', 'title', 'ordering_number', 'category', 'is_active', 'existing_filtering_attributes', 'filtering_attributes']
+        fields = ['id', 'title', 'ordering_number', 'category', 'is_active', 'existing_filtering_attributes', 'filtering_attributes', 'icon']
 
     def get_existing_filtering_attributes(self, obj):
         try:
@@ -299,11 +300,11 @@ class AdminSubSubCategoryListSerializer(serializers.ModelSerializer):
 
 class AddNewSubSubCategorySerializer(serializers.ModelSerializer):
     title = serializers.CharField(required= True)
-    ordering_number = serializers.CharField(required= True)
+    ordering_number = serializers.CharField(required= False)
     sub_sub_category_filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
     class Meta:
         model = SubSubCategory
-        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category', 'sub_sub_category_filtering_attributes']
+        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category', 'sub_sub_category_filtering_attributes', 'icon']
 
     def create(self, validated_data):
         try:
@@ -312,22 +313,22 @@ class AddNewSubSubCategorySerializer(serializers.ModelSerializer):
             sub_sub_category_filtering_attributes = ''
 
         # work with category title
-        title_get = validated_data.pop('title')
-        title_get_data = title_get.lower()
-        if title_get:
-            title_get_for_check = SubSubCategory.objects.filter(title=title_get.lower())
-            if title_get_for_check:
-                raise ValidationError('This Sub Sub category title already exist in Sub Sub Category.')
+        # title_get = validated_data.pop('title')
+        # title_get_data = title_get.lower()
+        # if title_get:
+        #     title_get_for_check = SubSubCategory.objects.filter(title=title_get.lower())
+        #     if title_get_for_check:
+        #         raise ValidationError('This Sub Sub category title already exist in Sub Sub Category.')
 
         # work with order number
-        ordering_number_get = validated_data.pop('ordering_number')
-        ordering_number_get_data = ordering_number_get.lower()
-        if ordering_number_get:
-            ordering_number_get_for_check = SubSubCategory.objects.filter(ordering_number=ordering_number_get)
-            if ordering_number_get_for_check:
-                raise ValidationError('This Sub Sub category ordering number already exist in Sub Sub Category.')
+        # ordering_number_get = validated_data.pop('ordering_number')
+        # ordering_number_get_data = ordering_number_get.lower()
+        # if ordering_number_get:
+        #     ordering_number_get_for_check = SubSubCategory.objects.filter(ordering_number=ordering_number_get)
+        #     if ordering_number_get_for_check:
+        #         raise ValidationError('This Sub Sub category ordering number already exist in Sub Sub Category.')
 
-        sub_sub_category_instance = SubSubCategory.objects.create(**validated_data, title=title_get_data, ordering_number=ordering_number_get_data )
+        sub_sub_category_instance = SubSubCategory.objects.create(**validated_data)
 
         # filtering_attributes
         if sub_sub_category_filtering_attributes:
@@ -346,7 +347,7 @@ class UpdateSubSubCategorySerializer(serializers.ModelSerializer):
     filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
     class Meta:
         model = SubSubCategory
-        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category', 'is_active', 'existing_filtering_attributes', 'filtering_attributes']
+        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category', 'is_active', 'existing_filtering_attributes', 'filtering_attributes', 'icon']
 
     def get_existing_filtering_attributes(self, obj):
         try:
@@ -1237,6 +1238,7 @@ class ProductUpdateDetailsSerializer(serializers.ModelSerializer):
                     'price',
                     'pre_payment_amount',
                     'quantity',
+                    'total_quantity',
                     'sku',
                     'external_link',
                     'external_link_button_text',
@@ -1258,7 +1260,6 @@ class ProductUpdateDetailsSerializer(serializers.ModelSerializer):
                     'product_warranties',
                     'product_specification',
                 ]
-
     def get_product_tags(self, obj):
         tags_list = []
         try:
@@ -1406,11 +1407,33 @@ class FlashDealInfoSerializer(serializers.ModelSerializer):
             return super().update(instance, validated_data)
 
 
-class AdminProfileSerializer(serializers.ModelSerializer):
+class RolePermissionsDataSerializer(serializers.ModelSerializer):
+    permission_module_title = serializers.CharField(source='permission_module.title',read_only=True)
+    class Meta:
+        model = RolePermissions
+        fields = ['id', 'permission_module', 'permission_module_title']
 
+class RoleDataSerializer(serializers.ModelSerializer):
+    permissions = serializers.SerializerMethodField('get_permissions')
+    class Meta:
+        model = Role
+        fields = ['id', 'title', 'permissions']
+
+    def get_permissions(self, obj):
+        queryset = RolePermissions.objects.filter(role=obj, is_active = True)
+        serializer = RolePermissionsDataSerializer(instance=queryset, many=True)
+        return serializer.data
+
+class AdminProfileSerializer(serializers.ModelSerializer):
+    staff_role = serializers.SerializerMethodField('get_staff_role')
     class Meta:
         model = User
-        fields = ['id', 'name', 'email', 'username', 'phone', 'date_joined']
+        fields = ['id', 'name', 'email', 'username', 'phone', 'date_joined', 'staff_role']
+
+    def get_staff_role(self, obj):
+        queryset = Role.objects.filter(id=obj.role.id, is_active = True)
+        serializer = RoleDataSerializer(instance=queryset, many=True)
+        return serializer.data
 
 
 class ReviewListSerializer(serializers.ModelSerializer):
@@ -1731,7 +1754,6 @@ class AdminCouponSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Coupon
-        read_only_field = ['id']
         fields = [  'id',
                     'code',
                     'amount',
@@ -1741,7 +1763,7 @@ class AdminCouponSerializer(serializers.ModelSerializer):
                     'min_shopping_amount',
                     'is_active'
                 ]
-        read_only_fields = ['number_of_uses']
+        read_only_fields = ['id', 'number_of_uses']
 
 
 class AdminOfferProductsSerializer(serializers.ModelSerializer):

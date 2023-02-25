@@ -251,7 +251,8 @@ class SuperUserLoginUser(mixins.CreateModelMixin,
                         "email": user.email,
                         "name": user.name,
                         "access_token": str(token.access_token),
-                        "refresh_token": str(token)
+                        "refresh_token": str(token),
+                        "user_is_super": True
                     }
                     return Response({"status": True, "data": data}, status=status.HTTP_200_OK)
 
@@ -262,7 +263,8 @@ class SuperUserLoginUser(mixins.CreateModelMixin,
                         "email": user.email,
                         "name": user.name,
                         "access_token": str(token.access_token),
-                        "refresh_token": str(token)
+                        "refresh_token": str(token),
+                        "user_is_super": False
                     }
                     return Response({"status": True, "data": data}, status=status.HTTP_200_OK)
 

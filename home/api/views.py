@@ -25,11 +25,11 @@ class   HomeDataAPIView(APIView):
         slider_images_serializer = AdvertisementDataSerializer(slider_images, many=True, context={"request": request})
 
         # categories
-        categories = Category.objects.filter(is_featured=True, is_active=True).order_by('-created_at')
+        categories = Category.objects.filter(is_featured=True, is_active=True).order_by('-ordering_number')
         categories_serializer = product_catListSerializer(categories, many=True, context={"request": request})
 
         # categories
-        sub_categories = SubCategory.objects.filter(is_featured=True, is_active=True).order_by('-created_at')
+        sub_categories = SubCategory.objects.filter(is_featured=True, is_active=True).order_by('-ordering_number')
         sub_categories_serializer = product_sub_catListSerializer(sub_categories, many=True, context={"request": request})
 
         featured_categories_serializer = categories_serializer.data + sub_categories_serializer.data

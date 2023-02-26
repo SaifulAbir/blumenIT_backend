@@ -62,10 +62,11 @@ class CheckoutDetailsSerializer(serializers.ModelSerializer):
     product_price = serializers.SerializerMethodField('get_product_price')
     total_price = serializers.SerializerMethodField('get_total_price')
     delivery_date = serializers.SerializerMethodField('get_delivery_date')
+    warranty_price = serializers.SerializerMethodField('get_warranty_price')
     vat_amount =  serializers.FloatField(read_only=True)
     class Meta:
         model = Order
-        fields = ['id', 'user', 'user_email', 'user_phone', 'order_id', 'order_date', 'delivery_date', 'order_status', 'order_items', 'delivery_address', 'payment_type', 'payment_title', 'product_price', 'coupon_discount_amount', 'sub_total', 'shipping_class', 'shipping_cost', 'total_price', 'vat_amount']
+        fields = ['id', 'user', 'user_email', 'user_phone', 'order_id', 'order_date', 'delivery_date', 'order_status', 'order_items', 'delivery_address', 'payment_type', 'payment_title', 'product_price', 'coupon_discount_amount', 'sub_total', 'shipping_class', 'shipping_cost', 'total_price', 'vat_amount', 'warranty_price']
 
     def get_order_items(self, obj):
         queryset = OrderItem.objects.filter(order=obj)
@@ -107,6 +108,21 @@ class CheckoutDetailsSerializer(serializers.ModelSerializer):
             prices.append(price)
         product_price_total = sum(prices)
         return product_price_total
+
+
+    def get_warranty_price(self, obj):
+        order_items = OrderItem.objects.filter(order=obj)
+        prices = []
+        for order_item in order_items:
+            price = order_item.unit_price
+            if order_item.unit_price_after_add_warranty != 0.0:
+                price = order_item.unit_price_after_add_warranty
+                print(price)
+            quantity = order_item.quantity
+            t_price = float(price) * float(quantity)
+            prices.append(t_price)
+            # print(t_price)
+        return t_price
 
     def get_total_price(self, obj):
         order_items = OrderItem.objects.filter(order=obj)

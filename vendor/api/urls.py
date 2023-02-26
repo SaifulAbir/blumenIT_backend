@@ -49,9 +49,9 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminProductReviewToggleAPIView, AdminAdvertisementListAPIView, AdminProductUpdateDetailsAPIView, \
     AdminShippingCountryListAllAPIView, AdminRequestQuoteDetailsAPIView, AdminRequestQuoteDeleteAPIView, \
     AdminAdvertisementCreateAPIView, AdminAdvertisementUpdateAPIView, AdminAdvertisementDeleteAPIView, \
-    AdminContactUsListAPIView, \
+    AdminContactUsListAPIView, AdminFilterAttributeValueListAllAPIView, AdminSpecificationDeleteAPIView, \
     AdminPosCustomerProfileAPIView, AdminCorporateDealDetailsAPIView, AdminRequestQuoteListAPIView, \
-    AdminContactUsDetailsAPIView, AdminOffersListAllAPIView, \
+    AdminContactUsDetailsAPIView, AdminOffersListAllAPIView, AdminSpecificationCreateAPIView, \
     AdminContactUsDeleteAPIView, AdminPosCustomerCreateAPIView, AdminWebsiteConfigurationListAPIView, \
     AdminOfferCategoryListAPIView
 
@@ -95,6 +95,7 @@ urlpatterns = [
     path('admin/video-provider-list-all/', AdminVideoProviderListAllAPIView.as_view()),
     path('admin/discount-type-list-all/', AdminDiscountTypeListAllAPIView.as_view()),
     path('admin/filter-attribute-list-all/', AdminFilterAttributeListAllAPIView.as_view()),
+    path('admin/filter-attribute-value-list-all/<int:atid>/', AdminFilterAttributeValueListAllAPIView.as_view()),
     path('admin/flash-deal-list-all/', AdminFlashDealListAllAPIView.as_view()),
     path('admin/offers-list-all/', AdminOffersListAllAPIView.as_view()),
     path('admin/warranty-list-all/', AdminWarrantyListAllAPIView.as_view()),
@@ -216,6 +217,8 @@ urlpatterns = [
 
     # specification apies
     path('admin/specification-title-list/', AdminSpecificationTitleListAPIView.as_view()),
+    path('admin/specification-create/', AdminSpecificationCreateAPIView.as_view()),
+    path('admin/specification-delete/<int:id>/', AdminSpecificationDeleteAPIView.as_view()),
 
 
     # coupon apies

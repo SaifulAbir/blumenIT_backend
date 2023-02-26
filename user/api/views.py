@@ -243,6 +243,7 @@ class SuperUserLoginUser(mixins.CreateModelMixin,
                 return Response({"status": False, "data": {"message": "Invalid credentials for super user!"}}, status=status.HTTP_404_NOT_FOUND)
             if user:
                 user_is_super = user.is_superuser
+                user_is_staff = user.is_staff
                 if user_is_super == True:
                     token = RefreshToken.for_user(user)
                     data = {
@@ -250,9 +251,23 @@ class SuperUserLoginUser(mixins.CreateModelMixin,
                         "email": user.email,
                         "name": user.name,
                         "access_token": str(token.access_token),
-                        "refresh_token": str(token)
+                        "refresh_token": str(token),
+                        "user_is_super": True
                     }
                     return Response({"status": True, "data": data}, status=status.HTTP_200_OK)
+
+                elif user_is_staff == True:
+                    token = RefreshToken.for_user(user)
+                    data = {
+                        "user_id": user.id,
+                        "email": user.email,
+                        "name": user.name,
+                        "access_token": str(token.access_token),
+                        "refresh_token": str(token),
+                        "user_is_super": False
+                    }
+                    return Response({"status": True, "data": data}, status=status.HTTP_200_OK)
+
                 else:
                     return Response({"status": False, "data": {"message": "Invalid credentials for super user!"}}, status=status.HTTP_406_NOT_ACCEPTABLE)
             else:

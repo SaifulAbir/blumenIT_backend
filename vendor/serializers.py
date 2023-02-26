@@ -18,7 +18,9 @@ from vendor.models import Seller
 from django.db.models import Avg
 from django.utils import timezone
 from support_ticket.models import Ticket, TicketConversation
+from stuff.models import Role, RolePermissions
 from home.models import CorporateDeal, Advertisement, HomeSingleRowData, SliderImage, RequestQuote, ContactUs
+from django.db.models import Q
 
 
 class SellerCreateSerializer(serializers.ModelSerializer):
@@ -111,7 +113,7 @@ class AdminCategoryListSerializer(serializers.ModelSerializer):
 
 class AddNewCategorySerializer(serializers.ModelSerializer):
     title = serializers.CharField(required= True)
-    ordering_number = serializers.CharField(required= True)
+    ordering_number = serializers.CharField(required= False)
     category_filter_attributes = FilteringAttributesSerializer(many=True, required=False)
 
     class Meta:
@@ -126,22 +128,22 @@ class AddNewCategorySerializer(serializers.ModelSerializer):
             category_filter_attributes = ''
 
         # work with category title 
-        title_get = validated_data.pop('title')
-        title_get_data = title_get.lower()
-        if title_get:
-            title_get_for_check = Category.objects.filter(title=title_get.lower())
-            if title_get_for_check:
-                raise ValidationError('This category title already exist in Category.')
+        # title_get = validated_data.pop('title')
+        # title_get_data = title_get.lower()
+        # if title_get:
+        #     title_get_for_check = Category.objects.filter(title=title_get.lower())
+        #     if title_get_for_check:
+        #         raise ValidationError('This category title already exist in Category.')
 
         # work with order number
-        ordering_number_get = validated_data.pop('ordering_number')
-        ordering_number_get_data = ordering_number_get.lower()
-        if ordering_number_get:
-            ordering_number_get_for_check = Category.objects.filter(ordering_number=ordering_number_get)
-            if ordering_number_get_for_check:
-                raise ValidationError('This category ordering number already exist in Category.')
+        # ordering_number_get = validated_data.pop('ordering_number')
+        # ordering_number_get_data = ordering_number_get.lower()
+        # if ordering_number_get:
+        #     ordering_number_get_for_check = Category.objects.filter(ordering_number=ordering_number_get)
+        #     if ordering_number_get_for_check:
+        #         raise ValidationError('This category ordering number already exist in Category.')
 
-        category_instance = Category.objects.create(**validated_data, title=title_get_data, ordering_number=ordering_number_get_data )
+        category_instance = Category.objects.create(**validated_data)
 
         if category_filter_attributes:
             for f_attr in category_filter_attributes:
@@ -205,11 +207,11 @@ class AdminSubCategoryListSerializer(serializers.ModelSerializer):
 
 class AddNewSubCategorySerializer(serializers.ModelSerializer):
     title = serializers.CharField(required= True)
-    ordering_number = serializers.CharField(required= True)
+    ordering_number = serializers.CharField(required= False)
     sub_category_filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
     class Meta:
         model = SubCategory
-        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category_filtering_attributes']
+        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category_filtering_attributes', 'icon']
 
     def create(self, validated_data):
         try:
@@ -218,23 +220,23 @@ class AddNewSubCategorySerializer(serializers.ModelSerializer):
             sub_category_filtering_attributes = ''
 
         # work with category title 
-        title_get = validated_data.pop('title')
-        title_get_data = title_get.lower()
-        if title_get:
-            title_get_for_check = SubCategory.objects.filter(title=title_get.lower())
-            if title_get_for_check:
-                raise ValidationError('This Sub category title already exist in Sub Category.')
+        # title_get = validated_data.pop('title')
+        # title_get_data = title_get.lower()
+        # if title_get:
+        #     title_get_for_check = SubCategory.objects.filter(title=title_get.lower())
+        #     if title_get_for_check:
+        #         raise ValidationError('This Sub category title already exist in Sub Category.')
 
         # work with order number
-        ordering_number_get = validated_data.pop('ordering_number')
-        ordering_number_get_data = ordering_number_get.lower()
-        if ordering_number_get:
-            ordering_number_get_for_check = SubCategory.objects.filter(ordering_number=ordering_number_get)
-            if ordering_number_get_for_check:
-                raise ValidationError('This Sub category ordering number already exist in SubCategory.')
+        # ordering_number_get = validated_data.pop('ordering_number')
+        # ordering_number_get_data = ordering_number_get.lower()
+        # if ordering_number_get:
+        #     ordering_number_get_for_check = SubCategory.objects.filter(ordering_number=ordering_number_get)
+        #     if ordering_number_get_for_check:
+        #         raise ValidationError('This Sub category ordering number already exist in SubCategory.')
 
 
-        sub_category_instance = SubCategory.objects.create(**validated_data, title=title_get_data, ordering_number=ordering_number_get_data )
+        sub_category_instance = SubCategory.objects.create(**validated_data)
 
         # filtering_attributes
         if sub_category_filtering_attributes:
@@ -252,7 +254,7 @@ class UpdateSubCategorySerializer(serializers.ModelSerializer):
     filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
     class Meta:
         model = SubCategory
-        fields = ['id', 'title', 'ordering_number', 'category', 'is_active', 'existing_filtering_attributes', 'filtering_attributes']
+        fields = ['id', 'title', 'ordering_number', 'category', 'is_active', 'existing_filtering_attributes', 'filtering_attributes', 'icon']
 
     def get_existing_filtering_attributes(self, obj):
         try:
@@ -298,11 +300,11 @@ class AdminSubSubCategoryListSerializer(serializers.ModelSerializer):
 
 class AddNewSubSubCategorySerializer(serializers.ModelSerializer):
     title = serializers.CharField(required= True)
-    ordering_number = serializers.CharField(required= True)
+    ordering_number = serializers.CharField(required= False)
     sub_sub_category_filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
     class Meta:
         model = SubSubCategory
-        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category', 'sub_sub_category_filtering_attributes']
+        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category', 'sub_sub_category_filtering_attributes', 'icon']
 
     def create(self, validated_data):
         try:
@@ -311,22 +313,22 @@ class AddNewSubSubCategorySerializer(serializers.ModelSerializer):
             sub_sub_category_filtering_attributes = ''
 
         # work with category title
-        title_get = validated_data.pop('title')
-        title_get_data = title_get.lower()
-        if title_get:
-            title_get_for_check = SubSubCategory.objects.filter(title=title_get.lower())
-            if title_get_for_check:
-                raise ValidationError('This Sub Sub category title already exist in Sub Sub Category.')
+        # title_get = validated_data.pop('title')
+        # title_get_data = title_get.lower()
+        # if title_get:
+        #     title_get_for_check = SubSubCategory.objects.filter(title=title_get.lower())
+        #     if title_get_for_check:
+        #         raise ValidationError('This Sub Sub category title already exist in Sub Sub Category.')
 
         # work with order number
-        ordering_number_get = validated_data.pop('ordering_number')
-        ordering_number_get_data = ordering_number_get.lower()
-        if ordering_number_get:
-            ordering_number_get_for_check = SubSubCategory.objects.filter(ordering_number=ordering_number_get)
-            if ordering_number_get_for_check:
-                raise ValidationError('This Sub Sub category ordering number already exist in Sub Sub Category.')
+        # ordering_number_get = validated_data.pop('ordering_number')
+        # ordering_number_get_data = ordering_number_get.lower()
+        # if ordering_number_get:
+        #     ordering_number_get_for_check = SubSubCategory.objects.filter(ordering_number=ordering_number_get)
+        #     if ordering_number_get_for_check:
+        #         raise ValidationError('This Sub Sub category ordering number already exist in Sub Sub Category.')
 
-        sub_sub_category_instance = SubSubCategory.objects.create(**validated_data, title=title_get_data, ordering_number=ordering_number_get_data )
+        sub_sub_category_instance = SubSubCategory.objects.create(**validated_data)
 
         # filtering_attributes
         if sub_sub_category_filtering_attributes:
@@ -345,7 +347,7 @@ class UpdateSubSubCategorySerializer(serializers.ModelSerializer):
     filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
     class Meta:
         model = SubSubCategory
-        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category', 'is_active', 'existing_filtering_attributes', 'filtering_attributes']
+        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category', 'is_active', 'existing_filtering_attributes', 'filtering_attributes', 'icon']
 
     def get_existing_filtering_attributes(self, obj):
         try:
@@ -499,11 +501,13 @@ class FlashDealExistingSerializer(serializers.ModelSerializer):
 
 class ProductFilterAttributesSerializer(serializers.ModelSerializer):
     filter_attribute = serializers.PrimaryKeyRelatedField(queryset=FilterAttributes.objects.all(), many=False, required= True)
+    attribute_value = serializers.PrimaryKeyRelatedField(queryset=AttributeValues.objects.all(), many=False, required= True)
     class Meta:
         model = ProductFilterAttributes
         fields = [
             'id',
             'filter_attribute',
+            'attribute_value',
         ]
 
 
@@ -784,7 +788,8 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             if product_filter_attributes:
                 for product_filter_attribute in product_filter_attributes:
                     filter_attribute = product_filter_attribute['filter_attribute']
-                    ProductFilterAttributes.objects.create(filter_attribute=filter_attribute, product=product_instance)
+                    attribute_value = product_filter_attribute['attribute_value']
+                    ProductFilterAttributes.objects.create(filter_attribute=filter_attribute, attribute_value=attribute_value, product=product_instance)
         except:
             raise ValidationError('Problem of Product Filter Attributes info insert.')
 
@@ -922,7 +927,7 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
             sku = ''
 
         if sku:
-            product_check_sku = Product.objects.filter(sku=sku)
+            product_check_sku = Product.objects.filter(Q(sku=sku), ~Q(id = instance.id))
             if product_check_sku:
                 raise ValidationError('This SKU already exist in product.')
             variation_check_sku = ProductVariation.objects.filter(sku=sku)
@@ -1152,7 +1157,8 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
 
                 for product_filter_attribute in product_filter_attributes:
                     filter_attribute = product_filter_attribute['filter_attribute']
-                    ProductFilterAttributes.objects.create(filter_attribute=filter_attribute, product=instance)
+                    attribute_value = product_filter_attribute['attribute_value']
+                    ProductFilterAttributes.objects.create(filter_attribute=filter_attribute, attribute_value=attribute_value, product=instance)
             else:
                 p_f_a = ProductFilterAttributes.objects.filter(
                     product=instance).exists()
@@ -1200,6 +1206,7 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
 # product update serializer end
 
 
+
 # product update details serializer start
 class ProductUpdateDetailsSerializer(serializers.ModelSerializer):
     product_tags = serializers.SerializerMethodField()
@@ -1231,6 +1238,7 @@ class ProductUpdateDetailsSerializer(serializers.ModelSerializer):
                     'price',
                     'pre_payment_amount',
                     'quantity',
+                    'total_quantity',
                     'sku',
                     'external_link',
                     'external_link_button_text',
@@ -1252,7 +1260,6 @@ class ProductUpdateDetailsSerializer(serializers.ModelSerializer):
                     'product_warranties',
                     'product_specification',
                 ]
-
     def get_product_tags(self, obj):
         tags_list = []
         try:
@@ -1279,11 +1286,6 @@ class ProductUpdateDetailsSerializer(serializers.ModelSerializer):
         queryset = Specification.objects.filter(product=product, is_active = True)
         serializer = ProductExistingSpecificationSerializer(instance=queryset, many=True)
         return serializer.data
-
-    # def get_flash_deal(self, product):
-    #     queryset = FlashDealProduct.objects.filter(product=product, is_active = True)
-    #     serializer = FlashDealExistingSerializer(instance=queryset, many=True)
-    #     return serializer.data
 
     def get_offers(self, product):
         queryset = OfferProduct.objects.filter(product=product, is_active=True)
@@ -1405,11 +1407,36 @@ class FlashDealInfoSerializer(serializers.ModelSerializer):
             return super().update(instance, validated_data)
 
 
-class AdminProfileSerializer(serializers.ModelSerializer):
+class RolePermissionsDataSerializer(serializers.ModelSerializer):
+    permission_module_title = serializers.CharField(source='permission_module.title',read_only=True)
+    class Meta:
+        model = RolePermissions
+        fields = ['id', 'permission_module', 'permission_module_title']
 
+class RoleDataSerializer(serializers.ModelSerializer):
+    permissions = serializers.SerializerMethodField('get_permissions')
+    class Meta:
+        model = Role
+        fields = ['id', 'title', 'permissions']
+
+    def get_permissions(self, obj):
+        queryset = RolePermissions.objects.filter(role=obj, is_active = True)
+        serializer = RolePermissionsDataSerializer(instance=queryset, many=True)
+        return serializer.data
+
+class AdminProfileSerializer(serializers.ModelSerializer):
+    staff_role = serializers.SerializerMethodField('get_staff_role')
     class Meta:
         model = User
-        fields = ['id', 'name', 'email', 'username', 'phone', 'date_joined']
+        fields = ['id', 'name', 'email', 'username', 'phone', 'date_joined', 'staff_role']
+
+    def get_staff_role(self, obj):
+        try:
+            queryset = Role.objects.filter(id=obj.role.id, is_active = True)
+            serializer = RoleDataSerializer(instance=queryset, many=True)
+            return serializer.data
+        except:
+            return []
 
 
 class ReviewListSerializer(serializers.ModelSerializer):
@@ -1452,6 +1479,13 @@ class AdminFilterAttributeSerializer(serializers.ModelSerializer):
     def get_attribute_values(self, obj):
         values = AttributeValues.objects.filter(attribute=obj.attribute, is_active=True)
         return AttributeValuesSerializer(values, many=True, context={'request': self.context['request']}).data
+
+
+class AdminFilterAttributeValueSerializer(serializers.ModelSerializer):
+    attribute_title = serializers.CharField(source='attribute.title',read_only=True)
+    class Meta:
+        model = AttributeValues
+        fields = ['id', 'attribute', 'attribute_title', 'value']
 
 
 class AdminOrderListSerializer(serializers.ModelSerializer):
@@ -1572,10 +1606,13 @@ class AdminTicketListSerializer(serializers.ModelSerializer):
         fields = ['id', 'ticket_id', 'created_at', 'ticket_subject', 'user_name', 'user_email', 'status', 'last_reply']
 
     def get_last_reply(self, obj):
-        selected_last_ticket_conversation = TicketConversation.objects.filter(
-            ticket=obj).order_by('-created_at').latest('id').created_at
-        data = selected_last_ticket_conversation.strftime("%Y-%m-%d, %H:%M:%S")
-        return data
+        try:
+            selected_last_ticket_conversation = TicketConversation.objects.filter(
+                ticket=obj).order_by('-created_at').latest('id').created_at
+            data = selected_last_ticket_conversation.strftime("%Y-%m-%d, %H:%M:%S")
+            return data
+        except:
+            return ''
 
 
 class AdminTicketConversationSerializer(serializers.ModelSerializer):
@@ -1720,7 +1757,6 @@ class AdminCouponSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Coupon
-        read_only_field = ['id']
         fields = [  'id',
                     'code',
                     'amount',
@@ -1730,7 +1766,7 @@ class AdminCouponSerializer(serializers.ModelSerializer):
                     'min_shopping_amount',
                     'is_active'
                 ]
-        read_only_fields = ['number_of_uses']
+        read_only_fields = ['id', 'number_of_uses']
 
 
 class AdminOfferProductsSerializer(serializers.ModelSerializer):
@@ -2122,9 +2158,18 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
         try:
             if home_slider_images:
                 for home_slider_image in home_slider_images:
-                    image = home_slider_image['image']
-                    bold_text = home_slider_image['bold_text']
-                    small_text = home_slider_image['small_text']
+                    try:
+                        image = home_slider_image['image']
+                    except:
+                        raise ValidationError('Home Slider Image field required.')
+                    try:
+                        bold_text = home_slider_image['bold_text']
+                    except:
+                        bold_text = ''
+                    try:
+                        small_text = home_slider_image['small_text']
+                    except:
+                        small_text = ''
                     Advertisement.objects.create(image=image, bold_text=bold_text, small_text=small_text, is_gaming=False, work_for='SLIDER')
         except:
             raise ValidationError('Problem of Home Slider Images insert.')
@@ -2133,9 +2178,18 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
         try:
             if gaming_slider_images:
                 for gaming_slider_image in gaming_slider_images:
-                    image = gaming_slider_image['image']
-                    bold_text = gaming_slider_image['bold_text']
-                    small_text = gaming_slider_image['small_text']
+                    try:
+                        image = gaming_slider_image['image']
+                    except:
+                        raise ValidationError('Gaming Slider Image field required.')
+                    try:
+                        bold_text = gaming_slider_image['bold_text']
+                    except:
+                        bold_text = ''
+                    try:
+                        small_text = gaming_slider_image['small_text']
+                    except:
+                        small_text = ''
                     Advertisement.objects.create(image=image, bold_text=bold_text, small_text=small_text, is_gaming=True, work_for='SLIDER')
         except:
             raise ValidationError('Problem of Home Gaming Images insert.')
@@ -2158,8 +2212,6 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
         return home_single_row_data_instance
 
     def update(self, instance, validated_data):
-        print('hello')
-
         # home_slider_images
         try:
             home_slider_images = validated_data.pop('home_slider_images')
@@ -2195,9 +2247,18 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
         try:
             if home_slider_images:
                 for home_slider_image in home_slider_images:
-                    image = home_slider_image['image']
-                    bold_text = home_slider_image['bold_text']
-                    small_text = home_slider_image['small_text']
+                    try:
+                        image = home_slider_image['image']
+                    except:
+                        raise ValidationError('Home Slider Image field required.')
+                    try:
+                        bold_text = home_slider_image['bold_text']
+                    except:
+                        bold_text = ''
+                    try:
+                        small_text = home_slider_image['small_text']
+                    except:
+                        small_text = ''
                     Advertisement.objects.create(image=image, bold_text=bold_text, small_text=small_text, is_gaming=False, work_for='SLIDER')
         except:
             raise ValidationError('Problem of Home Slider Images update.')
@@ -2206,9 +2267,18 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
         try:
             if gaming_slider_images:
                 for gaming_slider_image in gaming_slider_images:
-                    image = gaming_slider_image['image']
-                    bold_text = gaming_slider_image['bold_text']
-                    small_text = gaming_slider_image['small_text']
+                    try:
+                        image = gaming_slider_image['image']
+                    except:
+                        raise ValidationError('Gaming Slider Image field required.')
+                    try:
+                        bold_text = gaming_slider_image['bold_text']
+                    except:
+                        bold_text = ''
+                    try:
+                        small_text = gaming_slider_image['small_text']
+                    except:
+                        small_text = ''
                     Advertisement.objects.create(image=image, bold_text=bold_text, small_text=small_text, is_gaming=True, work_for='SLIDER')
         except:
             raise ValidationError('Problem of Home Gaming Images insert.')
@@ -2219,26 +2289,32 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
                 Advertisement.objects.create(image=small_banner, work_for='SLIDER_SMALL', is_gaming=False)
 
         # popular_products_banners
-        try:
-            if popular_products_banners:
-                for popular_products_banner in popular_products_banners:
-                    image = popular_products_banner['image']
-                    bold_text = popular_products_banner['bold_text']
-                    small_text = popular_products_banner['small_text']
-                    Advertisement.objects.create(image=image, bold_text=bold_text, small_text=small_text, is_gaming=True, work_for='POPULAR_PRODUCT_POSTER')
-        except:
-            raise ValidationError('Problem of Home Gaming Images insert.')
+        if popular_products_banners:
+            for popular_products_banner in popular_products_banners:
+                Advertisement.objects.create(image=popular_products_banner, work_for='POPULAR_PRODUCT_POSTER', is_gaming=False)
+        # try:
+        #     if popular_products_banners:
+        #         for popular_products_banner in popular_products_banners:
+        #             image = popular_products_banner['image']
+        #             bold_text = popular_products_banner['bold_text']
+        #             small_text = popular_products_banner['small_text']
+        #             Advertisement.objects.create(image=image, bold_text=bold_text, small_text=small_text, is_gaming=True, work_for='POPULAR_PRODUCT_POSTER')
+        # except:
+        #     raise ValidationError('Problem of Home Gaming Images insert.')
 
         # feature_products_banners
-        try:
-            if feature_products_banners:
-                for feature_products_banner in feature_products_banners:
-                    image = feature_products_banner['image']
-                    bold_text = feature_products_banner['bold_text']
-                    small_text = feature_products_banner['small_text']
-                    Advertisement.objects.create(image=image, bold_text=bold_text, small_text=small_text, is_gaming=True, work_for='FEATURED_PRODUCT_POSTER')
-        except:
-            raise ValidationError('Problem of Home Gaming Images insert.')
+        if feature_products_banners:
+            for feature_products_banner in feature_products_banners:
+                Advertisement.objects.create(image=feature_products_banner, work_for='FEATURED_PRODUCT_POSTER', is_gaming=False)
+        # try:
+        #     if feature_products_banners:
+        #         for feature_products_banner in feature_products_banners:
+        #             image = feature_products_banner['image']
+        #             bold_text = feature_products_banner['bold_text']
+        #             small_text = feature_products_banner['small_text']
+        #             Advertisement.objects.create(image=image, bold_text=bold_text, small_text=small_text, is_gaming=True, work_for='FEATURED_PRODUCT_POSTER')
+        # except:
+        #     raise ValidationError('Problem of Home Gaming Images insert.')
 
         validated_data.update({"updated_at": timezone.now()})
         return super().update(instance, validated_data)

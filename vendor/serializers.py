@@ -1056,8 +1056,6 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
         except:
             single_quantity = ''
 
-        print(single_quantity)
-
         try:
             single_quantity = int(single_quantity)
             if single_quantity >= 0:

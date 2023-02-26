@@ -114,15 +114,14 @@ class CheckoutDetailsSerializer(serializers.ModelSerializer):
         order_items = OrderItem.objects.filter(order=obj)
         prices = []
         for order_item in order_items:
-            price = order_item.unit_price
             if order_item.unit_price_after_add_warranty != 0.0:
-                price = order_item.unit_price_after_add_warranty
-                print(price)
-            quantity = order_item.quantity
-            t_price = float(price) * float(quantity)
-            prices.append(t_price)
+                price = order_item.unit_price
+                w_prices = order_item.unit_price_after_add_warranty
+                t_price = float(w_prices) - float(price)
+                prices.append(t_price)
+        warranty_price = sum(prices)
             # print(t_price)
-        return t_price
+        return warranty_price
 
     def get_total_price(self, obj):
         order_items = OrderItem.objects.filter(order=obj)

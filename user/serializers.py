@@ -169,9 +169,10 @@ class CustomerOrderDetailsSerializer(serializers.ModelSerializer):
     total_price = serializers.SerializerMethodField('get_total_price')
     delivery_date = serializers.SerializerMethodField('get_delivery_date')
     vat_amount =  serializers.FloatField(read_only=True)
+    warranty_price = serializers.SerializerMethodField('get_warranty_price')
     class Meta:
         model = Order
-        fields = ['user', 'order_id', 'order_date', 'delivery_date', 'order_status', 'order_items', 'delivery_address', 'payment_type', 'payment_title', 'sub_total', 'shipping_cost', 'coupon_discount_amount', 'total_price', 'vat_amount']
+        fields = ['user', 'order_id', 'order_date', 'delivery_date', 'order_status', 'order_items', 'delivery_address', 'payment_type', 'payment_title', 'sub_total', 'shipping_cost', 'coupon_discount_amount', 'total_price', 'vat_amount', 'warranty_price']
 
     def get_order_items(self, obj):
         queryset = OrderItem.objects.filter(order=obj)
@@ -199,6 +200,19 @@ class CustomerOrderDetailsSerializer(serializers.ModelSerializer):
         else:
             sub_total = float(sum(prices))
         return sub_total
+
+    def get_warranty_price(self, obj):
+        order_items = OrderItem.objects.filter(order=obj)
+        prices = []
+        for order_item in order_items:
+            if order_item.unit_price_after_add_warranty != 0.0:
+                price = order_item.unit_price
+                w_prices = order_item.unit_price_after_add_warranty
+                t_price = float(w_prices) - float(price)
+                prices.append(t_price)
+        warranty_price = sum(prices)
+            # print(t_price)
+        return warranty_price
 
     def get_total_price(self, obj):
         order_items = OrderItem.objects.filter(order=obj)

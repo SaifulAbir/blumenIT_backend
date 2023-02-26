@@ -94,7 +94,7 @@ class  GamingDataAPIView(APIView):
         categories_with_logo_serializer = product_sub_catListSerializer(categories_with_logo, many=True, context={"request": request})
 
         # popular_sub_categories
-        popular_categories = SubCategory.objects.filter(category__is_gaming__icontains=True, is_active=True).order_by('-created_at')
+        popular_categories = SubCategory.objects.filter(category__is_gaming__icontains=True, is_active=True).order_by("ordering_number")
         popular_categories_serializer = product_sub_catListSerializer(popular_categories, many=True, context={"request": request})
 
         # popular products

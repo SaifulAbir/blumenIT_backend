@@ -1149,23 +1149,19 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
         # product_warranties
         try:
             if product_warranties:
-                p_w = ProductWarranty.objects.filter(
-                    product=instance).exists()
-                if p_w == True:
-                    ProductWarranty.objects.filter(
-                        product=instance).delete()
+                product_warranties_ids = [warranty['warranty'].id for warranty in product_warranties]
+                ProductWarranty.objects.filter(Q(product=instance), ~Q(warranty__in=product_warranties_ids)).update(is_active=False)
 
-                for product_warranties in product_warranties:
-                    warranty = product_warranties['warranty']
-                    warranty_value = product_warranties['warranty_value']
-                    warranty_value_type = product_warranties['warranty_value_type']
-                    ProductWarranty.objects.create(product=instance, warranty=warranty, warranty_value=warranty_value, warranty_value_type=warranty_value_type)
-            else:
-                p_w = ProductWarranty.objects.filter(
-                    product=instance).exists()
-                if p_w == True:
-                    ProductWarranty.objects.filter(
-                        product=instance).delete()
+                for product_warranty in product_warranties:
+                    warranty = product_warranty['warranty']
+                    warranty_value = product_warranty['warranty_value']
+                    warranty_value_type = product_warranty['warranty_value_type']
+
+                    warranty_exist = ProductWarranty.objects.filter(product=instance, warranty=warranty).exists()
+                    if not warranty_exist:
+                            ProductWarranty.objects.create(product=instance, warranty=warranty, warranty_value=warranty_value, warranty_value_type=warranty_value_type)
+                    else:
+                        ProductWarranty.objects.filter(product=instance, warranty=warranty).update(is_active=True)
         except:
             raise ValidationError('Problem of Product warranties update.')
 

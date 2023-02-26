@@ -59,10 +59,14 @@ class ProductWarrantyInline(admin.TabularInline):
     fields = ['warranty', 'warranty_value', 'warranty_value_type', 'is_active']
 
 
+class ProductOfferProductInline(admin.TabularInline):
+    model = OfferProduct
+    fields = ['offer', 'is_active']
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     inlines = [
-        ProductImageInline, ProductTagsInline, SpecificationInline, ProductFilterAttributesInline, ProductWarrantyInline
+        ProductImageInline, ProductTagsInline, SpecificationInline, ProductFilterAttributesInline, ProductWarrantyInline, ProductOfferProductInline
     ]
 
 

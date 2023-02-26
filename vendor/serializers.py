@@ -985,12 +985,6 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
         except:
             product_specification = ''
 
-        # flash_deal
-        # try:
-        #     flash_deal = validated_data.pop('flash_deal')
-        # except:
-        #     flash_deal = ''
-
         # offers
         try:
             offers = validated_data.pop('offers')
@@ -1114,46 +1108,19 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
         except:
             raise ValidationError('Problem of Product specification update.')
 
-        # flash_deal
-        # try:
-        #     if flash_deal:
-        #         f_p = FlashDealProduct.objects.filter(
-        #             product=instance).exists()
-        #         if f_p == True:
-        #             FlashDealProduct.objects.filter(
-        #                 product=instance).delete()
-
-        #         for f_deal in flash_deal:
-        #             flash_deal_info = f_deal['flash_deal_info']
-        #             discount_type = f_deal['discount_type']
-        #             discount_amount = f_deal['discount_amount']
-        #             if flash_deal_info:
-        #                 flash_deal_product_instance = FlashDealProduct.objects.create(product=instance, flash_deal_info=flash_deal_info, discount_type=discount_type, discount_amount=discount_amount)
-        #     else:
-        #         f_p = FlashDealProduct.objects.filter(
-        #             product=instance).exists()
-        #         if f_p == True:
-        #             FlashDealProduct.objects.filter(
-        #                 product=instance).delete()
-        # except:
-        #     raise ValidationError('Problem of Product flash deal update.')
-
-
         # offers
         try:
             if offers:
-                o_p = OfferProduct.objects.filter(product=instance, offer=offer).exists()
-                if o_p == True:
-                    OfferProduct.objects.filter(product=instance, offer=offer).delete()
-
+                offer_ids = [offer['offer'].id for offer in offers]
+                OfferProduct.objects.filter(Q(product=instance), ~Q(offer__in=offer_ids)).update(is_active=False)
                 for offer in offers:
                     offer = offer['offer']
-                    if offer:
+                    offer_product_exist = OfferProduct.objects.filter(product=instance, offer=offer).exists()
+                    if not offer_product_exist:
                         OfferProduct.objects.create(product=instance, offer=offer)
-            else:
-                o_p = OfferProduct.objects.filter(product=instance, offer=offer).exists()
-                if o_p == True:
-                    OfferProduct.objects.filter(product=instance, offer=offer).delete()
+                    else:
+                        OfferProduct.objects.filter(product=instance, offer=offer).update(is_active=True)
+
         except:
             raise ValidationError('Problem of Product Offer product update.')
 
@@ -1798,7 +1765,7 @@ class AdminOfferCategoryListSerializer(serializers.ModelSerializer):
 
 
 class AdminOfferSerializer(serializers.ModelSerializer):
-    offer_category_title = serializers.CharField(source='offer_category.title',read_only=True)
+    # offer_category_title = serializers.CharField(source='offer_category.title',read_only=True)
     product_category_title = serializers.CharField(source='product_category.title',read_only=True)
     offer_products = AdminOfferProductsSerializer(many=True, required=False)
     existing_offer_products = serializers.SerializerMethodField('get_existing_offer_products')
@@ -1813,8 +1780,8 @@ class AdminOfferSerializer(serializers.ModelSerializer):
                     'title',
                     'product_category',
                     'product_category_title',
-                    'offer_category',
-                    'offer_category_title',
+                    # 'offer_category',
+                    # 'offer_category_title',
                     'start_date',
                     'end_date',
                     'thumbnail',

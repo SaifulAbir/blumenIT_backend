@@ -21,6 +21,7 @@ from support_ticket.models import Ticket, TicketConversation
 from stuff.models import Role, RolePermissions
 from home.models import CorporateDeal, Advertisement, HomeSingleRowData, SliderImage, RequestQuote, ContactUs
 from django.db.models import Q
+from django.db.models import Sum
 
 
 class SellerCreateSerializer(serializers.ModelSerializer):
@@ -1056,18 +1057,20 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
             single_quantity = ''
 
         try:
-            if single_quantity:
-                quan = Product.objects.get(id=instance.id).quantity
-                total_quan = Product.objects.get(id=instance.id).total_quantity
-                if single_quantity:
-                    quan += single_quantity
-                    total_quan += single_quantity
+            single_quantity = int(single_quantity)
+            if single_quantity >= 0:
+                latest_inventory_obj = Inventory.objects.filter(product=instance).latest('created_at')
+                latest_current_quantity = latest_inventory_obj.current_quantity
 
-                    # inventory update
-                    latest_inventory_obj= Inventory.objects.filter(product=instance).latest('created_at')
-                    current_qun = int(latest_inventory_obj.current_quantity) + int(single_quantity)
-                    Inventory.objects.create(product=instance, initial_quantity=single_quantity, current_quantity=current_qun)
-                    validated_data.update({"quantity" : quan, "total_quantity": total_quan})
+                if single_quantity == 0 and latest_current_quantity == 0:
+                    pass
+                else:
+                    initial_quantity =  single_quantity - latest_current_quantity
+                    Inventory.objects.create(product=instance, initial_quantity=initial_quantity, current_quantity=single_quantity)
+                    total_initial_quantity= Inventory.objects.filter(product=instance).order_by('created_at').aggregate(Sum('initial_quantity'))
+                    validated_data.update({"quantity" : single_quantity, "total_quantity": total_initial_quantity['initial_quantity__sum']})
+            else:
+                raise ValidationError("We can't accept Minus quantity value.")
         except:
             raise ValidationError('Problem of Product Quantity update.')
 

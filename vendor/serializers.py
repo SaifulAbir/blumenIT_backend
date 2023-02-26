@@ -1142,10 +1142,18 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
         # offers
         try:
             if offers:
+                o_p = OfferProduct.objects.filter(product=instance, offer=offer).exists()
+                if o_p == True:
+                    OfferProduct.objects.filter(product=instance, offer=offer).delete()
+
                 for offer in offers:
                     offer = offer['offer']
                     if offer:
                         OfferProduct.objects.create(product=instance, offer=offer)
+            else:
+                o_p = OfferProduct.objects.filter(product=instance, offer=offer).exists()
+                if o_p == True:
+                    OfferProduct.objects.filter(product=instance, offer=offer).delete()
         except:
             raise ValidationError('Problem of Product Offer product update.')
 

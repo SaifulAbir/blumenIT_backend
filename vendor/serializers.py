@@ -985,12 +985,6 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
         except:
             product_specification = ''
 
-        # flash_deal
-        # try:
-        #     flash_deal = validated_data.pop('flash_deal')
-        # except:
-        #     flash_deal = ''
-
         # offers
         try:
             offers = validated_data.pop('offers')
@@ -1114,46 +1108,19 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
         except:
             raise ValidationError('Problem of Product specification update.')
 
-        # flash_deal
-        # try:
-        #     if flash_deal:
-        #         f_p = FlashDealProduct.objects.filter(
-        #             product=instance).exists()
-        #         if f_p == True:
-        #             FlashDealProduct.objects.filter(
-        #                 product=instance).delete()
-
-        #         for f_deal in flash_deal:
-        #             flash_deal_info = f_deal['flash_deal_info']
-        #             discount_type = f_deal['discount_type']
-        #             discount_amount = f_deal['discount_amount']
-        #             if flash_deal_info:
-        #                 flash_deal_product_instance = FlashDealProduct.objects.create(product=instance, flash_deal_info=flash_deal_info, discount_type=discount_type, discount_amount=discount_amount)
-        #     else:
-        #         f_p = FlashDealProduct.objects.filter(
-        #             product=instance).exists()
-        #         if f_p == True:
-        #             FlashDealProduct.objects.filter(
-        #                 product=instance).delete()
-        # except:
-        #     raise ValidationError('Problem of Product flash deal update.')
-
-
         # offers
         try:
             if offers:
-                o_p = OfferProduct.objects.filter(product=instance, offer=offer).exists()
-                if o_p == True:
-                    OfferProduct.objects.filter(product=instance, offer=offer).delete()
-
+                offer_ids = [offer['offer'].id for offer in offers]
+                OfferProduct.objects.filter(Q(product=instance), ~Q(offer__in=offer_ids)).update(is_active=False)
                 for offer in offers:
                     offer = offer['offer']
-                    if offer:
+                    offer_product_exist = OfferProduct.objects.filter(product=instance, offer=offer).exists()
+                    if not offer_product_exist:
                         OfferProduct.objects.create(product=instance, offer=offer)
-            else:
-                o_p = OfferProduct.objects.filter(product=instance, offer=offer).exists()
-                if o_p == True:
-                    OfferProduct.objects.filter(product=instance, offer=offer).delete()
+                    else:
+                        OfferProduct.objects.filter(product=instance, offer=offer).update(is_active=True)
+
         except:
             raise ValidationError('Problem of Product Offer product update.')
 
@@ -1182,23 +1149,19 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
         # product_warranties
         try:
             if product_warranties:
-                p_w = ProductWarranty.objects.filter(
-                    product=instance).exists()
-                if p_w == True:
-                    ProductWarranty.objects.filter(
-                        product=instance).delete()
+                product_warranties_ids = [warranty['warranty'].id for warranty in product_warranties]
+                ProductWarranty.objects.filter(Q(product=instance), ~Q(warranty__in=product_warranties_ids)).update(is_active=False)
 
-                for product_warranties in product_warranties:
-                    warranty = product_warranties['warranty']
-                    warranty_value = product_warranties['warranty_value']
-                    warranty_value_type = product_warranties['warranty_value_type']
-                    ProductWarranty.objects.create(product=instance, warranty=warranty, warranty_value=warranty_value, warranty_value_type=warranty_value_type)
-            else:
-                p_w = ProductWarranty.objects.filter(
-                    product=instance).exists()
-                if p_w == True:
-                    ProductWarranty.objects.filter(
-                        product=instance).delete()
+                for product_warranty in product_warranties:
+                    warranty = product_warranty['warranty']
+                    warranty_value = product_warranty['warranty_value']
+                    warranty_value_type = product_warranty['warranty_value_type']
+
+                    warranty_exist = ProductWarranty.objects.filter(product=instance, warranty=warranty).exists()
+                    if not warranty_exist:
+                            ProductWarranty.objects.create(product=instance, warranty=warranty, warranty_value=warranty_value, warranty_value_type=warranty_value_type)
+                    else:
+                        ProductWarranty.objects.filter(product=instance, warranty=warranty).update(is_active=True)
         except:
             raise ValidationError('Problem of Product warranties update.')
 
@@ -1812,7 +1775,7 @@ class AdminOfferCategoryListSerializer(serializers.ModelSerializer):
 
 
 class AdminOfferSerializer(serializers.ModelSerializer):
-    offer_category_title = serializers.CharField(source='offer_category.title',read_only=True)
+    # offer_category_title = serializers.CharField(source='offer_category.title',read_only=True)
     product_category_title = serializers.CharField(source='product_category.title',read_only=True)
     offer_products = AdminOfferProductsSerializer(many=True, required=False)
     existing_offer_products = serializers.SerializerMethodField('get_existing_offer_products')
@@ -1827,8 +1790,8 @@ class AdminOfferSerializer(serializers.ModelSerializer):
                     'title',
                     'product_category',
                     'product_category_title',
-                    'offer_category',
-                    'offer_category_title',
+                    # 'offer_category',
+                    # 'offer_category_title',
                     'start_date',
                     'end_date',
                     'thumbnail',

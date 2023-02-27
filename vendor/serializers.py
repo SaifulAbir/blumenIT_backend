@@ -1971,7 +1971,7 @@ class AdminPosOrderItemSerializer(serializers.ModelSerializer):
 class AdminPosOrderSerializer(serializers.ModelSerializer):
     order_items = AdminPosOrderItemSerializer(many=True, required=False)
     order_id = serializers.CharField(read_only=True)
-    vat_amount =  serializers.FloatField(read_only=True)
+    vat_amount =  serializers.FloatField()
     product_count = serializers.IntegerField(required=True)
 
     class Meta:

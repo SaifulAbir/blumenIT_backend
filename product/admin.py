@@ -33,7 +33,7 @@ admin.site.register(FlashDealProduct)
 admin.site.register(FilterAttributes)
 admin.site.register(ProductCondition)
 admin.site.register(Warranty)
-admin.site.register(OfferCategory)
+# admin.site.register(OfferCategory)
 
 class ProductImageInline(admin.TabularInline):
     model = ProductImages

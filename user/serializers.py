@@ -93,37 +93,41 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
 
 
 class CustomerOrderListSerializer(serializers.ModelSerializer):
-    total_price = serializers.SerializerMethodField('get_total_price')
+    # total_price = serializers.SerializerMethodField('get_total_price')
     class Meta:
         model = Order
-        fields = ['id', 'user', 'order_id', 'order_date', 'order_status', 'vat_amount', 'total_price']
+        fields = ['id', 'user', 'order_id', 'order_date', 'order_status', 'vat_amount', 'total_price', 'discount_amount']
 
-    def get_total_price(self, obj):
-        order_items = OrderItem.objects.filter(order=obj)
-        prices = []
-        total_price = 0.0
-        for order_item in order_items:
-            price = order_item.unit_price
-            if order_item.unit_price_after_add_warranty != 0.0:
-                price = order_item.unit_price_after_add_warranty
-            quantity = order_item.quantity
-            t_price = float(price) * float(quantity)
-            prices.append(t_price)
-        if obj.vat_amount:
-            sub_total = float(sum(prices)) + float(obj.vat_amount)
-        else:
-            sub_total = float(sum(prices))
-        if sub_total:
-            total_price += sub_total
+    # def get_total_price(self, obj):
+    #     order_items = OrderItem.objects.filter(order=obj)
+    #     prices = []
+    #     total_price = 0.0
+    #     for order_item in order_items:
+    #         price = order_item.unit_price
+    #         if order_item.unit_price_after_add_warranty != 0.0:
+    #             price = order_item.unit_price_after_add_warranty
+    #         quantity = order_item.quantity
+    #         t_price = float(price) * float(quantity)
+    #         prices.append(t_price)
+    #     if obj.vat_amount:
+    #         sub_total = float(sum(prices)) + float(obj.vat_amount)
+    #     else:
+    #         sub_total = float(sum(prices))
+    #     if sub_total:
+    #         total_price += sub_total
 
-        shipping_cost = obj.shipping_cost
-        if shipping_cost:
-            total_price += shipping_cost
+    #     shipping_cost = obj.shipping_cost
+    #     if shipping_cost:
+    #         total_price += shipping_cost
 
-        coupon_discount_amount = obj.coupon_discount_amount
-        if coupon_discount_amount:
-            total_price -= coupon_discount_amount
-        return total_price
+    #     coupon_discount_amount = obj.coupon_discount_amount
+    #     if coupon_discount_amount:
+    #         total_price -= coupon_discount_amount
+
+    #     discount_amount = obj.discount_amount
+    #     if discount_amount:
+    #         total_price -= discount_amount
+    #     return total_price
 
 
 class CustomerOrderItemsSerializer(serializers.ModelSerializer):
@@ -166,13 +170,13 @@ class CustomerOrderDetailsSerializer(serializers.ModelSerializer):
     sub_total = serializers.SerializerMethodField('get_sub_total')
     delivery_address = serializers.SerializerMethodField('get_delivery_address')
     payment_title = serializers.CharField(source='payment_type.type_name',read_only=True)
-    total_price = serializers.SerializerMethodField('get_total_price')
+    # total_price = serializers.SerializerMethodField('get_total_price')
     delivery_date = serializers.SerializerMethodField('get_delivery_date')
     vat_amount =  serializers.FloatField(read_only=True)
     warranty_price = serializers.SerializerMethodField('get_warranty_price')
     class Meta:
         model = Order
-        fields = ['user', 'order_id', 'order_date', 'delivery_date', 'order_status', 'order_items', 'delivery_address', 'payment_type', 'payment_title', 'sub_total', 'shipping_cost', 'coupon_discount_amount', 'total_price', 'vat_amount', 'warranty_price']
+        fields = ['user', 'order_id', 'order_date', 'delivery_date', 'order_status', 'order_items', 'delivery_address', 'payment_type', 'payment_title', 'sub_total', 'shipping_cost', 'coupon_discount_amount', 'total_price', 'vat_amount', 'warranty_price', 'discount_amount']
 
     def get_order_items(self, obj):
         queryset = OrderItem.objects.filter(order=obj)
@@ -214,32 +218,36 @@ class CustomerOrderDetailsSerializer(serializers.ModelSerializer):
             # print(t_price)
         return warranty_price
 
-    def get_total_price(self, obj):
-        order_items = OrderItem.objects.filter(order=obj)
-        prices = []
-        total_price = 0.0
-        for order_item in order_items:
-            price = order_item.unit_price
-            if order_item.unit_price_after_add_warranty != 0.0:
-                price = order_item.unit_price_after_add_warranty
-            quantity = order_item.quantity
-            t_price = float(price) * float(quantity)
-            prices.append(t_price)
-        if obj.vat_amount:
-            sub_total = float(sum(prices)) + float(obj.vat_amount)
-        else:
-            sub_total = float(sum(prices))
-        if sub_total:
-            total_price += sub_total
+    # def get_total_price(self, obj):
+    #     order_items = OrderItem.objects.filter(order=obj)
+    #     prices = []
+    #     total_price = 0.0
+    #     for order_item in order_items:
+    #         price = order_item.unit_price
+    #         if order_item.unit_price_after_add_warranty != 0.0:
+    #             price = order_item.unit_price_after_add_warranty
+    #         quantity = order_item.quantity
+    #         t_price = float(price) * float(quantity)
+    #         prices.append(t_price)
+    #     if obj.vat_amount:
+    #         sub_total = float(sum(prices)) + float(obj.vat_amount)
+    #     else:
+    #         sub_total = float(sum(prices))
+    #     if sub_total:
+    #         total_price += sub_total
 
-        shipping_cost = obj.shipping_cost
-        if shipping_cost:
-            total_price += shipping_cost
+    #     shipping_cost = obj.shipping_cost
+    #     if shipping_cost:
+    #         total_price += shipping_cost
 
-        coupon_discount_amount = obj.coupon_discount_amount
-        if coupon_discount_amount:
-            total_price -= coupon_discount_amount
-        return total_price
+    #     coupon_discount_amount = obj.coupon_discount_amount
+    #     if coupon_discount_amount:
+    #         total_price -= coupon_discount_amount
+
+    #     discount_amount = obj.discount_amount
+    #     if discount_amount:
+    #         total_price -= discount_amount
+    #     return total_price
 
     def get_delivery_date(self, obj):
         try:

@@ -60,13 +60,13 @@ class CheckoutDetailsSerializer(serializers.ModelSerializer):
     user_email = serializers.EmailField(source='user.email',read_only=True)
     user_phone = serializers.CharField(source='user.phone',read_only=True)
     product_price = serializers.SerializerMethodField('get_product_price')
-    total_price = serializers.SerializerMethodField('get_total_price')
+    # total_price = serializers.SerializerMethodField('get_total_price')
     delivery_date = serializers.SerializerMethodField('get_delivery_date')
     warranty_price = serializers.SerializerMethodField('get_warranty_price')
     vat_amount =  serializers.FloatField(read_only=True)
     class Meta:
         model = Order
-        fields = ['id', 'user', 'user_email', 'user_phone', 'order_id', 'order_date', 'delivery_date', 'order_status', 'order_items', 'delivery_address', 'payment_type', 'payment_title', 'product_price', 'coupon_discount_amount', 'sub_total', 'shipping_class', 'shipping_cost', 'total_price', 'vat_amount', 'warranty_price']
+        fields = ['id', 'user', 'user_email', 'user_phone', 'order_id', 'order_date', 'delivery_date', 'order_status', 'order_items', 'delivery_address', 'payment_type', 'payment_title', 'product_price', 'coupon_discount_amount', 'sub_total', 'shipping_class', 'shipping_cost', 'total_price', 'vat_amount', 'warranty_price', 'discount_amount']
 
     def get_order_items(self, obj):
         queryset = OrderItem.objects.filter(order=obj)
@@ -123,32 +123,37 @@ class CheckoutDetailsSerializer(serializers.ModelSerializer):
             # print(t_price)
         return warranty_price
 
-    def get_total_price(self, obj):
-        order_items = OrderItem.objects.filter(order=obj)
-        prices = []
-        total_price = 0.0
-        for order_item in order_items:
-            price = order_item.unit_price
-            if order_item.unit_price_after_add_warranty != 0.0:
-                price = order_item.unit_price_after_add_warranty
-            quantity = order_item.quantity
-            t_price = float(price) * float(quantity)
-            prices.append(t_price)
-        if obj.vat_amount:
-            sub_total = float(sum(prices)) + float(obj.vat_amount)
-        else:
-            sub_total = float(sum(prices))
-        if sub_total:
-            total_price += sub_total
+    # def get_total_price(self, obj):
+    #     order_items = OrderItem.objects.filter(order=obj)
+    #     prices = []
+    #     total_price = 0.0
+    #     for order_item in order_items:
+    #         price = order_item.unit_price
+    #         if order_item.unit_price_after_add_warranty != 0.0:
+    #             price = order_item.unit_price_after_add_warranty
+    #         quantity = order_item.quantity
+    #         t_price = float(price) * float(quantity)
+    #         prices.append(t_price)
+    #     if obj.vat_amount:
+    #         sub_total = float(sum(prices)) + float(obj.vat_amount)
+    #     else:
+    #         sub_total = float(sum(prices))
+    #     if sub_total:
+    #         total_price += sub_total
 
-        shipping_cost = obj.shipping_cost
-        if shipping_cost:
-            total_price += shipping_cost
+    #     shipping_cost = obj.shipping_cost
+    #     if shipping_cost:
+    #         total_price += shipping_cost
 
-        coupon_discount_amount = obj.coupon_discount_amount
-        if coupon_discount_amount:
-            total_price -= coupon_discount_amount
-        return total_price
+    #     coupon_discount_amount = obj.coupon_discount_amount
+    #     if coupon_discount_amount:
+    #         total_price -= coupon_discount_amount
+
+    #     discount_amount = obj.discount_amount
+    #     if discount_amount:
+    #         total_price -= discount_amount
+
+    #     return total_price
 
     def get_delivery_date(self, obj):
         try:
@@ -193,7 +198,7 @@ class DeliveryAddressSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = ['id', 'user', 'order_id', 'product_count', 'order_date', 'order_status', 'total_price']
+        fields = ['id', 'user', 'order_id', 'product_count', 'order_date', 'order_status', 'total_price', 'discount_amount']
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
@@ -205,6 +210,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 class ProductItemCheckoutSerializer(serializers.ModelSerializer):
     product_warranty = serializers.PrimaryKeyRelatedField(queryset=ProductWarranty.objects.all(), many=False, write_only=True, required= False)
+    offer_product = serializers.PrimaryKeyRelatedField(queryset=OfferProduct.objects.all(), many=False, required= False)
     class Meta:
         model = OrderItem
         fields = ['id',
@@ -212,6 +218,7 @@ class ProductItemCheckoutSerializer(serializers.ModelSerializer):
                   'quantity',
                   'unit_price',
                   'product_warranty',
+                  'offer_product'
                   ]
 
 
@@ -222,7 +229,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['id', 'order_id', 'product_count', 'coupon', 'coupon_status', 'coupon_discount_amount', 'payment_type', 'shipping_class', 'shipping_cost', 'order_items', 'delivery_address', 'comment']
+        fields = ['id', 'order_id', 'product_count', 'coupon', 'coupon_status', 'coupon_discount_amount', 'payment_type', 'shipping_class', 'shipping_cost', 'order_items', 'delivery_address', 'comment', 'discount_amount']
 
     def create(self, validated_data):
         order_items = validated_data.pop('order_items')
@@ -237,38 +244,17 @@ class CheckoutSerializer(serializers.ModelSerializer):
                 order_status = "CONFIRMED"
                 payment_status = "PAID"
 
-        # stop take order process if any product out of stock
+        # stop take order process if any product out of stock start
         if order_items:
             for order_item in order_items:
                 product = order_item['product']
                 quantity = order_item['quantity']
+
                 inventory_obj = Inventory.objects.filter(product=product).latest('created_at')
                 new_update_quantity = int(inventory_obj.current_quantity) - int(quantity)
                 if int(new_update_quantity) < 0:
                     raise ValidationError("Order didn't create. One of product out of stock.")
-
-        # stop take order process if order items have in_house and also normal products
-        # if order_items:
-        #     order_items_in_house_product = 0
-        #     order_items_not_in_house_product = 0
-        #     for order_item in order_items:
-        #         product = order_item['product']
-        #         if product.in_house_product == True:
-        #             order_items_in_house_product += 1
-        #         if product.in_house_product == False:
-        #             order_items_not_in_house_product += 1
-
-        #     total_order_items = int(len(order_items))
-        #     in_house_order = True
-        #     if order_items_in_house_product == total_order_items:
-        #         in_house_order = True
-        #         pass
-        #     elif order_items_not_in_house_product == total_order_items:
-        #         in_house_order = False
-        #         pass
-        #     else:
-        #         raise ValidationError("Order didn't create, Because of multiple products types available in order items.")
-
+        # stop take order process if any product out of stock end
 
         order_instance = Order.objects.create(
             **validated_data, user=self.context['request'].user, order_status=order_status,
@@ -277,11 +263,16 @@ class CheckoutSerializer(serializers.ModelSerializer):
         if order_items:
             count = 0
             vat_amount_list = []
+            total_product_discount_amount = 0.0
             sub_total = 0.0
             for order_item in order_items:
                 product = order_item['product']
                 quantity = order_item['quantity']
                 unit_price = order_item['unit_price']
+                try:
+                    offer_product = order_item['offer_product']
+                except:
+                    offer_product = ''
 
                 total_price = float(unit_price) * float(quantity)
 
@@ -290,6 +281,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
                 except:
                     product_warranty = None
 
+                # work with product warranty start
                 if product_warranty:
                     warranty_value = product_warranty.warranty_value
                     warranty_value_type = product_warranty.warranty_value_type
@@ -304,10 +296,41 @@ class CheckoutSerializer(serializers.ModelSerializer):
                     total_price =  float(unit_price_after_add_warranty) * float(quantity)
                     sub_total += total_price
 
-                    OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty)
+                    # work with offer product start
+                    if offer_product:
+                        discount_price = offer_product.offer.discount_price
+                        discount_price_type = offer_product.offer.discount_price_type.title
+                        if discount_price_type == 'percentage':
+                            discount_amount_value = float((float(total_price) / 100) * float(discount_price))
+                        elif discount_price_type == 'flat':
+                            discount_amount_value = float(discount_price)
+
+                        total_product_discount_amount += discount_amount_value
+
+                        OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty, offer_product=offer_product)
+                    else:
+                        OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty)
+
                 else:
                     sub_total += total_price
-                    OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price)
+                    # work with offer product start
+                    if offer_product:
+                        discount_price = offer_product.offer.discount_price
+                        discount_price_type = offer_product.offer.discount_price_type.title
+                        if discount_price_type == 'percentage':
+                            discount_amount_value = float((float(total_price) / 100) * float(discount_price))
+                        elif discount_price_type == 'flat':
+                            discount_amount_value = float(discount_price)
+
+                        total_product_discount_amount += discount_amount_value
+
+                        OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, offer_product=offer_product )
+                    else:
+                        sub_total += total_price
+
+                        OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price)
+                # work with product warranty end
+
 
                 # update inventory
                 inventory_obj = Inventory.objects.filter(product=product).latest('created_at')
@@ -331,8 +354,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
                     vat_amount_list.append(vat_amount)
 
 
-
-            Order.objects.filter(id=order_instance.id).update(vat_amount = sum(vat_amount_list))
+            Order.objects.filter(id=order_instance.id).update(vat_amount = sum(vat_amount_list), discount_amount = total_product_discount_amount)
 
 
         # work with coupon start
@@ -372,6 +394,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
         vat_amount = sum(vat_amount_list)
         shipping_cost = order_instance.shipping_cost
         coupon_discount_amount = order_instance.coupon_discount_amount
+        offer_discount_amount = order_instance.discount_amount
 
         # grand total price calculation start
         try:
@@ -390,8 +413,16 @@ class CheckoutSerializer(serializers.ModelSerializer):
             coupon_discount_amount_data = float(coupon_discount_amount)
         except:
             coupon_discount_amount_data = 0.0
-        grand_total_price = (sub_total_amount + vat_amount_data + shipping_cost_amount) - coupon_discount_amount_data
+
+        try:
+            total_product_discount_amount_data = float(total_product_discount_amount)
+        except:
+            total_product_discount_amount_data = 0.0
+
+        grand_total_price = (sub_total_amount + vat_amount_data + shipping_cost_amount) - (coupon_discount_amount_data + total_product_discount_amount_data)
         # grand total price calculation end
+        total_price = round(grand_total_price, 2)
+        Order.objects.filter(id=order_instance.id).update(total_price = total_price)
 
         try:
             delivery_days = ShippingClass.objects.get(id=order_instance.shipping_class.id).delivery_days
@@ -403,7 +434,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
             delivery_date = None
         order_items = OrderItem.objects.filter(order=order_instance)
         subject = "Your order has been successfully placed."
-        html_message = render_to_string('order_details.html', {'username':username, 'email' : email, 'name': name, 'order_id': order_id, 'created_at': created_at, 'order_items': order_items, 'payment_type': payment_type, 'sub_total': sub_total, 'shipping_cost': shipping_cost, 'vat_amount': vat_amount, 'coupon_discount_amount': coupon_discount_amount, 'grand_total_price': grand_total_price, 'delivery_date': delivery_date})
+        html_message = render_to_string('order_details.html', {'username':username, 'email' : email, 'name': name, 'order_id': order_id, 'created_at': created_at, 'order_items': order_items, 'payment_type': payment_type, 'sub_total': sub_total, 'shipping_cost': shipping_cost, 'vat_amount': vat_amount, 'coupon_discount_amount': coupon_discount_amount, 'offer_discount_amount': offer_discount_amount, 'grand_total_price': grand_total_price, 'delivery_date': delivery_date})
 
         send_mail(
             subject=subject,

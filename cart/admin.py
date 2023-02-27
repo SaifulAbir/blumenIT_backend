@@ -15,17 +15,13 @@ admin.site.register(Wishlist)
 
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
-    fields = ['product', 'quantity', 'unit_price', 'unit_price_after_add_warranty', 'total_price', 'product_warranty']
-
-class SubOrderInline(admin.TabularInline):
-    model = SubOrder
-    fields = ['sub_order_id', 'in_house_order']
+    fields = ['product', 'quantity', 'unit_price', 'unit_price_after_add_warranty', 'total_price', 'product_warranty', 'offer_product']
 
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     inlines = [
-        SubOrderInline, OrderItemInline
+         OrderItemInline
     ]
 
 @admin.register(SubOrder)

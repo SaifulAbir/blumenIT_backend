@@ -9,11 +9,11 @@ class SalesReportSerializer(serializers.ModelSerializer):
     customer_name = serializers.CharField(source="user.name", read_only=True)
     customer_email = serializers.CharField(source="user.email", read_only=True)
     customer_phone = serializers.CharField(source="user.phone", read_only=True)
-    total_price = serializers.SerializerMethodField('get_total_price')
+    # total_price = serializers.SerializerMethodField('get_total_price')
     vat_amount = serializers.FloatField(read_only=True)
     class Meta:
         model = Order
-        fields = ['id', 'order_id', 'num_of_product', 'customer_name', 'customer_email', 'customer_phone', 'total_price', 'order_status', 'payment_status', 'refund', 'order_date', 'vat_amount']
+        fields = ['id', 'order_id', 'num_of_product', 'customer_name', 'customer_email', 'customer_phone', 'total_price', 'order_status', 'payment_status', 'refund', 'order_date', 'vat_amount', 'discount_amount']
 
     def get_num_of_product(self, obj):
         try:
@@ -22,32 +22,37 @@ class SalesReportSerializer(serializers.ModelSerializer):
         except:
             return 0
 
-    def get_total_price(self, obj):
-        order_items = OrderItem.objects.filter(order=obj)
-        prices = []
-        total_price = 0.0
-        for order_item in order_items:
-            price = order_item.unit_price
-            if order_item.unit_price_after_add_warranty != 0.0:
-                price = order_item.unit_price_after_add_warranty
-            quantity = order_item.quantity
-            t_price = float(price) * float(quantity)
-            prices.append(t_price)
-        if obj.vat_amount:
-            sub_total = float(sum(prices)) + float(obj.vat_amount)
-        else:
-            sub_total = float(sum(prices))
-        if sub_total:
-            total_price += sub_total
+    # def get_total_price(self, obj):
+    #     order_items = OrderItem.objects.filter(order=obj)
+    #     prices = []
+    #     total_price = 0.0
+    #     for order_item in order_items:
+    #         price = order_item.unit_price
+    #         if order_item.unit_price_after_add_warranty != 0.0:
+    #             price = order_item.unit_price_after_add_warranty
+    #         quantity = order_item.quantity
+    #         t_price = float(price) * float(quantity)
+    #         prices.append(t_price)
+    #     if obj.vat_amount:
+    #         sub_total = float(sum(prices)) + float(obj.vat_amount)
+    #     else:
+    #         sub_total = float(sum(prices))
+    #     if sub_total:
+    #         total_price += sub_total
 
-        shipping_cost = obj.shipping_cost
-        if shipping_cost:
-            total_price += shipping_cost
+    #     shipping_cost = obj.shipping_cost
+    #     if shipping_cost:
+    #         total_price += shipping_cost
 
-        coupon_discount_amount = obj.coupon_discount_amount
-        if coupon_discount_amount:
-            total_price -= coupon_discount_amount
-        return total_price
+    #     coupon_discount_amount = obj.coupon_discount_amount
+    #     if coupon_discount_amount:
+    #         total_price -= coupon_discount_amount
+
+    #     discount_amount = obj.discount_amount
+    #     if discount_amount:
+    #         total_price -= discount_amount
+
+    #     return total_price
 
 
 class VendorProductReportSerializer(serializers.ModelSerializer):

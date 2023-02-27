@@ -266,7 +266,6 @@ class CheckoutSerializer(serializers.ModelSerializer):
             vat_amount_list = []
             total_product_discount_amount = 0.0
             sub_total = 0.0
-            print(order_items)
             for order_item in order_items:
                 product = order_item['product']
                 quantity = order_item['quantity']

@@ -1926,7 +1926,8 @@ class AdminPosProductListSerializer(serializers.ModelSerializer):
             'brand_title',
             'brand',
             'unit',
-            'vat'
+            'vat',
+            'vat_type'
         ]
 
 class AdminPosOrderItemSerializer(serializers.ModelSerializer):
@@ -1952,7 +1953,7 @@ class AdminPosOrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = ['id', 'order_id', 'product_count', 'vat_amount', 'discount_amount',
                   'payment_type', 'shipping_class', 'shipping_cost', 'order_items', 'delivery_address', 'comment',
-                  'customer', 'in_house_order', 'total_price']
+                  'customer', 'in_house_order', 'total_price', 'vat_amount']
 
     def create(self, validated_data):
         order_items = validated_data.pop('order_items')

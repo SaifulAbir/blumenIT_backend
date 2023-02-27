@@ -94,10 +94,12 @@ class CheckoutDetailsSerializer(serializers.ModelSerializer):
             quantity = order_item.quantity
             t_price = float(price) * float(quantity)
             prices.append(t_price)
-        if obj.vat_amount:
-            sub_total = float(sum(prices)) + float(obj.vat_amount)
-        else:
-            sub_total = float(sum(prices))
+        # if obj.vat_amount:
+        #     sub_total = float(sum(prices)) + float(obj.vat_amount)
+        # else:
+            # sub_total = float(sum(prices))
+
+        sub_total = float(sum(prices))
         return sub_total
 
     def get_product_price(self, obj):

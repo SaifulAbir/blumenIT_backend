@@ -212,7 +212,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 class ProductItemCheckoutSerializer(serializers.ModelSerializer):
     product_warranty = serializers.PrimaryKeyRelatedField(queryset=ProductWarranty.objects.all(), many=False, write_only=True, required= False)
-    offer_product = serializers.PrimaryKeyRelatedField(queryset=OfferProduct.objects.all(), many=False, required= False)
+    offer = serializers.PrimaryKeyRelatedField(queryset=Offer.objects.all(), many=False, required= False)
     class Meta:
         model = OrderItem
         fields = ['id',
@@ -220,7 +220,7 @@ class ProductItemCheckoutSerializer(serializers.ModelSerializer):
                   'quantity',
                   'unit_price',
                   'product_warranty',
-                  'offer_product'
+                  'offer'
                   ]
 
 

@@ -29,10 +29,12 @@ class CheckoutDetailsOrderItemSerializer(serializers.ModelSerializer):
     product_specification = serializers.SerializerMethodField('get_product_specification')
     product_warranty_title = serializers.CharField(source='product_warranty.warranty.title',read_only=True)
     product_vat = serializers.CharField(source='product.vat',read_only=True)
+    offer_discount_price = serializers.CharField(source='offer.discount_price',read_only=True)
+    offer_discount_price_type = serializers.CharField(source='offer.discount_price_type',read_only=True)
 
     class Meta:
         model = OrderItem
-        fields = ['id', 'product_title', 'product_thumb', 'product_price', 'product_sku', 'product_specification', 'quantity', 'unit_price', 'unit_price_after_add_warranty', 'total_price', 'product_warranty', 'product_warranty_title', 'product_vat']
+        fields = ['id', 'product_title', 'product_thumb', 'product_price', 'product_sku', 'product_specification', 'quantity', 'unit_price', 'unit_price_after_add_warranty', 'total_price', 'product_warranty', 'product_warranty_title', 'product_vat', 'offer', 'offer_discount_price', 'offer_discount_price_type']
 
     def get_product_price(self, obj):
         product_price = Product.objects.filter(id=obj.product.id)[
@@ -305,7 +307,10 @@ class CheckoutSerializer(serializers.ModelSerializer):
                         discount_price = offer.discount_price
                         discount_price_type = offer.discount_price_type.title
                         if discount_price_type == 'percentage':
-                            discount_amount_value = float((float(total_price) / 100) * float(discount_price))
+                            # discount_amount_value = float((float(total_price) / 100) * float(discount_price))
+                            # discount_amount = (discount_percentage*price)/100;
+                            base_price = float(unit_price) * float(quantity)
+                            discount_amount_value = (float(discount_price) * float(base_price)) / 100
                         elif discount_price_type == 'flat':
                             discount_amount_value = float(discount_price)
 
@@ -322,7 +327,9 @@ class CheckoutSerializer(serializers.ModelSerializer):
                         discount_price = offer.discount_price
                         discount_price_type = offer.discount_price_type.title
                         if discount_price_type == 'percentage':
-                            discount_amount_value = float((float(total_price) / 100) * float(discount_price))
+                            # discount_amount_value = float((float(total_price) / 100) * float(discount_price))
+                            base_price = float(unit_price) * float(quantity)
+                            discount_amount_value = (float(discount_price) * float(base_price)) / 100
                         elif discount_price_type == 'flat':
                             discount_amount_value = float(discount_price)
 
@@ -352,7 +359,14 @@ class CheckoutSerializer(serializers.ModelSerializer):
                 # vat calculation in percent logic
                 product_vat_value = Product.objects.filter(slug=product.slug)[0].vat
                 if product_vat_value:
-                    vat_amount = float((float(total_price - total_product_discount_amount) / 100) * float(product_vat_value))
+                    base_price = float(unit_price) * float(quantity)
+                    if offer:
+                        base_price = float(base_price) - float(total_product_discount_amount)
+                        # vat_amount = float((float(base_price - total_product_discount_amount) / 100) * float(product_vat_value))
+                        vat_amount = (float(product_vat_value) * (float(base_price))) / 100
+                    else:
+                        # vat_amount = float((float(base_price) / 100) * float(product_vat_value))
+                        vat_amount = (float(product_vat_value) * float(base_price)) / 100
                     vat_amount_list.append(vat_amount)
 
 

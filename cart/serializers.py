@@ -262,6 +262,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
 
         if order_items:
             count = 0
+            warranty_amount_list = []
             vat_amount_list = []
             total_product_discount_amount = 0.0
             sub_total = 0.0
@@ -287,8 +288,9 @@ class CheckoutSerializer(serializers.ModelSerializer):
                     warranty_value_type = product_warranty.warranty_value_type
 
                     if warranty_value_type == 'PERCENTAGE':
-                        unit_price_after_add_warranty = float((float(unit_price) / 100) * float(warranty_value))
-                        unit_price_after_add_warranty = unit_price + unit_price_after_add_warranty
+                        unit_price_by_warranty = float((float(unit_price) / 100) * float(warranty_value))
+                        unit_price_after_add_warranty = unit_price + unit_price_by_warranty
+                        warranty_amount_list.append(unit_price_by_warranty)
                     elif warranty_value_type == 'FIX':
                         unit_price_after_add_warranty = float(float(unit_price) + float(warranty_value))
                         unit_price_after_add_warranty = unit_price + unit_price_after_add_warranty
@@ -296,21 +298,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
                     total_price =  float(unit_price_after_add_warranty) * float(quantity)
                     sub_total += total_price
 
-                    # work with offer product start
-                    if offer_product:
-                        discount_price = offer_product.offer.discount_price
-                        discount_price_type = offer_product.offer.discount_price_type.title
-                        if discount_price_type == 'percentage':
-                            discount_amount_value = float((float(total_price) / 100) * float(discount_price))
-                        elif discount_price_type == 'flat':
-                            discount_amount_value = float(discount_price)
-
-                        total_product_discount_amount += discount_amount_value
-
-                        OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty, offer_product=offer_product)
-                    else:
-                        OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty)
-
+                    OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty)
                 else:
                     sub_total += total_price
                     # work with offer product start
@@ -393,6 +381,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
         payment_type = order_instance.payment_type.type_name
         vat_amount = sum(vat_amount_list)
         shipping_cost = order_instance.shipping_cost
+        warranty_amount = sum(warranty_amount_list)
         coupon_discount_amount = order_instance.coupon_discount_amount
         offer_discount_amount = order_instance.discount_amount
 
@@ -406,6 +395,10 @@ class CheckoutSerializer(serializers.ModelSerializer):
         except:
             vat_amount_data = 0.0
         try:
+            warranty_amount = float(warranty_amount)
+        except:
+            warranty_amount = 0.0
+        try:
             shipping_cost_amount = float(shipping_cost)
         except:
             shipping_cost_amount = 0.0
@@ -413,13 +406,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
             coupon_discount_amount_data = float(coupon_discount_amount)
         except:
             coupon_discount_amount_data = 0.0
-
-        try:
-            total_product_discount_amount_data = float(total_product_discount_amount)
-        except:
-            total_product_discount_amount_data = 0.0
-
-        grand_total_price = (sub_total_amount + vat_amount_data + shipping_cost_amount) - (coupon_discount_amount_data + total_product_discount_amount_data)
+        grand_total_price = (sub_total_amount + vat_amount_data + shipping_cost_amount) - coupon_discount_amount_data
         # grand total price calculation end
         total_price = round(grand_total_price, 2)
         Order.objects.filter(id=order_instance.id).update(total_price = total_price)
@@ -434,7 +421,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
             delivery_date = None
         order_items = OrderItem.objects.filter(order=order_instance)
         subject = "Your order has been successfully placed."
-        html_message = render_to_string('order_details.html', {'username':username, 'email' : email, 'name': name, 'order_id': order_id, 'created_at': created_at, 'order_items': order_items, 'payment_type': payment_type, 'sub_total': sub_total, 'shipping_cost': shipping_cost, 'vat_amount': vat_amount, 'coupon_discount_amount': coupon_discount_amount, 'offer_discount_amount': offer_discount_amount, 'grand_total_price': grand_total_price, 'delivery_date': delivery_date})
+        html_message = render_to_string('order_details.html', {'username':username, 'email' : email, 'name': name, 'order_id': order_id, 'created_at': created_at, 'order_items': order_items, 'payment_type': payment_type, 'sub_total': sub_total, 'shipping_cost': shipping_cost, 'vat_amount': vat_amount, 'coupon_discount_amount': coupon_discount_amount, 'grand_total_price': grand_total_price, 'delivery_date': delivery_date})
 
         send_mail(
             subject=subject,

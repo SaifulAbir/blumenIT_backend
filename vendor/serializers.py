@@ -1512,10 +1512,11 @@ class AdminOrderViewSerializer(serializers.ModelSerializer):
     payment_method = serializers.CharField(source='payment_type.type_name',read_only=True)
     sub_total = serializers.SerializerMethodField('get_sub_total')
     vat_amount = serializers.FloatField(read_only=True)
+    warranty_price = serializers.SerializerMethodField('get_warranty_price')
 
     class Meta:
         model = Order
-        fields = ['user', 'delivery_address', 'order_id', 'product_count', 'order_date', 'order_status', 'order_date', 'total_price', 'payment_status', 'payment_method', 'order_item_order', 'sub_total', 'vat_amount', 'shipping_cost', 'coupon_discount_amount', 'comment', 'discount_amount']
+        fields = ['user', 'delivery_address', 'order_id', 'product_count', 'order_date', 'order_status', 'order_date', 'total_price', 'payment_status', 'payment_method', 'order_item_order', 'sub_total', 'vat_amount', 'shipping_cost', 'coupon_discount_amount', 'comment', 'warranty_price', 'discount_amount']
 
     def get_sub_total(self, obj):
         order_items = OrderItem.objects.filter(order=obj)
@@ -1550,6 +1551,36 @@ class AdminOrderViewSerializer(serializers.ModelSerializer):
     #         sub_total = float(sum(prices))
     #     if sub_total:
     #         total_price += sub_total
+    def get_warranty_price(self, obj):
+        order_items = OrderItem.objects.filter(order=obj)
+        prices = []
+        for order_item in order_items:
+            if order_item.unit_price_after_add_warranty != 0.0:
+                price = order_item.unit_price
+                w_prices = order_item.unit_price_after_add_warranty
+                t_price = float(w_prices) - float(price)
+                prices.append(t_price)
+        warranty_price = sum(prices)
+            # print(t_price)
+        return warranty_price
+
+    def get_total_price(self, obj):
+        order_items = OrderItem.objects.filter(order=obj)
+        prices = []
+        total_price = 0
+        for order_item in order_items:
+            price = order_item.unit_price
+            if order_item.unit_price_after_add_warranty != 0.0:
+                price = order_item.unit_price_after_add_warranty
+            quantity = order_item.quantity
+            t_price = float(price) * float(quantity)
+            prices.append(t_price)
+        if obj.vat_amount:
+            sub_total = float(sum(prices)) + float(obj.vat_amount)
+        else:
+            sub_total = float(sum(prices))
+        if sub_total:
+            total_price += sub_total
 
     #     shipping_cost = obj.shipping_cost
     #     if shipping_cost:
@@ -1920,7 +1951,8 @@ class AdminPosProductListSerializer(serializers.ModelSerializer):
             'brand_title',
             'brand',
             'unit',
-            'vat'
+            'vat',
+            'vat_type'
         ]
 
 class AdminPosOrderItemSerializer(serializers.ModelSerializer):
@@ -1946,7 +1978,7 @@ class AdminPosOrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = ['id', 'order_id', 'product_count', 'vat_amount', 'discount_amount',
                   'payment_type', 'shipping_class', 'shipping_cost', 'order_items', 'delivery_address', 'comment',
-                  'customer', 'in_house_order', 'total_price']
+                  'customer', 'in_house_order', 'total_price', 'vat_amount']
 
     def create(self, validated_data):
         order_items = validated_data.pop('order_items')

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from product.models import Category, ProductImages, SubCategory, SubSubCategory, Product, ProductTags, ProductReview, \
     Brand, DiscountTypes, Tags, Units, Specification, SpecificationValue, AttributeValues, Seller, FilterAttributes, \
-    ProductWarranty
+    ProductWarranty, OfferProduct, Offer
 
 from user.models import User
 from vendor.models import StoreSettings
@@ -203,6 +203,25 @@ class SpecificationSerializer(serializers.ModelSerializer):
         return serializer.data
 
 
+class OfferProductSerializer(serializers.ModelSerializer):
+    offer_title = serializers.CharField(source="offer.title", read_only=True)
+    offer_discount_price = serializers.CharField(source="offer.discount_price", read_only=True)
+    offer_discount_price_type = serializers.CharField(source="offer.discount_price_type", read_only=True)
+    offer_start_date = serializers.CharField(source="offer.start_date", read_only=True)
+    offer_end_date = serializers.CharField(source="offer.end_date", read_only=True)
+    class Meta:
+        model = OfferProduct
+        fields = [
+            'id',
+            'offer',
+            'offer_title',
+            'offer_discount_price',
+            'offer_discount_price_type',
+            'offer_start_date',
+            'offer_end_date'
+        ]
+
+
 class ProductListBySerializer(serializers.ModelSerializer):
     product_specification = serializers.SerializerMethodField('get_product_specification')
     product_tags = serializers.SerializerMethodField()
@@ -220,6 +239,7 @@ class ProductListBySerializer(serializers.ModelSerializer):
     unit = UnitSerializer()
     total_quantity = serializers.SerializerMethodField()
     is_new = serializers.SerializerMethodField('get_is_new')
+    offers = serializers.SerializerMethodField('get_offers')
 
     class Meta:
         model = Product
@@ -257,8 +277,8 @@ class ProductListBySerializer(serializers.ModelSerializer):
             'short_description',
             'full_description',
             'in_house_product',
-            'is_new'
-
+            'is_new',
+            'offers'
         ]
 
     def get_is_new(self, obj):
@@ -301,6 +321,9 @@ class ProductListBySerializer(serializers.ModelSerializer):
         quantity = Product.objects.get(id=obj.id).quantity
         return quantity
 
+    def get_offers(self, obj):
+        selected_offer_product = OfferProduct.objects.filter(product=obj, is_active=True).distinct()
+        return OfferProductSerializer(selected_offer_product, many=True).data
 
 class ProductListBySerializerForHomeData(serializers.ModelSerializer):
     discount_type = DiscountTypeSerializer()

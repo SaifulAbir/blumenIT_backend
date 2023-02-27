@@ -5,7 +5,7 @@ from .utils import unique_order_id_generator_for_order, unique_sub_order_id_gene
 from django.db.models.signals import pre_save
 from user.models import User, CustomerProfile
 from django.utils.translation import gettext as _
-from product.models import Product, ShippingClass, DiscountTypes, ProductWarranty, OfferProduct
+from product.models import Product, ShippingClass, DiscountTypes, ProductWarranty, Offer, OfferProduct
 from django.utils import timezone
 
 '''
@@ -231,6 +231,7 @@ class OrderItem(AbstractTimeStamp):
     product_warranty = models.ForeignKey(
         ProductWarranty, on_delete=models.CASCADE, related_name='order_item_product_warranty', blank=True, null=True)
     offer_product = models.ForeignKey(OfferProduct, on_delete=models.CASCADE, null=True, blank=True, related_name='order_item_offer_product')
+    offer = models.ForeignKey(Offer, on_delete=models.CASCADE, null=True, blank=True, related_name='order_item_offer')
     is_active = models.BooleanField(null=False, blank=False, default=True)
 
     @property

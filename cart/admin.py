@@ -15,7 +15,7 @@ admin.site.register(Wishlist)
 
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
-    fields = ['product', 'quantity', 'unit_price', 'unit_price_after_add_warranty', 'total_price', 'product_warranty', 'offer_product']
+    fields = ['product', 'quantity', 'unit_price', 'unit_price_after_add_warranty', 'total_price', 'product_warranty', 'offer']
 
 
 @admin.register(Order)

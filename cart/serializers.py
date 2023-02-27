@@ -271,9 +271,9 @@ class CheckoutSerializer(serializers.ModelSerializer):
                 quantity = order_item['quantity']
                 unit_price = order_item['unit_price']
                 try:
-                    offer_product = order_item['offer_product']
+                    offer = order_item['offer']
                 except:
-                    offer_product = ''
+                    offer = ''
 
                 total_price = float(unit_price) * float(quantity)
 
@@ -299,9 +299,9 @@ class CheckoutSerializer(serializers.ModelSerializer):
                     sub_total += total_price
 
                     # work with offer product start
-                    if offer_product:
-                        discount_price = offer_product.offer.discount_price
-                        discount_price_type = offer_product.offer.discount_price_type.title
+                    if offer:
+                        discount_price = offer.discount_price
+                        discount_price_type = offer.discount_price_type.title
                         if discount_price_type == 'percentage':
                             discount_amount_value = float((float(total_price) / 100) * float(discount_price))
                         elif discount_price_type == 'flat':
@@ -309,16 +309,16 @@ class CheckoutSerializer(serializers.ModelSerializer):
 
                         total_product_discount_amount += discount_amount_value
 
-                        OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty, offer_product=offer_product)
+                        OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty, offer=offer)
                     else:
                         OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty)
 
                 else:
                     sub_total += total_price
                     # work with offer product start
-                    if offer_product:
-                        discount_price = offer_product.offer.discount_price
-                        discount_price_type = offer_product.offer.discount_price_type.title
+                    if offer:
+                        discount_price = offer.discount_price
+                        discount_price_type = offer.discount_price_type.title
                         if discount_price_type == 'percentage':
                             discount_amount_value = float((float(total_price) / 100) * float(discount_price))
                         elif discount_price_type == 'flat':
@@ -326,7 +326,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
 
                         total_product_discount_amount += discount_amount_value
 
-                        OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, offer_product=offer_product )
+                        OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, offer=offer )
                     else:
                         sub_total += total_price
 

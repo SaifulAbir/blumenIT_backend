@@ -352,7 +352,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
                 # vat calculation in percent logic
                 product_vat_value = Product.objects.filter(slug=product.slug)[0].vat
                 if product_vat_value:
-                    vat_amount = float((float(total_price) / 100) * float(product_vat_value))
+                    vat_amount = float((float(total_price - total_product_discount_amount) / 100) * float(product_vat_value))
                     vat_amount_list.append(vat_amount)
 
 

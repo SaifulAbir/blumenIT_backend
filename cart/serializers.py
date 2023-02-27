@@ -328,8 +328,6 @@ class CheckoutSerializer(serializers.ModelSerializer):
 
                         OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, offer=offer )
                     else:
-                        sub_total += total_price
-
                         OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price)
                 # work with product warranty end
 

@@ -1978,7 +1978,7 @@ class AdminPosOrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = ['id', 'order_id', 'product_count', 'vat_amount', 'discount_amount',
                   'payment_type', 'shipping_class', 'shipping_cost', 'order_items', 'delivery_address', 'comment',
-                  'customer', 'in_house_order', 'total_price', 'vat_amount']
+                  'customer', 'in_house_order', 'total_price',]
 
     def create(self, validated_data):
         order_items = validated_data.pop('order_items')

@@ -361,8 +361,9 @@ class CheckoutSerializer(serializers.ModelSerializer):
                 if product_vat_value:
                     base_price = float(unit_price) * float(quantity)
                     if offer:
-                        base_price = float(base_price) - float(total_product_discount_amount)
+                        # base_price = float(base_price) - float(total_product_discount_amount)
                         # vat_amount = float((float(base_price - total_product_discount_amount) / 100) * float(product_vat_value))
+                        base_price = float(unit_price - total_product_discount_amount) * float(quantity)
                         vat_amount = (float(product_vat_value) * (float(base_price))) / 100
                     else:
                         # vat_amount = float((float(base_price) / 100) * float(product_vat_value))

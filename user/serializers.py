@@ -167,7 +167,7 @@ class CustomerDeliveryAddressSerializer(serializers.ModelSerializer):
 
 class CustomerOrderDetailsSerializer(serializers.ModelSerializer):
     order_items = serializers.SerializerMethodField('get_order_items')
-    sub_total = serializers.SerializerMethodField('get_sub_total')
+    # sub_total = serializers.SerializerMethodField('get_sub_total')
     delivery_address = serializers.SerializerMethodField('get_delivery_address')
     payment_title = serializers.CharField(source='payment_type.type_name',read_only=True)
     # total_price = serializers.SerializerMethodField('get_total_price')
@@ -191,19 +191,19 @@ class CustomerOrderDetailsSerializer(serializers.ModelSerializer):
         except:
             return None
 
-    def get_sub_total(self, obj):
-        order_items = OrderItem.objects.filter(order=obj)
-        prices = []
-        for order_item in order_items:
-            price = order_item.unit_price
-            quantity = order_item.quantity
-            t_price = float(price) * float(quantity)
-            prices.append(t_price)
-        if obj.vat_amount:
-            sub_total = float(sum(prices)) + float(obj.vat_amount)
-        else:
-            sub_total = float(sum(prices))
-        return sub_total
+    # def get_sub_total(self, obj):
+    #     order_items = OrderItem.objects.filter(order=obj)
+    #     prices = []
+    #     for order_item in order_items:
+    #         price = order_item.unit_price
+    #         quantity = order_item.quantity
+    #         t_price = float(price) * float(quantity)
+    #         prices.append(t_price)
+    #     if obj.vat_amount:
+    #         sub_total = float(sum(prices)) + float(obj.vat_amount)
+    #     else:
+    #         sub_total = float(sum(prices))
+    #     return sub_total
 
     def get_warranty_price(self, obj):
         order_items = OrderItem.objects.filter(order=obj)

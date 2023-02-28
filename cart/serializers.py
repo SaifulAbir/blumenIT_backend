@@ -305,7 +305,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
                     if offer:
                         discount_price = offer.discount_price
                         discount_price_type = offer.discount_price_type.title
-                        if discount_price_type == 'percentage':
+                        if discount_price_type == '%':
                             # discount_amount_value = float((float(total_price) / 100) * float(discount_price))
                             discount_amount_value = (float(discount_price) * float(unit_price_after_add_warranty)) / 100
                         elif discount_price_type == 'flat':
@@ -333,7 +333,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
                     if offer:
                         discount_price = offer.discount_price
                         discount_price_type = offer.discount_price_type.title
-                        if discount_price_type == 'percentage':
+                        if discount_price_type == '%':
                             discount_amount_value = (float(discount_price) * float(total_price)) / 100
                         elif discount_price_type == 'flat':
                             discount_amount_value = float(discount_price) * float(quantity)

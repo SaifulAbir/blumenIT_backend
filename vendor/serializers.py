@@ -1510,7 +1510,7 @@ class AdminOrderViewSerializer(serializers.ModelSerializer):
     delivery_address = DeliveryAddressSerializer(read_only=True)
     # total_price = serializers.SerializerMethodField('get_total_price')
     payment_method = serializers.CharField(source='payment_type.type_name',read_only=True)
-    sub_total = serializers.SerializerMethodField('get_sub_total')
+    # sub_total = serializers.SerializerMethodField('get_sub_total')
     vat_amount = serializers.FloatField(read_only=True)
     warranty_price = serializers.SerializerMethodField('get_warranty_price')
 
@@ -1518,18 +1518,18 @@ class AdminOrderViewSerializer(serializers.ModelSerializer):
         model = Order
         fields = ['user', 'delivery_address', 'order_id', 'product_count', 'order_date', 'order_status', 'order_date', 'total_price', 'payment_status', 'payment_method', 'order_item_order', 'sub_total', 'vat_amount', 'shipping_cost', 'coupon_discount_amount', 'comment', 'warranty_price', 'discount_amount']
 
-    def get_sub_total(self, obj):
-        order_items = OrderItem.objects.filter(order=obj)
-        prices = []
-        for order_item in order_items:
-            price = order_item.unit_price
-            if order_item.unit_price_after_add_warranty != 0.0:
-                price = order_item.unit_price_after_add_warranty
-            quantity = order_item.quantity
-            t_price = float(price) * float(quantity)
-            prices.append(t_price)
-            sub_total = float(sum(prices))
-        return sub_total
+    # def get_sub_total(self, obj):
+    #     order_items = OrderItem.objects.filter(order=obj)
+    #     prices = []
+    #     for order_item in order_items:
+    #         price = order_item.unit_price
+    #         if order_item.unit_price_after_add_warranty != 0.0:
+    #             price = order_item.unit_price_after_add_warranty
+    #         quantity = order_item.quantity
+    #         t_price = float(price) * float(quantity)
+    #         prices.append(t_price)
+    #         sub_total = float(sum(prices))
+    #     return sub_total
 
     # def get_total_price(self, obj):
     #     order_items = OrderItem.objects.filter(order=obj)

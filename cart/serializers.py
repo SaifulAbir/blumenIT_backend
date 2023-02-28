@@ -477,10 +477,10 @@ class CheckoutSerializer(serializers.ModelSerializer):
         except:
             total_product_discount_amount_data = 0.0
         # grand_total_price = (sub_total_amount + vat_amount_data + shipping_cost_amount+warranty_amount) - (coupon_discount_amount_data + total_product_discount_amount_data)
-        print("sub_total_amount")
-        print(sub_total_amount)
+        # print("sub_total_amount")
+        # print(sub_total_amount)
         # grand_total_price = (sub_total_amount + vat_amount_data + shipping_cost_amount) - (coupon_discount_amount_data + total_product_discount_amount_data)
-        grand_total_price = (sub_total_amount + vat_amount_data + shipping_cost_amount) - coupon_discount_amount_data 
+        grand_total_price = (sub_total_amount + vat_amount_data + shipping_cost_amount) - coupon_discount_amount_data
         # grand total price calculation end
         total_price = round(grand_total_price, 2)
         Order.objects.filter(id=order_instance.id).update(total_price = total_price)

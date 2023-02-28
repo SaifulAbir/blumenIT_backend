@@ -148,6 +148,7 @@ class Order(AbstractTimeStamp):
         Seller, on_delete=models.PROTECT, related_name='order_vendor', blank=True, null=True)
     total_price = models.FloatField(
         max_length=255, null=False, blank=False, default=0.0)
+    sub_total = models.FloatField(max_length=255, null=True, blank=True, default=0.0)
     refund = models.BooleanField(default=False)
     order_date = models.DateField(auto_now_add=True)
     coupon = models.ForeignKey(

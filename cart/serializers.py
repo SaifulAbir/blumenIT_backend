@@ -56,7 +56,7 @@ class CheckoutDetailsDeliveryAddressSerializer(serializers.ModelSerializer):
 
 class CheckoutDetailsSerializer(serializers.ModelSerializer):
     order_items = serializers.SerializerMethodField('get_order_items')
-    sub_total = serializers.SerializerMethodField('get_sub_total')
+    # sub_total = serializers.SerializerMethodField('get_sub_total')
     delivery_address = serializers.SerializerMethodField('get_delivery_address')
     payment_title = serializers.CharField(source='payment_type.type_name',read_only=True)
     user_email = serializers.EmailField(source='user.email',read_only=True)
@@ -86,23 +86,23 @@ class CheckoutDetailsSerializer(serializers.ModelSerializer):
         except:
             return ''
 
-    def get_sub_total(self, obj):
-        order_items = OrderItem.objects.filter(order=obj)
-        prices = []
-        for order_item in order_items:
-            price = order_item.unit_price
-            if order_item.unit_price_after_add_warranty != 0.0:
-                price = order_item.unit_price_after_add_warranty
-            quantity = order_item.quantity
-            t_price = float(price) * float(quantity)
-            prices.append(t_price)
+    # def get_sub_total(self, obj):
+    #     order_items = OrderItem.objects.filter(order=obj)
+    #     prices = []
+    #     for order_item in order_items:
+    #         price = order_item.unit_price
+    #         if order_item.unit_price_after_add_warranty != 0.0:
+    #             price = order_item.unit_price_after_add_warranty
+    #         quantity = order_item.quantity
+    #         t_price = float(price) * float(quantity)
+    #         prices.append(t_price)
         # if obj.vat_amount:
         #     sub_total = float(sum(prices)) + float(obj.vat_amount)
         # else:
             # sub_total = float(sum(prices))
 
-        sub_total = float(sum(prices))
-        return sub_total
+        # sub_total = float(sum(prices))
+        # return sub_total
 
     def get_product_price(self, obj):
         order_items = OrderItem.objects.filter(order=obj)
@@ -279,6 +279,8 @@ class CheckoutSerializer(serializers.ModelSerializer):
                 except:
                     offer = ''
 
+                # print('unit_price')
+                # print(unit_price)
                 total_price = float(unit_price) * float(quantity)
 
                 try:
@@ -300,7 +302,8 @@ class CheckoutSerializer(serializers.ModelSerializer):
                         unit_price_after_add_warranty = unit_price + unit_price_after_add_warranty
 
                     total_price =  float(unit_price_after_add_warranty) * float(quantity)
-                    sub_total += total_price
+
+                    # base_price = float(unit_price_after_add_warranty) * float(quantity)
 
                     # work with offer product start
                     if offer:
@@ -309,34 +312,63 @@ class CheckoutSerializer(serializers.ModelSerializer):
                         if discount_price_type == 'percentage':
                             # discount_amount_value = float((float(total_price) / 100) * float(discount_price))
                             # discount_amount = (discount_percentage*price)/100;
-                            base_price = float(unit_price) * float(quantity)
-                            discount_amount_value = (float(discount_price) * float(base_price)) / 100
+                            # base_price = float(unit_price) * float(quantity)
+                            # discount_amount_value = (float(discount_price) * float(base_price)) / 100
+                            discount_amount_value = (float(discount_price) * float(unit_price_after_add_warranty)) / 100
                         elif discount_price_type == 'flat':
-                            discount_amount_value = float(discount_price)
+                            discount_amount_value = float(discount_price) * float(quantity)
+
+                        # print('base_price discount_amount_value')
+                        # print(discount_amount_value)
+
+                        base_price = float(unit_price_after_add_warranty - discount_amount_value) * float(quantity)
+                        # print('base_price after_add_warranty')
+                        # print(base_price)
 
                         total_product_discount_amount += discount_amount_value
 
+                        sub_total += (total_price - discount_amount_value)
+
                         OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty, offer=offer)
                     else:
+                        base_price = float(unit_price_after_add_warranty) * float(quantity)
+                        # print('base_price after_add_warranty without discount')
+                        # print(base_price)
+
+                        sub_total += total_price
+
                         OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty)
 
                 else:
-                    sub_total += total_price
+                    # sub_total += total_price
                     # work with offer product start
                     if offer:
                         discount_price = offer.discount_price
                         discount_price_type = offer.discount_price_type.title
                         if discount_price_type == 'percentage':
-                            # discount_amount_value = float((float(total_price) / 100) * float(discount_price))
-                            base_price = float(unit_price) * float(quantity)
-                            discount_amount_value = (float(discount_price) * float(base_price)) / 100
+                            discount_amount_value = (float(discount_price) * float(total_price)) / 100
                         elif discount_price_type == 'flat':
-                            discount_amount_value = float(discount_price)
+                            discount_amount_value = float(discount_price) * float(quantity)
+
+                        # print("unit_price")
+                        # print(unit_price)
+
+                        base_price = float(unit_price - discount_amount_value) * float(quantity)
+                        # print('base_price without_warranty')
+                        # print(base_price)
 
                         total_product_discount_amount += discount_amount_value
 
+                        sub_total += ( total_price - discount_amount_value)
+
                         OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, offer=offer )
                     else:
+                        base_price = float(unit_price) * float(quantity)
+                        # print('base_price without_warranty without discount')
+                        # print(base_price)
+
+                        sub_total += total_price
+
                         OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price)
                 # work with product warranty end
 
@@ -359,20 +391,26 @@ class CheckoutSerializer(serializers.ModelSerializer):
                 # vat calculation in percent logic
                 product_vat_value = Product.objects.filter(slug=product.slug)[0].vat
                 if product_vat_value:
-                    base_price = float(unit_price) * float(quantity)
-                    if offer:
-                        # base_price = float(base_price) - float(total_product_discount_amount)
-                        # vat_amount = float((float(base_price - total_product_discount_amount) / 100) * float(product_vat_value))
-                        base_price = float(unit_price - total_product_discount_amount) * float(quantity)
-                        vat_amount = (float(product_vat_value) * (float(base_price))) / 100
-                    else:
-                        # vat_amount = float((float(base_price) / 100) * float(product_vat_value))
-                        vat_amount = (float(product_vat_value) * float(base_price)) / 100
+                    # base_price = float(unit_price) * float(quantity)
+                    # if offer:
+                    #     # base_price = float(base_price) - float(total_product_discount_amount)
+                    #     # vat_amount = float((float(base_price - total_product_discount_amount) / 100) * float(product_vat_value))
+                    #     base_price = float(unit_price - total_product_discount_amount) * float(quantity)
+                    #     vat_amount = (float(product_vat_value) * (float(base_price))) / 100
+                    # else:
+                    #     # vat_amount = float((float(base_price) / 100) * float(product_vat_value))
+                    #     vat_amount = (float(product_vat_value) * float(base_price)) / 100
+
+                    vat_amount = (float(product_vat_value) * float(base_price)) / 100
+                    # print("vat_amount")
+                    # print(vat_amount)
                     vat_amount_list.append(vat_amount)
 
 
-            Order.objects.filter(id=order_instance.id).update(vat_amount = sum(vat_amount_list), discount_amount = total_product_discount_amount)
+            Order.objects.filter(id=order_instance.id).update(vat_amount = sum(vat_amount_list), discount_amount = total_product_discount_amount, sub_total = sub_total)
 
+            # print("sub_total")
+            # print(sub_total)
 
         # work with coupon start
         try:
@@ -438,7 +476,10 @@ class CheckoutSerializer(serializers.ModelSerializer):
             total_product_discount_amount_data = float(total_product_discount_amount)
         except:
             total_product_discount_amount_data = 0.0
-        grand_total_price = (sub_total_amount + vat_amount_data + shipping_cost_amount+warranty_amount) - (coupon_discount_amount_data + total_product_discount_amount_data)
+        # grand_total_price = (sub_total_amount + vat_amount_data + shipping_cost_amount+warranty_amount) - (coupon_discount_amount_data + total_product_discount_amount_data)
+        print("sub_total_amount")
+        print(sub_total_amount)
+        grand_total_price = (sub_total_amount + vat_amount_data + shipping_cost_amount) - (coupon_discount_amount_data + total_product_discount_amount_data)
         # grand total price calculation end
         total_price = round(grand_total_price, 2)
         Order.objects.filter(id=order_instance.id).update(total_price = total_price)

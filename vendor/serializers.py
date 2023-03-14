@@ -2109,7 +2109,8 @@ class SliderSerializer(serializers.ModelSerializer):
 class WebsiteConfigurationSerializer(serializers.ModelSerializer):
     home_slider_images = SliderSerializer(many=True, required=False)
     gaming_slider_images = SliderSerializer(many=True, required=False)
-    small_banners = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
+    small_banners_carousel = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
+    small_banners_static = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
     popular_products_banners = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
     feature_products_banners = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
 
@@ -2124,7 +2125,8 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
             'shop_address',
 
             'home_slider_images',
-            'small_banners',
+            'small_banners_carousel',
+            'small_banners_static',
             'popular_products_banners',
             'feature_products_banners',
 
@@ -2132,7 +2134,7 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
-
+        print('create hit')
         # home_slider_images
         try:
             home_slider_images = validated_data.pop('home_slider_images')
@@ -2145,11 +2147,18 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
         except:
             gaming_slider_images = ''
 
-        # small_banners
+        # small_banners_carousel
         try:
-            small_banners = validated_data.pop('small_banners')
+            small_banners_carousel = validated_data.pop('small_banners_carousel')
         except:
-            small_banners = ''
+            small_banners_carousel = ''
+
+        # small_banners_static
+        try:
+            small_banners_static = validated_data.pop('small_banners_static')
+        except:
+            small_banners_static = ''
+
 
         # popular_products_banners
         try:
@@ -2205,10 +2214,15 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
         except:
             raise ValidationError('Problem of Home Gaming Images insert.')
 
-        # small_banners
-        if small_banners:
-            for small_banner in small_banners:
-                Advertisement.objects.create(image=small_banner, work_for='SLIDER_SMALL', is_gaming=False)
+        # small_banners_carousel
+        if small_banners_carousel:
+            for small_banner in small_banners_carousel:
+                Advertisement.objects.create(image=small_banner, work_for='SLIDER_SMALL_CAROUSEL', is_gaming=False)
+
+        # small_banners_static
+        if small_banners_static:
+            for small_banner in small_banners_static:
+                Advertisement.objects.create(image=small_banner, work_for='SLIDER_SMALL_STATIC', is_gaming=False)
 
         # popular_products_banners
         if popular_products_banners:
@@ -2235,11 +2249,17 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
         except:
             gaming_slider_images = ''
 
-        # small_banners
+        # small_banners_carousel
         try:
-            small_banners = validated_data.pop('small_banners')
+            small_banners_carousel = validated_data.pop('small_banners_carousel')
         except:
-            small_banners = ''
+            small_banners_carousel = ''
+
+        # small_banners_static
+        try:
+            small_banners_static = validated_data.pop('small_banners_static')
+        except:
+            small_banners_static = ''
 
         # popular_products_banners
         try:
@@ -2294,10 +2314,15 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
         except:
             raise ValidationError('Problem of Home Gaming Images insert.')
 
-        # small_banners
-        if small_banners:
-            for small_banner in small_banners:
-                Advertisement.objects.create(image=small_banner, work_for='SLIDER_SMALL', is_gaming=False)
+        # small_banners_carousel
+        if small_banners_carousel:
+            for small_banner in small_banners_carousel:
+                Advertisement.objects.create(image=small_banner, work_for='SLIDER_SMALL_CAROUSEL', is_gaming=False)
+
+        # small_banners_static
+        if small_banners_static:
+            for small_banner in small_banners_static:
+                Advertisement.objects.create(image=small_banner, work_for='SLIDER_SMALL_STATIC', is_gaming=False)
 
         # popular_products_banners
         if popular_products_banners:

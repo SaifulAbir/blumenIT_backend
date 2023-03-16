@@ -57,6 +57,7 @@ class SubCategorySerializerForMegaMenu(serializers.ModelSerializer):
         fields = [
             'id',
             'title',
+            'icon',
             'sub_sub_category'
         ]
 

@@ -143,7 +143,8 @@ class RequestQuote(AbstractTimeStamp):
 class Advertisement(AbstractTimeStamp):
     WORK_FOR = [
         ('SLIDER', 'slider'),
-        ('SLIDER_SMALL', 'slider_small'),
+        ('SLIDER_SMALL_CAROUSEL', 'slider_small_carousel'),
+        ('SLIDER_SMALL_STATIC', 'slider_small_static'),
         ('POPULAR_PRODUCT_POSTER', 'popular_product_poster'),
         ('FEATURED_PRODUCT_POSTER', 'featured_product_poster'),
     ]

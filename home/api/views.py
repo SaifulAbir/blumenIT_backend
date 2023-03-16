@@ -54,9 +54,13 @@ class   HomeDataAPIView(APIView):
         single_row_data = HomeSingleRowData.objects.filter(Q(is_active=True)).order_by('-created_at')[:1]
         single_row_data_serializer = SingleRowDataSerializer(single_row_data, many=True, context={"request": request})
 
-        # poster under slider
-        poster_under_data = Advertisement.objects.filter(Q(work_for='SLIDER_SMALL'), Q(is_active=True), Q(is_gaming=False)).order_by('-created_at')[:3]
-        poster_under_data_serializer = SliderAdvertisementDataSerializer(poster_under_data, many=True, context={"request": request})
+        # poster under slider static
+        poster_under_static_data = Advertisement.objects.filter(Q(work_for='SLIDER_SMALL_STATIC'), Q(is_active=True), Q(is_gaming=False)).order_by('-created_at')[:2]
+        poster_under_static_data_serializer = SliderAdvertisementDataSerializer(poster_under_static_data, many=True, context={"request": request})
+
+        # poster under slider carousel
+        poster_under_carousel_data = Advertisement.objects.filter(Q(work_for='SLIDER_SMALL_CAROUSEL'), Q(is_active=True), Q(is_gaming=False)).order_by('-created_at')
+        poster_under_carousel_data_serializer = SliderAdvertisementDataSerializer(poster_under_carousel_data, many=True, context={"request": request})
 
         # poster under popular products
         poster_under_popular_products_data = Advertisement.objects.filter(Q(work_for='POPULAR_PRODUCT_POSTER'), Q(is_active=True), Q(is_gaming=False)).order_by('-created_at')[:3]
@@ -74,7 +78,8 @@ class   HomeDataAPIView(APIView):
             "gaming_product": gaming_serializer.data,
             "brand_list": brand_list_serializer.data,
             "single_row_data_serializer": single_row_data_serializer.data,
-            "poster_under_slider_data_serializer": poster_under_data_serializer.data,
+            "poster_under_carousel_data_serializer": poster_under_carousel_data_serializer.data,
+            "poster_under_static_data_serializer": poster_under_static_data_serializer.data,
             "poster_under_popular_products_data_serializer": poster_under_popular_products_data_serializer.data,
             "poster_under_featured_products_data_serializer": poster_under_featured_products_data_serializer.data,
         })

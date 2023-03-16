@@ -77,7 +77,7 @@ class StoreCategoryAPIViewListSerializer(serializers.ModelSerializer):
     def get_sub_category(self, obj):
         try:
             queryset = SubCategory.objects.filter(category=obj.id, is_active=True).distinct()
-            serializer = SubCategorySerializerForMegaMenu(instance=queryset, many=True)
+            serializer = SubCategorySerializerForMegaMenu(instance=queryset, many=True, context={'request': self.context['request']})
             return serializer.data
         except:
             return []

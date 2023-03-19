@@ -265,14 +265,7 @@ class ProductStockReportAPI(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True:
-            # work with dynamic pagination page_size
-            # try:
-            #     pagination = self.kwargs['pagination']
-            # except:
-            #     pagination = 10
-            # self.pagination_class.page_size = pagination
-
-            queryset = Product.objects.all().order_by('-created_at')
+            queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
 
             if queryset:
                 return queryset
@@ -290,18 +283,10 @@ class ProductStockReportSearchAPI(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True:
-            # work with dynamic pagination page_size
-            # try:
-            #     pagination = self.kwargs['pagination']
-            # except:
-            #     pagination = 10
-            # self.pagination_class.page_size = pagination
-
-
             request = self.request
             search = request.GET.get('search')
 
-            queryset = Product.objects.all().order_by('-created_at')
+            queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
 
             if search:
                 queryset = queryset.filter(Q(title__icontains=search))

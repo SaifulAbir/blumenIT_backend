@@ -109,7 +109,7 @@ class AdminCategoryListSerializer(serializers.ModelSerializer):
     class Meta:
         ref_name = "admin category list serializer"
         model = Category
-        fields = ['id', 'title', 'ordering_number', 'type', 'banner', 'icon', 'is_featured']
+        fields = ['id', 'title', 'ordering_number', 'type', 'banner', 'icon', 'is_featured', 'pc_builder']
 
 
 class AddNewCategorySerializer(serializers.ModelSerializer):
@@ -389,7 +389,7 @@ class UpdateSubSubCategorySerializer(serializers.ModelSerializer):
 class VendorBrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
-        fields = ['id', 'title', 'logo', 'meta_title', 'meta_description']
+        fields = ['id', 'title', 'logo', 'meta_title', 'meta_description', 'is_gaming']
 
 
 class VendorUnitSerializer(serializers.ModelSerializer):
@@ -2093,6 +2093,17 @@ class AdminProductReviewSerializer(serializers.ModelSerializer):
         model = ProductReview
         fields = ['id', 'is_active']
 
+
+class AdminBrandIsGamingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Brand
+        fields = ['id', 'is_gaming']
+
+
+class AdminCategoryIsPcBuilderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id', 'pc_builder']
 
 
 class SliderSerializer(serializers.ModelSerializer):

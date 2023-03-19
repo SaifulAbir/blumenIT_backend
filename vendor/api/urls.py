@@ -53,7 +53,7 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminPosCustomerProfileAPIView, AdminCorporateDealDetailsAPIView, AdminRequestQuoteListAPIView, \
     AdminContactUsDetailsAPIView, AdminOffersListAllAPIView, AdminSpecificationCreateAPIView, \
     AdminContactUsDeleteAPIView, AdminPosCustomerCreateAPIView, AdminWebsiteConfigurationListAPIView, \
-    AdminOfferCategoryListAPIView
+    AdminOfferCategoryListAPIView, AdminBrandIsGamingToggleAPIView, AdminCategoryIsPcBuilderToggleAPIView
 
 urlpatterns = [
 
@@ -284,6 +284,8 @@ urlpatterns = [
     path('admin/toggle-product/<int:pk>/', AdminProductToggleUpdateAPIView.as_view()),
     path('admin/toggle-blog/<int:pk>/', AdminBlogToggleUpdateAPIView.as_view()),
     path('admin/toggle-product-review/<int:pk>/', AdminProductReviewToggleAPIView.as_view()),
+    path('admin/toggle-brand-is-gaming/<int:pk>/', AdminBrandIsGamingToggleAPIView.as_view()),
+    path('admin/toggle-category-is-pc-builder/<int:pk>/', AdminCategoryIsPcBuilderToggleAPIView.as_view()),
     # path('admin/toggle-sub-category-pcbuilder/<int:pk>/', AdminSubCategoryToggleUpdateAPIView.as_view()),
 
 

@@ -35,7 +35,8 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     AdminOfferSerializer, AdminPosProductListSerializer, AdminShippingCountrySerializer, AdminShippingCitySerializer, \
     AdminShippingStateSerializer, AdminPosOrderSerializer, AdminCategoryToggleSerializer, AdminProductToggleSerializer, \
     AdminBlogToggleSerializer, AdminProductReviewSerializer, AdvertisementPosterSerializer, ProductUpdateDetailsSerializer, \
-    AdminPosCustomerCreateSerializer, AdminSubCategoryToggleSerializer, AdminOfferCategoryListSerializer
+    AdminPosCustomerCreateSerializer, AdminSubCategoryToggleSerializer, AdminOfferCategoryListSerializer, AdminBrandIsGamingSerializer, \
+    AdminCategoryIsPcBuilderSerializer
 from cart.models import Order, OrderItem, Coupon
 from cart.models import Order, OrderItem, SubOrder
 from user.models import User, Subscription
@@ -2828,6 +2829,19 @@ class AdminProductReviewToggleAPIView(UpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AdminProductReviewSerializer
     queryset = ProductReview.objects.all()
+
+
+class AdminBrandIsGamingToggleAPIView(UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminBrandIsGamingSerializer
+    queryset = Brand.objects.all()
+
+
+class AdminCategoryIsPcBuilderToggleAPIView(UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminCategoryIsPcBuilderSerializer
+    queryset = Category.objects.all()
+
 #Advertisement related apies................................... start
 class AdminAdvertisementListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]

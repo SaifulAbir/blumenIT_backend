@@ -314,7 +314,7 @@ class AdminCategoryListAPIView(ListAPIView):
         request = self.request
         search = request.GET.get('search')
         if self.request.user.is_superuser == True:
-            queryset = Category.objects.filter(is_active=True)
+            queryset = Category.objects.filter(is_active=True).order_by('-created_at')
             if search:
                 queryset = queryset.filter(Q(title__icontains=search))
             if queryset:
@@ -538,7 +538,7 @@ class AdminBrandListAPIView(ListAPIView):
         request = self.request
         search = request.GET.get('search')
         if self.request.user.is_superuser == True:
-            queryset = Brand.objects.filter(is_active=True)
+            queryset = Brand.objects.filter(is_active=True).order_by('-created_at')
             if search:
                 queryset = queryset.filter(Q(title__icontains=search))
             if queryset:

@@ -210,13 +210,6 @@ class SellerProductsSaleReportAPI(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True:
-            # work with dynamic pagination page_size
-            # try:
-            #     pagination = self.kwargs['pagination']
-            # except:
-            #     pagination = 10
-            # self.pagination_class.page_size = pagination
-
             queryset = Seller.objects.all().order_by('-created_at')
 
             if queryset:

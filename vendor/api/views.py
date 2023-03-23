@@ -36,7 +36,10 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     AdminShippingStateSerializer, AdminPosOrderSerializer, AdminCategoryToggleSerializer, AdminProductToggleSerializer, \
     AdminBlogToggleSerializer, AdminProductReviewSerializer, AdvertisementPosterSerializer, ProductUpdateDetailsSerializer, \
     AdminPosCustomerCreateSerializer, AdminSubCategoryToggleSerializer, AdminOfferCategoryListSerializer, AdminBrandIsGamingSerializer, \
-    AdminCategoryIsPcBuilderSerializer
+    AdminCategoryIsPcBuilderSerializer, UpdateCategoryDetailsSerializer, UpdateSubCategoryDetailsSerializer,\
+    UpdateSubSubCategoryDetailsSerializer
+
+
 from cart.models import Order, OrderItem, Coupon
 from cart.models import Order, OrderItem, SubOrder
 from user.models import User, Subscription
@@ -338,9 +341,10 @@ class AdminAddNewCategoryAPIView(CreateAPIView):
                 {"msg": 'You can not create category, because you are not an Admin!'})
 
 
-class AdminUpdateCategoryAPIView(RetrieveUpdateAPIView):
+# class AdminUpdateCategoryAPIView(RetrieveUpdateAPIView):
+class AdminUpdateCategoryDetailsAPIView(RetrieveAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = UpdateCategorySerializer
+    serializer_class = UpdateCategoryDetailsSerializer
     lookup_field = 'id'
     lookup_url_kwarg = "id"
 
@@ -355,6 +359,24 @@ class AdminUpdateCategoryAPIView(RetrieveUpdateAPIView):
                     {"msg": 'Category does not found!'})
         else:
             raise ValidationError({"msg": 'You can not update category, because you are not an Admin!'})
+class AdminUpdateCategoryAPIView(UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UpdateCategorySerializer
+    queryset = Category.objects.all()
+    # lookup_field = 'id'
+    # lookup_url_kwarg = "id"
+
+    # def get_queryset(self):
+    #     id = self.kwargs['id']
+    #     if self.request.user.is_superuser == True:
+    #         query = Category.objects.filter(id=id)
+    #         if query:
+    #             return query
+    #         else:
+    #             raise ValidationError(
+    #                 {"msg": 'Category does not found!'})
+    #     else:
+    #         raise ValidationError({"msg": 'You can not update category, because you are not an Admin!'})
 
 
 class AdminDeleteCategoryAPIView(ListAPIView):
@@ -410,9 +432,9 @@ class AdminAddNewSubCategoryAPIView(CreateAPIView):
                 {"msg": 'You can not create sub category, because you are not an Admin!'})
 
 
-class AdminUpdateSubCategoryAPIView(RetrieveUpdateAPIView):
+class AdminUpdateSubCategoryDetailsAPIView(RetrieveAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = UpdateSubCategorySerializer
+    serializer_class = UpdateSubCategoryDetailsSerializer
     lookup_field = 'id'
     lookup_url_kwarg = "id"
 
@@ -427,6 +449,12 @@ class AdminUpdateSubCategoryAPIView(RetrieveUpdateAPIView):
                     {"msg": 'Sub Category does not found!'})
         else:
             raise ValidationError({"msg": 'You can not update sub category, because you are not an Admin!'})
+
+class AdminUpdateSubCategoryAPIView(UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UpdateSubCategorySerializer
+    queryset = SubCategory.objects.all()
+    
 
 
 class AdminDeleteSubCategoryAPIView(ListAPIView):
@@ -486,9 +514,9 @@ class AdminAddNewSubSubCategoryAPIView(CreateAPIView):
                 {"msg": 'You can not create sub sub category, because you are not an Admin!'})
 
 
-class AdminUpdateSubSubCategoryAPIView(RetrieveUpdateAPIView):
+class AdminUpdateSubSubCategoryDetailsAPIView(RetrieveAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = UpdateSubSubCategorySerializer
+    serializer_class = UpdateSubSubCategoryDetailsSerializer
     lookup_field = 'id'
     lookup_url_kwarg = "id"
 
@@ -503,6 +531,12 @@ class AdminUpdateSubSubCategoryAPIView(RetrieveUpdateAPIView):
                     {"msg": 'Sub Sub Category does not found!'})
         else:
             raise ValidationError({"msg": 'You can not update sub sub category, because you are not an Admin!'})
+
+
+class AdminUpdateSubSubCategoryAPIView(UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UpdateSubSubCategorySerializer
+    queryset = SubSubCategory.objects.all()
 
 
 class AdminDeleteSubSubCategoryAPIView(ListAPIView):

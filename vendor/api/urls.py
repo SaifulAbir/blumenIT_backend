@@ -37,12 +37,12 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminShippingStateUpdateAPIView, \
     AdminPosSearchAPI, AdminPosOrderAPIView, AdminShippingStateDeleteAPIView, AdminShippingClassAddAPIView, \
     AdminShippingClassUpdateAPIView, AdminShippingClassDeleteAPIView, AdminAttributeListAllAPIView, \
-    AdminWebsiteConfigurationCreateAPIView, \
+    AdminWebsiteConfigurationCreateAPIView, AdminUpdateSubSubCategoryDetailsAPIView, \
     AdminCategoryAllListAPIView, AdminSubCategoryListAllAPIView, AdminSubSubCategoryAllListAPIView, \
-    AdminBrandListAllAPIView, AdminSubCategoryToggleUpdateAPIView, \
+    AdminBrandListAllAPIView, AdminSubCategoryToggleUpdateAPIView, AdminUpdateSubCategoryDetailsAPIView, \
     AdminUnitListAllAPIView, AdminSellerListAllAPIView, AdminVatTypeListAllAPIView, AdminVideoProviderListAllAPIView, \
     AdminDiscountTypeListAllAPIView, AdminFilterAttributeListAllAPIView, AdminFlashDealListAllAPIView, \
-    AdminWarrantyListAllAPIView, AdminWebsiteConfigurationUpdateAPIView, \
+    AdminWarrantyListAllAPIView, AdminWebsiteConfigurationUpdateAPIView, AdminUpdateCategoryDetailsAPIView, \
     AdminVideoProviderCreateAPIView, AdminVideoProviderUpdateAPIView, AdminSpecificationTitleListAllAPIView, \
     AdminVideoProviderDeleteAPI, AdminTicketDeleteAPIView, AdminTicketReplyCreateAPIView, \
     AdminProductToggleUpdateAPIView, AdminCategoryToggleUpdateAPIView, AdminBlogToggleUpdateAPIView, \
@@ -72,15 +72,18 @@ urlpatterns = [
     path('admin/product-view/<str:slugi>/',AdminProductViewAPI.as_view()),
     path('admin/category-list/', AdminCategoryListAPIView.as_view()),
     path('admin/add-new-category/', AdminAddNewCategoryAPIView.as_view()),
-    path('admin/update-category/<int:id>/', AdminUpdateCategoryAPIView.as_view()),
+    path('admin/update-category-details/<int:id>/', AdminUpdateCategoryDetailsAPIView.as_view()),
+    path('admin/update-category/<int:pk>/', AdminUpdateCategoryAPIView.as_view()),
     path('admin/delete-category/<int:id>/', AdminDeleteCategoryAPIView.as_view()),
     path('admin/sub-category-list/<int:cid>/',AdminSubCategoryListAPIView.as_view()),
     path('admin/add-new-sub-category/', AdminAddNewSubCategoryAPIView.as_view()),
-    path('admin/update-sub-category/<int:id>/', AdminUpdateSubCategoryAPIView.as_view()),
+    path('admin/update-sub-category-details/<int:id>/', AdminUpdateSubCategoryDetailsAPIView.as_view()),
+    path('admin/update-sub-category/<int:pk>/', AdminUpdateSubCategoryAPIView.as_view()),
     path('admin/delete-sub-category/<int:id>/', AdminDeleteSubCategoryAPIView.as_view()),
     path('admin/sub-sub-category-list/<int:sid>/',AdminSubSubCategoryListAPIView.as_view()),
     path('admin/add-new-sub-sub-category/', AdminAddNewSubSubCategoryAPIView.as_view()),
-    path('admin/update-sub-sub-category/<int:id>/', AdminUpdateSubSubCategoryAPIView.as_view()),
+    path('admin/update-sub-sub-category-details/<int:id>/', AdminUpdateSubSubCategoryDetailsAPIView.as_view()),
+    path('admin/update-sub-sub-category/<int:pk>/', AdminUpdateSubSubCategoryAPIView.as_view()),
     path('admin/delete-sub-sub-category/<int:id>/', AdminDeleteSubSubCategoryAPIView.as_view()),
 
 

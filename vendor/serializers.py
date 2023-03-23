@@ -155,14 +155,13 @@ class AddNewCategorySerializer(serializers.ModelSerializer):
         return category_instance
 
 
-class UpdateCategorySerializer(serializers.ModelSerializer):
+class UpdateCategoryDetailsSerializer(serializers.ModelSerializer):
     title = serializers.CharField(required= False)
     ordering_number = serializers.CharField(required= False)
-    existing_filtering_attributes = serializers.SerializerMethodField()
-    filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
+    filtering_attributes = serializers.SerializerMethodField('get_existing_filtering_attributes')
     class Meta:
         model = Category
-        fields = ['id', 'title', 'ordering_number', 'type', 'icon', 'banner', 'subtitle', 'is_active', 'existing_filtering_attributes', 'filtering_attributes']
+        fields = ['id', 'title', 'ordering_number', 'type', 'icon', 'banner', 'subtitle', 'is_active', 'filtering_attributes']
 
     def get_existing_filtering_attributes(self, obj):
         try:
@@ -172,6 +171,14 @@ class UpdateCategorySerializer(serializers.ModelSerializer):
             return serializer.data
         except:
             return []
+
+class UpdateCategorySerializer(serializers.ModelSerializer):
+    title = serializers.CharField(required= False)
+    ordering_number = serializers.CharField(required= False)
+    filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
+    class Meta:
+        model = Category
+        fields = ['id', 'title', 'ordering_number', 'type', 'icon', 'banner', 'subtitle', 'is_active', 'filtering_attributes']
 
     def update(self, instance, validated_data):
         # filtering_attributes
@@ -248,14 +255,13 @@ class AddNewSubCategorySerializer(serializers.ModelSerializer):
         return sub_category_instance
 
 
-class UpdateSubCategorySerializer(serializers.ModelSerializer):
+class UpdateSubCategoryDetailsSerializer(serializers.ModelSerializer):
     title = serializers.CharField(required= False)
     ordering_number = serializers.CharField(required= False)
-    existing_filtering_attributes = serializers.SerializerMethodField()
-    filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
+    filtering_attributes = serializers.SerializerMethodField('get_existing_filtering_attributes')
     class Meta:
         model = SubCategory
-        fields = ['id', 'title', 'ordering_number', 'category', 'is_active', 'existing_filtering_attributes', 'filtering_attributes', 'icon']
+        fields = ['id', 'title', 'ordering_number', 'category', 'is_active','filtering_attributes', 'icon']
 
     def get_existing_filtering_attributes(self, obj):
         try:
@@ -265,6 +271,14 @@ class UpdateSubCategorySerializer(serializers.ModelSerializer):
             return serializer.data
         except:
             return []
+
+class UpdateSubCategorySerializer(serializers.ModelSerializer):
+    title = serializers.CharField(required= False)
+    ordering_number = serializers.CharField(required= False)
+    filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
+    class Meta:
+        model = SubCategory
+        fields = ['id', 'title', 'ordering_number', 'category', 'is_active', 'filtering_attributes', 'icon']
 
     def update(self, instance, validated_data):
         # filtering_attributes
@@ -341,14 +355,13 @@ class AddNewSubSubCategorySerializer(serializers.ModelSerializer):
         return sub_sub_category_instance
 
 
-class UpdateSubSubCategorySerializer(serializers.ModelSerializer):
+class UpdateSubSubCategoryDetailsSerializer(serializers.ModelSerializer):
     title = serializers.CharField(required= False)
     ordering_number = serializers.CharField(required= False)
-    existing_filtering_attributes = serializers.SerializerMethodField()
-    filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
+    filtering_attributes = serializers.SerializerMethodField('get_existing_filtering_attributes')
     class Meta:
         model = SubSubCategory
-        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category', 'is_active', 'existing_filtering_attributes', 'filtering_attributes', 'icon']
+        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category', 'is_active', 'filtering_attributes', 'icon']
 
     def get_existing_filtering_attributes(self, obj):
         try:
@@ -358,6 +371,14 @@ class UpdateSubSubCategorySerializer(serializers.ModelSerializer):
             return serializer.data
         except:
             return []
+
+class UpdateSubSubCategorySerializer(serializers.ModelSerializer):
+    title = serializers.CharField(required= False)
+    ordering_number = serializers.CharField(required= False)
+    filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
+    class Meta:
+        model = SubSubCategory
+        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category', 'is_active', 'filtering_attributes', 'icon']
 
     def update(self, instance, validated_data):
         # filtering_attributes

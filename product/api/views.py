@@ -64,6 +64,49 @@ class ProductListAPI(ListAPIView):
     pagination_class = ProductCustomPagination
 
 
+class ProductListByCategoryForOfferCreateAPI(ListAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = ProductListBySerializer
+    pagination_class = ProductCustomPagination
+    lookup_field = 'cid'
+    lookup_url_kwarg = "cid"
+
+    def get_queryset(self):
+        # work with dynamic pagination page_size
+        try:
+            pagination = self.kwargs['pagination']
+        except:
+            pagination = 10
+        self.pagination_class.page_size = pagination
+
+
+        cid = self.kwargs['cid']
+        if cid:
+            all_products = Product.objects.filter(category=cid, status='PUBLISH').order_by('-created_at')
+        # else:
+        #     queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
+
+        product_list = []
+        for q in all_products:
+            p_id = q.id
+            product_list.append(p_id)
+
+        active_offers_products_list = []
+        today_date = datetime.today()
+        active_offers_products = OfferProduct.objects.filter(is_active=True, offer__is_active=True, offer__end_date__gte = today_date)
+        for q_a in active_offers_products:
+            p_id = q_a.product.id
+            active_offers_products_list.append(p_id)
+
+        list_joined = [i for i in product_list if i not in active_offers_products_list]
+        if list_joined:
+            queryset = Product.objects.filter(id__in=list_joined).order_by('-created_at')
+        else:
+            queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
+
+        return queryset
+
+
 class ProductListByCategoryAPI(ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = ProductListBySerializer

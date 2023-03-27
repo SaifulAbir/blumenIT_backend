@@ -13,6 +13,8 @@ urlpatterns = [
           ProductListByCategoryPopularProductsAPI.as_view()),
      path('product-list-by-category/<int:cid>/<int:pagination>/',
           ProductListByCategoryAPI.as_view()),
+     path('product-list-by-category-for-offer-create/<int:cid>/<int:pagination>/',
+          ProductListByCategoryForOfferCreateAPI.as_view()),
      path('product-list-by-sub-category/<int:subcid>/<int:pagination>/',
           ProductListBySubCategoryAPI.as_view()),
      path('product-list-by-sub-sub-category/<int:subsubcid>/<int:pagination>/',

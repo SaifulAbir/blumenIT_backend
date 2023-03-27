@@ -1,13 +1,14 @@
 from rest_framework import serializers
 from product.models import Category, ProductImages, SubCategory, SubSubCategory, Product, ProductTags, ProductReview, \
     Brand, DiscountTypes, Tags, Units, Specification, SpecificationValue, AttributeValues, Seller, FilterAttributes, \
-    ProductWarranty
+    ProductWarranty, Offer
 
 from user.models import User
 from vendor.models import StoreSettings
 from django.db.models import Avg
 from rest_framework.exceptions import ValidationError
 from datetime import datetime
+from django.utils import timezone
 
 class SellerDataSerializer(serializers.ModelSerializer):
     logo = serializers.ImageField(allow_null=True)
@@ -222,6 +223,9 @@ class ProductListBySerializer(serializers.ModelSerializer):
     total_quantity = serializers.SerializerMethodField()
     is_new = serializers.SerializerMethodField('get_is_new')
 
+    offer_discount_price = serializers.SerializerMethodField('get_offer_discount_price')
+    offer_discount_price_type = serializers.SerializerMethodField('get_offer_discount_price_type')
+
     class Meta:
         model = Product
         fields = [
@@ -258,9 +262,42 @@ class ProductListBySerializer(serializers.ModelSerializer):
             'short_description',
             'full_description',
             'in_house_product',
-            'is_new'
-
+            'is_new',
+            'offer_discount_price',
+            'offer_discount_price_type',
         ]
+
+    # def get_mytimezone_date(original_datetime):
+    #     new_datetime = datetime.strptime(original_datetime, '%Y-%m-%d')
+    #     tz = timezone.get_current_timezone()
+    #     timzone_datetime = timezone.make_aware(new_datetime, tz, True)
+    #     return timzone_datetime.date()
+
+    def get_offer_discount_price_type(self, obj):
+        today_date = datetime.today()
+        # today_date = timezone.now()
+        # today_date = str(timezone.get_current_timezone())
+        # print(today_date)
+        # today_date = datetime.now()
+        # print("today_date")
+        # print(type(today_date))
+        # print(today_date)
+        # today_date = today_date.strftime("%Y-%m-%d, %H:%M:%S")
+        offers = Offer.objects.filter(offer_product_offer__product = obj.id, is_active=True, end_date__gte = today_date)
+        if offers:
+            price_type = offers[0].discount_price_type.title
+        else:
+            price_type = ''
+        return price_type
+
+    def get_offer_discount_price(self, obj):
+        today_date = datetime.today()
+        offers = Offer.objects.filter(offer_product_offer__product = obj.id, is_active=True, end_date__gte = today_date)
+        if offers:
+            price = offers[0].discount_price
+        else:
+            price = 0.00
+        return price
 
     def get_is_new(self, obj):
         create_date = obj.created_at
@@ -307,6 +344,8 @@ class ProductListBySerializerForHomeData(serializers.ModelSerializer):
     discount_type = DiscountTypeSerializer()
     total_quantity = serializers.SerializerMethodField()
     is_new = serializers.SerializerMethodField('get_is_new')
+    offer_discount_price = serializers.SerializerMethodField('get_offer_discount_price')
+    offer_discount_price_type = serializers.SerializerMethodField('get_offer_discount_price_type')
 
     class Meta:
         model = Product
@@ -324,8 +363,28 @@ class ProductListBySerializerForHomeData(serializers.ModelSerializer):
             'thumbnail',
             'warranty',
             'in_house_product',
-            'is_new'
+            'is_new',
+            'offer_discount_price',
+            'offer_discount_price_type',
         ]
+
+    def get_offer_discount_price_type(self, obj):
+        today_date = datetime.today()
+        offers = Offer.objects.filter(offer_product_offer__product = obj.id, is_active=True, end_date__gte = today_date)
+        if offers:
+            price_type = offers[0].discount_price_type.title
+        else:
+            price_type = ''
+        return price_type
+
+    def get_offer_discount_price(self, obj):
+        today_date = datetime.today()
+        offers = Offer.objects.filter(offer_product_offer__product = obj.id, is_active=True, end_date__gte = today_date)
+        if offers:
+            price = offers[0].discount_price
+        else:
+            price = 0.00
+        return price
 
     def get_is_new(self, obj):
         create_date = obj.created_at
@@ -373,6 +432,8 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
     vat_type_title = serializers.CharField(source="vat_type.title",read_only=True)
     related_products = serializers.SerializerMethodField()
     product_warranties = serializers.SerializerMethodField('get_product_warranties')
+    offer_discount_price = serializers.SerializerMethodField('get_offer_discount_price')
+    offer_discount_price_type = serializers.SerializerMethodField('get_offer_discount_price_type')
 
     class Meta:
         model = Product
@@ -413,8 +474,28 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             'video_link',
             'related_products',
             'product_warranties',
-            'in_house_product'
+            'in_house_product',
+            'offer_discount_price',
+            'offer_discount_price_type',
         ]
+
+    def get_offer_discount_price_type(self, obj):
+        today_date = datetime.today()
+        offers = Offer.objects.filter(offer_product_offer__product = obj.id, is_active=True, end_date__gte = today_date)
+        if offers:
+            price_type = offers[0].discount_price_type.title
+        else:
+            price_type = ''
+        return price_type
+
+    def get_offer_discount_price(self, obj):
+        today_date = datetime.today()
+        offers = Offer.objects.filter(offer_product_offer__product = obj.id, is_active=True, end_date__gte = today_date)
+        if offers:
+            price = offers[0].discount_price
+        else:
+            price = 0.00
+        return price
 
     def get_avg_rating(self, obj):
         return obj.product_review_product.all().aggregate(Avg('rating_number'))['rating_number__avg']

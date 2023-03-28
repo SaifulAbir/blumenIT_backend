@@ -1312,69 +1312,69 @@ class AdminDashboardDataAPIView(APIView):
                 customer_count = 0
 
             # total order
-            if Order.objects.all().exists():
-                order_count = Order.objects.all().count()
+            if Order.objects.filter(is_active=True).exists():
+                order_count = Order.objects.filter(is_active=True).count()
             else:
                 order_count = 0
 
             # total category
-            if Category.objects.all().exists():
-                category_count = Category.objects.all().count()
+            if Category.objects.filter(is_active=True).exists():
+                category_count = Category.objects.filter(is_active=True).count()
             else:
                 category_count = 0
 
             # total Brand
-            if Brand.objects.all().exists():
-                brand_count = Brand.objects.all().count()
+            if Brand.objects.filter(is_active=True).exists():
+                brand_count = Brand.objects.filter(is_active=True).count()
             else:
                 brand_count = 0
 
             # total published Product
-            if Product.objects.filter(status = 'PUBLISH').exists():
-                published_product_count = Product.objects.filter(status = 'PUBLISH').count()
+            if Product.objects.filter(status = 'PUBLISH', is_active=True).exists():
+                published_product_count = Product.objects.filter(status = 'PUBLISH', is_active=True).count()
             else:
                 published_product_count = 0
 
             # total seller Product
-            if Product.objects.filter(~Q(in_house_product = True)).exists():
-                seller_product_count = Product.objects.filter(~Q(in_house_product = True)).count()
+            if Product.objects.filter(~Q(in_house_product = True), Q(is_active=True)).exists():
+                seller_product_count = Product.objects.filter(~Q(in_house_product = True), Q(is_active=True)).count()
             else:
                 seller_product_count = 0
 
              # total admin Product
-            if Product.objects.filter(in_house_product = True).exists():
-                admin_product_count = Product.objects.filter(in_house_product = True).count()
+            if Product.objects.filter(in_house_product = True, is_active=True).exists():
+                admin_product_count = Product.objects.filter(in_house_product = True, is_active=True).count()
             else:
                 admin_product_count = 0
 
             # total sellers
-            if Seller.objects.all().exists():
-                seller_count = Seller.objects.all().count()
+            if Seller.objects.filter(is_active=True).exists():
+                seller_count = Seller.objects.filter(is_active=True).count()
             else:
                 seller_count = 0
 
             # total approved sellers
-            if Seller.objects.filter(status='APPROVED').exists():
-                approved_seller_count = Seller.objects.filter(status='APPROVED').count()
+            if Seller.objects.filter(status='APPROVED', is_active=True).exists():
+                approved_seller_count = Seller.objects.filter(status='APPROVED', is_active=True).count()
             else:
                 approved_seller_count = 0
 
             # total pending sellers
-            if Seller.objects.filter(status='PENDING').exists():
-                pending_seller_count = Seller.objects.filter(status='PENDING').count()
+            if Seller.objects.filter(status='PENDING', is_active=True).exists():
+                pending_seller_count = Seller.objects.filter(status='PENDING', is_active=True).count()
             else:
                 pending_seller_count = 0
 
             # Category wise product sale
-            categories = Category.objects.all()
+            categories = Category.objects.filter(is_active=True)
             category_wise_product_sale = CategoryWiseProductSaleSerializer(categories, many=True, context={"request": request})
 
             # Category wise product stock
             category_wise_product_stock = CategoryWiseProductStockSerializer(categories, many=True, context={"request": request})
 
             # Top products
-            if Product.objects.filter(status='PUBLISH').exists():
-                products = Product.objects.filter(status='PUBLISH').order_by('-sell_count')
+            if Product.objects.filter(status='PUBLISH', is_active=True).exists():
+                products = Product.objects.filter(status='PUBLISH', is_active=True).order_by('-sell_count')
                 products_data = ProductListBySerializer(products, many=True, context={"request": request})
 
 

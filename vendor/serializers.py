@@ -1696,7 +1696,7 @@ class CategoryWiseProductStockSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'stock_count']
 
     def get_stock_count(self, obj):
-        products = Product.objects.filter(category = obj)
+        products = Product.objects.filter(category = obj, status='PUBLISH')
         available_quantity = 0
         for product in products:
             available_quantity += product.quantity

@@ -223,6 +223,7 @@ class ProductListBySerializer(serializers.ModelSerializer):
     total_quantity = serializers.SerializerMethodField()
     is_new = serializers.SerializerMethodField('get_is_new')
 
+    offer_discount_id = serializers.SerializerMethodField('get_offer_discount_id')
     offer_discount_price = serializers.SerializerMethodField('get_offer_discount_price')
     offer_discount_price_type = serializers.SerializerMethodField('get_offer_discount_price_type')
 
@@ -263,9 +264,19 @@ class ProductListBySerializer(serializers.ModelSerializer):
             'full_description',
             'in_house_product',
             'is_new',
+            'offer_discount_id',
             'offer_discount_price',
             'offer_discount_price_type',
         ]
+
+    def get_offer_discount_id(self, obj):
+        today_date = datetime.today()
+        offers = Offer.objects.filter(offer_product_offer__product = obj.id, is_active=True, end_date__gte = today_date)
+        if offers:
+            offer_id = offers[0].id
+        else:
+            offer_id = None
+        return offer_id
 
     # def get_mytimezone_date(original_datetime):
     #     new_datetime = datetime.strptime(original_datetime, '%Y-%m-%d')
@@ -287,7 +298,7 @@ class ProductListBySerializer(serializers.ModelSerializer):
         if offers:
             price_type = offers[0].discount_price_type.title
         else:
-            price_type = ''
+            price_type = None
         return price_type
 
     def get_offer_discount_price(self, obj):
@@ -296,7 +307,7 @@ class ProductListBySerializer(serializers.ModelSerializer):
         if offers:
             price = offers[0].discount_price
         else:
-            price = 0.00
+            price = None
         return price
 
     def get_is_new(self, obj):
@@ -344,6 +355,7 @@ class ProductListBySerializerForHomeData(serializers.ModelSerializer):
     discount_type = DiscountTypeSerializer()
     total_quantity = serializers.SerializerMethodField()
     is_new = serializers.SerializerMethodField('get_is_new')
+    offer_discount_id = serializers.SerializerMethodField('get_offer_discount_id')
     offer_discount_price = serializers.SerializerMethodField('get_offer_discount_price')
     offer_discount_price_type = serializers.SerializerMethodField('get_offer_discount_price_type')
 
@@ -364,9 +376,19 @@ class ProductListBySerializerForHomeData(serializers.ModelSerializer):
             'warranty',
             'in_house_product',
             'is_new',
+            'offer_discount_id',
             'offer_discount_price',
             'offer_discount_price_type',
         ]
+
+    def get_offer_discount_id(self, obj):
+        today_date = datetime.today()
+        offers = Offer.objects.filter(offer_product_offer__product = obj.id, is_active=True, end_date__gte = today_date)
+        if offers:
+            offer_id = offers[0].id
+        else:
+            offer_id = None
+        return offer_id
 
     def get_offer_discount_price_type(self, obj):
         today_date = datetime.today()
@@ -374,7 +396,7 @@ class ProductListBySerializerForHomeData(serializers.ModelSerializer):
         if offers:
             price_type = offers[0].discount_price_type.title
         else:
-            price_type = ''
+            price_type = None
         return price_type
 
     def get_offer_discount_price(self, obj):
@@ -383,7 +405,7 @@ class ProductListBySerializerForHomeData(serializers.ModelSerializer):
         if offers:
             price = offers[0].discount_price
         else:
-            price = 0.00
+            price = None
         return price
 
     def get_is_new(self, obj):
@@ -432,6 +454,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
     vat_type_title = serializers.CharField(source="vat_type.title",read_only=True)
     related_products = serializers.SerializerMethodField()
     product_warranties = serializers.SerializerMethodField('get_product_warranties')
+    offer_discount_id = serializers.SerializerMethodField('get_offer_discount_id')
     offer_discount_price = serializers.SerializerMethodField('get_offer_discount_price')
     offer_discount_price_type = serializers.SerializerMethodField('get_offer_discount_price_type')
 
@@ -475,9 +498,19 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             'related_products',
             'product_warranties',
             'in_house_product',
+            'offer_discount_id',
             'offer_discount_price',
             'offer_discount_price_type',
         ]
+
+    def get_offer_discount_id(self, obj):
+        today_date = datetime.today()
+        offers = Offer.objects.filter(offer_product_offer__product = obj.id, is_active=True, end_date__gte = today_date)
+        if offers:
+            offer_id = offers[0].id
+        else:
+            offer_id = None
+        return offer_id
 
     def get_offer_discount_price_type(self, obj):
         today_date = datetime.today()
@@ -485,7 +518,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
         if offers:
             price_type = offers[0].discount_price_type.title
         else:
-            price_type = ''
+            price_type = None
         return price_type
 
     def get_offer_discount_price(self, obj):
@@ -494,7 +527,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
         if offers:
             price = offers[0].discount_price
         else:
-            price = 0.00
+            price = None
         return price
 
     def get_avg_rating(self, obj):

@@ -52,7 +52,7 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminContactUsListAPIView, AdminFilterAttributeValueListAllAPIView, AdminSpecificationDeleteAPIView, \
     AdminPosCustomerProfileAPIView, AdminCorporateDealDetailsAPIView, AdminRequestQuoteListAPIView, \
     AdminContactUsDetailsAPIView, AdminOffersListAllAPIView, AdminSpecificationCreateAPIView, \
-    AdminContactUsDeleteAPIView, AdminPosCustomerCreateAPIView, AdminWebsiteConfigurationListAPIView, \
+    AdminContactUsDeleteAPIView, AdminPosCustomerCreateAPIView, AdminWebsiteConfigurationViewAPIView, \
     AdminOfferCategoryListAPIView, AdminBrandIsGamingToggleAPIView, AdminCategoryIsPcBuilderToggleAPIView
 
 urlpatterns = [
@@ -302,7 +302,7 @@ urlpatterns = [
 
     # website-configuration apies
     path('admin/website-configuration/', AdminWebsiteConfigurationCreateAPIView.as_view()),
-    path('admin/website-configuration-list/', AdminWebsiteConfigurationListAPIView.as_view()),
+    path('admin/website-configuration-view/', AdminWebsiteConfigurationViewAPIView.as_view()),
     path('admin/website-configuration-update/<int:pk>/', AdminWebsiteConfigurationUpdateAPIView.as_view()),
 
 ]

@@ -37,7 +37,7 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     AdminBlogToggleSerializer, AdminProductReviewSerializer, AdvertisementPosterSerializer, ProductUpdateDetailsSerializer, \
     AdminPosCustomerCreateSerializer, AdminSubCategoryToggleSerializer, AdminOfferCategoryListSerializer, AdminBrandIsGamingSerializer, \
     AdminCategoryIsPcBuilderSerializer, UpdateCategoryDetailsSerializer, UpdateSubCategoryDetailsSerializer,\
-    UpdateSubSubCategoryDetailsSerializer
+    UpdateSubSubCategoryDetailsSerializer, WebsiteConfigurationViewSerializer
 
 
 from cart.models import Order, OrderItem, Coupon
@@ -2946,9 +2946,9 @@ class AdminWebsiteConfigurationCreateAPIView(CreateAPIView):
                 {"msg": 'You can not create Advertisement Poster, because you are not an Admin!'})
 
 
-class AdminWebsiteConfigurationListAPIView(ListAPIView):
+class AdminWebsiteConfigurationViewAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = WebsiteConfigurationSerializer
+    serializer_class = WebsiteConfigurationViewSerializer
 
     def get_queryset(self):
         if self.request.user.is_superuser == True:

@@ -2386,3 +2386,46 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
 
         validated_data.update({"updated_at": timezone.now()})
         return super().update(instance, validated_data)
+
+
+class WebsiteConfigurationViewSerializer(serializers.ModelSerializer):
+    # home_slider_images = SliderSerializer(many=True, required=False)
+    # gaming_slider_images = SliderSerializer(many=True, required=False)
+    # small_banners_carousel = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
+    # small_banners_static = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
+    # popular_products_banners = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
+    # feature_products_banners = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
+
+    home_slider_images = serializers.SerializerMethodField('get_home_slider_images')
+    # gaming_slider_images = SliderSerializer(many=True, required=False)
+    # small_banners_carousel = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
+    # small_banners_static = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
+    # popular_products_banners = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
+    # feature_products_banners = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
+
+    class Meta:
+        model = HomeSingleRowData
+        fields = [
+            'id',
+            'phone',
+            'whats_app_number',
+            'email',
+            'bottom_banner',
+            'shop_address',
+
+            'home_slider_images',
+            # 'small_banners_carousel',
+            # 'small_banners_static',
+            # 'popular_products_banners',
+            # 'feature_products_banners',
+
+            # 'gaming_slider_images'
+        ]
+
+    def get_home_slider_images(self, obj):
+        # try:
+            queryset = SliderImage.objects.filter(is_active=True, is_gaming=False)
+            serializer = SliderSerializer(instance=queryset, many=True, context={'request': self.context['request']})
+            return serializer.data
+        # except:
+        #     return []

@@ -466,6 +466,8 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             'slug',
             'sku',
             'avg_rating',
+            'meta_title',
+            'meta_description',
             'full_description',
             'short_description',
             'active_short_description',

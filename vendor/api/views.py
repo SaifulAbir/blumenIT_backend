@@ -2952,7 +2952,7 @@ class AdminWebsiteConfigurationViewAPIView(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True:
-            queryset = HomeSingleRowData.objects.filter(is_active=True)
+            queryset = HomeSingleRowData.objects.filter(is_active=True).order_by('-created_at')[:1]
             return queryset
         else:
             raise ValidationError({"msg": 'You can not see Website Configuration list data, because you are not an Admin!'})

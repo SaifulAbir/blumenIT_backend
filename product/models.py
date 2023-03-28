@@ -335,6 +335,8 @@ class Product(AbstractTimeStamp):
     sell_count = models.BigIntegerField(null=True, blank=True, default=0)
     warranty = models.CharField(max_length=100, default='', null=True, blank=True)
     total_average_rating_number = models.FloatField(null=True, blank=True, default=0.0)
+    meta_title = models.CharField(max_length=200, null=True, blank=True)
+    meta_description = models.TextField(null=True, blank=True)
 
     class Meta:
         verbose_name = 'Product'

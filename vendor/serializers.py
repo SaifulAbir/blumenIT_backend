@@ -1,5 +1,6 @@
 from blog.models import Blog
 from cart.serializers import OrderItemSerializer
+from home.serializers import AdvertisementDataSerializer, SliderAdvertisementDataSerializer
 from product.serializers import ProductImageSerializer, ProductReviewSerializer, BrandSerializer, UnitSerializer
 from cart.serializers import OrderItemSerializer, DeliveryAddressSerializer
 from product.serializers import ProductImageSerializer, ProductReviewSerializer
@@ -617,6 +618,8 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             'full_description',
             'active_short_description',
             'short_description',
+            'meta_title',
+            'meta_description',
             'product_specification',
             'show_stock_quantity',
             'in_house_product',
@@ -933,6 +936,8 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
                     'todays_deal',
                     'full_description',
                     'short_description',
+                    'meta_title',
+                    'meta_description',
                     'thumbnail',
                     'product_images',
                     'product_filter_attributes',
@@ -1239,6 +1244,8 @@ class ProductUpdateDetailsSerializer(serializers.ModelSerializer):
                     'external_link_button_text',
                     'vat',
                     'vat_type',
+                    'meta_title',
+                    'meta_description',
                     'active_short_description',
                     'show_stock_quantity',
                     'in_house_product',
@@ -2389,20 +2396,12 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
 
 
 class WebsiteConfigurationViewSerializer(serializers.ModelSerializer):
-    # home_slider_images = SliderSerializer(many=True, required=False)
-    # gaming_slider_images = SliderSerializer(many=True, required=False)
-    # small_banners_carousel = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
-    # small_banners_static = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
-    # popular_products_banners = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
-    # feature_products_banners = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
-
     home_slider_images = serializers.SerializerMethodField('get_home_slider_images')
-    # gaming_slider_images = SliderSerializer(many=True, required=False)
-    # small_banners_carousel = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
-    # small_banners_static = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
-    # popular_products_banners = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
-    # feature_products_banners = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
-
+    gaming_slider_images = serializers.SerializerMethodField('get_gaming_slider_images')
+    popular_products_banners = serializers.SerializerMethodField('get_popular_products_banners')
+    small_banners_carousel = serializers.SerializerMethodField('get_small_banners_carousel')
+    small_banners_static = serializers.SerializerMethodField('get_small_banners_static')
+    feature_products_banners = serializers.SerializerMethodField('get_feature_products_banners')
     class Meta:
         model = HomeSingleRowData
         fields = [
@@ -2414,18 +2413,69 @@ class WebsiteConfigurationViewSerializer(serializers.ModelSerializer):
             'shop_address',
 
             'home_slider_images',
-            # 'small_banners_carousel',
-            # 'small_banners_static',
-            # 'popular_products_banners',
-            # 'feature_products_banners',
+            'small_banners_carousel',
+            'small_banners_static',
+            'popular_products_banners',
+            'feature_products_banners',
 
-            # 'gaming_slider_images'
+            'gaming_slider_images'
         ]
 
     def get_home_slider_images(self, obj):
-        # try:
+        try:
             queryset = SliderImage.objects.filter(is_active=True, is_gaming=False)
             serializer = SliderSerializer(instance=queryset, many=True, context={'request': self.context['request']})
             return serializer.data
-        # except:
-        #     return []
+        except:
+            return []
+
+    def get_gaming_slider_images(self, obj):
+        try:
+            queryset = SliderImage.objects.filter(is_active=True, is_gaming=True)
+            serializer = SliderSerializer(instance=queryset, many=True, context={'request': self.context['request']})
+            return serializer.data
+        except:
+            return []
+
+    def get_popular_products_banners(self, obj):
+        try:
+            queryset = Advertisement.objects.filter(Q(work_for='POPULAR_PRODUCT_POSTER'),
+                                                                              Q(is_active=True),
+                                                                              Q(is_gaming=False)).order_by(
+                '-created_at')[:3]
+            serializer = AdvertisementDataSerializer(instance=queryset, many=True, context={'request': self.context['request']})
+            return serializer.data
+        except:
+            return []
+
+    def get_small_banners_carousel(self, obj):
+        try:
+            queryset = Advertisement.objects.filter(Q(work_for='SLIDER_SMALL_CAROUSEL'),
+                                                                  Q(is_active=True), Q(is_gaming=False)).order_by(
+            '-created_at')
+            serializer = SliderAdvertisementDataSerializer(instance=queryset, many=True, context={'request': self.context['request']})
+            return serializer.data
+        except:
+            return []
+
+    def get_small_banners_static(self, obj):
+        try:
+            queryset = Advertisement.objects.filter(Q(work_for='SLIDER_SMALL_STATIC'), Q(is_active=True),
+                                                                Q(is_gaming=False)).order_by('-created_at')[:2]
+            serializer = SliderAdvertisementDataSerializer(instance=queryset, many=True, context={'request': self.context['request']})
+            return serializer.data
+        except:
+            return []
+
+    def get_feature_products_banners(self,obj):
+        try:
+            queryset = Advertisement.objects.filter(Q(work_for='FEATURED_PRODUCT_POSTER'),
+                                                    Q(is_active=True), Q(is_gaming=False)).order_by('-created_at')[:3]
+            serializer = AdvertisementDataSerializer(instance=queryset, many=True, context={'request': self.context['request']})
+            return serializer.data
+        except:
+            return []
+
+
+
+

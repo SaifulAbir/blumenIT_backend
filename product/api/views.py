@@ -79,12 +79,14 @@ class ProductListByCategoryForOfferCreateAPI(ListAPIView):
             pagination = 10
         self.pagination_class.page_size = pagination
 
+        # order id get from offer update
+        request = self.request
+        offer_id = request.GET.get('offer_id')
+
 
         cid = self.kwargs['cid']
         if cid:
             all_products = Product.objects.filter(category=cid, status='PUBLISH').order_by('-created_at')
-        # else:
-        #     queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
 
         product_list = []
         for q in all_products:
@@ -98,7 +100,19 @@ class ProductListByCategoryForOfferCreateAPI(ListAPIView):
             p_id = q_a.product.id
             active_offers_products_list.append(p_id)
 
-        list_joined = [i for i in product_list if i not in active_offers_products_list]
+        # if offer_id id exist
+        offers_products_list = []
+        if offer_id:
+            offers_products = OfferProduct.objects.filter(offer=offer_id, is_active=True)
+            for a_p in offers_products:
+                p_id = a_p.product.id
+                offers_products_list.append(p_id)
+
+        if offers_products_list:
+            list_joined = [i for i in product_list if i not in active_offers_products_list] + offers_products_list
+        else:
+            list_joined = [i for i in product_list if i not in active_offers_products_list]
+
         if list_joined:
             queryset = Product.objects.filter(id__in=list_joined).order_by('-created_at')
         else:

@@ -19,7 +19,7 @@ class BlogCategoryCreateAPIView(CreateAPIView):
     permission_classes = [AllowAny]
     serializer_class = BlogCategorySerializer
     def post(self, request):
-        if self.request.user.is_superuser == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             blog_category = BlogCategorySerializer(data=request.data)
 
             if BlogCategory.objects.filter(**request.data).exists():
@@ -32,7 +32,7 @@ class BlogCategoryCreateAPIView(CreateAPIView):
                 return Response(status=status.HTTP_404_NOT_FOUND)
         else:
             raise ValidationError(
-                {"msg": 'You can not create Blog Category, because you are not an Admin!'}
+                {"msg": 'You can not create Blog Category, because you are not an Admin or an staff!'}
             )
 
 
@@ -42,7 +42,7 @@ class BlogCategoryListAPIView(ListAPIView):
     pagination_class = BlogCustomPagination
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             queryset = BlogCategory.objects.filter(is_active=True).order_by('-created_at')
             if queryset:
                 return queryset
@@ -52,7 +52,7 @@ class BlogCategoryListAPIView(ListAPIView):
                 )
         else:
             raise ValidationError(
-                {"msg": 'You can not view Blog Category List, because you are not an Admin!'}
+                {"msg": 'You can not view Blog Category List, because you are not an Admin or a staff!'}
             )
 
 
@@ -64,7 +64,7 @@ class BlogCategoryUpdateAPIView(RetrieveUpdateAPIView):
 
         def get_queryset(self):
             blogcat_id = self.kwargs['id']
-            if self.request.user.is_superuser == True:
+            if self.request.user.is_superuser == True or self.request.user.is_staff == True:
                 queryset = BlogCategory.objects.filter(id=blogcat_id)
                 if queryset:
                     return queryset
@@ -72,7 +72,7 @@ class BlogCategoryUpdateAPIView(RetrieveUpdateAPIView):
                     raise ValidationError({"msg": 'Blog Category not found'})
             else:
                 raise ValidationError(
-                    {"msg": 'You can not update coupon, because you are not an Admin!'})
+                    {"msg": 'You can not update coupon, because you are not an Admin or a staff!'})
 
 
 class BlogCategoryDeleteAPIView(ListAPIView):
@@ -83,7 +83,7 @@ class BlogCategoryDeleteAPIView(ListAPIView):
     lookup_url_kwarg = 'id'
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             bcat_id = self.kwargs['id']
             blog_category_obj = BlogCategory.objects.filter(id=bcat_id).exists()
             if blog_category_obj:
@@ -96,7 +96,7 @@ class BlogCategoryDeleteAPIView(ListAPIView):
                 )
         else:
             raise ValidationError(
-                {"msg": 'You can not update coupon, because you are not an Admin!'})
+                {"msg": 'You can not update coupon, because you are not an Admin or a staff!'})
 
 
 class AdminBlogCreateAPIView(CreateAPIView):
@@ -104,11 +104,11 @@ class AdminBlogCreateAPIView(CreateAPIView):
     serializer_class = BlogSerializer
 
     def post(self, request, *args, **kwargs):
-        if self.request.user.is_superuser == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             return super(AdminBlogCreateAPIView, self).post(request, *args, **kwargs)
         else:
             raise ValidationError(
-                {"msg": 'You can not create seller, because you are not an Admin!'}
+                {"msg": 'You can not create seller, because you are not an Admin or a staff!'}
             )
 
 
@@ -120,7 +120,7 @@ class AdminBlogDetailAPIView(RetrieveUpdateAPIView):
 
     def get_object(self):
         slug = self.kwargs['slug']
-        if self.request.user.is_superuser == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             try:
                 query = Blog.objects.get(slug=slug)
                 return query
@@ -130,7 +130,7 @@ class AdminBlogDetailAPIView(RetrieveUpdateAPIView):
                 )
         else:
             raise ValidationError(
-                {"msg": 'You can not see Blog details, because you are not an Admin!'}
+                {"msg": 'You can not see Blog details, because you are not an Admin or a staff!'}
             )
 
 
@@ -140,7 +140,7 @@ class AdminBlogListAPIView(ListAPIView):
     pagination_class = BlogCustomPagination
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             queryset = Blog.objects.filter(is_active=True).order_by('-created_at')
             if queryset:
                 return queryset
@@ -148,7 +148,7 @@ class AdminBlogListAPIView(ListAPIView):
                 raise ValidationError({"msg": "No Blog available! " })
         else:
             raise ValidationError(
-                {"msg": 'You can not see Blog list, because you are not an Admin!'})
+                {"msg": 'You can not see Blog list, because you are not an Admin or a staff!'})
 
 
 class AdminBlogSearchAPI(ListAPIView):
@@ -157,7 +157,7 @@ class AdminBlogSearchAPI(ListAPIView):
     serializer_class = BlogSerializer
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             request = self.request
             query = request.GET.get('search')
 
@@ -170,7 +170,7 @@ class AdminBlogSearchAPI(ListAPIView):
             return queryset
         else:
             raise ValidationError(
-                {"msg": 'You can not show Blog list, because you are not an Admin!'})
+                {"msg": 'You can not show Blog list, because you are not an Admin or a staff!'})
 
 
 class AdminBlogUpdateAPIView(RetrieveUpdateAPIView):
@@ -181,7 +181,7 @@ class AdminBlogUpdateAPIView(RetrieveUpdateAPIView):
 
     def get_queryset(self):
         slug = self.kwargs['slug']
-        if self.request.user.is_superuser == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             query = Blog.objects.filter(slug=slug)
             if query:
                 return query
@@ -189,7 +189,7 @@ class AdminBlogUpdateAPIView(RetrieveUpdateAPIView):
                 raise ValidationError({"msg": 'Blog not found'})
         else:
             raise ValidationError(
-                {"msg": 'You can not update blog, because you are not an Admin!'})
+                {"msg": 'You can not update blog, because you are not an Admin or a staff!'})
 
 
 class AdminBlogDeleteAPIView(ListAPIView):
@@ -201,7 +201,7 @@ class AdminBlogDeleteAPIView(ListAPIView):
 
     def get_queryset(self):
         slug = self.kwargs['slug']
-        if self.request.user.is_superuser == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             blog_obj_exist = Blog.objects.filter(
                 slug=slug).exists()
             if blog_obj_exist:
@@ -213,7 +213,7 @@ class AdminBlogDeleteAPIView(ListAPIView):
                     {"msg": 'Blog Does not exist!'})
         else:
             raise ValidationError(
-                {"msg": 'You can not delete this blog, because you are not an Admin!'})
+                {"msg": 'You can not delete this blog, because you are not an Admin or a staff!'})
 
 
 class CustomerBlogListAPIView(ListAPIView):

@@ -15,7 +15,7 @@ class SalesReportAPI(ListAPIView):
     pagination_class = ProductCustomPagination
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             # work with dynamic pagination page_size
             # try:
             #     pagination = self.kwargs['pagination']
@@ -31,7 +31,7 @@ class SalesReportAPI(ListAPIView):
                 raise ValidationError({"msg": "There is no data in order list."})
         else:
             raise ValidationError(
-                {"msg": 'You can not see order report list, because you are not an Admin!'})
+                {"msg": 'You can not see order report list, because you are not an Admin or a staff!'})
 
 
 class SalesReportSearchAPI(ListAPIView):
@@ -40,7 +40,7 @@ class SalesReportSearchAPI(ListAPIView):
     pagination_class = ProductCustomPagination
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             # work with dynamic pagination page_size
             try:
                 pagination = self.kwargs['pagination']
@@ -80,7 +80,7 @@ class SalesReportSearchAPI(ListAPIView):
 
         else:
             raise ValidationError(
-                {"msg": 'You can not search in sale report list, because you are not an Admin!'})
+                {"msg": 'You can not search in sale report list, because you are not an Admin or a staff!'})
 
 
 class VendorProductReportAPI(ListAPIView):
@@ -89,7 +89,7 @@ class VendorProductReportAPI(ListAPIView):
     pagination_class = ProductCustomPagination
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             # work with dynamic pagination page_size
             # try:
             #     pagination = self.kwargs['pagination']
@@ -105,7 +105,7 @@ class VendorProductReportAPI(ListAPIView):
                 raise ValidationError({"msg": "There is no product in order items."})
         else:
             raise ValidationError(
-                {"msg": 'You can not see vendor product list, because you are not an Admin!'})
+                {"msg": 'You can not see vendor product list, because you are not an Admin or a staff!'})
 
 
 class VendorProductReportSearchAPI(ListAPIView):
@@ -114,7 +114,7 @@ class VendorProductReportSearchAPI(ListAPIView):
     pagination_class = ProductCustomPagination
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             # work with dynamic pagination page_size
             # try:
             #     pagination = self.kwargs['pagination']
@@ -145,7 +145,7 @@ class VendorProductReportSearchAPI(ListAPIView):
 
         else:
             raise ValidationError(
-                {"msg": 'You can not search in sale report list, because you are not an Admin!'})
+                {"msg": 'You can not search in sale report list, because you are not an Admin or a staff!'})
 
 
 class InHouseProductReportAPI(ListAPIView):
@@ -154,7 +154,7 @@ class InHouseProductReportAPI(ListAPIView):
     pagination_class = ProductCustomPagination
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             # work with dynamic pagination page_size
             # try:
             #     pagination = self.kwargs['pagination']
@@ -170,7 +170,7 @@ class InHouseProductReportAPI(ListAPIView):
                 raise ValidationError({"msg": "There is no in-house product available."})
         else:
             raise ValidationError(
-                {"msg": 'You can not see in-house product list, because you are not an Admin!'})
+                {"msg": 'You can not see in-house product list, because you are not an Admin or a staff!'})
 
 
 class InHouseProductReportSearchAPI(ListAPIView):
@@ -179,7 +179,7 @@ class InHouseProductReportSearchAPI(ListAPIView):
     pagination_class = ProductCustomPagination
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             # work with dynamic pagination page_size
             # try:
             #     pagination = self.kwargs['pagination']
@@ -200,7 +200,7 @@ class InHouseProductReportSearchAPI(ListAPIView):
 
         else:
             raise ValidationError(
-                {"msg": 'You can not search in sale report list, because you are not an Admin!'})
+                {"msg": 'You can not search in sale report list, because you are not an Admin or a staff!'})
 
 
 class SellerProductsSaleReportAPI(ListAPIView):
@@ -209,7 +209,7 @@ class SellerProductsSaleReportAPI(ListAPIView):
     pagination_class = ProductCustomPagination
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             queryset = Seller.objects.all().order_by('-created_at')
 
             if queryset:
@@ -218,7 +218,7 @@ class SellerProductsSaleReportAPI(ListAPIView):
                 raise ValidationError({"msg": "There is no seller product sale available."})
         else:
             raise ValidationError(
-                {"msg": 'You can not see seller product sale list, because you are not an Admin!'})
+                {"msg": 'You can not see seller product sale list, because you are not an Admin or a staff!'})
 
 
 class SellerProductsSaleReportSearchAPI(ListAPIView):
@@ -227,7 +227,7 @@ class SellerProductsSaleReportSearchAPI(ListAPIView):
     pagination_class = ProductCustomPagination
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             # work with dynamic pagination page_size
             # try:
             #     pagination = self.kwargs['pagination']
@@ -248,7 +248,7 @@ class SellerProductsSaleReportSearchAPI(ListAPIView):
 
         else:
             raise ValidationError(
-                {"msg": 'You can not search in seller product sale report list, because you are not an Admin!'})
+                {"msg": 'You can not search in seller product sale report list, because you are not an Admin or a staff!'})
 
 
 class ProductStockReportAPI(ListAPIView):
@@ -257,7 +257,7 @@ class ProductStockReportAPI(ListAPIView):
     pagination_class = ProductCustomPagination
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
 
             if queryset:
@@ -266,7 +266,7 @@ class ProductStockReportAPI(ListAPIView):
                 raise ValidationError({"msg": "There is no product list available."})
         else:
             raise ValidationError(
-                {"msg": 'You can not see product list, because you are not an Admin!'})
+                {"msg": 'You can not see product list, because you are not an Admin or a staff!'})
 
 
 class ProductStockReportSearchAPI(ListAPIView):
@@ -275,7 +275,7 @@ class ProductStockReportSearchAPI(ListAPIView):
     pagination_class = ProductCustomPagination
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             request = self.request
             search = request.GET.get('search')
 
@@ -288,7 +288,7 @@ class ProductStockReportSearchAPI(ListAPIView):
 
         else:
             raise ValidationError(
-                {"msg": 'You can not search in seller product sale report list, because you are not an Admin!'})
+                {"msg": 'You can not search in seller product sale report list, because you are not an Admin or a staff!'})
 
 
 class ProductWishlistReportAPI(ListAPIView):
@@ -297,7 +297,7 @@ class ProductWishlistReportAPI(ListAPIView):
     pagination_class = ProductCustomPagination
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             # work with dynamic pagination page_size
             # try:
             #     pagination = self.kwargs['pagination']
@@ -313,7 +313,7 @@ class ProductWishlistReportAPI(ListAPIView):
                 raise ValidationError({"msg": "There is no product list available."})
         else:
             raise ValidationError(
-                {"msg": 'You can not see product list, because you are not an Admin!'})
+                {"msg": 'You can not see product list, because you are not an Admin or a staff!'})
 
 
 class ProductWishlistReportSearchAPI(ListAPIView):
@@ -322,11 +322,7 @@ class ProductWishlistReportSearchAPI(ListAPIView):
     pagination_class = ProductCustomPagination
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True:
-            # work with dynamic pagination page_size
-
-
-
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             request = self.request
             search = request.GET.get('search')
 
@@ -339,4 +335,4 @@ class ProductWishlistReportSearchAPI(ListAPIView):
 
         else:
             raise ValidationError(
-                {"msg": 'You can not search in seller product sale report list, because you are not an Admin!'})
+                {"msg": 'You can not search in seller product sale report list, because you are not an Admin or a staff!'})

@@ -274,10 +274,31 @@ class CheckoutSerializer(serializers.ModelSerializer):
                 product = order_item['product']
                 quantity = order_item['quantity']
                 unit_price = order_item['unit_price']
+
+                base_price = float(unit_price) * float(quantity)
+
+                # work with offer start
                 try:
                     offer = order_item['offer']
                 except:
                     offer = ''
+
+                if offer:
+                    discount_price = offer.discount_price
+                    discount_price_type = offer.discount_price_type.title
+                    if discount_price_type == '%':
+                        discount_amount_value = (float(discount_price) * float(base_price)) / 100
+                    elif discount_price_type == 'flat':
+                        discount_amount_value = float(discount_price) * float(quantity)
+
+                    base_price = base_price - discount_amount_value
+                    total_product_discount_amount += discount_amount_value
+                    sub_total += float(unit_price) * float(quantity)
+                else:
+                    # base_price = float(unit_price) * float(quantity)
+                    sub_total += float(unit_price) * float(quantity)
+                # work with offer end
+
 
                 try:
                     product_warranty = order_item['product_warranty']
@@ -285,70 +306,35 @@ class CheckoutSerializer(serializers.ModelSerializer):
                     product_warranty = None
 
                 # work with product warranty start
+                # real
                 if product_warranty:
                     warranty_value = product_warranty.warranty_value
                     warranty_value_type = product_warranty.warranty_value_type
-
                     if warranty_value_type == 'PERCENTAGE':
-                        unit_price_by_warranty = float((float(unit_price) / 100) * float(warranty_value))
-                        unit_price_after_add_warranty = unit_price + unit_price_by_warranty
-                        warranty_amount_list.append(unit_price_by_warranty)
+                        warranty_value = float((float(base_price) / 100) * float(warranty_value))
+                        unit_price_after_add_warranty = unit_price + warranty_value
+                        warranty_amount_list.append(unit_price_after_add_warranty)
+
+                        base_price = base_price + warranty_value
                     elif warranty_value_type == 'FIX':
-                        unit_price_after_add_warranty = float(float(unit_price) + float(warranty_value))
-                        unit_price_after_add_warranty = unit_price + unit_price_after_add_warranty
+                        warranty_value = float(float(base_price) + float(warranty_value))
+                        warranty_amount_list.append(warranty_value)
 
-                    total_price =  float(unit_price_after_add_warranty) * float(quantity)
+                        base_price = base_price + warranty_value
 
-                    # work with offer product start
+                    # print("warranty_value")
+                    # print(warranty_value)
+
                     if offer:
-                        discount_price = offer.discount_price
-                        discount_price_type = offer.discount_price_type.title
-                        if discount_price_type == '%':
-                            discount_amount_value = (float(discount_price) * float(total_price)) / 100
-                        elif discount_price_type == 'flat':
-                            discount_amount_value = float(discount_price) * float(quantity)
-
-                        # base_price = float(unit_price_after_add_warranty - discount_amount_value) * float(quantity)
-                        base_price = (float(unit_price_after_add_warranty) * float(quantity)) - discount_amount_value
-
-                        total_product_discount_amount += discount_amount_value
-                        sub_total += total_price
-
-                        OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty, offer=offer)
+                        OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=base_price, product_warranty=product_warranty, unit_price_after_add_warranty=warranty_value, offer=offer)
                     else:
-                        base_price = float(unit_price_after_add_warranty) * float(quantity)
-
-                        sub_total += total_price
-
-                        OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty)
-
+                        OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=base_price, product_warranty=product_warranty, unit_price_after_add_warranty=warranty_value)
                 else:
-                    total_price = float(unit_price) * float(quantity)
-
-                    # work with offer product start
                     if offer:
-                        discount_price = offer.discount_price
-                        discount_price_type = offer.discount_price_type.title
-
-                        if discount_price_type == '%':
-                            discount_amount_value = (float(discount_price) * float(total_price)) / 100
-                        elif discount_price_type == 'flat':
-                            discount_amount_value = float(discount_price) * float(quantity)
-
-                        # base_price = float(unit_price - discount_amount_value) * float(quantity)
-                        base_price = (float(unit_price) * float(quantity)) - discount_amount_value
-                        total_product_discount_amount += discount_amount_value
-                        sub_total += total_price
-
-                        OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price, offer=offer )
+                        OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=base_price, offer=offer )
                     else:
-                        base_price = float(unit_price) * float(quantity)
-
-                        sub_total += total_price
-
-                        OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=total_price)
+                        OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=base_price)
                 # work with product warranty end
-
 
                 # update inventory
                 inventory_obj = Inventory.objects.filter(product=product).latest('created_at')
@@ -368,10 +354,8 @@ class CheckoutSerializer(serializers.ModelSerializer):
                 # vat calculation
                 product_vat_value = Product.objects.filter(slug=product.slug)[0].vat
                 if product_vat_value:
-                    # print(base_price)
                     vat_amount = (float(product_vat_value) * float(base_price)) / 100
                     vat_amount_list.append(vat_amount)
-
 
             Order.objects.filter(id=order_instance.id).update(vat_amount = sum(vat_amount_list), discount_amount = total_product_discount_amount, sub_total = sub_total)
 

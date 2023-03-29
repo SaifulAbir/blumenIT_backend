@@ -19,7 +19,7 @@ class StuffListAPI(ListAPIView):
     pagination_class = ProductCustomPagination
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             queryset = User.objects.filter(is_staff=True, is_active=True)
 
             if queryset:
@@ -28,7 +28,7 @@ class StuffListAPI(ListAPIView):
                 raise ValidationError({"msg": "There is no stuff data in stuff list."})
         else:
             raise ValidationError(
-                {"msg": 'You can not show stuff list, because you are not an Admin!'})
+                {"msg": 'You can not show stuff list, because you are not an Admin or a staff!'})
 
 
 class CreateStuffAPI(CreateAPIView):
@@ -37,7 +37,7 @@ class CreateStuffAPI(CreateAPIView):
     queryset = User.objects.all()
 
     def post(self, request, *args, **kwargs):
-        if self.request.user.is_superuser == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             name = check_dict_data_rise_error("name", request_data=request.data, arrise=True)
             email = check_dict_data_rise_error("email", request_data=request.data, arrise=True)
             phone = check_dict_data_rise_error("phone", request_data=request.data, arrise=True)
@@ -76,7 +76,7 @@ class CreateStuffAPI(CreateAPIView):
             return Response({"details": role}, status=status.HTTP_400_BAD_REQUEST)
         else:
             raise ValidationError(
-                {"msg": 'You can not create stuff, because you are not an Admin!'})
+                {"msg": 'You can not create stuff, because you are not an Admin or a staff!'})
 
 
 class UpdateStuffAPIView(RetrieveUpdateAPIView):
@@ -87,7 +87,7 @@ class UpdateStuffAPIView(RetrieveUpdateAPIView):
 
     def get_queryset(self):
         stuff_id = self.kwargs['id']
-        if self.request.user.is_superuser == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             query = User.objects.filter(Q(id=stuff_id), Q(is_staff=True))
             if query:
                 return query
@@ -95,7 +95,7 @@ class UpdateStuffAPIView(RetrieveUpdateAPIView):
                 raise ValidationError(
                     {"msg": 'Stuff does not exist!'})
         else:
-            raise ValidationError({"msg": 'You can not update Stuff info, because you are not an Admin!'})
+            raise ValidationError({"msg": 'You can not update Stuff info, because you are not an Admin or a staff!'})
 
 
     def put(self, request, *args, **kwargs):
@@ -173,7 +173,7 @@ class AdminStuffDeleteAPIView(ListAPIView):
 
     def get_queryset(self):
         id = self.kwargs['id']
-        if self.request.user.is_superuser == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             stuff_obj = User.objects.filter(id=id, is_staff=True, is_active=True).exists()
             if stuff_obj:
                 stuff_obj = User.objects.filter(id=id, is_staff=True, is_active=True).update(is_active=False)
@@ -185,7 +185,7 @@ class AdminStuffDeleteAPIView(ListAPIView):
                     {"msg": 'Staff Does not exist!'}
                 )
         else:
-            raise ValidationError({"msg": 'You can not delete staff, because you are not an Admin!'})
+            raise ValidationError({"msg": 'You can not delete staff, because you are not an Admin or a staff!'})
 
 
 class RoleListAPIView(ListAPIView):
@@ -194,7 +194,7 @@ class RoleListAPIView(ListAPIView):
     pagination_class = ProductCustomPagination
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             queryset = Role.objects.all()
 
             if queryset:
@@ -203,7 +203,7 @@ class RoleListAPIView(ListAPIView):
                 raise ValidationError({"msg": "There is no role data in role list."})
         else:
             raise ValidationError(
-                {"msg": 'You can not show role list, because you are not an Admin!'})
+                {"msg": 'You can not show role list, because you are not an Admin or a staff!'})
 
 
 class AdminRoleCreateAPIView(CreateAPIView):
@@ -211,11 +211,11 @@ class AdminRoleCreateAPIView(CreateAPIView):
     serializer_class = RoleCreateSerializer
 
     def post(self, request, *args, **kwargs):
-        if self.request.user.is_superuser == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             return super(AdminRoleCreateAPIView, self).post(request, *args, **kwargs)
         else:
             raise ValidationError(
-                {"msg": 'You can not create product, because you are not an Admin!'})
+                {"msg": 'You can not create product, because you are not an Admin or a Staff!'})
 
 
 class AdminRoleUpdateAPIView(RetrieveUpdateAPIView):
@@ -226,7 +226,7 @@ class AdminRoleUpdateAPIView(RetrieveUpdateAPIView):
 
     def get_queryset(self):
         id = self.kwargs['id']
-        if self.request.user.is_superuser == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             query = Role.objects.filter(id=id)
             if query:
                 return query
@@ -234,7 +234,7 @@ class AdminRoleUpdateAPIView(RetrieveUpdateAPIView):
                 raise ValidationError(
                     {"msg": 'Role does not exist!'})
         else:
-            raise ValidationError({"msg": 'You can not update role, because you are not an Admin!'})
+            raise ValidationError({"msg": 'You can not update role, because you are not an Admin or a Staff!'})
 
 
 class PermissionListAPIView(ListAPIView):
@@ -243,7 +243,7 @@ class PermissionListAPIView(ListAPIView):
     pagination_class = ProductCustomPagination
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             queryset = PermissionModules.objects.all()
 
             if queryset:
@@ -252,7 +252,7 @@ class PermissionListAPIView(ListAPIView):
                 raise ValidationError({"msg": "There is no permission modules data in permission modules list."})
         else:
             raise ValidationError(
-                {"msg": 'You can not show permission modules list, because you are not an Admin!'})
+                {"msg": 'You can not show permission modules list, because you are not an Admin or a Staff!'})
 
 
 class AdminPermissionCreateAPIView(CreateAPIView):
@@ -260,11 +260,11 @@ class AdminPermissionCreateAPIView(CreateAPIView):
     serializer_class = PermissionSerializer
 
     def post(self, request, *args, **kwargs):
-        if self.request.user.is_superuser == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             return super(AdminPermissionCreateAPIView, self).post(request, *args, **kwargs)
         else:
             raise ValidationError(
-                {"msg": 'You can not create permission, because you are not an Admin!'})
+                {"msg": 'You can not create permission, because you are not an Admin or a Staff!'})
 
 
 class AdminPermissionUpdateAPIView(RetrieveUpdateAPIView):
@@ -275,7 +275,7 @@ class AdminPermissionUpdateAPIView(RetrieveUpdateAPIView):
 
     def get_queryset(self):
         id = self.kwargs['id']
-        if self.request.user.is_superuser == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             query = PermissionModules.objects.filter(id=id)
             if query:
                 return query
@@ -283,7 +283,7 @@ class AdminPermissionUpdateAPIView(RetrieveUpdateAPIView):
                 raise ValidationError(
                     {"msg": 'Permission Modules does not exist!'})
         else:
-            raise ValidationError({"msg": 'You can not update permission modules, because you are not an Admin!'})
+            raise ValidationError({"msg": 'You can not update permission modules, because you are not an Admin or a Staff!'})
 
     def put(self, request, *args, **kwargs):
         return super(AdminPermissionUpdateAPIView, self).put(request, *args, **kwargs)

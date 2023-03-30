@@ -306,29 +306,26 @@ class CheckoutSerializer(serializers.ModelSerializer):
                     product_warranty = None
 
                 # work with product warranty start
-                # real
                 if product_warranty:
                     warranty_value = product_warranty.warranty_value
                     warranty_value_type = product_warranty.warranty_value_type
                     if warranty_value_type == 'PERCENTAGE':
-                        warranty_value = float((float(base_price) / 100) * float(warranty_value))
-                        unit_price_after_add_warranty = unit_price + warranty_value
-                        warranty_amount_list.append(unit_price_after_add_warranty)
+                        warranty_value_data = float((float(base_price) / 100) * float(warranty_value))
+                        unit_price_after_add_warranty = unit_price + warranty_value_data
+                        warranty_amount_list.append(warranty_value_data)
 
                         base_price = base_price + warranty_value
                     elif warranty_value_type == 'FIX':
-                        warranty_value = float(float(base_price) + float(warranty_value))
+                        # warranty_value = float(float(base_price) + float(warranty_value))
+                        unit_price_after_add_warranty = base_price + warranty_value
                         warranty_amount_list.append(warranty_value)
 
                         base_price = base_price + warranty_value
 
-                    # print("warranty_value")
-                    # print(warranty_value)
-
                     if offer:
-                        OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=base_price, product_warranty=product_warranty, unit_price_after_add_warranty=warranty_value, offer=offer)
+                        OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=base_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty, offer=offer)
                     else:
-                        OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=base_price, product_warranty=product_warranty, unit_price_after_add_warranty=warranty_value)
+                        OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=base_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty)
                 else:
                     if offer:
                         OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=base_price, offer=offer )
@@ -424,7 +421,15 @@ class CheckoutSerializer(serializers.ModelSerializer):
         except:
             total_product_discount_amount_data = 0.0
 
-        grand_total_price = (sub_total_amount + vat_amount_data + shipping_cost_amount) - (coupon_discount_amount_data + total_product_discount_amount_data)
+        print("sub_total_amount: " + str(sub_total_amount))
+        print("vat_amount_data: " + str(vat_amount_data))
+        print("shipping_cost_amount: " + str(shipping_cost_amount))
+        print("warranty_amount: " + str(warranty_amount))
+        print("coupon_discount_amount_data: " + str(coupon_discount_amount_data))
+        print("total_product_discount_amount_data: " + str(total_product_discount_amount_data))
+
+        # grand_total_price = (sub_total_amount + vat_amount_data + shipping_cost_amount) - (coupon_discount_amount_data + total_product_discount_amount_data)
+        grand_total_price = (sub_total_amount + vat_amount_data + shipping_cost_amount + warranty_amount) - (coupon_discount_amount_data + total_product_discount_amount_data)
         total_price = round(grand_total_price, 2)
         Order.objects.filter(id=order_instance.id).update(total_price = total_price)
 

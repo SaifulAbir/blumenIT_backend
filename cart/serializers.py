@@ -335,6 +335,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
                         print(warranty_value)
 
                         base_price = base_price + warranty_value_data
+                        sub_total += warranty_value_data
 
                         print("base_price")
                         print(base_price)
@@ -345,6 +346,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
                         warranty_amount_list.append(warranty_value)
 
                         base_price = base_price + warranty_value
+                        sub_total += warranty_value
 
                     if offer:
                         OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity), unit_price=unit_price, total_price=base_price, product_warranty=product_warranty, unit_price_after_add_warranty=unit_price_after_add_warranty, offer=offer)
@@ -448,14 +450,6 @@ class CheckoutSerializer(serializers.ModelSerializer):
         except:
             total_product_discount_amount_data = 0.0
 
-        # print("sub_total_amount: " + str(sub_total_amount))
-        # print("vat_amount_data: " + str(vat_amount_data))
-        # print("shipping_cost_amount: " + str(shipping_cost_amount))
-        # print("warranty_amount: " + str(warranty_amount))
-        # print("coupon_discount_amount_data: " + str(coupon_discount_amount_data))
-        # print("total_product_discount_amount_data: " + str(total_product_discount_amount_data))
-
-        # grand_total_price = (sub_total_amount + vat_amount_data + shipping_cost_amount) - (coupon_discount_amount_data + total_product_discount_amount_data)
         grand_total_price = (sub_total_amount + vat_amount_data + shipping_cost_amount + warranty_amount) - (coupon_discount_amount_data + total_product_discount_amount_data)
         total_price = round(grand_total_price, 2)
         Order.objects.filter(id=order_instance.id).update(total_price = total_price)

@@ -276,6 +276,10 @@ class CheckoutSerializer(serializers.ModelSerializer):
                 unit_price = order_item['unit_price']
 
                 base_price = float(unit_price) * float(quantity)
+                sub_total += base_price
+
+                print("base_price1")
+                print(base_price)
 
                 # work with offer start
                 try:
@@ -293,12 +297,15 @@ class CheckoutSerializer(serializers.ModelSerializer):
 
                     base_price = base_price - discount_amount_value
                     total_product_discount_amount += discount_amount_value
-                    sub_total += float(unit_price) * float(quantity)
-                else:
-                    # base_price = float(unit_price) * float(quantity)
-                    sub_total += float(unit_price) * float(quantity)
+                    # sub_total += float(unit_price) * float(quantity)
+                    # sub_total += base_price
+                # else:
+                    # base_price += float(unit_price) * float(quantity)
+                    # sub_total += base_price
                 # work with offer end
 
+                print("base_price2")
+                print(base_price)
 
                 try:
                     product_warranty = order_item['product_warranty']
@@ -309,15 +316,32 @@ class CheckoutSerializer(serializers.ModelSerializer):
                 if product_warranty:
                     warranty_value = product_warranty.warranty_value
                     warranty_value_type = product_warranty.warranty_value_type
+
+                    print("base_price3")
+                    print(base_price)
+
                     if warranty_value_type == 'PERCENTAGE':
-                        warranty_value_data = float((float(base_price) / 100) * float(warranty_value))
-                        unit_price_after_add_warranty = unit_price + warranty_value_data
+                        # warranty_value_data = float((float(base_price) / 100) * float(warranty_value))
+                        warranty_value_data = (float(base_price) * float(warranty_value)) / 100
+                        # unit_price_after_add_warranty1 = unit_price + warranty_value_data
+                        # print("unit_price_after_add_warranty1")
+                        # print(unit_price_after_add_warranty1)
+                        unit_price_after_add_warranty = (float(base_price) / float(quantity)) + warranty_value_data
+                        # print("unit_price_after_add_warranty 2")
+                        # print(unit_price_after_add_warranty)
                         warranty_amount_list.append(warranty_value_data)
 
-                        base_price = base_price + warranty_value
+                        print("warranty_value")
+                        print(warranty_value)
+
+                        base_price = base_price + warranty_value_data
+
+                        print("base_price")
+                        print(base_price)
                     elif warranty_value_type == 'FIX':
                         # warranty_value = float(float(base_price) + float(warranty_value))
-                        unit_price_after_add_warranty = base_price + warranty_value
+                        # unit_price_after_add_warranty = unit_price + warranty_value
+                        unit_price_after_add_warranty = (float(base_price) / float(quantity)) + warranty_value
                         warranty_amount_list.append(warranty_value)
 
                         base_price = base_price + warranty_value
@@ -353,6 +377,9 @@ class CheckoutSerializer(serializers.ModelSerializer):
                 if product_vat_value:
                     vat_amount = (float(product_vat_value) * float(base_price)) / 100
                     vat_amount_list.append(vat_amount)
+
+                print("vat_amount")
+                print(vat_amount)
 
             Order.objects.filter(id=order_instance.id).update(vat_amount = sum(vat_amount_list), discount_amount = total_product_discount_amount, sub_total = sub_total)
 
@@ -421,12 +448,12 @@ class CheckoutSerializer(serializers.ModelSerializer):
         except:
             total_product_discount_amount_data = 0.0
 
-        print("sub_total_amount: " + str(sub_total_amount))
-        print("vat_amount_data: " + str(vat_amount_data))
-        print("shipping_cost_amount: " + str(shipping_cost_amount))
-        print("warranty_amount: " + str(warranty_amount))
-        print("coupon_discount_amount_data: " + str(coupon_discount_amount_data))
-        print("total_product_discount_amount_data: " + str(total_product_discount_amount_data))
+        # print("sub_total_amount: " + str(sub_total_amount))
+        # print("vat_amount_data: " + str(vat_amount_data))
+        # print("shipping_cost_amount: " + str(shipping_cost_amount))
+        # print("warranty_amount: " + str(warranty_amount))
+        # print("coupon_discount_amount_data: " + str(coupon_discount_amount_data))
+        # print("total_product_discount_amount_data: " + str(total_product_discount_amount_data))
 
         # grand_total_price = (sub_total_amount + vat_amount_data + shipping_cost_amount) - (coupon_discount_amount_data + total_product_discount_amount_data)
         grand_total_price = (sub_total_amount + vat_amount_data + shipping_cost_amount + warranty_amount) - (coupon_discount_amount_data + total_product_discount_amount_data)

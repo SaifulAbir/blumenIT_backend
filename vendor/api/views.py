@@ -294,7 +294,7 @@ class AdminProductDeleteAPI(ListAPIView):
             product_obj_exist = Product.objects.filter(slug=slug).exists()
             if product_obj_exist:
                 product_obj = Product.objects.filter(slug=slug)
-                product_obj.update(is_active=False)
+                product_obj.update(is_active=False, status='UNPUBLISH')
 
                 queryset = Product.objects.filter(is_active=True).order_by('-created_at')
                 return queryset

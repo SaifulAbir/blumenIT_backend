@@ -2173,7 +2173,6 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
-        print('create hit')
         # home_slider_images
         try:
             home_slider_images = validated_data.pop('home_slider_images')
@@ -2275,6 +2274,35 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
 
         return home_single_row_data_instance
 
+
+class WebsiteConfigurationUpdateSerializer(serializers.ModelSerializer):
+    home_slider_images = SliderSerializer(many=True, required=False)
+    gaming_slider_images = SliderSerializer(many=True, required=False)
+    small_banners_carousel = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
+    small_banners_static = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
+    popular_products_banners = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
+    feature_products_banners = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
+
+    class Meta:
+        model = HomeSingleRowData
+        fields = [
+            'id',
+            'phone',
+            'whats_app_number',
+            'email',
+            'bottom_banner',
+            'shop_address',
+
+            'home_slider_images',
+            'small_banners_carousel',
+            'small_banners_static',
+            'popular_products_banners',
+            'feature_products_banners',
+
+            'gaming_slider_images'
+        ]
+
+
     def update(self, instance, validated_data):
         # home_slider_images
         try:
@@ -2367,33 +2395,14 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
         if popular_products_banners:
             for popular_products_banner in popular_products_banners:
                 Advertisement.objects.create(image=popular_products_banner, work_for='POPULAR_PRODUCT_POSTER', is_gaming=False)
-        # try:
-        #     if popular_products_banners:
-        #         for popular_products_banner in popular_products_banners:
-        #             image = popular_products_banner['image']
-        #             bold_text = popular_products_banner['bold_text']
-        #             small_text = popular_products_banner['small_text']
-        #             Advertisement.objects.create(image=image, bold_text=bold_text, small_text=small_text, is_gaming=True, work_for='POPULAR_PRODUCT_POSTER')
-        # except:
-        #     raise ValidationError('Problem of Home Gaming Images insert.')
 
         # feature_products_banners
         if feature_products_banners:
             for feature_products_banner in feature_products_banners:
                 Advertisement.objects.create(image=feature_products_banner, work_for='FEATURED_PRODUCT_POSTER', is_gaming=False)
-        # try:
-        #     if feature_products_banners:
-        #         for feature_products_banner in feature_products_banners:
-        #             image = feature_products_banner['image']
-        #             bold_text = feature_products_banner['bold_text']
-        #             small_text = feature_products_banner['small_text']
-        #             Advertisement.objects.create(image=image, bold_text=bold_text, small_text=small_text, is_gaming=True, work_for='FEATURED_PRODUCT_POSTER')
-        # except:
-        #     raise ValidationError('Problem of Home Gaming Images insert.')
 
         validated_data.update({"updated_at": timezone.now()})
         return super().update(instance, validated_data)
-
 
 class WebsiteConfigurationViewSerializer(serializers.ModelSerializer):
     home_slider_images = serializers.SerializerMethodField('get_home_slider_images')

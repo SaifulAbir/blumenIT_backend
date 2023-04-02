@@ -37,7 +37,7 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     AdminBlogToggleSerializer, AdminProductReviewSerializer, AdvertisementPosterSerializer, ProductUpdateDetailsSerializer, \
     AdminPosCustomerCreateSerializer, AdminSubCategoryToggleSerializer, AdminOfferCategoryListSerializer, AdminBrandIsGamingSerializer, \
     AdminCategoryIsPcBuilderSerializer, UpdateCategoryDetailsSerializer, UpdateSubCategoryDetailsSerializer,\
-    UpdateSubSubCategoryDetailsSerializer, WebsiteConfigurationViewSerializer
+    UpdateSubSubCategoryDetailsSerializer, WebsiteConfigurationViewSerializer, WebsiteConfigurationUpdateSerializer
 
 
 from cart.models import Order, OrderItem, Coupon
@@ -359,6 +359,7 @@ class AdminUpdateCategoryDetailsAPIView(RetrieveAPIView):
                     {"msg": 'Category does not found!'})
         else:
             raise ValidationError({"msg": 'You can not update category, because you are not an Admin or a Staff!'})
+
 class AdminUpdateCategoryAPIView(UpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = UpdateCategorySerializer
@@ -454,7 +455,6 @@ class AdminUpdateSubCategoryAPIView(UpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = UpdateSubCategorySerializer
     queryset = SubCategory.objects.all()
-    
 
 
 class AdminDeleteSubCategoryAPIView(ListAPIView):
@@ -2960,6 +2960,6 @@ class AdminWebsiteConfigurationViewAPIView(ListAPIView):
 
 class AdminWebsiteConfigurationUpdateAPIView(UpdateAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = WebsiteConfigurationSerializer
+    serializer_class = WebsiteConfigurationUpdateSerializer
     queryset = HomeSingleRowData.objects.all()
 #website-configuration related apies................................... end

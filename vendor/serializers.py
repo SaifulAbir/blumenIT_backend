@@ -2169,7 +2169,9 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
             'popular_products_banners',
             'feature_products_banners',
 
-            'gaming_slider_images'
+            'gaming_slider_images',
+            'gaming_popular_products_banners',
+            'gaming_feature_products_banners'
         ]
 
     def create(self, validated_data):
@@ -2209,6 +2211,18 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
             feature_products_banners = validated_data.pop('feature_products_banners')
         except:
             feature_products_banners = ''
+
+        # gaming_popular_products_banners
+        try:
+            gaming_popular_products_banners = validated_data.pop('gaming_popular_products_banners')
+        except:
+            gaming_popular_products_banners = ''
+
+        # gaming_feature_products_banners
+        try:
+            gaming_feature_products_banners = validated_data.pop('gaming_feature_products_banners')
+        except:
+            gaming_feature_products_banners = ''
 
         home_single_row_data_instance = HomeSingleRowData.objects.create(**validated_data)
 
@@ -2272,6 +2286,16 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
             for feature_products_banner in feature_products_banners:
                 Advertisement.objects.create(image=feature_products_banner, work_for='FEATURED_PRODUCT_POSTER', is_gaming=False)
 
+        # gaming_popular_products_banners
+        if gaming_popular_products_banners:
+            for gaming_popular_products_banner in gaming_popular_products_banners:
+                Advertisement.objects.create(image=gaming_popular_products_banner, work_for='POPULAR_PRODUCT_POSTER', is_gaming=True)
+
+        # gaming_feature_products_banners
+        if gaming_feature_products_banners:
+            for gaming_feature_products_banner in gaming_feature_products_banners:
+                Advertisement.objects.create(image=gaming_feature_products_banner, work_for='FEATURED_PRODUCT_POSTER', is_gaming=True)
+
         return home_single_row_data_instance
 
 
@@ -2299,7 +2323,9 @@ class WebsiteConfigurationUpdateSerializer(serializers.ModelSerializer):
             'popular_products_banners',
             'feature_products_banners',
 
-            'gaming_slider_images'
+            'gaming_slider_images',
+            'gaming_popular_products_banners',
+            'gaming_feature_products_banners'
         ]
 
 
@@ -2339,6 +2365,18 @@ class WebsiteConfigurationUpdateSerializer(serializers.ModelSerializer):
             feature_products_banners = validated_data.pop('feature_products_banners')
         except:
             feature_products_banners = ''
+
+        # gaming_popular_products_banners
+        try:
+            gaming_popular_products_banners = validated_data.pop('gaming_popular_products_banners')
+        except:
+            gaming_popular_products_banners = ''
+
+        # gaming_feature_products_banners
+        try:
+            gaming_feature_products_banners = validated_data.pop('gaming_feature_products_banners')
+        except:
+            gaming_feature_products_banners = ''
 
 
         # home_slider_images
@@ -2401,6 +2439,16 @@ class WebsiteConfigurationUpdateSerializer(serializers.ModelSerializer):
             for feature_products_banner in feature_products_banners:
                 Advertisement.objects.create(image=feature_products_banner, work_for='FEATURED_PRODUCT_POSTER', is_gaming=False)
 
+        # gaming_popular_products_banners
+        if gaming_popular_products_banners:
+            for gaming_popular_products_banner in gaming_popular_products_banners:
+                Advertisement.objects.create(image=gaming_popular_products_banner, work_for='POPULAR_PRODUCT_POSTER', is_gaming=True)
+
+        # gaming_feature_products_banners
+        if gaming_feature_products_banners:
+            for gaming_feature_products_banner in gaming_feature_products_banners:
+                Advertisement.objects.create(image=gaming_feature_products_banner, work_for='FEATURED_PRODUCT_POSTER', is_gaming=True)
+
         validated_data.update({"updated_at": timezone.now()})
         return super().update(instance, validated_data)
 
@@ -2427,7 +2475,9 @@ class WebsiteConfigurationViewSerializer(serializers.ModelSerializer):
             'popular_products_banners',
             'feature_products_banners',
 
-            'gaming_slider_images'
+            'gaming_slider_images',
+            'gaming_popular_products_banners',
+            'gaming_feature_products_banners'
         ]
 
     def get_home_slider_images(self, obj):
@@ -2480,6 +2530,26 @@ class WebsiteConfigurationViewSerializer(serializers.ModelSerializer):
         try:
             queryset = Advertisement.objects.filter(Q(work_for='FEATURED_PRODUCT_POSTER'),
                                                     Q(is_active=True), Q(is_gaming=False)).order_by('-created_at')[:3]
+            serializer = AdvertisementDataSerializer(instance=queryset, many=True, context={'request': self.context['request']})
+            return serializer.data
+        except:
+            return []
+
+    def get_gaming_popular_products_banners(self, obj):
+        try:
+            queryset = Advertisement.objects.filter(Q(work_for='POPULAR_PRODUCT_POSTER'),
+                                                                              Q(is_active=True),
+                                                                              Q(is_gaming=True)).order_by(
+                '-created_at')[:3]
+            serializer = AdvertisementDataSerializer(instance=queryset, many=True, context={'request': self.context['request']})
+            return serializer.data
+        except:
+            return []
+
+    def get_gaming_feature_products_banners(self,obj):
+        try:
+            queryset = Advertisement.objects.filter(Q(work_for='FEATURED_PRODUCT_POSTER'),
+                                                    Q(is_active=True), Q(is_gaming=True)).order_by('-created_at')[:3]
             serializer = AdvertisementDataSerializer(instance=queryset, many=True, context={'request': self.context['request']})
             return serializer.data
         except:

@@ -2459,6 +2459,9 @@ class WebsiteConfigurationViewSerializer(serializers.ModelSerializer):
     small_banners_carousel = serializers.SerializerMethodField('get_small_banners_carousel')
     small_banners_static = serializers.SerializerMethodField('get_small_banners_static')
     feature_products_banners = serializers.SerializerMethodField('get_feature_products_banners')
+    gaming_popular_products_banners = serializers.SerializerMethodField('get_gaming_popular_products_banners')
+    gaming_feature_products_banners = serializers.SerializerMethodField('get_gaming_feature_products_banners')
+
     class Meta:
         model = HomeSingleRowData
         fields = [

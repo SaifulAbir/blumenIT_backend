@@ -4,7 +4,7 @@ from home.serializers import AdvertisementDataSerializer, SliderAdvertisementDat
 from product.serializers import ProductImageSerializer, ProductReviewSerializer, BrandSerializer, UnitSerializer
 from cart.serializers import OrderItemSerializer, DeliveryAddressSerializer
 from product.serializers import ProductImageSerializer, ProductReviewSerializer
-from rest_framework import serializers
+from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 from product.models import Brand, Category, DiscountTypes, FlashDealInfo, FlashDealProduct, Inventory, \
     Product, ProductImages, ProductReview, ProductTags, ProductVariation, ProductVideoProvider, \
@@ -23,16 +23,18 @@ from stuff.models import Role, RolePermissions
 from home.models import CorporateDeal, Advertisement, HomeSingleRowData, SliderImage, RequestQuote, ContactUs
 from django.db.models import Q
 from django.db.models import Sum
+from rest_framework.response import Response
 
 
 class SellerCreateSerializer(serializers.ModelSerializer):
     name = serializers.CharField(required=True)
     email = serializers.EmailField(required=True)
     phone = serializers.CharField(required=True)
+    password = serializers.CharField(required=True)
 
     class Meta:
         model = Seller
-        fields = ['id', 'name', 'address', 'phone', 'email', 'logo', 'is_active']
+        fields = ['id', 'name', 'address', 'phone', 'email', 'logo', 'is_active', 'password']
 
     def create(self, validated_data):
         email_get = validated_data.pop('email')
@@ -49,6 +51,42 @@ class SellerCreateSerializer(serializers.ModelSerializer):
                 raise ValidationError('Phone already exists')
         seller_instance = Seller.objects.create(**validated_data, phone=phone_get_data,
                                                 email=email_get_data)
+
+        try:
+            user_obj = User.objects.get(Q(email=email_get_data) | Q(phone=phone_get_data))
+        except User.DoesNotExist:
+            user_obj = None
+
+        if not user_obj:
+            # create seller user
+            name = validated_data.pop('name')
+            password = validated_data.pop('password')
+            user = User.objects.create(
+                name=name,
+                email=email_get_data,
+                phone=phone_get_data,
+                username=email_get_data,
+                is_seller=True
+            )
+
+            user.is_active = True
+            user.set_password(password)
+            user.save()
+
+            seller_instance.seller_user = user
+            seller_instance.save()
+
+            print('Mail sent!')
+
+            # return Response(
+            # data={"user_id": user.id if user else None},
+            # status=status.HTTP_201_CREATED)
+        else:
+            if user_obj.email == email_get_data:
+                return Response({"details": "Email already exists"}, status=status.HTTP_400_BAD_REQUEST)
+            if user_obj.phone == phone_get_data:
+                return Response({"details": "Phone number already exists"}, status=status.HTTP_400_BAD_REQUEST)
+
         return seller_instance
 
 
@@ -2152,6 +2190,8 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
     small_banners_static = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
     popular_products_banners = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
     feature_products_banners = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
+    gaming_popular_products_banners = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
+    gaming_feature_products_banners = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
 
     class Meta:
         model = HomeSingleRowData
@@ -2306,6 +2346,8 @@ class WebsiteConfigurationUpdateSerializer(serializers.ModelSerializer):
     small_banners_static = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
     popular_products_banners = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
     feature_products_banners = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
+    gaming_popular_products_banners = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
+    gaming_feature_products_banners = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
 
     class Meta:
         model = HomeSingleRowData

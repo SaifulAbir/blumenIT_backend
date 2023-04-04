@@ -5,7 +5,7 @@ from vendor.models import Seller
 from rest_framework.permissions import IsAuthenticated
 from product.pagination import ProductCustomPagination
 from reports.serializers import SalesReportSerializer, VendorProductReportSerializer, InHouseProductSerializer, SellerProductSaleSerializer, \
-    ProductStockSerializer, ProductWishlistSerializer
+    ProductStockSerializer, ProductWishlistSerializer, InHouseSaleSerializer
 from rest_framework.exceptions import ValidationError
 from django.db.models import Q
 
@@ -152,13 +152,6 @@ class InHouseProductReportAPI(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True:
-            # work with dynamic pagination page_size
-            # try:
-            #     pagination = self.kwargs['pagination']
-            # except:
-            #     pagination = 10
-            # self.pagination_class.page_size = pagination
-
             queryset = Product.objects.filter(in_house_product=True).order_by('-created_at')
 
             if queryset:
@@ -168,6 +161,45 @@ class InHouseProductReportAPI(ListAPIView):
         else:
             raise ValidationError(
                 {"msg": 'You can not see in-house product list, because you are not an Admin or a staff!'})
+
+
+class InHouseProductSaleReportAPI(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = InHouseSaleSerializer
+    pagination_class = ProductCustomPagination
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+            queryset = Product.objects.filter(order_item_product__order__in_house_order=True).order_by('-created_at').distinct()
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError({"msg": "There is no in-house order available."})
+        else:
+            raise ValidationError(
+                {"msg": 'You can not see in-house product sale report list, because you are not an Admin or a staff!'})
+
+
+class InHouseProductSaleReportSearchAPI(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = InHouseProductSerializer
+    pagination_class = ProductCustomPagination
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+            request = self.request
+            search = request.GET.get('category')
+
+            queryset = Product.objects.filter(order_item_product__order__in_house_order=True).order_by('-created_at').distinct()
+
+            if search:
+                queryset = queryset.filter(Q(category__icontains=search))
+
+            return queryset
+
+        else:
+            raise ValidationError(
+                {"msg": 'You can not search in-house product sale report list, because you are not an Admin or a staff!'})
 
 
 class InHouseProductReportSearchAPI(ListAPIView):

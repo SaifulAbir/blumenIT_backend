@@ -202,11 +202,14 @@ class AdminProductListAPI(ListAPIView):
     pagination_class = ProductCustomPagination
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             request = self.request
             type = request.GET.get('type')
 
-            queryset = Product.objects.filter(is_active=True).order_by('-created_at')
+            if self.request.user.is_seller == True:
+                queryset = Product.objects.filter(is_active=True, seller=Seller.objects.get(seller_user=self.request.user.id)).order_by('-created_at')
+            else:
+                queryset = Product.objects.filter(is_active=True).order_by('-created_at')
 
             if type == 'digital':
                 queryset = queryset.filter(digital=True)

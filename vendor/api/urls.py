@@ -54,12 +54,13 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminContactUsDetailsAPIView, AdminOffersListAllAPIView, AdminSpecificationCreateAPIView, \
     AdminContactUsDeleteAPIView, AdminPosCustomerCreateAPIView, AdminWebsiteConfigurationViewAPIView, \
     AdminOfferCategoryListAPIView, AdminBrandIsGamingToggleAPIView, AdminCategoryIsPcBuilderToggleAPIView, \
-    AdminWebsiteGeneralSettingsView, AdminWebsiteGeneralSettingsUpdateAPIView
+    AdminWebsiteGeneralSettingsView, AdminWebsiteGeneralSettingsUpdateAPIView, SellerListAPIView
 
 urlpatterns = [
 
     # seller apies
     path('admin/seller-create/', AdminSellerCreateAPIView.as_view()),
+    path('seller-list/', SellerListAPIView.as_view()),
     path('admin/seller-list/', AdminSellerListAPIView.as_view()),
     path('admin/seller-update/<int:id>/', AdminSellerUpdateAPIView.as_view()),
     path('admin/seller-delete/<int:id>/', AdminSellerDeleteAPIView.as_view()),

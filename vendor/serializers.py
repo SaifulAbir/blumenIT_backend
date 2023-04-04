@@ -24,6 +24,9 @@ from home.models import CorporateDeal, Advertisement, HomeSingleRowData, SliderI
 from django.db.models import Q
 from django.db.models import Sum
 from rest_framework.response import Response
+from django.template.loader import render_to_string
+from django.core.mail import send_mail
+from django.conf import settings
 
 
 class SellerCreateSerializer(serializers.ModelSerializer):
@@ -76,7 +79,17 @@ class SellerCreateSerializer(serializers.ModelSerializer):
             seller_instance.seller_user = user
             seller_instance.save()
 
-            print('Mail sent!')
+            # print('Mail sent!')
+            subject = "New Vendor credential."
+            html_message = render_to_string('seller_email.html', {'username':name, 'email': email_get_data, 'password': password})
+
+            send_mail(
+                subject=subject,
+                message=None,
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[email_get_data],
+                html_message=html_message
+            )
 
             # return Response(
             # data={"user_id": user.id if user else None},
@@ -2527,7 +2540,7 @@ class WebsiteConfigurationViewSerializer(serializers.ModelSerializer):
 
     def get_home_slider_images(self, obj):
         try:
-            queryset = SliderImage.objects.filter(is_active=True, is_gaming=False)
+            queryset = Advertisement.objects.filter(work_for='SLIDER', is_active=True, is_gaming=False).order_by('-created_at')[:3]
             serializer = SliderSerializer(instance=queryset, many=True, context={'request': self.context['request']})
             return serializer.data
         except:
@@ -2535,7 +2548,7 @@ class WebsiteConfigurationViewSerializer(serializers.ModelSerializer):
 
     def get_gaming_slider_images(self, obj):
         try:
-            queryset = SliderImage.objects.filter(is_active=True, is_gaming=True)
+            queryset = Advertisement.objects.filter(work_for='SLIDER', is_active=True, is_gaming=True).order_by('-created_at')[:3]
             serializer = SliderSerializer(instance=queryset, many=True, context={'request': self.context['request']})
             return serializer.data
         except:

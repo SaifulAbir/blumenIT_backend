@@ -1,10 +1,13 @@
 from django.urls import path
-from user.api.views import LoginUser,  \
-    SubscriptionAPIView,  ChangePasswordView, SendOTPAPIView, OTPVerifyAPIVIEW, ReSendOTPAPIView, \
-    SetPasswordAPIView, SuperUserLoginUser, CustomerOrdersList, CustomerOrderDetails, CustomerProfile, CustomerAddressListAPIView, \
-    CustomerAddressAddAPIView, CustomerAddressUpdateAPIView, CustomerAddressDeleteAPIView, DashboardDataAPIView, WishlistDataAPIView, \
-    SavePcAPIView, SavePcListAPIView, SavePcViewAPIView, SavePcDeleteAPIView, AccountDeleteRequestAPIView, AdminAccountDeleteRequestListAPIView, \
-    AdminAccountDeleteAPIView
+from user.api.views import LoginUser, \
+    SubscriptionAPIView, ChangePasswordView, SendOTPAPIView, OTPVerifyAPIVIEW, ReSendOTPAPIView, \
+    SetPasswordAPIView, SuperUserLoginUser, CustomerOrdersList, CustomerOrderDetails, CustomerProfile, \
+    CustomerAddressListAPIView, \
+    CustomerAddressAddAPIView, CustomerAddressUpdateAPIView, CustomerAddressDeleteAPIView, DashboardDataAPIView, \
+    WishlistDataAPIView, \
+    SavePcAPIView, SavePcListAPIView, SavePcViewAPIView, SavePcDeleteAPIView, AccountDeleteRequestAPIView, \
+    AdminAccountDeleteRequestListAPIView, \
+    AdminAccountDeleteAPIView, ForgotPasswordView
 
 urlpatterns = [
     path('login/', LoginUser.as_view({'post': 'create'}), name='login_user'),
@@ -15,6 +18,9 @@ urlpatterns = [
     path('set-password/', SetPasswordAPIView.as_view(), name='set_password'),
     path('subscription/', SubscriptionAPIView.as_view()),
     path('change_password/', ChangePasswordView.as_view(), name='auth_change_password'),
+    path('forgot-password/', ForgotPasswordView.as_view(), name='forgot-password'),
+    # path('forgot-password/<str:encoded_uid>/<str:token>/', name='forgot-password'),
+    # path('p')
 
     path('customer/orders-list/', CustomerOrdersList.as_view()),
     path('customer/order-details/<str:o_id>/', CustomerOrderDetails.as_view()),

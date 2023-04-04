@@ -229,7 +229,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
 EMAIL_DOMAIN_NAME = os.environ.get('EMAIL_DOMAIN')
-
+FRONTEND_URL = os.environ.get('FRONTEND_URL')
 
 # LOGIN_URL = "user:login"
 # LOGIN_REDIRECT_URL = '/'

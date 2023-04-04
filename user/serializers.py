@@ -8,6 +8,9 @@ from cart.models import Wishlist
 from product.serializers import ProductListBySerializer
 import datetime
 
+from django.utils.encoding import smart_str,force_str,smart_bytes, DjangoUnicodeDecodeError
+from django.utils.http import urlsafe_base64_encode,urlsafe_base64_decode
+
 
 class SetPasswordSerializer(serializers.ModelSerializer):
     class Meta:
@@ -456,3 +459,21 @@ class AccountDeleteSerializer(serializers.ModelSerializer):
         # read_only_fields = ['email']
 
 
+class ForgotPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    class Meta:
+        fields = ['email']
+
+    # def validate(self, attrs):
+    #     try:
+    #         email = attrs.get('email', '')
+    #         if User.objects.filter(email=email):
+    #             user = User.objects.get(email=email)
+    #             uid=urlsafe_base64_encode(user.id)
+    #             token = PasswordResetTokenGenerator().make_token(user)
+    #
+    #         return attrs
+    #     except:
+    #         pass
+    #     return super().validate(attrs)

@@ -2601,5 +2601,23 @@ class WebsiteConfigurationViewSerializer(serializers.ModelSerializer):
             return []
 
 
+class GeneralSettingsViewSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = HomeSingleRowData
+        fields = [
+            'id',
+            'header_logo',
+            'footer_logo',
+            'footer_description',
+            'facebook',
+            'twitter',
+            'instagram',
+            'whatsapp',
+            'messenger',
+            'linkedin',
+            'youtube',
+        ]
+
 
 

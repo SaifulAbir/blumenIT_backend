@@ -65,6 +65,16 @@ class SingleRowDataSerializer(serializers.ModelSerializer):
                 'email',
                 'bottom_banner',
                 'is_active',
+                'header_logo',
+                'footer_logo',
+                'footer_description',
+                'facebook',
+                'twitter',
+                'instagram',
+                'whatsapp',
+                'messenger',
+                'linkedin',
+                'youtube',
                 ]
 
 

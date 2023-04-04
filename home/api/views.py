@@ -15,7 +15,7 @@ from rest_framework.exceptions import ValidationError
 from product.pagination import ProductCustomPagination
 
 
-class   HomeDataAPIView(APIView):
+class HomeDataAPIView(APIView):
     permission_classes = (AllowAny,)
 
     def get(self, request):

@@ -254,6 +254,7 @@ class SuperUserLoginUser(mixins.CreateModelMixin,
             if user:
                 user_is_super = user.is_superuser
                 user_is_staff = user.is_staff
+                user_is_seller = user.is_seller
                 if user_is_super == True:
                     token = RefreshToken.for_user(user)
                     data = {
@@ -262,7 +263,9 @@ class SuperUserLoginUser(mixins.CreateModelMixin,
                         "name": user.name,
                         "access_token": str(token.access_token),
                         "refresh_token": str(token),
-                        "user_is_super": True
+                        "user_is_super": True,
+                        "is_staff": False,
+                        "is_seller": False,
                     }
                     return Response({"status": True, "data": data}, status=status.HTTP_200_OK)
 
@@ -274,16 +277,32 @@ class SuperUserLoginUser(mixins.CreateModelMixin,
                         "name": user.name,
                         "access_token": str(token.access_token),
                         "refresh_token": str(token),
-                        "user_is_super": False
+                        "user_is_super": False,
+                        "is_staff": True,
+                        "is_seller": False,
+                    }
+                    return Response({"status": True, "data": data}, status=status.HTTP_200_OK)
+
+                elif user_is_seller == True:
+                    token = RefreshToken.for_user(user)
+                    data = {
+                        "user_id": user.id,
+                        "email": user.email,
+                        "name": user.name,
+                        "access_token": str(token.access_token),
+                        "refresh_token": str(token),
+                        "user_is_super": False,
+                        "is_staff": False,
+                        "is_seller": True,
                     }
                     return Response({"status": True, "data": data}, status=status.HTTP_200_OK)
 
                 else:
-                    return Response({"status": False, "data": {"message": "Invalid credentials for super user!"}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+                    return Response({"status": False, "data": {"message": "Invalid credentials!"}}, status=status.HTTP_406_NOT_ACCEPTABLE)
             else:
-                return Response({"status": False, "data": {"message": "Invalid credentials for super user!"}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+                return Response({"status": False, "data": {"message": "Invalid credentials!"}}, status=status.HTTP_406_NOT_ACCEPTABLE)
         else:
-            return Response({"status": False, "data": {"message": "Invalid credentials for super user!", "error": serializer.errors}}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            return Response({"status": False, "data": {"message": "Invalid credentials!", "error": serializer.errors}}, status=status.HTTP_406_NOT_ACCEPTABLE)
 
 
 class SubscriptionAPIView(CreateAPIView):

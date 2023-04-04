@@ -59,9 +59,19 @@ class ProductDetailsAPI(RetrieveAPIView):
 
 class ProductListAPI(ListAPIView):
     permission_classes = (AllowAny,)
-    queryset = Product.objects.filter(Q(status='PUBLISH') | Q(is_active=True)).order_by('-created_at')
-    serializer_class = ProductListBySerializer
     pagination_class = ProductCustomPagination
+    serializer_class = ProductListBySerializer
+
+    def get_queryset(self):
+        request = self.request
+        seller = request.GET.get('seller')
+
+        queryset = Product.objects.filter(Q(status='PUBLISH') | Q(is_active=True)).order_by('-created_at')
+
+        if seller:
+            queryset = queryset.filter(seller__id=seller)
+
+        return queryset
 
 
 class ProductListByCategoryForOfferCreateAPI(ListAPIView):

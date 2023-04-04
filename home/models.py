@@ -82,6 +82,16 @@ class HomeSingleRowData(AbstractTimeStamp):
     bottom_banner = models.ImageField(upload_to='HomeImage', default="")
     shop_address = models.TextField(default='', null=True, blank=True)
     is_active = models.BooleanField(default=True)
+    header_logo = models.ImageField(upload_to='HomeImage', null=True, blank=True)
+    footer_logo = models.ImageField(upload_to='HomeImage', null=True, blank=True)
+    footer_description = models.TextField(null=True, blank=True)
+    facebook = models.URLField(null=True, blank=True)
+    twitter = models.URLField(null=True, blank=True)
+    instagram = models.URLField(null=True, blank=True)
+    whatsapp = models.URLField(null=True, blank=True)
+    messenger = models.URLField(null=True, blank=True)
+    linkedin = models.URLField(null=True, blank=True)
+    youtube = models.URLField(null=True, blank=True)
 
     class Meta:
         verbose_name = 'HomeSingleRowData'

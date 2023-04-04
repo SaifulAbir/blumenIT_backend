@@ -91,7 +91,7 @@ class  GamingDataAPIView(APIView):
     def get(self, request):
 
         # slider images
-        slider_images = Advertisement.objects.filter(Q(work_for='SLIDER'), Q(is_active=True), Q(is_gaming=True)).order_by('-created_at')[:4]
+        slider_images = Advertisement.objects.filter(Q(work_for='SLIDER'), Q(is_active=True), Q(is_gaming=True)).order_by('-created_at')[:3]
         slider_images_serializer = AdvertisementDataSerializer(slider_images, many=True, context={"request": request})
 
         # sub_categories_with_logo

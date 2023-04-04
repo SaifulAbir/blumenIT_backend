@@ -78,6 +78,16 @@ class AdminSellerDetailsAPIView(RetrieveAPIView):
             raise ValidationError(
                 {"msg": 'You can not see seller details, because you are not an Admin or a Staff!'})
 
+class SellerListAPIView(ListAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = SellerSerializer
+
+    def get_queryset(self):
+        queryset = Seller.objects.filter(is_active=True)
+        if queryset:
+            return queryset
+        else:
+            raise ValidationError({"msg": "No seller available! " })
 
 class AdminSellerListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -150,11 +160,11 @@ class AdminProductCreateAPIView(CreateAPIView):
     serializer_class = ProductCreateSerializer
 
     def post(self, request, *args, **kwargs):
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             return super(AdminProductCreateAPIView, self).post(request, *args, **kwargs)
         else:
             raise ValidationError(
-                {"msg": 'You can not create product, because you are not an Admin or a Staff!'})
+                {"msg": 'You can not create product, because you are not an Admin or a Staff or a vendor!'})
 
 
 # class AdminProductUpdateAPIView(RetrieveUpdateAPIView):
@@ -166,7 +176,7 @@ class AdminProductUpdateAPIView(UpdateAPIView):
 
     def get_queryset(self):
         slug = self.kwargs['slug']
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             query = Product.objects.filter(slug=slug)
             if query:
                 return query
@@ -174,7 +184,7 @@ class AdminProductUpdateAPIView(UpdateAPIView):
                 raise ValidationError(
                     {"msg": 'Product does not exist!'})
         else:
-            raise ValidationError({"msg": 'You can not update this product, because you are not an Admin or a Staff!'})
+            raise ValidationError({"msg": 'You can not update this product, because you are not an Admin or a Staff or a vendor!'})
 
 
 class AdminProductUpdateDetailsAPIView(RetrieveAPIView):
@@ -185,7 +195,7 @@ class AdminProductUpdateDetailsAPIView(RetrieveAPIView):
 
     def get_queryset(self):
         slug = self.kwargs['slug']
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             query = Product.objects.filter(slug=slug)
             if query:
                 return query
@@ -193,7 +203,7 @@ class AdminProductUpdateDetailsAPIView(RetrieveAPIView):
                 raise ValidationError(
                     {"msg": 'Product does not exist!'})
         else:
-            raise ValidationError({"msg": 'You can not update this product, because you are not an Admin or a Staff!'})
+            raise ValidationError({"msg": 'You can not update this product, because you are not an Admin or a Staff or a vendor!'})
 
 
 class AdminProductListAPI(ListAPIView):
@@ -224,7 +234,7 @@ class AdminProductListAPI(ListAPIView):
                 raise ValidationError({"msg": "Product doesn't exist! " })
         else:
             raise ValidationError(
-                {"msg": 'You can not see product list, because you are not an Admin or a Staff!'})
+                {"msg": 'You can not see product list, because you are not an Admin or a Staff or a vendor!'})
 
 
 class AdminProductListSearchAPI(ListAPIView):
@@ -233,14 +243,17 @@ class AdminProductListSearchAPI(ListAPIView):
     serializer_class = VendorProductListSerializer
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             request = self.request
 
             seller = request.GET.get('seller')
             sort_by = request.GET.get('sort_by')
             query = request.GET.get('search')
 
-            queryset = Product.objects.filter(is_active=True).order_by('-created_at')
+            if self.request.user.is_seller == True:
+                queryset = Product.objects.filter(is_active=True, seller=Seller.objects.get(seller_user=self.request.user.id)).order_by('-created_at')
+            else:
+                queryset = Product.objects.filter(is_active=True).order_by('-created_at')
 
             if seller:
                 queryset = queryset.filter(seller__id=seller)
@@ -262,7 +275,7 @@ class AdminProductListSearchAPI(ListAPIView):
             return queryset
         else:
             raise ValidationError(
-                {"msg": 'You can not see product list, because you are not an Admin or a Staff!'})
+                {"msg": 'You can not see product list, because you are not an Admin or a Staff or a vendor!'})
 
 
 class AdminProductViewAPI(RetrieveAPIView):
@@ -273,7 +286,7 @@ class AdminProductViewAPI(RetrieveAPIView):
 
     def get_object(self):
         slug = self.kwargs['slugi']
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             query = Product.objects.get(slug=slug)
             if query:
                 return query
@@ -281,7 +294,7 @@ class AdminProductViewAPI(RetrieveAPIView):
                 raise ValidationError({"msg": "Product doesn't exist! " })
         else:
             raise ValidationError(
-                {"msg": 'You can not see product view, because you are not an Admin or a Staff!'})
+                {"msg": 'You can not see product view, because you are not an Admin or a Staff or a vendor!'})
 
 
 class AdminProductDeleteAPI(ListAPIView):
@@ -293,7 +306,7 @@ class AdminProductDeleteAPI(ListAPIView):
 
     def get_queryset(self):
         slug = self.kwargs['slug']
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             product_obj_exist = Product.objects.filter(slug=slug).exists()
             if product_obj_exist:
                 product_obj = Product.objects.filter(slug=slug)
@@ -306,7 +319,7 @@ class AdminProductDeleteAPI(ListAPIView):
                     {"msg": 'Product Does not exist!'})
         else:
             raise ValidationError(
-                {"msg": 'You can not delete this product, because you are not an Admin or a Staff!'})
+                {"msg": 'You can not delete this product, because you are not an Admin or a Staff or a vendor!'})
 # Product related admin apies views............................ end
 
 
@@ -1018,12 +1031,15 @@ class AdminOrderList(ListAPIView):
     pagination_class = OrderCustomPagination
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             request = self.request
             type = request.GET.get('type')
             order_status = request.GET.get('order_status')
 
-            queryset = Order.objects.filter(is_active=True).order_by('-created_at')
+            if self.request.user.is_seller == True:
+                queryset = Order.objects.filter(is_active=True, order_item_order__product__seller=Seller.objects.get(seller_user=self.request.user.id)).order_by('-created_at')
+            else:
+                queryset = Order.objects.filter(is_active=True).order_by('-created_at')
 
             if type == 'in_house_order':
                 queryset = queryset.filter(in_house_order=True)
@@ -1062,7 +1078,7 @@ class AdminOrderViewAPI(RetrieveAPIView):
 
     def get_object(self):
         id = self.kwargs['id']
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             query = Order.objects.get(id=id)
             if query:
                 return query
@@ -1070,7 +1086,7 @@ class AdminOrderViewAPI(RetrieveAPIView):
                 raise ValidationError({"msg": "No Order available! " })
         else:
             raise ValidationError(
-                {"msg": 'You can not see order, because you are not an Admin or a Staff!'})
+                {"msg": 'You can not see order, because you are not an Admin or a Staff or a vendor!'})
 
 
 class OrderListSearchAPI(ListAPIView):
@@ -1080,7 +1096,7 @@ class OrderListSearchAPI(ListAPIView):
 
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             request = self.request
             order_id = request.GET.get('order_id')
             order_status = request.GET.get('order_status')
@@ -1088,7 +1104,10 @@ class OrderListSearchAPI(ListAPIView):
             start_date = request.GET.get('start_date')
             end_date = request.GET.get('end_date')
 
-            queryset = Order.objects.filter(is_active=True).order_by('-created_at')
+            if self.request.user.is_seller == True:
+                queryset = Order.objects.filter(is_active=True, order_item_order__product__seller=Seller.objects.get(seller_user=self.request.user.id)).order_by('-created_at')
+            else:
+                queryset = Order.objects.filter(is_active=True).order_by('-created_at')
 
             if order_id:
                 queryset = queryset.filter(Q(order_id__icontains=order_id))
@@ -1184,11 +1203,11 @@ class AdminCustomerListAPIView(ListAPIView):
     serializer_class = AdminCustomerListSerializer
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             queryset = User.objects.filter(is_customer=True, is_active=True)
             return queryset
         else:
-            raise ValidationError({"msg": 'You can not see customer list data, because you are not an Admin or a Staff!'})
+            raise ValidationError({"msg": 'You can not see customer list data, because you are not an Admin or a Staff or a vendor!'})
 
 
 class AdminCustomerDeleteAPIView(ListAPIView):
@@ -2141,7 +2160,7 @@ class AdminOrderDeleteAPIView(ListAPIView):
 
     def get_queryset(self):
         id = self.kwargs['id']
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             order_obj = Order.objects.filter(id=id).exists()
             if order_obj:
                 Order.objects.filter(id=id).update(is_active=False)

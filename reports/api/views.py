@@ -15,15 +15,12 @@ class SalesReportAPI(ListAPIView):
     pagination_class = ProductCustomPagination
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
-            # work with dynamic pagination page_size
-            # try:
-            #     pagination = self.kwargs['pagination']
-            # except:
-            #     pagination = 10
-            # self.pagination_class.page_size = pagination
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
 
-            queryset = Order.objects.all().order_by('-created_at')
+            if self.request.user.is_seller == True:
+                queryset = Order.objects.filter(order_item_order__product__seller=Seller.objects.get(seller_user=self.request.user.id)).order_by('-created_at')
+            else:
+                queryset = Order.objects.all().order_by('-created_at')
 
             if queryset:
                 return queryset
@@ -31,7 +28,7 @@ class SalesReportAPI(ListAPIView):
                 raise ValidationError({"msg": "There is no data in order list."})
         else:
             raise ValidationError(
-                {"msg": 'You can not see order report list, because you are not an Admin or a staff!'})
+                {"msg": 'You can not see order report list, because you are not an Admin or a staff or a vendor!'})
 
 
 class SalesReportSearchAPI(ListAPIView):

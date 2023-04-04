@@ -8,6 +8,7 @@ from cart.models import Wishlist
 from product.serializers import ProductListBySerializer
 import datetime
 
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.encoding import smart_str,force_str,smart_bytes, DjangoUnicodeDecodeError
 from django.utils.http import urlsafe_base64_encode,urlsafe_base64_decode
 
@@ -464,6 +465,32 @@ class ForgotPasswordSerializer(serializers.Serializer):
 
     class Meta:
         fields = ['email']
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(write_only=True, min_length=6)
+
+    class Meta:
+        fields = ['password']
+
+    def validate(self, data):
+        print(self.context)
+        password = data.get("password")
+        request = self.context.get("request")
+        token = request.query_params.get('token')
+        encoded_uid = request.query_params.get('encoded_uid')
+
+        if token is None or encoded_uid is None:
+            serializers.ValidationError("Missing data")
+
+
+        uid=urlsafe_base64_decode(encoded_uid).decode()
+        user=User.objects.get(id=uid)
+        if not PasswordResetTokenGenerator().check_token(user, token):
+            raise serializers.ValidationError("Reset token is invalid")
+        user.set_password(password)
+        user.save()
+        return data
 
     # def validate(self, attrs):
     #     try:

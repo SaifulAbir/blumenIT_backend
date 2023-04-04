@@ -32,7 +32,7 @@ from user.serializers import SubscriptionSerializer, \
     CustomerOrderListSerializer, \
     CustomerOrderDetailsSerializer, CustomerProfileSerializer, CustomerAddressListSerializer, CustomerAddressSerializer, \
     WishlistDataSerializer, SavePcCreateSerializer, SavaPcDataSerializer, SavePcDetailsSerializer, \
-    AccountDeleteRequestSerializer, AccountDeleteSerializer, ForgotPasswordSerializer
+    AccountDeleteRequestSerializer, AccountDeleteSerializer, ForgotPasswordSerializer, ResetPasswordSerializer
 
 from vendor.pagination import OrderCustomPagination
 from cart.models import Order, DeliveryAddress, Wishlist
@@ -42,6 +42,9 @@ from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.urls import reverse
+from django.core.mail import send_mail
+from django.http import QueryDict
+
 
 
 
@@ -607,15 +610,27 @@ class ForgotPasswordView(generics.GenericAPIView):
             encoded_uid = urlsafe_base64_encode(force_bytes(user.id))
             token = PasswordResetTokenGenerator().make_token(user)
 
-            reset_url = reverse(
-                'forgot-password',
-                kwargs={"encoded_uid":encoded_uid, "token":token}
+            # reset_url = request.build_absolute_uri(reverse('reset-password'))
+            reset_url = f"https://blumanit.vercel.app/reset-password/?encoded_uid={encoded_uid}&token={token}"
+
+
+            subject = "Reset Your Password"
+            message = f"Click the following link to reset your password: {reset_url}"
+
+            recipient_list = [email]
+            send_mail(
+                subject=subject,
+                message=message,
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[email]
             )
-            reset_url = f"localhost:8000(reset_url)"
+            # send email
+            # email_message.send()
             return response.Response(
                 {
-                    "message":
-                        f"Your Password reset link: (reset_url)"
+                    "message": "Password reset email sent",
+                    # "message":
+                    #     f"Your Password reset link: {reset_url}"
                 },
                 status=status.HTTP_200_OK,
             )
@@ -625,6 +640,21 @@ class ForgotPasswordView(generics.GenericAPIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+class ResetPasswordView(generics.GenericAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = ResetPasswordSerializer
+
+    def patch(self, request, *args, **kwargs):
+        # query_params = QueryDict(request.META['QUERY_STRING'])
+        # encoded_uid = query_params.get('encoded_uid')
+        # token = query_params.get('token')
+        serializer = self.serializer_class(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+
+        return response.Response(
+            {"message": "Password reset complete"},
+            status=status.HTTP_200_OK,
+        )
 
 
         #     email = serializer.validated_data['email']

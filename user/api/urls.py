@@ -7,7 +7,7 @@ from user.api.views import LoginUser, \
     WishlistDataAPIView, \
     SavePcAPIView, SavePcListAPIView, SavePcViewAPIView, SavePcDeleteAPIView, AccountDeleteRequestAPIView, \
     AdminAccountDeleteRequestListAPIView, \
-    AdminAccountDeleteAPIView, ForgotPasswordView
+    AdminAccountDeleteAPIView, ForgotPasswordView, ResetPasswordView
 
 urlpatterns = [
     path('login/', LoginUser.as_view({'post': 'create'}), name='login_user'),
@@ -19,7 +19,7 @@ urlpatterns = [
     path('subscription/', SubscriptionAPIView.as_view()),
     path('change_password/', ChangePasswordView.as_view(), name='auth_change_password'),
     path('forgot-password/', ForgotPasswordView.as_view(), name='forgot-password'),
-    # path('forgot-password/<str:encoded_uid>/<str:token>/', name='forgot-password'),
+    path('reset-password/', ResetPasswordView.as_view(), name='reset-password'),
     # path('p')
 
     path('customer/orders-list/', CustomerOrdersList.as_view()),

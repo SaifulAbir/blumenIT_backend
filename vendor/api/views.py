@@ -34,11 +34,13 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     AdminCouponSerializer, VatTypeSerializer, WebsiteConfigurationSerializer, AdminFilterAttributeValueSerializer, \
     AdminOfferSerializer, AdminPosProductListSerializer, AdminShippingCountrySerializer, AdminShippingCitySerializer, \
     AdminShippingStateSerializer, AdminPosOrderSerializer, AdminCategoryToggleSerializer, AdminProductToggleSerializer, \
-    AdminBlogToggleSerializer, AdminProductReviewSerializer, AdvertisementPosterSerializer, ProductUpdateDetailsSerializer, \
-    AdminPosCustomerCreateSerializer, AdminSubCategoryToggleSerializer, AdminOfferCategoryListSerializer, AdminBrandIsGamingSerializer, \
-    AdminCategoryIsPcBuilderSerializer, UpdateCategoryDetailsSerializer, UpdateSubCategoryDetailsSerializer,\
-    UpdateSubSubCategoryDetailsSerializer, WebsiteConfigurationViewSerializer, WebsiteConfigurationUpdateSerializer
-
+    AdminBlogToggleSerializer, AdminProductReviewSerializer, AdvertisementPosterSerializer, \
+    ProductUpdateDetailsSerializer, \
+    AdminPosCustomerCreateSerializer, AdminSubCategoryToggleSerializer, AdminOfferCategoryListSerializer, \
+    AdminBrandIsGamingSerializer, \
+    AdminCategoryIsPcBuilderSerializer, UpdateCategoryDetailsSerializer, UpdateSubCategoryDetailsSerializer, \
+    UpdateSubSubCategoryDetailsSerializer, WebsiteConfigurationViewSerializer, WebsiteConfigurationUpdateSerializer, \
+    GeneralSettingsViewSerializer
 
 from cart.models import Order, OrderItem, Coupon
 from cart.models import Order, OrderItem, SubOrder
@@ -2983,5 +2985,23 @@ class AdminWebsiteConfigurationViewAPIView(ListAPIView):
 class AdminWebsiteConfigurationUpdateAPIView(UpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = WebsiteConfigurationUpdateSerializer
+    queryset = HomeSingleRowData.objects.all()
+
+
+class AdminWebsiteGeneralSettingsView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = GeneralSettingsViewSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+            queryset = HomeSingleRowData.objects.filter(is_active=True).order_by('-created_at')[:1]
+            return queryset
+        else:
+            raise ValidationError({"msg": 'You can not see general settings data, because you are not an Admin or a Staff!'})
+
+
+class AdminWebsiteGeneralSettingsUpdateAPIView(UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = GeneralSettingsViewSerializer
     queryset = HomeSingleRowData.objects.all()
 #website-configuration related apies................................... end

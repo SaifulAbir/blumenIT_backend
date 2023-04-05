@@ -1741,7 +1741,12 @@ class CategoryWiseProductSaleSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'sale_count']
 
     def get_sale_count(self, obj):
-        sell_count = Order.objects.filter(order_item_order__product__category = obj).count()
+        user = self.context.get("request").user
+        if user.is_seller == True:
+            sell_count = Order.objects.filter(order_item_order__product__category = obj, order_item_order__product__seller=Seller.objects.get(seller_user=user.id)).count()
+        else:
+            sell_count = Order.objects.filter(order_item_order__product__category = obj).count()
+
         return sell_count
 
 
@@ -1752,7 +1757,12 @@ class CategoryWiseProductStockSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'stock_count']
 
     def get_stock_count(self, obj):
-        products = Product.objects.filter(category = obj, status='PUBLISH')
+        user = self.context.get("request").user
+        if user.is_seller == True:
+            products = Product.objects.filter(category = obj, status='PUBLISH', seller=Seller.objects.get(seller_user=user.id))
+        else:
+            products = Product.objects.filter(category = obj, status='PUBLISH')
+
         available_quantity = 0
         for product in products:
             available_quantity += product.quantity

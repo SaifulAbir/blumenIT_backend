@@ -11,6 +11,8 @@ urlpatterns = [
      path('filtering-attributes/<int:id>/<str:type>/',FilterAttributesAPI.as_view()),
      path('product-list-by-category-popular-products/<int:id>/<str:type>/<int:pagination>/',
           ProductListByCategoryPopularProductsAPI.as_view()),
+     path('gaming-product-list-by-category-popular-products/<int:id>/<str:type>/<int:pagination>/',
+          GamingProductListByCategoryPopularProductsAPI.as_view()),
      path('product-list-by-category/<int:cid>/<int:pagination>/',
           ProductListByCategoryAPI.as_view()),
      path('product-list-by-category-for-offer-create/<int:cid>/<int:pagination>/',

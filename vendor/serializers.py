@@ -30,7 +30,7 @@ from django.conf import settings
 
 
 class SellerCreateSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(required=True)
+    # name = serializers.CharField(required=True)
     email = serializers.EmailField(required=True)
     phone = serializers.CharField(required=True)
     password = serializers.CharField(required=True)
@@ -40,7 +40,7 @@ class SellerCreateSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'address', 'phone', 'email', 'logo', 'is_active', 'password']
 
     def create(self, validated_data):
-        try:
+        # try:
             email_get = validated_data.pop('email')
             email_get_data = email_get.lower()
             if email_get:
@@ -98,8 +98,9 @@ class SellerCreateSerializer(serializers.ModelSerializer):
                     return Response({"details": "Phone number already exists"}, status=status.HTTP_400_BAD_REQUEST)
 
             return seller_instance
-        except:
-            return Response({"details": "Something went wrong!"}, status=status.HTTP_400_BAD_REQUEST)
+        # except:
+        #     print("hello")
+        #     return Response({"details": "Something went wrong!"}, status=status.HTTP_400_BAD_REQUEST)
 
 class SellerUpdateSerializer(serializers.ModelSerializer):
     name = serializers.CharField(required=True)

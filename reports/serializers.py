@@ -78,6 +78,12 @@ class InHouseProductSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'sell_count', 'category']
 
 
+class InHouseSaleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ['id', 'title', 'sell_count', 'category']
+
+
 class SellerProductSaleSerializer(serializers.ModelSerializer):
     shop_name =  serializers.SerializerMethodField()
     number_of_product_sale =  serializers.SerializerMethodField()

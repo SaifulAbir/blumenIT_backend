@@ -188,12 +188,12 @@ class InHouseProductSaleReportSearchAPI(ListAPIView):
     def get_queryset(self):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             request = self.request
-            search = request.GET.get('category')
+            search = request.GET.get('search')
 
             queryset = Product.objects.filter(order_item_product__order__in_house_order=True).order_by('-created_at').distinct()
 
             if search:
-                queryset = queryset.filter(Q(category__icontains=search))
+                queryset = queryset.filter(Q(title__icontains=search))
 
             return queryset
 

@@ -190,6 +190,43 @@ class ProductListByCategoryAPI(ListAPIView):
         return queryset
 
 
+class GamingProductListByCategoryPopularProductsAPI(ListAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = ProductListBySerializer
+    pagination_class = ProductCustomPagination
+    lookup_field = 'id'
+    lookup_url_kwarg = 'id'
+
+    def get_object(self):
+        try:
+            pagination = self.kwargs['pagination']
+        except:
+            pagination = 10
+        self.pagination_class.page_size = pagination
+
+        id = self.kwargs['id']
+        type = self.kwargs['type']
+
+        queryset = Product.objects.filter(category__is_gaming__icontains=True, status='PUBLISH').annotate(count=Count('product_review_product')).order_by('-count')
+
+        if id and type:
+            if type == 'category':
+                queryset = queryset.filter(Q(category=id))
+
+            if type == 'sub_category':
+                queryset = queryset.filter(Q(sub_category=id))
+
+            if type == 'sub_sub_category':
+                queryset = queryset.filter(Q(sub_sub_category=id))
+
+        else:
+            queryset = Product.objects.filter(category__is_gaming__icontains=True, status='PUBLISH').annotate(count=Count('product_review_product')).order_by('-count')
+
+
+
+        return queryset
+
+
 class ProductListByCategoryPopularProductsAPI(ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = ProductListBySerializer

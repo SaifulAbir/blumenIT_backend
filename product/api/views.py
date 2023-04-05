@@ -197,7 +197,7 @@ class GamingProductListByCategoryPopularProductsAPI(ListAPIView):
     lookup_field = 'id'
     lookup_url_kwarg = 'id'
 
-    def get_object(self):
+    def get_queryset(self):
         try:
             pagination = self.kwargs['pagination']
         except:
@@ -207,7 +207,8 @@ class GamingProductListByCategoryPopularProductsAPI(ListAPIView):
         id = self.kwargs['id']
         type = self.kwargs['type']
 
-        queryset = Product.objects.filter(category__is_gaming__icontains=True, status='PUBLISH').annotate(count=Count('product_review_product')).order_by('-count')
+        queryset = Product.objects.filter(category__is_gaming__icontains=True, status='PUBLISH').\
+                                            annotate(count=Count('product_review_product')).order_by('-count')
 
         if id and type:
             if type == 'category':

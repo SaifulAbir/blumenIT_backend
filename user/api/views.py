@@ -630,7 +630,7 @@ class ForgotPasswordView(generics.GenericAPIView):
             token = PasswordResetTokenGenerator().make_token(user)
 
             # reset_url = request.build_absolute_uri(reverse('reset-password'))
-            reset_url = f"https://blumanit.vercel.app/reset-password/?encoded_uid={encoded_uid}&token={token}"
+            reset_url = f"https://blumen-it-admin.vercel.app/reset-password/?encoded_uid={encoded_uid}&token={token}"
 
 
             subject = "Reset Your Password"

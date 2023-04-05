@@ -40,68 +40,66 @@ class SellerCreateSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'address', 'phone', 'email', 'logo', 'is_active', 'password']
 
     def create(self, validated_data):
-        email_get = validated_data.pop('email')
-        email_get_data = email_get.lower()
-        if email_get:
-            email_get_for_check = Seller.objects.filter(email=email_get.lower())
-            if email_get_for_check:
-                raise ValidationError('Email already exists')
-        phone_get = validated_data.pop('phone')
-        phone_get_data = phone_get.lower()
-        if phone_get:
-            phone_get_for_check = Seller.objects.filter(phone=phone_get.lower())
-            if phone_get_for_check:
-                raise ValidationError('Phone already exists')
-        seller_instance = Seller.objects.create(**validated_data, phone=phone_get_data,
-                                                email=email_get_data)
-
         try:
-            user_obj = User.objects.get(Q(email=email_get_data) | Q(phone=phone_get_data))
-        except User.DoesNotExist:
-            user_obj = None
+            email_get = validated_data.pop('email')
+            email_get_data = email_get.lower()
+            if email_get:
+                email_get_for_check = Seller.objects.filter(email=email_get.lower())
+                if email_get_for_check:
+                    raise ValidationError('Email already exists')
+            phone_get = validated_data.pop('phone')
+            phone_get_data = phone_get.lower()
+            if phone_get:
+                phone_get_for_check = Seller.objects.filter(phone=phone_get.lower())
+                if phone_get_for_check:
+                    raise ValidationError('Phone already exists')
+            seller_instance = Seller.objects.create(**validated_data, phone=phone_get_data,
+                                                    email=email_get_data)
 
-        if not user_obj:
-            # create seller user
-            name = validated_data.pop('name')
-            password = validated_data.pop('password')
-            user = User.objects.create(
-                name=name,
-                email=email_get_data,
-                phone=phone_get_data,
-                username=email_get_data,
-                is_seller=True
-            )
+            try:
+                user_obj = User.objects.get(Q(email=email_get_data) | Q(phone=phone_get_data))
+            except User.DoesNotExist:
+                user_obj = None
 
-            user.is_active = True
-            user.set_password(password)
-            user.save()
+            if not user_obj:
+                # create seller user
+                name = validated_data.pop('name')
+                password = validated_data.pop('password')
+                user = User.objects.create(
+                    name=name,
+                    email=email_get_data,
+                    phone=phone_get_data,
+                    username=email_get_data,
+                    is_seller=True
+                )
 
-            seller_instance.seller_user = user
-            seller_instance.save()
+                user.is_active = True
+                user.set_password(password)
+                user.save()
 
-            # print('Mail sent!')
-            subject = "New Vendor credential."
-            html_message = render_to_string('seller_email.html', {'username':name, 'email': email_get_data, 'password': password})
+                seller_instance.seller_user = user
+                seller_instance.save()
 
-            send_mail(
-                subject=subject,
-                message=None,
-                from_email=settings.EMAIL_HOST_USER,
-                recipient_list=[email_get_data],
-                html_message=html_message
-            )
+                # print('Mail sent!')
+                subject = "New Vendor credential."
+                html_message = render_to_string('seller_email.html', {'username':name, 'email': email_get_data, 'password': password})
 
-            # return Response(
-            # data={"user_id": user.id if user else None},
-            # status=status.HTTP_201_CREATED)
-        else:
-            if user_obj.email == email_get_data:
-                return Response({"details": "Email already exists"}, status=status.HTTP_400_BAD_REQUEST)
-            if user_obj.phone == phone_get_data:
-                return Response({"details": "Phone number already exists"}, status=status.HTTP_400_BAD_REQUEST)
+                send_mail(
+                    subject=subject,
+                    message=None,
+                    from_email=settings.EMAIL_HOST_USER,
+                    recipient_list=[email_get_data],
+                    html_message=html_message
+                )
+            else:
+                if user_obj.email == email_get_data:
+                    return Response({"details": "Email already exists"}, status=status.HTTP_400_BAD_REQUEST)
+                if user_obj.phone == phone_get_data:
+                    return Response({"details": "Phone number already exists"}, status=status.HTTP_400_BAD_REQUEST)
 
-        return seller_instance
-
+            return seller_instance
+        except:
+            return Response({"details": "Something went wrong!"}, status=status.HTTP_400_BAD_REQUEST)
 
 class SellerUpdateSerializer(serializers.ModelSerializer):
     name = serializers.CharField(required=True)
@@ -1481,7 +1479,7 @@ class AdminProfileSerializer(serializers.ModelSerializer):
     staff_role = serializers.SerializerMethodField('get_staff_role')
     class Meta:
         model = User
-        fields = ['id', 'name', 'email', 'username', 'phone', 'date_joined', 'staff_role']
+        fields = ['id', 'name', 'email', 'username', 'phone', 'date_joined', 'staff_role', 'is_seller', 'is_staff', 'is_superuser']
 
     def get_staff_role(self, obj):
         try:

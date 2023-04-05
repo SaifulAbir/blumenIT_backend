@@ -1328,7 +1328,7 @@ class AdminDashboardDataAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             # total customer
             if User.objects.filter(is_customer=True).exists():
                 customer_count = User.objects.filter(is_customer=True).count()
@@ -1337,7 +1337,10 @@ class AdminDashboardDataAPIView(APIView):
 
             # total order
             if Order.objects.filter(is_active=True).exists():
-                order_count = Order.objects.filter(is_active=True).count()
+                if self.request.user.is_seller == True:
+                    order_count = Order.objects.filter(is_active=True, order_item_order__product__seller=Seller.objects.get(seller_user=self.request.user.id)).count()
+                else:
+                    order_count = Order.objects.filter(is_active=True).count()
             else:
                 order_count = 0
 
@@ -1355,17 +1358,23 @@ class AdminDashboardDataAPIView(APIView):
 
             # total published Product
             if Product.objects.filter(status = 'PUBLISH', is_active=True).exists():
-                published_product_count = Product.objects.filter(status = 'PUBLISH', is_active=True).count()
+                if self.request.user.is_seller == True:
+                    published_product_count = Product.objects.filter(status = 'PUBLISH', is_active=True, seller=Seller.objects.get(seller_user=self.request.user.id)).count()
+                else:
+                    published_product_count = Product.objects.filter(status = 'PUBLISH', is_active=True).count()
             else:
                 published_product_count = 0
 
             # total seller Product
             if Product.objects.filter(~Q(in_house_product = True), Q(is_active=True)).exists():
-                seller_product_count = Product.objects.filter(~Q(in_house_product = True), Q(is_active=True)).count()
+                if self.request.user.is_seller == True:
+                    seller_product_count = Product.objects.filter(~Q(in_house_product = True), Q(is_active=True), Q(seller=Seller.objects.get(seller_user=self.request.user.id))).count()
+                else:
+                    seller_product_count = Product.objects.filter(~Q(in_house_product = True), Q(is_active=True)).count()
             else:
                 seller_product_count = 0
 
-             # total admin Product
+            # total admin Product
             if Product.objects.filter(in_house_product = True, is_active=True).exists():
                 admin_product_count = Product.objects.filter(in_house_product = True, is_active=True).count()
             else:

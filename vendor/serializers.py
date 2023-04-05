@@ -814,6 +814,16 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             # inventory update
             Inventory.objects.create(product=product_instance, initial_quantity=single_quantity, current_quantity=single_quantity)
 
+        # seller
+        try:
+            seller = validated_data["seller"]
+        except:
+            seller = ''
+        if seller:
+            print("seller")
+            print(seller)
+            Product.objects.filter(id=product_instance.id).update(seller=Seller.objects.get(seller_user=seller))
+
         # product_specification
         try:
             if product_specification:
@@ -829,23 +839,6 @@ class ProductCreateSerializer(serializers.ModelSerializer):
                         product_specification_instance = SpecificationValue.objects.create(specification = specification_instance, key=key, value=value, product=product_instance )
         except:
             raise ValidationError('Problem of Product Specification info insert.')
-
-        # flash_deal
-        # try:
-        #     flash_deal_add_count = 0
-        #     if flash_deal:
-        #         for f_deal in flash_deal:
-        #             flash_deal_info = f_deal['flash_deal_info']
-        #             discount_type = f_deal['discount_type']
-        #             discount_amount = f_deal['discount_amount']
-        #             if flash_deal_info:
-        #                 if flash_deal_add_count <= 0:
-        #                     flash_deal_product_instance = FlashDealProduct.objects.create(product=product_instance, flash_deal_info=flash_deal_info, discount_type=discount_type, discount_amount=discount_amount)
-        #                     flash_deal_add_count += 1
-        #                 else:
-        #                     pass
-        # except:
-        #     raise ValidationError('Problem of Flash Deal info insert.')
 
         # offers
         try:
@@ -1477,9 +1470,10 @@ class RoleDataSerializer(serializers.ModelSerializer):
 
 class AdminProfileSerializer(serializers.ModelSerializer):
     staff_role = serializers.SerializerMethodField('get_staff_role')
+    seller_id = serializers.SerializerMethodField('get_seller_id')
     class Meta:
         model = User
-        fields = ['id', 'name', 'email', 'username', 'phone', 'date_joined', 'staff_role', 'is_seller', 'is_staff', 'is_superuser']
+        fields = ['id', 'name', 'email', 'username', 'phone', 'date_joined', 'staff_role', 'is_seller', 'is_staff', 'is_superuser', 'seller_id']
 
     def get_staff_role(self, obj):
         try:
@@ -1488,6 +1482,13 @@ class AdminProfileSerializer(serializers.ModelSerializer):
             return serializer.data
         except:
             return []
+
+    def get_seller_id(self, obj):
+        try:
+            seller_id = Seller.objects.filter(seller_user=obj.id, is_active = True)
+            return seller_id[0].id
+        except:
+            return None
 
 
 class ReviewListSerializer(serializers.ModelSerializer):

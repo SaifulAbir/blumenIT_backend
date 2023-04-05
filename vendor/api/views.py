@@ -842,7 +842,7 @@ class AdminAttributeListAllAPIView(ListAPIView):
     serializer_class = AttributeSerializer
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             queryset = Attribute.objects.filter(is_active=True).order_by('-created_at')
             return queryset
         else:
@@ -2609,7 +2609,7 @@ class AdminCategoryAllListAPIView(ListAPIView):
     serializer_class = AdminCategoryListSerializer
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             queryset = Category.objects.filter(is_active=True)
             if queryset:
                 return queryset
@@ -2628,7 +2628,7 @@ class AdminSubCategoryListAllAPIView(ListAPIView):
 
     def get_queryset(self):
         cid = self.kwargs['cid']
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             queryset = SubCategory.objects.filter(category=cid, is_active=True).order_by('-created_at')
             if queryset:
                 return queryset
@@ -2647,7 +2647,7 @@ class AdminSubSubCategoryAllListAPIView(ListAPIView):
 
     def get_queryset(self):
         sid = self.kwargs['sid']
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             if sid:
                 queryset = SubSubCategory.objects.filter(
                     sub_category=sid, is_active=True).order_by('-created_at')
@@ -2665,7 +2665,7 @@ class AdminBrandListAllAPIView(ListAPIView):
     serializer_class = VendorBrandSerializer
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             queryset = Brand.objects.filter(is_active=True)
             if queryset:
                 return queryset
@@ -2681,7 +2681,7 @@ class AdminUnitListAllAPIView(ListAPIView):
     serializer_class = VendorUnitSerializer
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             queryset = Units.objects.filter(is_active=True)
             if queryset:
                 return queryset
@@ -2697,7 +2697,7 @@ class AdminSellerListAllAPIView(ListAPIView):
     serializer_class = SellerSerializer
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             queryset = Seller.objects.filter(is_active=True)
             if queryset:
                 return queryset
@@ -2713,7 +2713,7 @@ class AdminVatTypeListAllAPIView(ListAPIView):
     serializer_class = VatTypeSerializer
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             queryset = VatType.objects.filter(is_active=True)
             if queryset:
                 return queryset
@@ -2729,7 +2729,7 @@ class AdminVideoProviderListAllAPIView(ListAPIView):
     serializer_class = ProductVideoProviderSerializer
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             queryset = ProductVideoProvider.objects.filter(is_active=True)
             if queryset:
                 return queryset
@@ -2745,7 +2745,7 @@ class AdminDiscountTypeListAllAPIView(ListAPIView):
     serializer_class = DiscountTypeSerializer
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             queryset = DiscountTypes.objects.filter(is_active=True)
             if queryset:
                 return queryset
@@ -2761,7 +2761,7 @@ class AdminFilterAttributeListAllAPIView(ListAPIView):
     serializer_class = AdminFilterAttributeSerializer
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             request = self.request
             cid = request.GET.get('cid')
             s_cid = request.GET.get('s_cid')
@@ -2787,7 +2787,7 @@ class AdminFilterAttributeValueListAllAPIView(ListAPIView):
     serializer_class = AdminFilterAttributeValueSerializer
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             request = self.request
             atid = self.kwargs['atid']
             if atid:
@@ -2805,7 +2805,7 @@ class AdminFlashDealListAllAPIView(ListAPIView):
     serializer_class = FlashDealInfoSerializer
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             queryset = FlashDealInfo.objects.filter(is_active=True)
             if queryset:
                 return queryset
@@ -2821,7 +2821,7 @@ class AdminOffersListAllAPIView(ListAPIView):
     serializer_class = AdminOfferSerializer
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             queryset = Offer.objects.filter(is_active=True).order_by('-created_at')
             if queryset:
                 return queryset
@@ -2837,7 +2837,7 @@ class AdminWarrantyListAllAPIView(ListAPIView):
     serializer_class = AdminWarrantyListSerializer
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             queryset = Warranty.objects.filter(is_active=True)
             return queryset
         else:
@@ -2849,7 +2849,7 @@ class AdminSpecificationTitleListAllAPIView(ListAPIView):
     serializer_class = AdminSpecificationTitleSerializer
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             queryset = SpecificationTitle.objects.filter(is_active=True)
             return queryset
         else:

@@ -1479,7 +1479,7 @@ class AdminProfileSerializer(serializers.ModelSerializer):
     staff_role = serializers.SerializerMethodField('get_staff_role')
     class Meta:
         model = User
-        fields = ['id', 'name', 'email', 'username', 'phone', 'date_joined', 'staff_role']
+        fields = ['id', 'name', 'email', 'username', 'phone', 'date_joined', 'staff_role', 'is_seller', 'is_staff', 'is_superuser']
 
     def get_staff_role(self, obj):
         try:

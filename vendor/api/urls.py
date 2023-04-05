@@ -34,7 +34,7 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminShippingCountryDeleteAPIView, AdminShippingCityListAPIView, AdminShippingCityAddAPIView, \
     AdminShippingCityUpdateAPIView, \
     AdminShippingCityDeleteAPIView, AdminShippingStateListAPIView, AdminShippingStateAddAPIView, \
-    AdminShippingStateUpdateAPIView, \
+    AdminShippingStateUpdateAPIView, AdminSubscribersListAllAPIView, AdminCustomerListAllAPIView, \
     AdminPosSearchAPI, AdminPosOrderAPIView, AdminShippingStateDeleteAPIView, AdminShippingClassAddAPIView, \
     AdminShippingClassUpdateAPIView, AdminShippingClassDeleteAPIView, AdminAttributeListAllAPIView, \
     AdminWebsiteConfigurationCreateAPIView, AdminUpdateSubSubCategoryDetailsAPIView, \
@@ -183,11 +183,13 @@ urlpatterns = [
 
 
     # subscribers apies
+    path('admin/subscribers-list-all/', AdminSubscribersListAllAPIView.as_view()),
     path('admin/subscribers-list/', AdminSubscribersListAPIView.as_view()),
     path('admin/subscriber-delete/<int:id>/', AdminSubscriberDeleteAPIView.as_view()),
 
 
     # customer apies
+    path('admin/customer-list-all/', AdminCustomerListAllAPIView.as_view()),
     path('admin/customer-list/', AdminCustomerListAPIView.as_view()),
     path('admin/customer-delete/<int:id>/', AdminCustomerDeleteAPIView.as_view()),
 
@@ -240,11 +242,6 @@ urlpatterns = [
     path('admin/offers-create/', AdminOffersCreateAPIView.as_view()),
     path('admin/offers-update/<int:id>/', AdminOffersUpdateAPIView.as_view()),
     path('admin/offers-delete/<int:id>/', AdminOffersDeleteAPIView.as_view()),
-
-
-    # subscriber apies
-    path('admin/subscribers-list/', AdminSubscribersListAPIView.as_view()),
-    path('admin/subscriber-delete/<int:id>/', AdminSubscriberDeleteAPIView.as_view()),
 
 
     # units apies

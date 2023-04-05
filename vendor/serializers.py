@@ -814,16 +814,6 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             # inventory update
             Inventory.objects.create(product=product_instance, initial_quantity=single_quantity, current_quantity=single_quantity)
 
-        # seller
-        try:
-            seller = validated_data["seller"]
-        except:
-            seller = ''
-        if seller:
-            print("seller")
-            print(seller)
-            Product.objects.filter(id=product_instance.id).update(seller=Seller.objects.get(seller_user=seller))
-
         # product_specification
         try:
             if product_specification:

@@ -10,6 +10,12 @@ class BlogCategorySerializer(serializers.ModelSerializer):
         model = BlogCategory
         fields = ['id', 'title', 'is_active']
 
+class BlogListDeleteSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Blog
+        fields = ['id', 'is_active']
+
 
 class BlogSerializer(serializers.ModelSerializer):
     title = serializers.CharField(required=True)

@@ -1212,6 +1212,18 @@ class AdminCustomerListAPIView(ListAPIView):
             raise ValidationError({"msg": 'You can not see customer list data, because you are not an Admin or a Staff or a vendor!'})
 
 
+class AdminCustomerListAllAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminCustomerListSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
+            queryset = User.objects.filter(is_customer=True, is_active=True)
+            return queryset
+        else:
+            raise ValidationError({"msg": 'You can not see customer list data, because you are not an Admin or a Staff or a vendor!'})
+
+
 class AdminCustomerDeleteAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     pagination_class = ProductCustomPagination
@@ -1952,6 +1964,18 @@ class AdminSpecificationDeleteAPIView(ListAPIView):
 class AdminSubscribersListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     pagination_class = ProductCustomPagination
+    serializer_class = AdminSubscribersListSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+            queryset = Subscription.objects.filter(is_active=True).order_by('-created_at')
+            return queryset
+        else:
+            raise ValidationError({"msg": 'You can not see Subscribers list data, because you are not an Admin or a Staff!'})
+
+
+class AdminSubscribersListAllAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
     serializer_class = AdminSubscribersListSerializer
 
     def get_queryset(self):

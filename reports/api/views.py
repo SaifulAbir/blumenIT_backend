@@ -286,8 +286,11 @@ class ProductStockReportAPI(ListAPIView):
     pagination_class = ProductCustomPagination
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
-            queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
+            if self.request.user.is_seller == True:
+                queryset = Product.objects.filter(status='PUBLISH',  seller=Seller.objects.get(seller_user=self.request.user.id)).order_by('-created_at')
+            else:
+                queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
 
             if queryset:
                 return queryset
@@ -304,11 +307,14 @@ class ProductStockReportSearchAPI(ListAPIView):
     pagination_class = ProductCustomPagination
 
     def get_queryset(self):
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             request = self.request
             search = request.GET.get('search')
 
-            queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
+            if self.request.user.is_seller == True:
+                queryset = Product.objects.filter(status='PUBLISH',  seller=Seller.objects.get(seller_user=self.request.user.id)).order_by('-created_at')
+            else:
+                queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
 
             if search:
                 queryset = queryset.filter(Q(title__icontains=search))

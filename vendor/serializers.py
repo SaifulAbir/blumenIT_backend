@@ -30,7 +30,7 @@ from django.conf import settings
 
 
 class SellerCreateSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(required=True)
+    # name = serializers.CharField(required=True)
     email = serializers.EmailField(required=True)
     phone = serializers.CharField(required=True)
     password = serializers.CharField(required=True)
@@ -40,7 +40,7 @@ class SellerCreateSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'address', 'phone', 'email', 'logo', 'is_active', 'password']
 
     def create(self, validated_data):
-        try:
+        # try:
             email_get = validated_data.pop('email')
             email_get_data = email_get.lower()
             if email_get:
@@ -98,8 +98,9 @@ class SellerCreateSerializer(serializers.ModelSerializer):
                     return Response({"details": "Phone number already exists"}, status=status.HTTP_400_BAD_REQUEST)
 
             return seller_instance
-        except:
-            return Response({"details": "Something went wrong!"}, status=status.HTTP_400_BAD_REQUEST)
+        # except:
+        #     print("hello")
+        #     return Response({"details": "Something went wrong!"}, status=status.HTTP_400_BAD_REQUEST)
 
 class SellerUpdateSerializer(serializers.ModelSerializer):
     name = serializers.CharField(required=True)
@@ -830,23 +831,6 @@ class ProductCreateSerializer(serializers.ModelSerializer):
         except:
             raise ValidationError('Problem of Product Specification info insert.')
 
-        # flash_deal
-        # try:
-        #     flash_deal_add_count = 0
-        #     if flash_deal:
-        #         for f_deal in flash_deal:
-        #             flash_deal_info = f_deal['flash_deal_info']
-        #             discount_type = f_deal['discount_type']
-        #             discount_amount = f_deal['discount_amount']
-        #             if flash_deal_info:
-        #                 if flash_deal_add_count <= 0:
-        #                     flash_deal_product_instance = FlashDealProduct.objects.create(product=product_instance, flash_deal_info=flash_deal_info, discount_type=discount_type, discount_amount=discount_amount)
-        #                     flash_deal_add_count += 1
-        #                 else:
-        #                     pass
-        # except:
-        #     raise ValidationError('Problem of Flash Deal info insert.')
-
         # offers
         try:
             if offers:
@@ -1477,9 +1461,10 @@ class RoleDataSerializer(serializers.ModelSerializer):
 
 class AdminProfileSerializer(serializers.ModelSerializer):
     staff_role = serializers.SerializerMethodField('get_staff_role')
+    seller_id = serializers.SerializerMethodField('get_seller_id')
     class Meta:
         model = User
-        fields = ['id', 'name', 'email', 'username', 'phone', 'date_joined', 'staff_role', 'is_seller', 'is_staff', 'is_superuser']
+        fields = ['id', 'name', 'email', 'username', 'phone', 'date_joined', 'staff_role', 'is_seller', 'is_staff', 'is_superuser', 'seller_id']
 
     def get_staff_role(self, obj):
         try:
@@ -1488,6 +1473,13 @@ class AdminProfileSerializer(serializers.ModelSerializer):
             return serializer.data
         except:
             return []
+
+    def get_seller_id(self, obj):
+        try:
+            seller_id = Seller.objects.filter(seller_user=obj.id, is_active = True)
+            return seller_id[0].id
+        except:
+            return None
 
 
 class ReviewListSerializer(serializers.ModelSerializer):

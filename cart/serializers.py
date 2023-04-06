@@ -12,9 +12,10 @@ from django.conf import settings
 
 class ProductSerializer(serializers.ModelSerializer):
     total_quantity = serializers.SerializerMethodField()
+    seller_user_id = serializers.CharField(source='seller.seller_user.id',read_only=True)
     class Meta:
         model = Product
-        fields = ['id', 'thumbnail', 'title', 'price', 'total_quantity']
+        fields = ['id', 'thumbnail', 'title', 'price', 'total_quantity', 'seller', 'seller_user_id']
 
     def get_total_quantity(self, obj):
         quantity = Product.objects.get(id=obj.id).quantity

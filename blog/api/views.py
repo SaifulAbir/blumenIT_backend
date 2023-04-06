@@ -11,8 +11,9 @@ from blog.pagination import BlogCustomPagination
 
 
 from blog.models import BlogCategory, Blog
-from blog.serializers import BlogCategorySerializer, BlogSerializer, CustomerBlogListSerializer, CustomerBlogDataSerializer, \
-    ReviewCreateSerializer
+from blog.serializers import BlogCategorySerializer, BlogSerializer, CustomerBlogListSerializer, \
+    CustomerBlogDataSerializer, \
+    ReviewCreateSerializer, BlogListDeleteSerializer
 
 
 class BlogCategoryCreateAPIView(CreateAPIView):
@@ -171,6 +172,24 @@ class AdminBlogSearchAPI(ListAPIView):
         else:
             raise ValidationError(
                 {"msg": 'You can not show Blog list, because you are not an Admin or a staff!'})
+
+class AdminBlogListBulkDeleteAPI(RetrieveUpdateAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = BlogListDeleteSerializer
+
+    def get_queryset(self):
+        ids = self.request.query_params.get('ids')
+        if ids:
+            return Blog.objects.filter(id__in=ids.split(','))
+        return Blog.objects.none()
+
+    def put(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        if not queryset.exists():
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        queryset.update(is_active=False)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class AdminBlogUpdateAPIView(RetrieveUpdateAPIView):

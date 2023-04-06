@@ -21,7 +21,7 @@ class Seller(AbstractTimeStamp):
     address = models.CharField(max_length=254, null=True, blank=True)
     logo = models.ImageField(null=True, blank=True, upload_to='images/logo')
     password = models.CharField(max_length=255, null=True, blank=True)
-    seller_user = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True, related_name="seller_user")
+    seller_user = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True, related_name="seller_seller_user")
     status = models.CharField(
         max_length=20, choices=SELLER_STATUSES, default=SELLER_STATUSES[0][0])
     is_active = models.BooleanField(default=True)

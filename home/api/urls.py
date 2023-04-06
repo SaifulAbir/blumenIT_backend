@@ -10,6 +10,7 @@ urlpatterns = [
 
     path('gaming-data/', GamingDataAPIView.as_view()),
     path('create-corporate-deal/', CorporateDealCreateAPIView.as_view()),
+    path('single-row-data/', SingleRowDataAPIView.as_view()),
 
     # path('gaming-category-list/', GamingCategoryListAPIView.as_view()),
     # path('product-list-by-category-gaming-popular-products/<int:id>/<str:type>/<int:pagination>/',

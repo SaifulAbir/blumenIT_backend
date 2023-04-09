@@ -74,7 +74,20 @@ class ProductListAPI(ListAPIView):
 
         return queryset
 
+class ProductListForOfferCreateAPI(ListAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = ProductListBySerializer
 
+    def get_queryset(self):
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+            queryset = Product.objects.filter(is_active=True)
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'Products does not exist!'})
+        else:
+            raise ValidationError({"msg": 'You can not view offers list, because you are not an Admin or a Staff!'})
 class ProductListByCategoryForOfferCreateAPI(ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = ProductListBySerializer
@@ -665,7 +678,7 @@ class OffersListAPIView(ListAPIView):
 
     def get_queryset(self):
         today_date = datetime.today()
-        queryset = Offer.objects.filter(end_date__gte = today_date,is_active=True).order_by('-created_at')
+        queryset = Offer.objects.filter(end_date__gte = today_date, is_active=True).order_by('-created_at')
         if queryset:
             return queryset
         else:

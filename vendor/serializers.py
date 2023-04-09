@@ -1862,8 +1862,8 @@ class AdminOfferSerializer(serializers.ModelSerializer):
         read_only_field = ['id']
         fields = [  'id',
                     'title',
-                    'product_category',
-                    'product_category_title',
+                    # 'product_category',
+                    # 'product_category_title',
                     # 'offer_category',
                     # 'offer_category_title',
                     'start_date',

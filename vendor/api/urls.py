@@ -54,7 +54,8 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminContactUsDetailsAPIView, AdminOffersListAllAPIView, AdminSpecificationCreateAPIView, \
     AdminContactUsDeleteAPIView, AdminPosCustomerCreateAPIView, AdminWebsiteConfigurationViewAPIView, \
     AdminOfferCategoryListAPIView, AdminBrandIsGamingToggleAPIView, AdminCategoryIsPcBuilderToggleAPIView, \
-    SellerListAPIView, AdminWebsiteGeneralSettingsView, AdminWebsiteGeneralSettingsUpdateAPIView
+    SellerListAPIView, AdminWebsiteGeneralSettingsView, AdminWebsiteGeneralSettingsUpdateAPIView, \
+    AdminDeleteAttributeValueAPIView
 
 urlpatterns = [
 
@@ -160,6 +161,7 @@ urlpatterns = [
     path('admin/update-attribute/<int:id>/', AdminUpdateAttributeAPIView.as_view()),
     path('admin/add-new-attribute-value/', AdminAddNewAttributeValueAPIView.as_view()),
     path('admin/update-attribute-value/<int:id>/', AdminUpdateAttributeValueAPIView.as_view()),
+    path('admin/delete-attribute-value/<int:id>/', AdminDeleteAttributeValueAPIView.as_view()),
     path('admin/filter-attribute-list/', AdminFilterAttributeListAPIView.as_view()),
     path('admin/add-new-filter-attribute/', AdminAddNewFilterAttributeAPIView.as_view()),
     path('admin/update-filter-attribute/<int:id>/', AdminUpdateFilterAttributeAPIView.as_view()),

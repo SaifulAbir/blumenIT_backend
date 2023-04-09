@@ -1462,9 +1462,10 @@ class RoleDataSerializer(serializers.ModelSerializer):
 class AdminProfileSerializer(serializers.ModelSerializer):
     staff_role = serializers.SerializerMethodField('get_staff_role')
     seller_id = serializers.SerializerMethodField('get_seller_id')
+    seller_logo = serializers.SerializerMethodField('get_seller_logo')
     class Meta:
         model = User
-        fields = ['id', 'name', 'email', 'username', 'phone', 'date_joined', 'staff_role', 'is_seller', 'is_staff', 'is_superuser', 'seller_id']
+        fields = ['id', 'name', 'email', 'username', 'phone', 'date_joined', 'staff_role', 'is_seller', 'is_staff', 'is_superuser', 'seller_id', 'seller_logo']
 
     def get_staff_role(self, obj):
         try:
@@ -1478,6 +1479,14 @@ class AdminProfileSerializer(serializers.ModelSerializer):
         try:
             seller_id = Seller.objects.filter(seller_user=obj.id, is_active = True)
             return seller_id[0].id
+        except:
+            return None
+
+    def get_seller_logo(self, obj):
+        try:
+            seller_id = Seller.objects.filter(seller_user=obj.id, is_active = True)
+            photo_url=seller_id[0].logo.url
+            return self.context['request'].build_absolute_uri(photo_url)
         except:
             return None
 

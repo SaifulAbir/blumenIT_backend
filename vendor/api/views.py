@@ -1160,6 +1160,44 @@ class AdminOrderViewAPI(RetrieveAPIView):
                 {"msg": 'You can not see order, because you are not an Admin or a Staff or a vendor!'})
 
 
+class SallerOrderListSearchAPI(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    pagination_class = OrderCustomPagination
+    serializer_class = AdminOrderListSerializer
+
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
+            request = self.request
+            order_id = request.GET.get('order_id')
+            order_status = request.GET.get('order_status')
+            date = request.GET.get('order_date')
+            start_date = request.GET.get('start_date')
+            end_date = request.GET.get('end_date')
+            seller = request.GET.get('seller')
+
+            if seller:
+                queryset = Order.objects.filter(is_active=True, order_item_order__product__seller=seller).order_by('-created_at')
+            else:
+                queryset = Order.objects.filter(is_active=True).order_by('-created_at')
+
+            if order_id:
+                queryset = queryset.filter(Q(order_id__icontains=order_id))
+            if order_status:
+                queryset = queryset.filter(order_status__icontains=order_status)
+            if date:
+                queryset = queryset.filter(Q(order_date__icontains=date))
+            if start_date and end_date:
+                queryset = queryset.filter(
+                    Q(order_date__gte=start_date) & Q(order_date__lte=end_date)
+                )
+
+            return queryset
+        else:
+            raise ValidationError(
+                {"msg": 'You can not see Order list, because you are not an Admin or a Staff!'})
+
+
 class OrderListSearchAPI(ListAPIView):
     permission_classes = [IsAuthenticated]
     pagination_class = OrderCustomPagination

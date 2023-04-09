@@ -67,20 +67,10 @@ class ProductListAPI(ListAPIView):
         seller = request.GET.get('seller')
 
         # queryset = Product.objects.filter(Q(status='PUBLISH') | Q(is_active=True)).order_by('-created_at')
-        # print(queryset.count())
-
         if seller:
-            # queryset = queryset.filter(seller__id=seller)
             queryset = Product.objects.filter(status='PUBLISH' , is_active=True, seller__id=seller).order_by('-created_at')
-            print('If')
-            print(queryset.count())
         else:
             queryset = Product.objects.filter(status='PUBLISH', is_active=True).order_by('-created_at')
-            print('Else')
-            print(queryset.count())
-
-
-
 
         return queryset
 

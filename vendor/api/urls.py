@@ -32,7 +32,7 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminOffersUpdateAPIView, AdminOffersDeleteAPIView, AdminPosProductListAPI, AdminShippingCountryListAPIView, \
     AdminShippingCountryListFilterAPIView, AdminShippingCountryAddAPIView, AdminShippingCountryUpdateAPIView, \
     AdminShippingCountryDeleteAPIView, AdminShippingCityListAPIView, AdminShippingCityAddAPIView, \
-    AdminShippingCityUpdateAPIView, AdminSellerOrderList, \
+    AdminShippingCityUpdateAPIView, AdminSellerOrderList, AdminDeleteProductImageAPIView, \
     AdminShippingCityDeleteAPIView, AdminShippingStateListAPIView, AdminShippingStateAddAPIView, \
     AdminShippingStateUpdateAPIView, AdminSubscribersListAllAPIView, AdminCustomerListAllAPIView, \
     AdminPosSearchAPI, AdminPosOrderAPIView, AdminShippingStateDeleteAPIView, AdminShippingClassAddAPIView, \
@@ -68,6 +68,7 @@ urlpatterns = [
     path('admin/product-create/', AdminProductCreateAPIView.as_view()),
     path('admin/product-update/<str:slug>/',AdminProductUpdateAPIView.as_view()),
     path('admin/product-update-details/<str:slug>/',AdminProductUpdateDetailsAPIView.as_view()),
+    path('admin/delete-product-image/<int:id>/', AdminDeleteProductImageAPIView.as_view()),
     path('admin/product-list/', AdminProductListAPI.as_view()),
     path('admin/product-list-search/', AdminProductListSearchAPI.as_view()),
     path('admin/product-delete/<str:slug>/',AdminProductDeleteAPI.as_view()),

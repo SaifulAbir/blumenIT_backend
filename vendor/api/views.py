@@ -1072,6 +1072,52 @@ class AdminOrderList(ListAPIView):
                 {"msg": 'You can not see order list, because you are not an Admin or a Staff!'})
 
 
+class AdminSellerOrderList(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminOrderListSerializer
+    pagination_class = OrderCustomPagination
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+            request = self.request
+            type = request.GET.get('type')
+            order_status = request.GET.get('order_status')
+            seller = request.GET.get('seller')
+
+            if seller:
+                queryset = Order.objects.filter(is_active=True, order_item_order__product__seller=seller).order_by('-created_at')
+            else:
+                queryset = Order.objects.filter(is_active=True).order_by('-created_at')
+
+            if type == 'in_house_order':
+                queryset = queryset.filter(in_house_order=True)
+            if type == 'seller_order':
+                queryset = queryset.filter(is_active=True, vendor__isnull=False).order_by('vendor')
+            if type == 'pick_up_point_order':
+                queryset = queryset.filter(is_active=True, delivery_address__isnull=True).order_by('vendor')
+
+            if order_status == 'PENDING':
+                queryset = queryset.filter(order_status = 'PENDING', is_active=True)
+            if order_status == 'CONFIRMED':
+                queryset = queryset.filter(order_status = 'CONFIRMED', is_active=True)
+            if order_status == 'PICKED-UP':
+                queryset = queryset.filter(order_status = 'PICKED-UP', is_active=True)
+            if order_status == 'DELIVERED':
+                queryset = queryset.filter(order_status = 'DELIVERED', is_active=True)
+            if order_status == 'RETURN':
+                queryset = queryset.filter(order_status = 'RETURN', is_active=True)
+            if order_status == 'CANCEL':
+                queryset = queryset.filter(order_status = 'CANCEL', is_active=True)
+
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError({"msg": "There is no order till now "})
+        else:
+            raise ValidationError(
+                {"msg": 'You can not see order list, because you are not an Admin or a Staff!'})
+
+
 class AdminOrderViewAPI(RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     # serializer_class = AdminOrderViewSerializer(many=True, context={"request": request})

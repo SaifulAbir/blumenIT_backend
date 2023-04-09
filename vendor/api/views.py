@@ -958,6 +958,27 @@ class AdminUpdateAttributeValueAPIView(RetrieveUpdateAPIView):
             raise ValidationError({"msg": 'You can not update attribute value, because you are not an Admin or a Staff!'})
 
 
+class AdminDeleteAttributeValueAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AttributeValuesSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+            attribute_value_obj = AttributeValues.objects.filter(id=id).exists()
+            if attribute_value_obj:
+                AttributeValues.objects.filter(id=id).update(is_active=False)
+                queryset = AttributeValues.objects.filter(is_active=True).order_by('-created_at')
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'Attribute Value does not found!'})
+        else:
+            raise ValidationError({"msg": 'You can not update attribute value, because you are not an Admin or a Staff!'})
+
+
 class AdminFilterAttributeListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     pagination_class = ProductCustomPagination

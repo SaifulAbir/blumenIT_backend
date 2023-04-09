@@ -10,7 +10,7 @@ from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAP
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from product.models import Brand, Category, DiscountTypes, Product, ProductReview, SubCategory, SubSubCategory, Tags, \
-    Units, \
+    Units, ProductImages, \
     ProductVideoProvider, VatType, FilterAttributes, Attribute, AttributeValues, Inventory, FlashDealInfo, Warranty, \
     ShippingClass, SpecificationTitle, Offer, ShippingCountry, ShippingState, ShippingCity, OfferCategory
 from user.models import User
@@ -207,6 +207,24 @@ class AdminProductUpdateDetailsAPIView(RetrieveAPIView):
                     {"msg": 'Product does not exist!'})
         else:
             raise ValidationError({"msg": 'You can not update this product, because you are not an Admin or a Staff or a vendor!'})
+        
+
+class AdminDeleteProductImageAPIView(UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def put(self, request, *args, **kwargs):
+        try:
+            image_id = self.kwargs['id']
+            product_image_obj_exist = ProductImages.objects.filter(id=image_id).exists()
+            if product_image_obj_exist:
+                product_image_obj = ProductImages.objects.filter(id=image_id)
+                if product_image_obj:
+                    product_image_obj.update(is_active=False)
+            return Response({"msg": "Successfully deleted!"})
+        except KeyError:
+            raise ValidationError({"msg": 'Image delete failed!'})
 
 
 class AdminProductListAPI(ListAPIView):
@@ -1178,6 +1196,8 @@ class SallerOrderListSearchAPI(ListAPIView):
 
             if seller:
                 queryset = Order.objects.filter(is_active=True, order_item_order__product__seller=seller).order_by('-created_at')
+                print('seller')
+                print(seller)
             else:
                 queryset = Order.objects.filter(is_active=True).order_by('-created_at')
 
@@ -3150,7 +3170,6 @@ class AdminWebsiteGeneralSettingsUpdateAPIView(UpdateAPIView):
 
 class AdminDeleteWebsiteConfigurationImageAPIView(UpdateAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = VendorUnitSerializer
     lookup_field = 'id'
     lookup_url_kwarg = "id"
 

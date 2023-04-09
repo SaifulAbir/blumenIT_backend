@@ -26,7 +26,7 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminSubscriberDeleteAPIView, AdminCorporateDealListAPIView, AdminCorporateDealDeleteAPIView, \
     AdminAttributeDeleteAPIView, \
     AdminOrderDeleteAPIView, AdminCouponCreateAPIView, AdminCouponListAPIView, AdminCouponUpdateAPIView, \
-    AdminCouponDeleteAPIView, \
+    AdminCouponDeleteAPIView, SallerOrderListSearchAPI, \
     AdminCustomerDeleteAPIView, AdminBrandUpdateAPIView, AdminOffersListAPIView, AdminOffersCreateAPIView, \
     AdminOffersDetailsAPIView, AdminDeleteWebsiteConfigurationImageAPIView, \
     AdminOffersUpdateAPIView, AdminOffersDeleteAPIView, AdminPosProductListAPI, AdminShippingCountryListAPIView, \
@@ -131,10 +131,11 @@ urlpatterns = [
 
     # order apies
     path('admin/all-order-list/', AdminOrderList.as_view()),
+    path('admin/order-list-search/', OrderListSearchAPI.as_view()),
     path('admin/seller-order/', AdminSellerOrderList.as_view()),
+    path('admin/seller-order-search/', SallerOrderListSearchAPI.as_view()),
     path('admin/order-view/<int:id>/', AdminOrderViewAPI.as_view()),
     path('admin/order-update/<int:id>/', AdminOrderUpdateAPI.as_view()),
-    path('admin/order-list-search/', OrderListSearchAPI.as_view()),
     path('admin/order-delete/<int:id>/', AdminOrderDeleteAPIView.as_view()),
 
 

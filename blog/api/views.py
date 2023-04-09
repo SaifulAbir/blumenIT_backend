@@ -241,7 +241,7 @@ class CustomerBlogListAPIView(ListAPIView):
     pagination_class = BlogCustomPagination
 
     def get_queryset(self):
-        queryset = Blog.objects.filter(is_active=True).order_by('-created_at')
+        queryset = Blog.objects.filter(is_active=True, status='PUBLISH').order_by('-created_at')
         if queryset:
             return queryset
         else:

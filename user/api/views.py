@@ -85,7 +85,7 @@ class SendOTPAPIView(CreateAPIView):
         if is_login == "false":
             email = check_dict_data_rise_error("email", request_data=request.data, arrise=True)
         phone = check_dict_data_rise_error("phone", request_data=request.data, arrise=True)
-        name = check_dict_data_rise_error("full_name", request_data=request.data, arrise=True)
+        name = check_dict_data_rise_error("full_name", request_data=request.data, arrise=False)
 
         if is_login == "false":
             try:

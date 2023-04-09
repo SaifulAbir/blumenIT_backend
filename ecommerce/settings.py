@@ -59,7 +59,8 @@ INSTALLED_APPS = [
     'upload_file',
     'support_ticket',
     'reports',
-    'stuff'
+    'stuff',
+    'ckeditor'
     # 'admin_lte',
     # 'django_countries',
 ]

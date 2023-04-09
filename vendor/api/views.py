@@ -1,6 +1,7 @@
 from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework import status
+from datetime import datetime
 
 from blog.models import Blog
 from product.pagination import ProductCustomPagination
@@ -2338,7 +2339,8 @@ class AdminOffersListAPIView(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True:
-            queryset = Offer.objects.filter(is_active=True).order_by('-created_at')
+            today_date = datetime.today()
+            queryset = Offer.objects.filter(end_date__gte = today_date, is_active=True).order_by('-created_at')
             if queryset:
                 return queryset
             else:
@@ -2902,7 +2904,8 @@ class AdminOffersListAllAPIView(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
-            queryset = Offer.objects.filter(is_active=True).order_by('-created_at')
+            today_date = datetime.today()
+            queryset = Offer.objects.filter(end_date__gte = today_date, cis_active=True).order_by('-created_at')
             if queryset:
                 return queryset
             else:

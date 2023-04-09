@@ -15,6 +15,7 @@ urlpatterns = [
           GamingProductListByCategoryPopularProductsAPI.as_view()),
      path('product-list-by-category/<int:cid>/<int:pagination>/',
           ProductListByCategoryAPI.as_view()),
+     path('product-list-for-offer-create/', ProductListForOfferCreateAPI.as_view()),
      path('product-list-by-category-for-offer-create/<int:cid>/<int:pagination>/',
           ProductListByCategoryForOfferCreateAPI.as_view()),
      path('product-list-by-sub-category/<int:subcid>/<int:pagination>/',

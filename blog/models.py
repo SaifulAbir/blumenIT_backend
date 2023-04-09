@@ -4,6 +4,7 @@ from user.models import User
 from django.db.models import Avg
 from django.db.models.signals import pre_save
 from .utils import unique_slug_generator_blog
+from ckeditor.fields import RichTextField
 
 
 class BlogCategory(AbstractTimeStamp):
@@ -29,7 +30,7 @@ class Blog(AbstractTimeStamp):
     blog_category = models.ForeignKey(
         BlogCategory, related_name='blog_category', on_delete=models.PROTECT, null=True, blank=True)
     short_description = models.TextField(default='', null=True, blank=True)
-    full_description = models.TextField(default='', null=True, blank=True)
+    full_description = RichTextField(default='', null=True, blank=True)
     banner = models.ImageField(upload_to='blog', blank=True, null=True)
     thumbnail = models.ImageField(upload_to='blog', blank=True, null=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='blog_created_user', blank=True, null=True)

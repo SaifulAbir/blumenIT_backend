@@ -28,7 +28,7 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminOrderDeleteAPIView, AdminCouponCreateAPIView, AdminCouponListAPIView, AdminCouponUpdateAPIView, \
     AdminCouponDeleteAPIView, \
     AdminCustomerDeleteAPIView, AdminBrandUpdateAPIView, AdminOffersListAPIView, AdminOffersCreateAPIView, \
-    AdminOffersDetailsAPIView, \
+    AdminOffersDetailsAPIView, AdminDeleteWebsiteConfigurationImageAPIView, \
     AdminOffersUpdateAPIView, AdminOffersDeleteAPIView, AdminPosProductListAPI, AdminShippingCountryListAPIView, \
     AdminShippingCountryListFilterAPIView, AdminShippingCountryAddAPIView, AdminShippingCountryUpdateAPIView, \
     AdminShippingCountryDeleteAPIView, AdminShippingCityListAPIView, AdminShippingCityAddAPIView, \
@@ -304,6 +304,8 @@ urlpatterns = [
     path('admin/website-configuration/', AdminWebsiteConfigurationCreateAPIView.as_view()),
     path('admin/website-configuration-view/', AdminWebsiteConfigurationViewAPIView.as_view()),
     path('admin/website-configuration-update/<int:pk>/', AdminWebsiteConfigurationUpdateAPIView.as_view()),
+
+    path('admin/delete-website-configuration-image/<int:id>/', AdminDeleteWebsiteConfigurationImageAPIView.as_view()),
 
     # general-settings api
     path('admin/website-general-settings-view/', AdminWebsiteGeneralSettingsView.as_view()),

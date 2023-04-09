@@ -3084,4 +3084,25 @@ class AdminWebsiteGeneralSettingsUpdateAPIView(UpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = GeneralSettingsViewSerializer
     queryset = HomeSingleRowData.objects.all()
+
+
+class AdminDeleteWebsiteConfigurationImageAPIView(UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = VendorUnitSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def put(self, request, *args, **kwargs):
+        try:
+            image_id = self.kwargs['id']
+            advertisement_obj_exist = Advertisement.objects.filter(id=image_id).exists()
+            if advertisement_obj_exist:
+                advertisement_obj = Advertisement.objects.filter(id=image_id)
+                if advertisement_obj:
+                    advertisement_obj.update(is_active=False)
+            return Response({"msg": "Successfully deleted!"})
+        except KeyError:
+            raise ValidationError({"msg": 'Image delete failed!'})
+
+
 #website-configuration related apies................................... end

@@ -11,9 +11,10 @@ class SalesReportSerializer(serializers.ModelSerializer):
     customer_phone = serializers.CharField(source="user.phone", read_only=True)
     # total_price = serializers.SerializerMethodField('get_total_price')
     vat_amount = serializers.FloatField(read_only=True)
+    sellers = serializers.SerializerMethodField('get_sellers')
     class Meta:
         model = Order
-        fields = ['id', 'order_id', 'num_of_product', 'customer_name', 'customer_email', 'customer_phone', 'total_price', 'order_status', 'payment_status', 'refund', 'order_date', 'vat_amount', 'discount_amount']
+        fields = ['id', 'order_id', 'num_of_product', 'customer_name', 'customer_email', 'customer_phone', 'total_price', 'order_status', 'payment_status', 'refund', 'order_date', 'vat_amount', 'discount_amount', 'sellers']
 
     def get_num_of_product(self, obj):
         try:
@@ -21,6 +22,17 @@ class SalesReportSerializer(serializers.ModelSerializer):
             return number
         except:
             return 0
+
+    def get_sellers(self, obj):
+        try:
+            sellers_names = []
+            order_items = OrderItem.objects.filter(order=obj, is_active=True)
+            for order_item in order_items:
+                seller = order_item.product.seller.name
+                sellers_names.append(seller)
+            return sellers_names
+        except:
+            return None
 
     # def get_total_price(self, obj):
     #     order_items = OrderItem.objects.filter(order=obj)
@@ -68,8 +80,11 @@ class VendorProductReportSerializer(serializers.ModelSerializer):
         fields = ['id', 'order_id', 'product_title', 'product_price', 'quantity', 'order_date', 'order_status', 'seller_name', 'product_vat']
 
     def get_seller_name(self, obj):
-        seller_name = obj.product.seller.name
-        return seller_name
+        try:
+            seller_name = obj.product.seller.name
+            return seller_name
+        except:
+            return None
 
 
 class InHouseProductSerializer(serializers.ModelSerializer):

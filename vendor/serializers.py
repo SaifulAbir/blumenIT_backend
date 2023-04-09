@@ -1626,11 +1626,11 @@ class AdminOrderViewSerializer(serializers.ModelSerializer):
             total_price += sub_total
 
     def get_order_item_order(self, obj):
-        user = self.context.get("request").user
-        if user.is_seller == True:
-            order_items = OrderItem.objects.filter(is_active=True, order=obj, product__seller=Seller.objects.get(seller_user=user.id))
-        else:
-            order_items = OrderItem.objects.filter(is_active=True, order=obj)
+        # user = self.context.get("request").user
+        # if user.is_seller == True:
+        #     order_items = OrderItem.objects.filter(is_active=True, order=obj, product__seller=Seller.objects.get(seller_user=user.id))
+        # else:
+        order_items = OrderItem.objects.filter(is_active=True, order=obj)
 
         return OrderItemSerializer(order_items, many=True).data
 

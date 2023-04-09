@@ -1074,6 +1074,7 @@ class AdminOrderList(ListAPIView):
 
 class AdminOrderViewAPI(RetrieveAPIView):
     permission_classes = [IsAuthenticated]
+    # serializer_class = AdminOrderViewSerializer(many=True, context={"request": request})
     serializer_class = AdminOrderViewSerializer
     lookup_field = 'id'
     lookup_url_kwarg = "id"

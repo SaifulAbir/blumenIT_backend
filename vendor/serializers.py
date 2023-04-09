@@ -1462,9 +1462,10 @@ class RoleDataSerializer(serializers.ModelSerializer):
 class AdminProfileSerializer(serializers.ModelSerializer):
     staff_role = serializers.SerializerMethodField('get_staff_role')
     seller_id = serializers.SerializerMethodField('get_seller_id')
+    seller_logo = serializers.SerializerMethodField('get_seller_logo')
     class Meta:
         model = User
-        fields = ['id', 'name', 'email', 'username', 'phone', 'date_joined', 'staff_role', 'is_seller', 'is_staff', 'is_superuser', 'seller_id']
+        fields = ['id', 'name', 'email', 'username', 'phone', 'date_joined', 'staff_role', 'is_seller', 'is_staff', 'is_superuser', 'seller_id', 'seller_logo']
 
     def get_staff_role(self, obj):
         try:
@@ -1478,6 +1479,14 @@ class AdminProfileSerializer(serializers.ModelSerializer):
         try:
             seller_id = Seller.objects.filter(seller_user=obj.id, is_active = True)
             return seller_id[0].id
+        except:
+            return None
+
+    def get_seller_logo(self, obj):
+        try:
+            seller_id = Seller.objects.filter(seller_user=obj.id, is_active = True)
+            photo_url=seller_id[0].logo.url
+            return self.context['request'].build_absolute_uri(photo_url)
         except:
             return None
 
@@ -1574,12 +1583,11 @@ class AdminOrderListSerializer(serializers.ModelSerializer):
 
 
 class AdminOrderViewSerializer(serializers.ModelSerializer):
-    order_item_order = OrderItemSerializer(many=True, read_only=True)
+    # order_item_order = OrderItemSerializer(many=True, read_only=True)
+    order_item_order = serializers.SerializerMethodField('get_order_item_order')
     user = CustomerProfileSerializer(read_only=True)
     delivery_address = DeliveryAddressSerializer(read_only=True)
-    # total_price = serializers.SerializerMethodField('get_total_price')
     payment_method = serializers.CharField(source='payment_type.type_name',read_only=True)
-    # sub_total = serializers.SerializerMethodField('get_sub_total')
     vat_amount = serializers.FloatField(read_only=True)
     warranty_price = serializers.SerializerMethodField('get_warranty_price')
 
@@ -1587,36 +1595,6 @@ class AdminOrderViewSerializer(serializers.ModelSerializer):
         model = Order
         fields = ['user', 'delivery_address', 'order_id', 'product_count', 'order_date', 'order_status', 'order_date', 'total_price', 'payment_status', 'payment_method', 'order_item_order', 'sub_total', 'vat_amount', 'shipping_cost', 'coupon_discount_amount', 'comment', 'warranty_price', 'discount_amount']
 
-    # def get_sub_total(self, obj):
-    #     order_items = OrderItem.objects.filter(order=obj)
-    #     prices = []
-    #     for order_item in order_items:
-    #         price = order_item.unit_price
-    #         if order_item.unit_price_after_add_warranty != 0.0:
-    #             price = order_item.unit_price_after_add_warranty
-    #         quantity = order_item.quantity
-    #         t_price = float(price) * float(quantity)
-    #         prices.append(t_price)
-    #         sub_total = float(sum(prices))
-    #     return sub_total
-
-    # def get_total_price(self, obj):
-    #     order_items = OrderItem.objects.filter(order=obj)
-    #     prices = []
-    #     total_price = 0
-    #     for order_item in order_items:
-    #         price = order_item.unit_price
-    #         if order_item.unit_price_after_add_warranty != 0.0:
-    #             price = order_item.unit_price_after_add_warranty
-    #         quantity = order_item.quantity
-    #         t_price = float(price) * float(quantity)
-    #         prices.append(t_price)
-    #     if obj.vat_amount:
-    #         sub_total = float(sum(prices)) + float(obj.vat_amount)
-    #     else:
-    #         sub_total = float(sum(prices))
-    #     if sub_total:
-    #         total_price += sub_total
     def get_warranty_price(self, obj):
         order_items = OrderItem.objects.filter(order=obj)
         prices = []
@@ -1627,7 +1605,6 @@ class AdminOrderViewSerializer(serializers.ModelSerializer):
                 t_price = float(w_prices) - float(price)
                 prices.append(t_price)
         warranty_price = sum(prices)
-            # print(t_price)
         return warranty_price
 
     def get_total_price(self, obj):
@@ -1648,18 +1625,14 @@ class AdminOrderViewSerializer(serializers.ModelSerializer):
         if sub_total:
             total_price += sub_total
 
-    #     shipping_cost = obj.shipping_cost
-    #     if shipping_cost:
-    #         total_price += shipping_cost
+    def get_order_item_order(self, obj):
+        user = self.context.get("request").user
+        if user.is_seller == True:
+            order_items = OrderItem.objects.filter(is_active=True, order=obj, product__seller=Seller.objects.get(seller_user=user.id))
+        else:
+            order_items = OrderItem.objects.filter(is_active=True, order=obj)
 
-    #     coupon_discount_amount = obj.coupon_discount_amount
-    #     if coupon_discount_amount:
-    #         total_price -= coupon_discount_amount
-
-    #     discount_amount = obj.discount_amount
-    #     if discount_amount:
-    #         total_price -= discount_amount
-    #     return total_price
+        return OrderItemSerializer(order_items, many=True).data
 
 
 class AdminOrderUpdateSerializer(serializers.ModelSerializer):

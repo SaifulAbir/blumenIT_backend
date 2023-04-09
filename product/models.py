@@ -350,7 +350,7 @@ class Product(AbstractTimeStamp):
         return self.reviews.aggregate(Avg('rating'))
 
     def __str__(self):
-        return self.title + ' ' + str(self.category.id) + ' ' + str(self.status) + ' ' + str(self.id)
+        return self.title + ' ' + str(self.status) + ' ' + str(self.is_active) + ' ' + str(self.seller)
 
 def pre_save_product(sender, instance, *args, **kwargs):
     if not instance.slug:

@@ -87,24 +87,6 @@ class CheckoutDetailsSerializer(serializers.ModelSerializer):
         except:
             return ''
 
-    # def get_sub_total(self, obj):
-    #     order_items = OrderItem.objects.filter(order=obj)
-    #     prices = []
-    #     for order_item in order_items:
-    #         price = order_item.unit_price
-    #         if order_item.unit_price_after_add_warranty != 0.0:
-    #             price = order_item.unit_price_after_add_warranty
-    #         quantity = order_item.quantity
-    #         t_price = float(price) * float(quantity)
-    #         prices.append(t_price)
-        # if obj.vat_amount:
-        #     sub_total = float(sum(prices)) + float(obj.vat_amount)
-        # else:
-            # sub_total = float(sum(prices))
-
-        # sub_total = float(sum(prices))
-        # return sub_total
-
     def get_product_price(self, obj):
         order_items = OrderItem.objects.filter(order=obj)
         prices = []
@@ -125,8 +107,12 @@ class CheckoutDetailsSerializer(serializers.ModelSerializer):
                 t_price = float(w_prices) - float(price)
                 prices.append(t_price)
         warranty_price = sum(prices)
-            # print(t_price)
-        return warranty_price
+        warranty_price_value = round(warranty_price, 2)
+        if warranty_price_value:
+            return warranty_price_value
+        else:
+            return 0.00
+
 
     # def get_total_price(self, obj):
     #     order_items = OrderItem.objects.filter(order=obj)

@@ -3170,6 +3170,7 @@ class AdminWebsiteGeneralSettingsUpdateAPIView(UpdateAPIView):
 
 class AdminDeleteWebsiteConfigurationImageAPIView(UpdateAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = WebsiteConfigurationViewSerializer
     lookup_field = 'id'
     lookup_url_kwarg = "id"
 

@@ -219,8 +219,11 @@ class CustomerOrderDetailsSerializer(serializers.ModelSerializer):
                 t_price = float(w_prices) - float(price)
                 prices.append(t_price)
         warranty_price = sum(prices)
-            # print(t_price)
-        return warranty_price
+        warranty_price_value = round(warranty_price, 2)
+        if warranty_price_value:
+            return warranty_price_value
+        else:
+            return 0.00
 
     # def get_total_price(self, obj):
     #     order_items = OrderItem.objects.filter(order=obj)

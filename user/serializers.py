@@ -195,20 +195,6 @@ class CustomerOrderDetailsSerializer(serializers.ModelSerializer):
         except:
             return None
 
-    # def get_sub_total(self, obj):
-    #     order_items = OrderItem.objects.filter(order=obj)
-    #     prices = []
-    #     for order_item in order_items:
-    #         price = order_item.unit_price
-    #         quantity = order_item.quantity
-    #         t_price = float(price) * float(quantity)
-    #         prices.append(t_price)
-    #     if obj.vat_amount:
-    #         sub_total = float(sum(prices)) + float(obj.vat_amount)
-    #     else:
-    #         sub_total = float(sum(prices))
-    #     return sub_total
-
     def get_warranty_price(self, obj):
         order_items = OrderItem.objects.filter(order=obj)
         prices = []
@@ -224,37 +210,6 @@ class CustomerOrderDetailsSerializer(serializers.ModelSerializer):
             return warranty_price_value
         else:
             return 0.00
-
-    # def get_total_price(self, obj):
-    #     order_items = OrderItem.objects.filter(order=obj)
-    #     prices = []
-    #     total_price = 0.0
-    #     for order_item in order_items:
-    #         price = order_item.unit_price
-    #         if order_item.unit_price_after_add_warranty != 0.0:
-    #             price = order_item.unit_price_after_add_warranty
-    #         quantity = order_item.quantity
-    #         t_price = float(price) * float(quantity)
-    #         prices.append(t_price)
-    #     if obj.vat_amount:
-    #         sub_total = float(sum(prices)) + float(obj.vat_amount)
-    #     else:
-    #         sub_total = float(sum(prices))
-    #     if sub_total:
-    #         total_price += sub_total
-
-    #     shipping_cost = obj.shipping_cost
-    #     if shipping_cost:
-    #         total_price += shipping_cost
-
-    #     coupon_discount_amount = obj.coupon_discount_amount
-    #     if coupon_discount_amount:
-    #         total_price -= coupon_discount_amount
-
-    #     discount_amount = obj.discount_amount
-    #     if discount_amount:
-    #         total_price -= discount_amount
-    #     return total_price
 
     def get_delivery_date(self, obj):
         try:

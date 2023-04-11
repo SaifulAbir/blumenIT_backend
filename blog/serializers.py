@@ -20,6 +20,7 @@ class BlogListDeleteSerializer(serializers.ModelSerializer):
 class BlogSerializer(serializers.ModelSerializer):
     title = serializers.CharField(required=True)
     slug = serializers.SlugField(read_only=True)
+    blog_category = BlogCategorySerializer()
 
     class Meta:
         model = Blog

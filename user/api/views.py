@@ -335,7 +335,7 @@ class CustomerOrdersList(ListAPIView):
             if queryset:
                 return queryset
             else:
-                raise ValidationError({"msg": "There is no orders for you."})
+                return []
         else:
             raise ValidationError(
                 {"msg": 'You can not show order list, because you are not an User!'})
@@ -391,7 +391,7 @@ class CustomerAddressListAPIView(ListAPIView):
             if queryset:
                 return queryset
             else:
-                raise ValidationError({"msg": "There is no orders for you."})
+                return []
         else:
             raise ValidationError(
                 {"msg": 'You can not show address list, because you are not an Customer!'})

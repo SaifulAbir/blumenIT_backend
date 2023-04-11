@@ -1298,21 +1298,6 @@ class AdminOrderUpdateAPI(RetrieveUpdateAPIView):
                 if order_status:
                     order_obj.update(order_status=order_status)
                     # update inventory
-                    # if order_status == 'CONFIRMED':
-                    #     order_obj_get = Order.objects.get(id=order_id)
-                    #     order_items_obj_exist = OrderItem.objects.filter(order=order_obj_get.id).exists()
-                    #     if order_items_obj_exist:
-                    #         order_items = OrderItem.objects.filter(order=order_obj_get.id)
-                    #         for order_item in order_items:
-                    #             product = order_item.product
-                    #             quantity = order_item.quantity
-                    #             product_filter_obj = Product.objects.filter(id=product.id)
-                    #             inventory_obj = Inventory.objects.filter(product=product).latest('created_at')
-                    #             new_update_quantity = int(inventory_obj.current_quantity) - int(quantity)
-                    #             product_filter_obj.update(quantity = new_update_quantity)
-                    #             inventory_obj.current_quantity = new_update_quantity
-                    #             inventory_obj.save()
-
                     if order_status == 'RETURN':
                         order_obj_get = Order.objects.get(id=order_id)
                         order_items_obj_exist = OrderItem.objects.filter(order=order_obj_get.id).exists()
@@ -1322,29 +1307,12 @@ class AdminOrderUpdateAPI(RetrieveUpdateAPIView):
                                 product = order_item.product
                                 quantity = order_item.quantity
                                 product_filter_obj = Product.objects.filter(id=product.id)
-                                # inventory_obj = Inventory.objects.filter(product=product).latest('created_at')
-                                # new_update_quantity = int(inventory_obj.current_quantity) - int(quantity)
-                                # product_filter_obj.update(quantity = new_update_quantity)
-                                # inventory_obj.current_quantity = new_update_quantity
-                                # inventory_obj.save()
-
-                    # try:
-                    #     single_quantity = int(single_quantity)
-                    #     if single_quantity >= 0:
-                    #         latest_inventory_obj = Inventory.objects.filter(product=instance).latest('created_at')
-                    #         latest_current_quantity = latest_inventory_obj.current_quantity
-
-                    #         if single_quantity == 0 and latest_current_quantity == 0:
-                    #             pass
-                    #         else:
-                    #             initial_quantity =  single_quantity - latest_current_quantity
-                    #             Inventory.objects.create(product=instance, initial_quantity=initial_quantity, current_quantity=single_quantity)
-                    #             total_initial_quantity= Inventory.objects.filter(product=instance).order_by('created_at').aggregate(Sum('initial_quantity'))
-                    #             validated_data.update({"quantity" : single_quantity, "total_quantity": total_initial_quantity['initial_quantity__sum']})
-                    #     else:
-                    #         raise ValidationError("We can't accept Minus quantity value.")
-                    # except:
-                    #     raise ValidationError('Problem of Product Quantity update.')
+                                latest_inventory_obj = Inventory.objects.filter(product=product).latest('created_at')
+                                latest_current_quantity = latest_inventory_obj.current_quantity
+                                latest_initial_quantity = latest_inventory_obj.initial_quantity
+                                new_current_quantity =  latest_current_quantity + quantity
+                                Inventory.objects.create(product=product, initial_quantity=latest_initial_quantity, current_quantity=new_current_quantity)
+                                product_filter_obj.update(quantity = new_current_quantity)
 
                 if payment_status:
                     order_obj.update(payment_status=payment_status)

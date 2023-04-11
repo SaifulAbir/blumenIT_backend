@@ -8,6 +8,7 @@ from reports.serializers import SalesReportSerializer, VendorProductReportSerial
     ProductStockSerializer, ProductWishlistSerializer, InHouseSaleSerializer
 from rest_framework.exceptions import ValidationError
 from django.db.models import Q
+from django.db.models import Q, Count, Sum
 
 class SalesReportAPI(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -87,13 +88,6 @@ class VendorProductReportAPI(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True:
-            # work with dynamic pagination page_size
-            # try:
-            #     pagination = self.kwargs['pagination']
-            # except:
-            #     pagination = 10
-            # self.pagination_class.page_size = pagination
-
             queryset = OrderItem.objects.all().order_by('-created_at')
 
             if queryset:
@@ -239,7 +233,8 @@ class SellerProductsSaleReportAPI(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True:
-            queryset = Seller.objects.all().order_by('-created_at')
+            # queryset = Seller.objects.all().order_by('-created_at')
+            queryset = Seller.objects.all().annotate(number_of_product_sale=Count('product_seller')).order_by('-number_of_product_sale')
 
             if queryset:
                 return queryset
@@ -257,18 +252,12 @@ class SellerProductsSaleReportSearchAPI(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True:
-            # work with dynamic pagination page_size
-            # try:
-            #     pagination = self.kwargs['pagination']
-            # except:
-            #     pagination = 10
-            # self.pagination_class.page_size = pagination
-
-
+            
             request = self.request
             status = request.GET.get('status')
 
-            queryset = Seller.objects.all().order_by('-created_at')
+            # queryset = Seller.objects.all().order_by('-created_at')
+            queryset = Seller.objects.all().annotate(number_of_product_sale=Count('product_seller')).order_by('-number_of_product_sale')
 
             if status:
                 queryset = queryset.filter(Q(status__exact=status))

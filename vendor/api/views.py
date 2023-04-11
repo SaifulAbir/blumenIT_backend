@@ -1498,14 +1498,14 @@ class AdminDashboardDataAPIView(APIView):
             # total published Product
             if Product.objects.filter(status = 'PUBLISH', is_active=True).exists():
                 if self.request.user.is_seller == True:
-                    published_product_count = Product.objects.filter(status = 'PUBLISH', is_active=True, seller=Seller.objects.get(seller_user=self.request.user.id)).count()
+                    published_product_count = Product.objects.filter(~Q(in_house_product = True), Q(status = 'PUBLISH'), Q(is_active=True), Q(seller=Seller.objects.get(seller_user=self.request.user.id))).count()
                 else:
                     published_product_count = Product.objects.filter(status = 'PUBLISH', is_active=True).count()
             else:
                 published_product_count = 0
 
             # total seller Product
-            if Product.objects.filter(~Q(in_house_product = True), Q(is_active=True)).exists():
+            if Product.objects.filter(~Q(in_house_product = True), Q(is_active=True), Q(seller=Seller.objects.get(seller_user=self.request.user.id))).exists():
                 if self.request.user.is_seller == True:
                     seller_product_count = Product.objects.filter(~Q(in_house_product = True), Q(is_active=True), Q(seller=Seller.objects.get(seller_user=self.request.user.id))).count()
                 else:

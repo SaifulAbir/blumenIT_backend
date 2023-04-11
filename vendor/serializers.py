@@ -1850,7 +1850,7 @@ class AdminOfferCategoryListSerializer(serializers.ModelSerializer):
 
 class AdminOfferSerializer(serializers.ModelSerializer):
     # offer_category_title = serializers.CharField(source='offer_category.title',read_only=True)
-    product_category_title = serializers.CharField(source='product_category.title',read_only=True)
+    # product_category_title = serializers.CharField(source='product_category.title',read_only=True)
     offer_products = AdminOfferProductsSerializer(many=True, required=False)
     existing_offer_products = serializers.SerializerMethodField('get_existing_offer_products')
     start_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", required=False)

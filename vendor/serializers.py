@@ -134,7 +134,7 @@ class SellerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Seller
-        fields = ['id', 'name', 'address', 'phone', 'email', 'logo', 'is_active', 'total_product']
+        fields = ['id', 'name', 'address', 'phone', 'email', 'logo', 'is_active', 'total_product', 'password']
 
     def get_total_product(self, obj):
         total_product_count = Product.objects.filter(status='PUBLISH', seller=obj).count()

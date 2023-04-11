@@ -1088,7 +1088,7 @@ class AdminOrderList(ListAPIView):
             if type == 'seller_order':
                 queryset = queryset.filter(is_active=True, vendor__isnull=False).order_by('vendor')
             if type == 'pick_up_point_order':
-                queryset = queryset.filter(is_active=True, delivery_address__isnull=True).order_by('vendor')
+                queryset = queryset.filter(is_active=True, delivery_address__isnull=True)
 
             if order_status == 'PENDING':
                 queryset = queryset.filter(order_status = 'PENDING', is_active=True)
@@ -3017,7 +3017,7 @@ class AdminOffersListAllAPIView(ListAPIView):
     def get_queryset(self):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             today_date = datetime.today()
-            queryset = Offer.objects.filter(end_date__gte = today_date, cis_active=True).order_by('-created_at')
+            queryset = Offer.objects.filter(end_date__gte = today_date, is_active=True).order_by('-created_at')
             if queryset:
                 return queryset
             else:

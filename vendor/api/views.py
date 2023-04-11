@@ -117,18 +117,14 @@ class AdminSellerUpdateAPIView(RetrieveUpdateAPIView):
 
     def get_queryset(self):
         seller_id = self.kwargs['id']
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             query = Seller.objects.filter(id=seller_id)
             if query:
                 return query
             else:
                 raise ValidationError({"msg": 'Seller not found'})
         else:
-            query = Seller.objects.filter(id=seller_id, user=self.request.user)
-            if query:
-                return query
-            else:
-                raise ValidationError(
+           raise ValidationError(
                     {"msg": 'You can not update seller, because you are not an Admin, Staff or owner!'})
     def put(self, request, *args, **kwargs):
         return self.update(request, *args, **kwargs)

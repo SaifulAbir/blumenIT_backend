@@ -13,7 +13,7 @@ from blog.pagination import BlogCustomPagination
 from blog.models import BlogCategory, Blog
 from blog.serializers import BlogCategorySerializer, BlogSerializer, CustomerBlogListSerializer, \
     CustomerBlogDataSerializer, \
-    ReviewCreateSerializer, BlogListDeleteSerializer
+    ReviewCreateSerializer, BlogListDeleteSerializer, BlogListSerializer
 
 
 class BlogCategoryCreateAPIView(CreateAPIView):
@@ -137,7 +137,7 @@ class AdminBlogDetailAPIView(RetrieveUpdateAPIView):
 
 class AdminBlogListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = BlogSerializer
+    serializer_class = BlogListSerializer
     pagination_class = BlogCustomPagination
 
     def get_queryset(self):

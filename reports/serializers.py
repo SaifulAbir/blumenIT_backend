@@ -100,21 +100,22 @@ class InHouseSaleSerializer(serializers.ModelSerializer):
 
 
 class SellerProductSaleSerializer(serializers.ModelSerializer):
-    shop_name =  serializers.SerializerMethodField()
+    # shop_name =  serializers.SerializerMethodField()
     number_of_product_sale =  serializers.SerializerMethodField()
     order_amount =  serializers.SerializerMethodField()
     class Meta:
         model = Seller
-        fields = ['id', 'name', 'shop_name', 'number_of_product_sale', 'order_amount', 'status']
+        # fields = ['id', 'name', 'shop_name', 'number_of_product_sale', 'order_amount', 'status']
+        fields = ['id', 'name', 'phone', 'number_of_product_sale', 'order_amount']
 
-    def get_shop_name(self, obj):
-        store_name_obj = StoreSettings.objects.filter(Q(seller = obj.id )).exists()
-        if store_name_obj:
-            store_name_ob = StoreSettings.objects.get(seller = obj.id)
-            store_name = store_name_ob.store_name
-        else:
-            store_name = ''
-        return store_name
+    # def get_shop_name(self, obj):
+    #     store_name_obj = StoreSettings.objects.filter(Q(seller = obj.id )).exists()
+    #     if store_name_obj:
+    #         store_name_ob = StoreSettings.objects.get(seller = obj.id)
+    #         store_name = store_name_ob.store_name
+    #     else:
+    #         store_name = ''
+    #     return store_name
 
     def get_number_of_product_sale(self, obj):
         order_item_obj = OrderItem.objects.filter(Q(product__seller = obj.id)).exists()

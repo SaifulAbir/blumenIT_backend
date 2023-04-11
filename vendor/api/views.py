@@ -2984,7 +2984,7 @@ class AdminOffersListAllAPIView(ListAPIView):
     def get_queryset(self):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             today_date = datetime.today()
-            queryset = Offer.objects.filter(end_date__gte = today_date, cis_active=True).order_by('-created_at')
+            queryset = Offer.objects.filter(end_date__gte = today_date, is_active=True).order_by('-created_at')
             if queryset:
                 return queryset
             else:

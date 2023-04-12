@@ -79,7 +79,7 @@ class ProductListForOfferCreateAPI(ListAPIView):
     serializer_class = ProductListBySerializer
 
     def get_queryset(self):
-        # if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             queryset = Product.objects.filter(is_active=True, status='PUBLISH')
             offer_products = OfferProduct.objects.filter(offer__is_active=True)
             if offer_products:
@@ -89,9 +89,9 @@ class ProductListForOfferCreateAPI(ListAPIView):
                 return queryset
             else:
                 raise ValidationError({"msg": 'Products do not exist!'})
-        # else:
-        #     raise ValidationError(
-        #         {"msg": 'You cannot view the offers list because you are not an admin or a staff member!'})
+        else:
+            raise ValidationError(
+                {"msg": 'You cannot view the offers list because you are not an admin or a staff member!'})
 
     # def get_queryset(self):
     #     if self.request.user.is_superuser == True or self.request.user.is_staff == True:

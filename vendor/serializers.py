@@ -238,21 +238,21 @@ class UpdateCategorySerializer(serializers.ModelSerializer):
         except:
             filtering_attributes = ''
         if filtering_attributes:
-            f_a = FilterAttributes.objects.filter(
-                category=instance).exists()
-            if f_a == True:
-                FilterAttributes.objects.filter(
-                    category=instance).delete()
+            # f_a = FilterAttributes.objects.filter(
+            #     category=instance).exists()
+            # if f_a == True:
+            #     FilterAttributes.objects.filter(
+            #         category=instance).delete()
 
             for f_attr in filtering_attributes:
                 attribute = f_attr['attribute']
                 if attribute:
-                    filter_attr_create_instance = FilterAttributes.objects.create(attribute=attribute, category=instance)
-        else:
-            f_a = FilterAttributes.objects.filter(
-                category=instance).exists()
-            if f_a == True:
-                FilterAttributes.objects.filter(category=instance).delete()
+                    FilterAttributes.objects.create(attribute=attribute, category=instance)
+        # else:
+        #     f_a = FilterAttributes.objects.filter(
+        #         category=instance).exists()
+        #     if f_a == True:
+        #         FilterAttributes.objects.filter(category=instance).delete()
 
         validated_data.update({"updated_at": timezone.now()})
         return super().update(instance, validated_data)
@@ -338,21 +338,21 @@ class UpdateSubCategorySerializer(serializers.ModelSerializer):
         except:
             filtering_attributes = ''
         if filtering_attributes:
-            f_a = FilterAttributes.objects.filter(
-                sub_category=instance).exists()
-            if f_a == True:
-                FilterAttributes.objects.filter(
-                    sub_category=instance).delete()
+            # f_a = FilterAttributes.objects.filter(
+            #     sub_category=instance).exists()
+            # if f_a == True:
+            #     FilterAttributes.objects.filter(
+            #         sub_category=instance).delete()
 
             for f_attr in filtering_attributes:
                 attribute = f_attr['attribute']
                 if attribute:
                     filter_attr_create_instance = FilterAttributes.objects.create(attribute=attribute, sub_category=instance)
-        else:
-            f_a = FilterAttributes.objects.filter(
-                sub_category=instance).exists()
-            if f_a == True:
-                FilterAttributes.objects.filter(sub_category=instance).delete()
+        # else:
+        #     f_a = FilterAttributes.objects.filter(
+        #         sub_category=instance).exists()
+        #     if f_a == True:
+        #         FilterAttributes.objects.filter(sub_category=instance).delete()
 
         validated_data.update({"updated_at": timezone.now()})
         return super().update(instance, validated_data)
@@ -1853,8 +1853,8 @@ class AdminOfferSerializer(serializers.ModelSerializer):
     # product_category_title = serializers.CharField(source='product_category.title',read_only=True)
     offer_products = AdminOfferProductsSerializer(many=True, required=False)
     existing_offer_products = serializers.SerializerMethodField('get_existing_offer_products')
-    start_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", required=False)
-    end_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", required=False)
+    start_date = serializers.DateTimeField()
+    end_date = serializers.DateTimeField()
     discount_price_title = serializers.CharField(source='discount_price_type.title', read_only=True)
 
     class Meta:

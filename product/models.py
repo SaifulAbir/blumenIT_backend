@@ -304,8 +304,8 @@ class Product(AbstractTimeStamp):
         max_length=255, null=False, blank=False, default=0, help_text="Old price")
     pre_payment_amount = models.FloatField(
         max_length=255, null=False, blank=False, default=0)
-    discount_start_date = models.DateTimeField(null=True, blank=True)
-    discount_end_date = models.DateTimeField(null=True, blank=True)
+    discount_start_date = models.DateTimeField(null=True, blank=True, auto_now_add=True)
+    discount_end_date = models.DateTimeField(null=True, blank=True, auto_now_add=True)
     discount_type = models.ForeignKey(
         DiscountTypes, related_name="product_discount_type", null=True, blank=True, on_delete=models.PROTECT)
     discount_amount = models.FloatField(
@@ -592,8 +592,8 @@ class FlashDealInfo(AbstractTimeStamp):
         TextColor, on_delete=models.PROTECT, related_name='flash_deal_info_text_color', null=True, blank=True)
     banner = models.ImageField(
         upload_to='flash_deal_info', blank=True, null=True)
-    start_date = models.DateTimeField(null=False, blank=False,default=timezone.now)
-    end_date = models.DateTimeField(null=False, blank=False, default=timezone.now)
+    start_date = models.DateTimeField(null=False, blank=False, auto_now_add=True)
+    end_date = models.DateTimeField(null=False, blank=False, auto_now_add=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
     is_featured = models.BooleanField(null=False, blank=False, default=False)
 

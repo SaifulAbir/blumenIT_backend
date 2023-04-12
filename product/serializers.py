@@ -212,7 +212,7 @@ class ProductListBySerializer(serializers.ModelSerializer):
     avg_rating = serializers.SerializerMethodField()
     brand_title= serializers.CharField(source="brand.title",read_only=True)
     product_condition_title= serializers.CharField(source="product_condition.title",read_only=True)
-    review_count = serializers.SerializerMethodField('get_is_new')
+    review_count = serializers.SerializerMethodField('get_review_count')
     product_reviews = serializers.SerializerMethodField()
     seller = SellerDataSerializer()
     category = CategorySerializer()
@@ -270,7 +270,7 @@ class ProductListBySerializer(serializers.ModelSerializer):
         ]
 
     def get_offer_discount_id(self, obj):
-        today_date = datetime.today()
+        today_date = timezone.now().date()
         offers = Offer.objects.filter(offer_product_offer__product = obj.id, is_active=True, end_date__gte = today_date)
         if offers:
             offer_id = offers[0].id
@@ -278,22 +278,8 @@ class ProductListBySerializer(serializers.ModelSerializer):
             offer_id = None
         return offer_id
 
-    # def get_mytimezone_date(original_datetime):
-    #     new_datetime = datetime.strptime(original_datetime, '%Y-%m-%d')
-    #     tz = timezone.get_current_timezone()
-    #     timzone_datetime = timezone.make_aware(new_datetime, tz, True)
-    #     return timzone_datetime.date()
-
     def get_offer_discount_price_type(self, obj):
-        today_date = datetime.today()
-        # today_date = timezone.now()
-        # today_date = str(timezone.get_current_timezone())
-        # print(today_date)
-        # today_date = datetime.now()
-        # print("today_date")
-        # print(type(today_date))
-        # print(today_date)
-        # today_date = today_date.strftime("%Y-%m-%d, %H:%M:%S")
+        today_date = timezone.now().date()
         offers = Offer.objects.filter(offer_product_offer__product = obj.id, is_active=True, end_date__gte = today_date)
         if offers:
             price_type = offers[0].discount_price_type.title
@@ -302,7 +288,7 @@ class ProductListBySerializer(serializers.ModelSerializer):
         return price_type
 
     def get_offer_discount_price(self, obj):
-        today_date = datetime.today()
+        today_date = timezone.now().date()
         offers = Offer.objects.filter(offer_product_offer__product = obj.id, is_active=True, end_date__gte = today_date)
         if offers:
             price = offers[0].discount_price
@@ -315,7 +301,7 @@ class ProductListBySerializer(serializers.ModelSerializer):
         created_month_number = create_date.month
         created_year_number = create_date.year
 
-        today = datetime.now()
+        today = timezone.now().date()
         today_month = today.month
         today_year = today.year
 
@@ -382,7 +368,7 @@ class ProductListBySerializerForHomeData(serializers.ModelSerializer):
         ]
 
     def get_offer_discount_id(self, obj):
-        today_date = datetime.today()
+        today_date = timezone.now().date()
         offers = Offer.objects.filter(offer_product_offer__product = obj.id, is_active=True, end_date__gte = today_date)
         if offers:
             offer_id = offers[0].id
@@ -391,7 +377,7 @@ class ProductListBySerializerForHomeData(serializers.ModelSerializer):
         return offer_id
 
     def get_offer_discount_price_type(self, obj):
-        today_date = datetime.today()
+        today_date = timezone.now().date()
         offers = Offer.objects.filter(offer_product_offer__product = obj.id, is_active=True, end_date__gte = today_date)
         if offers:
             price_type = offers[0].discount_price_type.title
@@ -400,7 +386,7 @@ class ProductListBySerializerForHomeData(serializers.ModelSerializer):
         return price_type
 
     def get_offer_discount_price(self, obj):
-        today_date = datetime.today()
+        today_date = timezone.now().date()
         offers = Offer.objects.filter(offer_product_offer__product = obj.id, is_active=True, end_date__gte = today_date)
         if offers:
             price = offers[0].discount_price
@@ -413,7 +399,7 @@ class ProductListBySerializerForHomeData(serializers.ModelSerializer):
         created_month_number = create_date.month
         created_year_number = create_date.year
 
-        today = datetime.now()
+        today = timezone.now()
         today_month = today.month
         today_year = today.year
 
@@ -506,7 +492,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
         ]
 
     def get_offer_discount_id(self, obj):
-        today_date = datetime.today()
+        today_date = timezone.now().date()
         offers = Offer.objects.filter(offer_product_offer__product = obj.id, is_active=True, end_date__gte = today_date)
         if offers:
             offer_id = offers[0].id
@@ -515,7 +501,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
         return offer_id
 
     def get_offer_discount_price_type(self, obj):
-        today_date = datetime.today()
+        today_date = timezone.now().date()
         offers = Offer.objects.filter(offer_product_offer__product = obj.id, is_active=True, end_date__gte = today_date)
         if offers:
             price_type = offers[0].discount_price_type.title
@@ -524,7 +510,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
         return price_type
 
     def get_offer_discount_price(self, obj):
-        today_date = datetime.today()
+        today_date = timezone.now().date()
         offers = Offer.objects.filter(offer_product_offer__product = obj.id, is_active=True, end_date__gte = today_date)
         if offers:
             price = offers[0].discount_price

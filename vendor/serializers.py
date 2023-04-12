@@ -1853,8 +1853,8 @@ class AdminOfferSerializer(serializers.ModelSerializer):
     # product_category_title = serializers.CharField(source='product_category.title',read_only=True)
     offer_products = AdminOfferProductsSerializer(many=True, required=False)
     existing_offer_products = serializers.SerializerMethodField('get_existing_offer_products')
-    start_date = serializers.DateTimeField()
-    end_date = serializers.DateTimeField()
+    start_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", required=False)
+    end_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", required=False)
     discount_price_title = serializers.CharField(source='discount_price_type.title', read_only=True)
 
     class Meta:

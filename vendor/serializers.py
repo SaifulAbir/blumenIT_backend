@@ -133,6 +133,7 @@ class SellerSerializer(serializers.ModelSerializer):
     phone = serializers.CharField(required=False)
     email = serializers.EmailField(required=False)
     total_product = serializers.SerializerMethodField('get_total_product')
+    is_active = serializers.BooleanField(required=False, default=True)
 
     class Meta:
         model = Seller

@@ -80,7 +80,7 @@ class ProductListForOfferCreateAPI(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True:
-            queryset = Product.objects.filter(is_active=True)
+            queryset = Product.objects.filter(is_active=True, status='PUBLISH')
             if queryset:
                 return queryset
             else:

@@ -129,7 +129,9 @@ class SellerUpdateSerializer(serializers.ModelSerializer):
 
 
 class SellerSerializer(serializers.ModelSerializer):
-    logo = serializers.ImageField(allow_null=True)
+    logo = serializers.ImageField(required=False)
+    phone = serializers.CharField(required=False)
+    email = serializers.EmailField(required=False)
     total_product = serializers.SerializerMethodField('get_total_product')
 
     class Meta:

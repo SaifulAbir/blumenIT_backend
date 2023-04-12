@@ -2,6 +2,7 @@ from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework import status
 from datetime import datetime
+from django.utils import timezone
 
 from blog.models import Blog
 from product.pagination import ProductCustomPagination
@@ -237,7 +238,8 @@ class AdminProductListAPI(ListAPIView):
             type = request.GET.get('type')
 
             if self.request.user.is_seller == True:
-                queryset = Product.objects.filter(is_active=True, seller=Seller.objects.get(seller_user=self.request.user.id)).order_by('-created_at')
+
+                queryset = Product.objects.filter(~Q(in_house_product = True), Q(is_active=True), Q(seller=Seller.objects.get(seller_user=self.request.user.id))).order_by('-created_at')
             else:
                 queryset = Product.objects.filter(is_active=True).order_by('-created_at')
 
@@ -400,20 +402,6 @@ class AdminUpdateCategoryAPIView(UpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = UpdateCategorySerializer
     queryset = Category.objects.all()
-    # lookup_field = 'id'
-    # lookup_url_kwarg = "id"
-
-    # def get_queryset(self):
-    #     id = self.kwargs['id']
-    #     if self.request.user.is_superuser == True or self.request.user.is_staff == True:
-    #         query = Category.objects.filter(id=id)
-    #         if query:
-    #             return query
-    #         else:
-    #             raise ValidationError(
-    #                 {"msg": 'Category does not found!'})
-    #     else:
-    #         raise ValidationError({"msg": 'You can not update category, because you are not an Admin or a Staff!'})
 
 
 class AdminDeleteCategoryAPIView(ListAPIView):
@@ -1333,7 +1321,7 @@ class AdminCustomerListAPIView(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
-            queryset = User.objects.filter(is_customer=True, is_active=True)
+            queryset = User.objects.filter(is_customer=True)
             return queryset
         else:
             raise ValidationError({"msg": 'You can not see customer list data, because you are not an Admin or a Staff or a vendor!'})
@@ -1483,19 +1471,19 @@ class AdminDashboardDataAPIView(APIView):
             else:
                 order_count = 0
 
-            # total category
+            # # total category
             if Category.objects.filter(is_active=True).exists():
                 category_count = Category.objects.filter(is_active=True).count()
             else:
                 category_count = 0
 
-            # total Brand
+            # # total Brand
             if Brand.objects.filter(is_active=True).exists():
                 brand_count = Brand.objects.filter(is_active=True).count()
             else:
                 brand_count = 0
 
-            # total published Product
+            # # total published Product
             if Product.objects.filter(status = 'PUBLISH', is_active=True).exists():
                 if self.request.user.is_seller == True:
                     published_product_count = Product.objects.filter(~Q(in_house_product = True), Q(status = 'PUBLISH'), Q(is_active=True), Q(seller=Seller.objects.get(seller_user=self.request.user.id))).count()
@@ -1504,7 +1492,7 @@ class AdminDashboardDataAPIView(APIView):
             else:
                 published_product_count = 0
 
-            # total seller Product
+            # # total seller Product
             if Product.objects.filter(~Q(in_house_product = True), Q(is_active=True)).exists():
                 if self.request.user.is_seller == True:
                     seller_product_count = Product.objects.filter(~Q(in_house_product = True), Q(is_active=True), Q(seller=Seller.objects.get(seller_user=self.request.user.id))).count()
@@ -1513,38 +1501,38 @@ class AdminDashboardDataAPIView(APIView):
             else:
                 seller_product_count = 0
 
-            # total admin Product
+            # # total admin Product
             if Product.objects.filter(in_house_product = True, is_active=True).exists():
                 admin_product_count = Product.objects.filter(in_house_product = True, is_active=True).count()
             else:
                 admin_product_count = 0
 
-            # total sellers
+            # # total sellers
             if Seller.objects.filter(is_active=True).exists():
                 seller_count = Seller.objects.filter(is_active=True).count()
             else:
                 seller_count = 0
 
-            # total approved sellers
+            # # total approved sellers
             if Seller.objects.filter(status='APPROVED', is_active=True).exists():
                 approved_seller_count = Seller.objects.filter(status='APPROVED', is_active=True).count()
             else:
                 approved_seller_count = 0
 
-            # total pending sellers
+            # # total pending sellers
             if Seller.objects.filter(status='PENDING', is_active=True).exists():
                 pending_seller_count = Seller.objects.filter(status='PENDING', is_active=True).count()
             else:
                 pending_seller_count = 0
 
-            # Category wise product sale
+            # # Category wise product sale
             categories = Category.objects.filter(is_active=True)
             category_wise_product_sale = CategoryWiseProductSaleSerializer(categories, many=True, context={"request": request})
 
-            # Category wise product stock
+            # # Category wise product stock
             category_wise_product_stock = CategoryWiseProductStockSerializer(categories, many=True, context={"request": request})
 
-            # Top products
+            # # Top products
             if Product.objects.filter(status='PUBLISH', is_active=True).exists():
                 products = Product.objects.filter(status='PUBLISH', is_active=True).order_by('-sell_count')
                 products_data = ProductListBySerializer(products, many=True, context={"request": request})
@@ -2418,7 +2406,7 @@ class AdminOffersListAPIView(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True:
-            today_date = datetime.today()
+            today_date = timezone.now().date()
             queryset = Offer.objects.filter(end_date__gte = today_date, is_active=True).order_by('-created_at')
             if queryset:
                 return queryset
@@ -2983,7 +2971,7 @@ class AdminOffersListAllAPIView(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
-            today_date = datetime.today()
+            today_date = timezone.now().date()
             queryset = Offer.objects.filter(end_date__gte = today_date, is_active=True).order_by('-created_at')
             if queryset:
                 return queryset

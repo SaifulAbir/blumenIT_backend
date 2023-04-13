@@ -76,7 +76,7 @@ class CustomerBlogDataSerializer(serializers.ModelSerializer):
     blog_reviews = serializers.SerializerMethodField()
     class Meta:
         model = Blog
-        fields = ['id', 'banner', 'title', 'created_by_email', 'created_by_name', 'view_count', 'created_at', 'full_description', 'popular_blog', 'blog_reviews']
+        fields = ['id', 'banner', 'title', 'created_by_email', 'created_by_name', 'view_count', 'created_at', 'full_description', 'popular_blog', 'blog_reviews', 'meta_title', 'meta_description', 'meta_image']
 
     def get_popular_blog(self, obj):
         try:

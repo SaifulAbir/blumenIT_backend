@@ -79,49 +79,25 @@ class ProductListForOfferCreateAPI(ListAPIView):
     serializer_class = ProductListBySerializer
 
     def get_queryset(self):
-        offer_id = self.request.GET.get('offer_id')
-        print('offer', offer_id)
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+            a = []
+            b = []
+            active_products = Product.objects.filter(is_active=True, status='PUBLISH')
+            for aa in active_products:
+                a.append(aa.id)
+            offer_products = OfferProduct.objects.filter(offer__is_active=True)
+            for bb in offer_products:
+                b.append(bb.product.id)
+            new_product_id_list = [x for x in a if x not in b]
+            queryset = Product.objects.filter(id__in=new_product_id_list)
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError({"msg": 'Products do not exist!'})
+        else:
+            raise ValidationError(
+                {"msg": 'You cannot view the offers list because you are not an admin or a staff member!'})
 
-        product_list = [p.id for p in Product.objects.filter(status='PUBLISH').order_by('-created_at')]
-
-        active_offers_products_list = [p.product.id for p in OfferProduct.objects.filter(
-            is_active=True, offer__is_active=True, offer__end_date__gte=datetime.today()
-        )]
-
-        offers_products_list = [p.product.id for p in
-                                OfferProduct.objects.filter(offer=offer_id, is_active=True)] if offer_id else []
-
-        list_joined = [i for i in product_list if
-                       i not in active_offers_products_list] + offers_products_list if offers_products_list else product_list
-
-        return Product.objects.filter(id__in=list_joined).order_by(
-            '-created_at') if list_joined else Product.objects.filter(status='PUBLISH').order_by('-created_at')
-
-    # def get_queryset(self):
-    #     if self.request.user.is_superuser == True or self.request.user.is_staff == True:
-    #         queryset = Product.objects.filter(is_active=True, status='PUBLISH')
-    #         offer_products = OfferProduct.objects.filter(offer__is_active=True)
-    #         if offer_products:
-    #             product_ids = offer_products.values_list('product__id', flat=True)
-    #             queryset = queryset.exclude(id__in=product_ids)
-    #         if queryset:
-    #             return queryset
-    #         else:
-    #             raise ValidationError({"msg": 'Products do not exist!'})
-    #     else:
-    #         raise ValidationError(
-    #             {"msg": 'You cannot view the offers list because you are not an admin or a staff member!'})
-
-    # def get_queryset(self):
-    #     if self.request.user.is_superuser == True or self.request.user.is_staff == True:
-    #         queryset = Product.objects.filter(is_active=True, status='PUBLISH')
-    #         if queryset:
-    #             return queryset
-    #         else:
-    #             raise ValidationError(
-    #                 {"msg": 'Products does not exist!'})
-    #     else:
-    #         raise ValidationError({"msg": 'You can not view offers list, because you are not an Admin or a Staff!'})
 class ProductListByCategoryForOfferCreateAPI(ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = ProductListBySerializer

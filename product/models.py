@@ -108,13 +108,13 @@ class SubSubCategory(AbstractTimeStamp):
 
 class FilterAttributes(AbstractTimeStamp):
     attribute = models.ForeignKey(
-        Attribute, related_name='filter_attributes_attribute', blank=False, null=False, on_delete=models.PROTECT)
+        Attribute, related_name='filter_attributes_attribute', blank=False, null=False, on_delete=models.CASCADE)
     category = models.ForeignKey(
-        Category, related_name='filter_attributes_category', blank=True, null=True, on_delete=models.PROTECT)
+        Category, related_name='filter_attributes_category', blank=True, null=True, on_delete=models.CASCADE)
     sub_category = models.ForeignKey(
-        SubCategory, related_name='filter_attributes_sub_category', blank=True, null=True, on_delete=models.PROTECT)
+        SubCategory, related_name='filter_attributes_sub_category', blank=True, null=True, on_delete=models.CASCADE)
     sub_sub_category = models.ForeignKey(
-        SubSubCategory, related_name='filter_attributes_sub_sub_category', blank=True, null=True, on_delete=models.PROTECT)
+        SubSubCategory, related_name='filter_attributes_sub_sub_category', blank=True, null=True, on_delete=models.CASCADE)
     is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
@@ -643,11 +643,11 @@ class Inventory(AbstractTimeStamp):
 
 class ProductFilterAttributes(AbstractTimeStamp):
     filter_attribute = models.ForeignKey(
-        FilterAttributes, related_name='product_filter_attributes_filter_attribute', blank=True, null=True, on_delete=models.PROTECT)
+        FilterAttributes, related_name='product_filter_attributes_filter_attribute', blank=True, null=True, on_delete=models.CASCADE)
     attribute_value = models.ForeignKey(
-        AttributeValues, related_name='product_filter_attributes_attribute_value', blank=True, null=True, on_delete=models.PROTECT)
+        AttributeValues, related_name='product_filter_attributes_attribute_value', blank=True, null=True, on_delete=models.CASCADE)
     product = models.ForeignKey(
-        Product, related_name='product_filter_attributes_product', blank=True, null=True, on_delete=models.PROTECT)
+        Product, related_name='product_filter_attributes_product', blank=True, null=True, on_delete=models.CASCADE)
     is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:

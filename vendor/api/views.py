@@ -1671,7 +1671,7 @@ class AdminShippingCountryListAllAPIView(ListAPIView):
     def get_queryset(self):
         request = self.request
         search = request.GET.get('search')
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.is_customer == True:
             queryset = ShippingCountry.objects.filter(is_active=True).order_by('-created_at')
 
             if search:

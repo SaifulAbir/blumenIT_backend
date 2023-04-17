@@ -1,6 +1,6 @@
 from rest_framework.generics import ListAPIView, CreateAPIView
 from support_ticket.models import Ticket
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from vendor.pagination import OrderCustomPagination
 from support_ticket.serializers import TicketListSerializer, CustomerTicketCreateSerializer, TicketDataSerializer, \
     TicketConversationReplySerializer
@@ -54,12 +54,12 @@ class CustomerTicketDetailsAPIView(ListAPIView):
 
 
 class CustomerTicketReplyAPIView(CreateAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     serializer_class = TicketConversationReplySerializer
 
     def post(self, request, *args, **kwargs):
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        if self.request.user.is_customer == True:
             return super(CustomerTicketReplyAPIView, self).post(request, *args, **kwargs)
         else:
             raise ValidationError(
-                {"msg": 'You can not create ticket reply, because you are not an Admin or a stuff!'})
+                {"msg": 'You can not create ticket reply, because you are not a customer!'})

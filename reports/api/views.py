@@ -19,7 +19,7 @@ class SalesReportAPI(ListAPIView):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
 
             if self.request.user.is_seller == True:
-                queryset = Order.objects.filter(order_item_order__product__seller=Seller.objects.get(seller_user=self.request.user.id)).order_by('-created_at')
+                queryset = Order.objects.filter(order_item_order__product__seller=Seller.objects.get(seller_user=self.request.user.id)).order_by('-created_at').distinct()
             else:
                 queryset = Order.objects.all().order_by('-created_at')
 
@@ -54,7 +54,11 @@ class SalesReportSearchAPI(ListAPIView):
             order_code = request.GET.get('order_code')
             phone = request.GET.get('phone')
 
-            queryset = Order.objects.all().order_by('-created_at')
+            if self.request.user.is_seller == True:
+                queryset = Order.objects.filter(order_item_order__product__seller=Seller.objects.get(seller_user=self.request.user.id)).order_by('-created_at').distinct()
+            else:
+                queryset = Order.objects.all().order_by('-created_at')
+
 
             if order_status:
                 queryset = queryset.filter(Q(order_status__icontains=order_status))

@@ -1,5 +1,5 @@
 from datetime import datetime
-from django.db.models import Q, Count, F, FloatField, ExpressionWrapper
+from django.db.models import Q, Count, F, FloatField, ExpressionWrapper, Prefetch, Subquery, OuterRef, DecimalField
 from ecommerce.settings import MEDIA_URL
 from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView
 from rest_framework.views import APIView
@@ -19,6 +19,7 @@ from product.pagination import ProductCustomPagination
 from itertools import chain
 from user.models import CustomerProfile, User
 from vendor.models import Vendor
+from django.utils import timezone
 
 
 class StoreCategoryListAPIView(ListAPIView):
@@ -556,23 +557,9 @@ class PcBuilderChooseAPIView(ListAPIView):
 
 
         if price_low_to_high:
-            # queryset = queryset.order_by('price').distinct()
-            # queryset = queryset.order_by('price').distinct()
-            queryset = queryset.annotate(
-                discounted_price=ExpressionWrapper(
-                    F('price') - F('discount_amount'),
-                    output_field=FloatField()
-                )
-            ).order_by('discounted_price')
-
+            queryset = queryset.order_by('price').distinct()
         if price_high_to_low:
-            # queryset = queryset.order_by('-price').distinct()
-            queryset = queryset.annotate(
-                discounted_price=ExpressionWrapper(
-                    F('price') - F('discount_amount'),
-                    output_field=FloatField()
-                )
-            ).order_by('-discounted_price')
+            queryset = queryset.order_by('-price').distinct()
 
 
         return queryset

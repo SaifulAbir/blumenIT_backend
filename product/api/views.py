@@ -226,21 +226,40 @@ class ProductListByCategoryAPI(ListAPIView):
                 '-id').distinct("id")
 
         if price_low_to_high:
-            queryset = queryset.annotate(discount_price=Case(
-                When(discount_type='percentage', then=F('price') * (1 - (F('discount_amount') / 100))),
-                When(discount_type='fixed', then=F('price') - F('discount_amount')),
-                default=F('price'),
-                output_field=DecimalField(max_digits=10, decimal_places=2))
-            ).order_by('discount_price').distinct('discount_price')
+            if filter_price:
+                price_list = []
+                filter_prices = filter_price.split("-")
+                for filter_price in filter_prices:
+                    price_list.append(int(filter_price))
+
+                min_price = price_list[0]
+                max_price = price_list[1]
+                queryset = queryset.filter(price__range=(min_price, max_price)).order_by('price').distinct('price')
+            else:
+                queryset = queryset.annotate(discount_price=Case(
+                    When(discount_type='percentage', then=F('price') * (1 - (F('discount_amount') / 100))),
+                    When(discount_type='fixed', then=F('price') - F('discount_amount')),
+                    default=F('price'),
+                    output_field=DecimalField(max_digits=10, decimal_places=2))
+                ).order_by('discount_price').distinct('discount_price')
 
         if price_high_to_low:
-            queryset = queryset.annotate(discount_price=Case(
-                When(discount_type='percentage', then=F('price') * (1 - (F('discount_amount') / 100))),
-                When(discount_type='fixed', then=F('price') - F('discount_amount')),
-                default=F('price'),
-                output_field=DecimalField(max_digits=10, decimal_places=2))
-            ).order_by('-discount_price').distinct('-discount_price')
+            if filter_price:
+                price_list = []
+                filter_prices = filter_price.split("-")
+                for filter_price in filter_prices:
+                    price_list.append(int(filter_price))
 
+                min_price = price_list[0]
+                max_price = price_list[1]
+                queryset = queryset.filter(price__range=(min_price, max_price)).order_by('-price').distinct('-price')
+            else:
+                queryset = queryset.annotate(discount_price=Case(
+                    When(discount_type='percentage', then=F('price') * (1 - (F('discount_amount') / 100))),
+                    When(discount_type='fixed', then=F('price') - F('discount_amount')),
+                    default=F('price'),
+                    output_field=DecimalField(max_digits=10, decimal_places=2))
+                ).order_by('-discount_price').distinct('-discount_price')
         return queryset
 
     # def get_queryset(self):

@@ -1,5 +1,5 @@
 from datetime import datetime
-from django.db.models import Q, Count
+from django.db.models import Q, Count, F, FloatField, ExpressionWrapper
 from ecommerce.settings import MEDIA_URL
 from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView
 from rest_framework.views import APIView
@@ -509,7 +509,7 @@ class VendorProductListForFrondEndAPI(ListAPIView):
 
 
 class PcBuilderChooseAPIView(ListAPIView):
-    permission_classes = (AllowAny,) 
+    permission_classes = (AllowAny,)
     serializer_class = ProductListBySerializer
     pagination_class = ProductCustomPagination
 
@@ -556,10 +556,23 @@ class PcBuilderChooseAPIView(ListAPIView):
 
 
         if price_low_to_high:
-            queryset = queryset.order_by('price').distinct()
+            # queryset = queryset.order_by('price').distinct()
+            # queryset = queryset.order_by('price').distinct()
+            queryset = queryset.annotate(
+                discounted_price=ExpressionWrapper(
+                    F('price') - F('discount_amount'),
+                    output_field=FloatField()
+                )
+            ).order_by('discounted_price')
 
         if price_high_to_low:
-            queryset = queryset.order_by('-price').distinct()
+            # queryset = queryset.order_by('-price').distinct()
+            queryset = queryset.annotate(
+                discounted_price=ExpressionWrapper(
+                    F('price') - F('discount_amount'),
+                    output_field=FloatField()
+                )
+            ).order_by('-discounted_price')
 
 
         return queryset

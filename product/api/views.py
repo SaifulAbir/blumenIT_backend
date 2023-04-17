@@ -190,6 +190,7 @@ class ProductListByCategoryAPI(ListAPIView):
             pagination = 10
         self.pagination_class.page_size = pagination
 
+
         cid = self.kwargs['cid']
         if cid:
             queryset = Product.objects.filter(category=cid, status='PUBLISH').order_by('-created_at')
@@ -213,6 +214,7 @@ class ProductListByCategoryAPI(ListAPIView):
             max_price = price_list[1]
             queryset = queryset.filter(price__range=(min_price, max_price)).order_by('-created_at')
 
+
         new_attr_value_ids = []
         if attr_value_ids:
             attr_value_ids_list = attr_value_ids.split(",")
@@ -221,97 +223,15 @@ class ProductListByCategoryAPI(ListAPIView):
                 new_attr_value_ids.append(attr_value_id)
 
         if new_attr_value_ids:
-            queryset = queryset.filter(
-                Q(product_filter_attributes_product__attribute_value__id__in=new_attr_value_ids)).order_by(
-                '-id').distinct("id")
+            queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id__in = new_attr_value_ids)).order_by('-id').distinct("id")
 
         if price_low_to_high:
-            if filter_price:
-                price_list = []
-                filter_prices = filter_price.split("-")
-                for filter_price in filter_prices:
-                    price_list.append(int(filter_price))
-
-                min_price = price_list[0]
-                max_price = price_list[1]
-                queryset = queryset.filter(price__range=(min_price, max_price)).order_by('price').distinct('price')
-            else:
-                queryset = queryset.annotate(discount_price=Case(
-                    When(discount_type='percentage', then=F('price') * (1 - (F('discount_amount') / 100))),
-                    When(discount_type='fixed', then=F('price') - F('discount_amount')),
-                    default=F('price'),
-                    output_field=DecimalField(max_digits=10, decimal_places=2))
-                ).order_by('discount_price').distinct('discount_price')
+            queryset = queryset.order_by('price').distinct('price')
 
         if price_high_to_low:
-            if filter_price:
-                price_list = []
-                filter_prices = filter_price.split("-")
-                for filter_price in filter_prices:
-                    price_list.append(int(filter_price))
+            queryset = queryset.order_by('-price').distinct('-price')
 
-                min_price = price_list[0]
-                max_price = price_list[1]
-                queryset = queryset.filter(price__range=(min_price, max_price)).order_by('-price').distinct('-price')
-            else:
-                queryset = queryset.annotate(discount_price=Case(
-                    When(discount_type='percentage', then=F('price') * (1 - (F('discount_amount') / 100))),
-                    When(discount_type='fixed', then=F('price') - F('discount_amount')),
-                    default=F('price'),
-                    output_field=DecimalField(max_digits=10, decimal_places=2))
-                ).order_by('-discount_price').distinct('-discount_price')
         return queryset
-
-    # def get_queryset(self):
-    #     # work with dynamic pagination page_size
-    #     try:
-    #         pagination = self.kwargs['pagination']
-    #     except:
-    #         pagination = 10
-    #     self.pagination_class.page_size = pagination
-    #
-    #
-    #     cid = self.kwargs['cid']
-    #     if cid:
-    #         queryset = Product.objects.filter(category=cid, status='PUBLISH').order_by('-created_at')
-    #     else:
-    #         queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
-    #
-    #     # filtering start
-    #     request = self.request
-    #     filter_price = request.GET.get('filter_price')
-    #     attr_value_ids = request.GET.get('attr_value_ids')
-    #     price_low_to_high = request.GET.get('price_low_to_high')
-    #     price_high_to_low = request.GET.get('price_high_to_low')
-    #
-    #     if filter_price:
-    #         price_list = []
-    #         filter_prices = filter_price.split("-")
-    #         for filter_price in filter_prices:
-    #             price_list.append(int(filter_price))
-    #
-    #         min_price = price_list[0]
-    #         max_price = price_list[1]
-    #         queryset = queryset.filter(price__range=(min_price, max_price)).order_by('-created_at')
-    #
-    #
-    #     new_attr_value_ids = []
-    #     if attr_value_ids:
-    #         attr_value_ids_list = attr_value_ids.split(",")
-    #         for attr_value_id in attr_value_ids_list:
-    #             attr_value_id = int(attr_value_id)
-    #             new_attr_value_ids.append(attr_value_id)
-    #
-    #     if new_attr_value_ids:
-    #         queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id__in = new_attr_value_ids)).order_by('-id').distinct("id")
-    #
-    #     if price_low_to_high:
-    #         queryset = queryset.order_by('price').distinct('price')
-    #
-    #     if price_high_to_low:
-    #         queryset = queryset.order_by('-price').distinct('-price')
-    #
-    #     return queryset
 
 
 class GamingProductListByCategoryPopularProductsAPI(ListAPIView):

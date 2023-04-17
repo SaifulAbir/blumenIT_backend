@@ -1664,6 +1664,28 @@ class AdminShippingCountryListAPIView(ListAPIView):
                 {"msg": 'You can not see Shipping Country list, because you are not an Admin or a Staff!'})
 
 
+class CustomerShippingCountryListAllAPIView(ListAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = AdminShippingCountrySerializer
+
+    def get_queryset(self):
+        request = self.request
+        search = request.GET.get('search')
+        # if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+        queryset = ShippingCountry.objects.filter(is_active=True).order_by('-created_at')
+
+        if search:
+            queryset = queryset.filter(Q(title__icontains=search))
+
+        if queryset:
+            return queryset
+        else:
+            raise ValidationError({"msg": "Shipping Country doesn't exist! " })
+        # else:
+        #     raise ValidationError(
+        #         {"msg": 'You can not see Shipping Country list, because you are not an Admin or a Staff!'})
+
+
 class AdminShippingCountryListAllAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AdminShippingCountrySerializer
@@ -1671,7 +1693,7 @@ class AdminShippingCountryListAllAPIView(ListAPIView):
     def get_queryset(self):
         request = self.request
         search = request.GET.get('search')
-        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.is_customer == True:
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             queryset = ShippingCountry.objects.filter(is_active=True).order_by('-created_at')
 
             if search:

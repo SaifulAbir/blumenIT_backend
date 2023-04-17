@@ -55,7 +55,7 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminContactUsDeleteAPIView, AdminPosCustomerCreateAPIView, AdminWebsiteConfigurationViewAPIView, \
     AdminOfferCategoryListAPIView, AdminBrandIsGamingToggleAPIView, AdminCategoryIsPcBuilderToggleAPIView, \
     SellerListAPIView, AdminWebsiteGeneralSettingsView, AdminWebsiteGeneralSettingsUpdateAPIView, \
-    AdminDeleteAttributeValueAPIView
+    AdminDeleteAttributeValueAPIView, CustomerShippingCountryListAllAPIView
 
 urlpatterns = [
 
@@ -203,6 +203,7 @@ urlpatterns = [
     path('admin/shipping-country-add/', AdminShippingCountryAddAPIView.as_view()),
     path('admin/shipping-country-list/', AdminShippingCountryListAPIView.as_view()),
     path('admin/shipping-country-list-all/', AdminShippingCountryListAllAPIView.as_view()),
+    path('customer/shipping-country-list-all/', CustomerShippingCountryListAllAPIView.as_view()),
     path('admin/shipping-country-filter/', AdminShippingCountryListFilterAPIView.as_view()),
     path('admin/shipping-country-update/<int:id>/', AdminShippingCountryUpdateAPIView.as_view()),
     path('admin/shipping-country-delete/<int:id>/', AdminShippingCountryDeleteAPIView.as_view()),

@@ -206,67 +206,67 @@ class SpecificationSerializer(serializers.ModelSerializer):
 
 
 class ProductListBySerializer(serializers.ModelSerializer):
-    # product_specification = serializers.SerializerMethodField('get_product_specification')
-    # product_tags = serializers.SerializerMethodField()
-    # discount_type = DiscountTypeSerializer()
-    # avg_rating = serializers.SerializerMethodField()
-    # brand_title= serializers.CharField(source="brand.title",read_only=True)
-    # product_condition_title= serializers.CharField(source="product_condition.title",read_only=True)
-    # review_count = serializers.SerializerMethodField('get_review_count')
-    # product_reviews = serializers.SerializerMethodField()
-    # seller = SellerDataSerializer()
-    # category = CategorySerializer()
-    # sub_category = SubCategorySerializer()
-    # sub_sub_category = SubSubCategorySerializer()
-    # brand = BrandSerializer()
-    # unit = UnitSerializer()
-    # total_quantity = serializers.SerializerMethodField()
-    # is_new = serializers.SerializerMethodField('get_is_new')
+    product_specification = serializers.SerializerMethodField('get_product_specification')
+    product_tags = serializers.SerializerMethodField()
+    discount_type = DiscountTypeSerializer()
+    avg_rating = serializers.SerializerMethodField()
+    brand_title= serializers.CharField(source="brand.title",read_only=True)
+    product_condition_title= serializers.CharField(source="product_condition.title",read_only=True)
+    review_count = serializers.SerializerMethodField('get_review_count')
+    product_reviews = serializers.SerializerMethodField()
+    seller = SellerDataSerializer()
+    category = CategorySerializer()
+    sub_category = SubCategorySerializer()
+    sub_sub_category = SubSubCategorySerializer()
+    brand = BrandSerializer()
+    unit = UnitSerializer()
+    total_quantity = serializers.SerializerMethodField()
+    is_new = serializers.SerializerMethodField('get_is_new')
 
-    # offer_discount_id = serializers.SerializerMethodField('get_offer_discount_id')
-    # offer_discount_price = serializers.SerializerMethodField('get_offer_discount_price')
-    # offer_discount_price_type = serializers.SerializerMethodField('get_offer_discount_price_type')
+    offer_discount_id = serializers.SerializerMethodField('get_offer_discount_id')
+    offer_discount_price = serializers.SerializerMethodField('get_offer_discount_price')
+    offer_discount_price_type = serializers.SerializerMethodField('get_offer_discount_price_type')
 
     class Meta:
         model = Product
         fields = [
             'id',
             'title',
-            # 'slug',
-            # 'sku',
-            # 'avg_rating',
-            # 'status',
-            # 'is_featured',
-            # 'seller',
-            # 'category',
-            # 'sub_category',
-            # 'sub_sub_category',
+            'slug',
+            'sku',
+            'avg_rating',
+            'status',
+            'is_featured',
+            'seller',
+            'category',
+            'sub_category',
+            'sub_sub_category',
             'price',
             'old_price',
             'discount_type',
             'discount_amount',
-            # 'total_quantity',
-            # 'thumbnail',
-            # 'product_tags',
-            # 'product_specification',
-            # 'brand',
-            # 'unit',
-            # 'vat',
-            # 'vat_type',
-            # 'brand_title',
-            # 'product_condition',
-            # 'product_condition_title',
-            # 'short_description',
-            # 'review_count',
-            # 'product_reviews',
-            # 'warranty',
-            # 'short_description',
-            # 'full_description',
-            # 'in_house_product',
-            # 'is_new',
-            # 'offer_discount_id',
-            # 'offer_discount_price',
-            # 'offer_discount_price_type',
+            'total_quantity',
+            'thumbnail',
+            'product_tags',
+            'product_specification',
+            'brand',
+            'unit',
+            'vat',
+            'vat_type',
+            'brand_title',
+            'product_condition',
+            'product_condition_title',
+            'short_description',
+            'review_count',
+            'product_reviews',
+            'warranty',
+            'short_description',
+            'full_description',
+            'in_house_product',
+            'is_new',
+            'offer_discount_id',
+            'offer_discount_price',
+            'offer_discount_price_type',
         ]
 
     def get_offer_discount_id(self, obj):

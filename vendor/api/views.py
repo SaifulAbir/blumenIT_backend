@@ -1066,7 +1066,7 @@ class AdminOrderList(ListAPIView):
             order_status = request.GET.get('order_status')
 
             if self.request.user.is_seller == True:
-                queryset = Order.objects.filter(is_active=True, order_item_order__product__seller=Seller.objects.get(seller_user=self.request.user.id)).order_by('-created_at')
+                queryset = Order.objects.filter(is_active=True, order_item_order__product__seller=Seller.objects.get(seller_user=self.request.user.id)).order_by('-created_at').distinct()
             else:
                 queryset = Order.objects.filter(is_active=True).order_by('-created_at')
 
@@ -1221,7 +1221,7 @@ class OrderListSearchAPI(ListAPIView):
             end_date = request.GET.get('end_date')
 
             if self.request.user.is_seller == True:
-                queryset = Order.objects.filter(is_active=True, order_item_order__product__seller=Seller.objects.get(seller_user=self.request.user.id)).order_by('-created_at')
+                queryset = Order.objects.filter(is_active=True, order_item_order__product__seller=Seller.objects.get(seller_user=self.request.user.id)).order_by('-created_at').distinct()
             else:
                 queryset = Order.objects.filter(is_active=True).order_by('-created_at')
 

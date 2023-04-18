@@ -231,7 +231,7 @@ class ProductListByCategoryAPI(ListAPIView):
                 When(discount_type='fixed', then=F('price') - F('discount_amount')),
                 default=F('price'),
                 output_field=DecimalField(max_digits=10, decimal_places=2))
-            ).order_by('discount_price').distinct('discount_price')
+            ).order_by('price_after_offer_discount').distinct('discount_price')
 
         if price_high_to_low:
             queryset = queryset.annotate(discount_price=Case(
@@ -239,7 +239,7 @@ class ProductListByCategoryAPI(ListAPIView):
                 When(discount_type='fixed', then=F('price') - F('discount_amount')),
                 default=F('price'),
                 output_field=DecimalField(max_digits=10, decimal_places=2))
-            ).order_by('-discount_price').distinct('-discount_price')
+            ).order_by('-price_after_offer_discount').distinct('-discount_price')
 
         # filtering based on active offers
         today = timezone.now()

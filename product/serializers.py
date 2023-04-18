@@ -228,6 +228,14 @@ class ProductListBySerializer(serializers.ModelSerializer):
     offer_discount_price_type = serializers.SerializerMethodField('get_offer_discount_price_type')
     price_after_offer_discount = serializers.SerializerMethodField('get_price_after_offer_discount')
 
+    # def to_representation(self, instance):
+    #     # get the serialized data as a dictionary
+    #     data = super().to_representation(instance)
+    #     # update the price field with the discounted price
+    #     if data['offer_discount_price']:
+    #         data['price'] = data['offer_discount_price']
+        # return the updated data
+        # return data
     class Meta:
         model = Product
         fields = [
@@ -270,6 +278,8 @@ class ProductListBySerializer(serializers.ModelSerializer):
             'offer_discount_price_type',
             'price_after_offer_discount'
         ]
+        # ordering_fields = ('price', 'price_after_offer_discount')
+        # ordering = ('-price_after_offer_discount',)
 
     def get_offer_discount_id(self, obj):
         today_date = timezone.now().date()

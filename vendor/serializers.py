@@ -30,7 +30,6 @@ from django.conf import settings
 
 
 class SellerCreateSerializer(serializers.ModelSerializer):
-    # name = serializers.CharField(required=True)
     email = serializers.EmailField(required=True)
     phone = serializers.CharField(required=True)
     password = serializers.CharField(required=True)
@@ -40,7 +39,7 @@ class SellerCreateSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'address', 'phone', 'email', 'logo', 'is_active', 'password']
 
     def create(self, validated_data):
-        # try:
+        try:
             email_get = validated_data.pop('email')
             email_get_data = email_get.lower()
             if email_get:
@@ -80,7 +79,6 @@ class SellerCreateSerializer(serializers.ModelSerializer):
                 seller_instance.seller_user = user
                 seller_instance.save()
 
-                # print('Mail sent!')
                 subject = "New Vendor credential."
                 html_message = render_to_string('seller_email.html', {'username':name, 'email': email_get_data, 'password': password})
 
@@ -98,9 +96,8 @@ class SellerCreateSerializer(serializers.ModelSerializer):
                     return Response({"details": "Phone number already exists"}, status=status.HTTP_400_BAD_REQUEST)
 
             return seller_instance
-        # except:
-        #     print("hello")
-        #     return Response({"details": "Something went wrong!"}, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            return Response({"details": "Something went wrong!"}, status=status.HTTP_400_BAD_REQUEST)
 
 class SellerUpdateSerializer(serializers.ModelSerializer):
     name = serializers.CharField(required=True)
@@ -182,29 +179,13 @@ class AddNewCategorySerializer(serializers.ModelSerializer):
         except:
             category_filter_attributes = ''
 
-        # work with category title 
-        # title_get = validated_data.pop('title')
-        # title_get_data = title_get.lower()
-        # if title_get:
-        #     title_get_for_check = Category.objects.filter(title=title_get.lower())
-        #     if title_get_for_check:
-        #         raise ValidationError('This category title already exist in Category.')
-
-        # work with order number
-        # ordering_number_get = validated_data.pop('ordering_number')
-        # ordering_number_get_data = ordering_number_get.lower()
-        # if ordering_number_get:
-        #     ordering_number_get_for_check = Category.objects.filter(ordering_number=ordering_number_get)
-        #     if ordering_number_get_for_check:
-        #         raise ValidationError('This category ordering number already exist in Category.')
-
         category_instance = Category.objects.create(**validated_data)
 
         if category_filter_attributes:
             for f_attr in category_filter_attributes:
                 attribute = f_attr['attribute']
                 if attribute:
-                    filtering_attribute_create_instance = FilterAttributes.objects.create(attribute=attribute, category=category_instance)
+                    FilterAttributes.objects.create(attribute=attribute, category=category_instance)
 
         return category_instance
 
@@ -281,23 +262,6 @@ class AddNewSubCategorySerializer(serializers.ModelSerializer):
         except:
             sub_category_filtering_attributes = ''
 
-        # work with category title 
-        # title_get = validated_data.pop('title')
-        # title_get_data = title_get.lower()
-        # if title_get:
-        #     title_get_for_check = SubCategory.objects.filter(title=title_get.lower())
-        #     if title_get_for_check:
-        #         raise ValidationError('This Sub category title already exist in Sub Category.')
-
-        # work with order number
-        # ordering_number_get = validated_data.pop('ordering_number')
-        # ordering_number_get_data = ordering_number_get.lower()
-        # if ordering_number_get:
-        #     ordering_number_get_for_check = SubCategory.objects.filter(ordering_number=ordering_number_get)
-        #     if ordering_number_get_for_check:
-        #         raise ValidationError('This Sub category ordering number already exist in SubCategory.')
-
-
         sub_category_instance = SubCategory.objects.create(**validated_data)
 
         # filtering_attributes
@@ -350,7 +314,7 @@ class UpdateSubCategorySerializer(serializers.ModelSerializer):
             for f_attr in filtering_attributes:
                 attribute = f_attr['attribute']
                 if attribute:
-                    filter_attr_create_instance = FilterAttributes.objects.create(attribute=attribute, sub_category=instance)
+                    FilterAttributes.objects.create(attribute=attribute, sub_category=instance)
         else:
             f_a = FilterAttributes.objects.filter(
                 sub_category=instance).exists()
@@ -381,22 +345,6 @@ class AddNewSubSubCategorySerializer(serializers.ModelSerializer):
         except:
             sub_sub_category_filtering_attributes = ''
 
-        # work with category title
-        # title_get = validated_data.pop('title')
-        # title_get_data = title_get.lower()
-        # if title_get:
-        #     title_get_for_check = SubSubCategory.objects.filter(title=title_get.lower())
-        #     if title_get_for_check:
-        #         raise ValidationError('This Sub Sub category title already exist in Sub Sub Category.')
-
-        # work with order number
-        # ordering_number_get = validated_data.pop('ordering_number')
-        # ordering_number_get_data = ordering_number_get.lower()
-        # if ordering_number_get:
-        #     ordering_number_get_for_check = SubSubCategory.objects.filter(ordering_number=ordering_number_get)
-        #     if ordering_number_get_for_check:
-        #         raise ValidationError('This Sub Sub category ordering number already exist in Sub Sub Category.')
-
         sub_sub_category_instance = SubSubCategory.objects.create(**validated_data)
 
         # filtering_attributes
@@ -404,7 +352,7 @@ class AddNewSubSubCategorySerializer(serializers.ModelSerializer):
             for f_attr in sub_sub_category_filtering_attributes:
                 attribute = f_attr['attribute']
                 if attribute:
-                    filtering_attribute_create_instance = FilterAttributes.objects.create(attribute=attribute, sub_sub_category=sub_sub_category_instance)
+                    FilterAttributes.objects.create(attribute=attribute, sub_sub_category=sub_sub_category_instance)
 
         return sub_sub_category_instance
 
@@ -450,7 +398,7 @@ class UpdateSubSubCategorySerializer(serializers.ModelSerializer):
             for f_attr in filtering_attributes:
                 attribute = f_attr['attribute']
                 if attribute:
-                    filter_attr_create_instance = FilterAttributes.objects.create(attribute=attribute, sub_sub_category=instance)
+                    FilterAttributes.objects.create(attribute=attribute, sub_sub_category=instance)
         else:
             f_a = FilterAttributes.objects.filter(sub_sub_category=instance).exists()
             if f_a == True:
@@ -608,17 +556,6 @@ class OfferProductSerializer(serializers.ModelSerializer):
             'offer'
         ]
 
-# class FlashDealSerializer(serializers.ModelSerializer):
-#     flash_deal_info = serializers.PrimaryKeyRelatedField(queryset=FlashDealInfo.objects.all(), many=False, write_only=True, required= False)
-#     discount_type = serializers.PrimaryKeyRelatedField(queryset=DiscountTypes.objects.all(), many=False, write_only=True, required= False)
-#     class Meta:
-#         model = FlashDealProduct
-#         fields = [
-#             'id',
-#             'flash_deal_info',
-#             'discount_amount',
-#             'discount_type'
-#         ]
 
 # product create serializer start
 class ProductCreateSerializer(serializers.ModelSerializer):
@@ -631,13 +568,9 @@ class ProductCreateSerializer(serializers.ModelSerializer):
     minimum_purchase_quantity = serializers.IntegerField(required=True)
     price = serializers.FloatField(required=True)
     quantity = serializers.IntegerField(required=False, write_only=True)
-    product_tags = serializers.ListField(
-        child=serializers.CharField(), write_only=True, required=True)
-    product_images = serializers.ListField(
-        child=serializers.FileField(), write_only=True, required=False)
-    product_specification = ProductSpecificationSerializer(
-        many=True, required=False)
-    # flash_deal = FlashDealSerializer(many=True, required=False)
+    product_tags = serializers.ListField(child=serializers.CharField(), write_only=True, required=True)
+    product_images = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
+    product_specification = ProductSpecificationSerializer(many=True, required=False)
     offers = OfferProductSerializer(many=True, required=False)
     product_filter_attributes = ProductFilterAttributesSerializer(many=True, required=False)
     product_warranties = ProductWarrantiesSerializer(many=True, required=False)
@@ -753,12 +686,6 @@ class ProductCreateSerializer(serializers.ModelSerializer):
             product_specification = validated_data.pop('product_specification')
         except:
             product_specification = ''
-
-        # flash_deal
-        # try:
-        #     flash_deal = validated_data.pop('flash_deal')
-        # except:
-        #     flash_deal = ''
 
         # offers
         try:
@@ -931,7 +858,6 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
     product_tags = serializers.ListField(child=serializers.CharField(), write_only=True, required=False)
     product_images = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
     product_specification = ProductSpecificationSerializer(many=True, required=False)
-    # flash_deal = FlashDealSerializer(many=True, required=False)
     offers = OfferProductSerializer(many=True, required=False)
     quantity = serializers.IntegerField(required=False, write_only=True)
     product_filter_attributes = ProductFilterAttributesSerializer(many=True, required=False)
@@ -1248,7 +1174,6 @@ class ProductUpdateDetailsSerializer(serializers.ModelSerializer):
     product_tags = serializers.SerializerMethodField()
     product_images = serializers.SerializerMethodField()
     product_specification = serializers.SerializerMethodField('get_product_specification')
-    # flash_deal = serializers.SerializerMethodField('get_flash_deal')
     offers = serializers.SerializerMethodField('get_offers')
     product_filter_attributes = serializers.SerializerMethodField('get_product_filter_attributes')
     product_warranties = serializers.SerializerMethodField('get_product_warranties')
@@ -1553,7 +1478,6 @@ class AdminFilterAttributeValueSerializer(serializers.ModelSerializer):
 
 
 class AdminOrderListSerializer(serializers.ModelSerializer):
-    # total_price = serializers.SerializerMethodField('get_total_price')
     user_email = serializers.CharField(source='user.email',read_only=True)
     user_phone = serializers.CharField(source='user.phone',read_only=True)
     seller = serializers.CharField(source='vendor.name',read_only=True)
@@ -1562,40 +1486,8 @@ class AdminOrderListSerializer(serializers.ModelSerializer):
         model = Order
         fields = ['id', 'delivery_address', 'order_id', 'product_count', 'order_date', 'order_status', 'total_price', 'created_at', 'payment_status', 'user_email', 'user_phone', 'vendor', 'seller', 'delivery_agent', 'refund', 'discount_amount']
 
-    # def get_total_price(self, obj):
-    #     order_items = OrderItem.objects.filter(order=obj)
-    #     prices = []
-    #     total_price = 0.0
-    #     for order_item in order_items:
-    #         price = order_item.unit_price
-    #         if order_item.unit_price_after_add_warranty != 0.0:
-    #             price = order_item.unit_price_after_add_warranty
-    #         quantity = order_item.quantity
-    #         t_price = float(price) * float(quantity)
-    #         prices.append(t_price)
-    #     if obj.vat_amount:
-    #         sub_total = float(sum(prices)) + float(obj.vat_amount)
-    #     else:
-    #         sub_total = float(sum(prices))
-    #     if sub_total:
-    #         total_price += sub_total
-
-    #     shipping_cost = obj.shipping_cost
-    #     if shipping_cost:
-    #         total_price += shipping_cost
-
-    #     coupon_discount_amount = obj.coupon_discount_amount
-    #     if coupon_discount_amount:
-    #         total_price -= coupon_discount_amount
-
-    #     discount_amount = obj.discount_amount
-    #     if discount_amount:
-    #         total_price -= discount_amount
-    #     return total_price
-
 
 class AdminOrderViewSerializer(serializers.ModelSerializer):
-    # order_item_order = OrderItemSerializer(many=True, read_only=True)
     order_item_order = serializers.SerializerMethodField('get_order_item_order')
     user = CustomerProfileSerializer(read_only=True)
     delivery_address = DeliveryAddressSerializer(read_only=True)
@@ -1638,12 +1530,7 @@ class AdminOrderViewSerializer(serializers.ModelSerializer):
             total_price += sub_total
 
     def get_order_item_order(self, obj):
-        # user = self.context.get("request").user
-        # if user.is_seller == True:
-        #     order_items = OrderItem.objects.filter(is_active=True, order=obj, product__seller=Seller.objects.get(seller_user=user.id))
-        # else:
         order_items = OrderItem.objects.filter(is_active=True, order=obj)
-
         return OrderItemSerializer(order_items, many=True).data
 
 
@@ -1861,8 +1748,6 @@ class AdminOfferCategoryListSerializer(serializers.ModelSerializer):
 
 
 class AdminOfferSerializer(serializers.ModelSerializer):
-    # offer_category_title = serializers.CharField(source='offer_category.title',read_only=True)
-    # product_category_title = serializers.CharField(source='product_category.title',read_only=True)
     offer_products = AdminOfferProductsSerializer(many=True, required=False)
     existing_offer_products = serializers.SerializerMethodField('get_existing_offer_products')
     start_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", required=False)
@@ -1874,10 +1759,6 @@ class AdminOfferSerializer(serializers.ModelSerializer):
         read_only_field = ['id']
         fields = [  'id',
                     'title',
-                    # 'product_category',
-                    # 'product_category_title',
-                    # 'offer_category',
-                    # 'offer_category_title',
                     'start_date',
                     'end_date',
                     'thumbnail',
@@ -1984,16 +1865,7 @@ class AdminPosCustomerCreateSerializer(serializers.ModelSerializer):
             'username', 'email', 'phone', 'is_customer'
         ]
 
-    # def create(self, validated_data):
-    #     username = validated_data.pop('username')
-    #     phone = validated_data.pop('phone')
-    #     email = validated_data.pop('email')
-    #     is_customer = validated_data.pop('is_customer')
-    #
-    #     query = User.objects.all()
-    #
-    #     query.username = username
-    #     query.phone =
+
 class AdminPosProductListSerializer(serializers.ModelSerializer):
     brand_title = serializers.CharField(source="brand.title", read_only=True)
     brand = BrandSerializer()
@@ -2017,8 +1889,7 @@ class AdminPosProductListSerializer(serializers.ModelSerializer):
         ]
 
 class AdminPosOrderItemSerializer(serializers.ModelSerializer):
-    product_warranty = serializers.PrimaryKeyRelatedField(queryset=ProductWarranty.objects.all(), many=False,
-                                                          write_only=True, required=False)
+    product_warranty = serializers.PrimaryKeyRelatedField(queryset=ProductWarranty.objects.all(), many=False, write_only=True, required=False)
 
     class Meta:
         model = OrderItem
@@ -2200,13 +2071,11 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
             'email',
             'bottom_banner',
             'shop_address',
-
             'home_slider_images',
             'small_banners_carousel',
             'small_banners_static',
             'popular_products_banners',
             'feature_products_banners',
-
             'gaming_slider_images',
             'gaming_popular_products_banners',
             'gaming_feature_products_banners'
@@ -2356,13 +2225,11 @@ class WebsiteConfigurationUpdateSerializer(serializers.ModelSerializer):
             'email',
             'bottom_banner',
             'shop_address',
-
             'home_slider_images',
             'small_banners_carousel',
             'small_banners_static',
             'popular_products_banners',
             'feature_products_banners',
-
             'gaming_slider_images',
             'gaming_popular_products_banners',
             'gaming_feature_products_banners'

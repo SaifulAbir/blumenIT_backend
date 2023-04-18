@@ -1,9 +1,7 @@
 from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework import status
-from datetime import datetime
 from django.utils import timezone
-
 from blog.models import Blog
 from product.pagination import ProductCustomPagination
 from product.serializers import DiscountTypeSerializer, TagsSerializer, ProductListBySerializer
@@ -22,7 +20,7 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     VendorBrandSerializer, AdminCategoryListSerializer, VendorProductListSerializer, \
     ProductUpdateSerializer, VendorProductViewSerializer, AdminSubCategoryListSerializer, \
     AdminSubSubCategoryListSerializer, VendorUnitSerializer, SellerSerializer, \
-    ProductVideoProviderSerializer, ProductVatProviderSerializer, UpdateCategorySerializer, \
+    ProductVideoProviderSerializer, UpdateCategorySerializer, \
     UpdateSubSubCategorySerializer, ProductCreateSerializer, AddNewCategorySerializer, \
     SellerCreateSerializer, FlashDealInfoSerializer, UpdateSubCategorySerializer, FilteringAttributesSerializer, \
     AdminProfileSerializer, AdminContactUsSerializer, AdminOfferDetailsSerializer, \
@@ -45,7 +43,7 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     GeneralSettingsViewSerializer
 
 from cart.models import Order, OrderItem, Coupon
-from cart.models import Order, OrderItem, SubOrder
+from cart.models import Order, OrderItem
 from user.models import User, Subscription
 from rest_framework.exceptions import ValidationError
 from vendor.pagination import OrderCustomPagination
@@ -207,7 +205,7 @@ class AdminProductUpdateDetailsAPIView(RetrieveAPIView):
                     {"msg": 'Product does not exist!'})
         else:
             raise ValidationError({"msg": 'You can not update this product, because you are not an Admin or a Staff or a vendor!'})
-        
+
 
 class AdminDeleteProductImageAPIView(UpdateAPIView):
     permission_classes = [IsAuthenticated]
@@ -238,7 +236,6 @@ class AdminProductListAPI(ListAPIView):
             type = request.GET.get('type')
 
             if self.request.user.is_seller == True:
-
                 queryset = Product.objects.filter(~Q(in_house_product = True), Q(is_active=True), Q(seller=Seller.objects.get(seller_user=self.request.user.id))).order_by('-created_at')
             else:
                 queryset = Product.objects.filter(is_active=True).order_by('-created_at')
@@ -686,7 +683,6 @@ class AdminFlashDealCreateAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = FlashDealInfoSerializer
 
-
     def post(self, request, *args, **kwargs):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             return super(AdminFlashDealCreateAPIView, self).post(request, *args, **kwargs)
@@ -762,15 +758,12 @@ class AdminProfileAPIView(RetrieveAPIView):
     serializer_class = AdminProfileSerializer
 
     def get_object(self):
-        # if self.request.user.is_staff == True:
         query = User.objects.get(id=self.request.user.id)
         if query:
             return query
         else:
             raise ValidationError(
                 {"msg": 'User does not exist!'})
-        # else:
-        #     raise ValidationError({"msg": 'You can not view your profile, because you are not a Staff!'})
 
 
 # Review related admin apies views............................ start
@@ -1147,7 +1140,6 @@ class AdminSellerOrderList(ListAPIView):
 
 class AdminOrderViewAPI(RetrieveAPIView):
     permission_classes = [IsAuthenticated]
-    # serializer_class = AdminOrderViewSerializer(many=True, context={"request": request})
     serializer_class = AdminOrderViewSerializer
     lookup_field = 'id'
     lookup_url_kwarg = "id"
@@ -1651,10 +1643,8 @@ class AdminShippingCountryListAPIView(ListAPIView):
         search = request.GET.get('search')
         if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             queryset = ShippingCountry.objects.filter(is_active=True).order_by('-created_at')
-
             if search:
                 queryset = queryset.filter(Q(title__icontains=search))
-
             if queryset:
                 return queryset
             else:
@@ -1671,7 +1661,6 @@ class CustomerShippingCountryListAllAPIView(ListAPIView):
     def get_queryset(self):
         request = self.request
         search = request.GET.get('search')
-        # if self.request.user.is_superuser == True or self.request.user.is_staff == True:
         queryset = ShippingCountry.objects.filter(is_active=True).order_by('-created_at')
 
         if search:
@@ -1681,9 +1670,6 @@ class CustomerShippingCountryListAllAPIView(ListAPIView):
             return queryset
         else:
             raise ValidationError({"msg": "Shipping Country doesn't exist! " })
-        # else:
-        #     raise ValidationError(
-        #         {"msg": 'You can not see Shipping Country list, because you are not an Admin or a Staff!'})
 
 
 class AdminShippingCountryListAllAPIView(ListAPIView):
@@ -1695,10 +1681,8 @@ class AdminShippingCountryListAllAPIView(ListAPIView):
         search = request.GET.get('search')
         if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             queryset = ShippingCountry.objects.filter(is_active=True).order_by('-created_at')
-
             if search:
                 queryset = queryset.filter(Q(title__icontains=search))
-
             if queryset:
                 return queryset
             else:
@@ -1720,7 +1704,6 @@ class AdminShippingCountryListFilterAPIView(ListAPIView):
             queryset = ShippingCountry.objects.filter(is_active= True).order_by('-created_at')
             if search:
                 queryset = queryset.filter(Q(title__icontains=search) | Q(code__icontains=search))
-
             return queryset
         else:
             raise ValidationError({"msg": 'You can not search Shipping Country data, because you are not an Admin or a Staff!'})
@@ -1778,10 +1761,8 @@ class AdminShippingCityListAPIView(ListAPIView):
         search = request.GET.get('search')
         if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             queryset = ShippingCity.objects.filter(is_active=True).order_by('-created_at')
-
             if search:
                 queryset = queryset.filter(Q(title__icontains=search))
-
             if queryset:
                 return queryset
             else:
@@ -1800,10 +1781,8 @@ class AdminShippingCityListAllAPIView(ListAPIView):
         search = request.GET.get('search')
         if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             queryset = ShippingCity.objects.filter(is_active=True).order_by('-created_at')
-
             if search:
                 queryset = queryset.filter(Q(title__icontains=search))
-
             if queryset:
                 return queryset
             else:
@@ -2137,7 +2116,6 @@ class AdminSubscriberDeleteAPIView(ListAPIView):
             if subscription_obj:
                 subscription_obj = Subscription.objects.filter(id=id)
                 subscription_obj.update(is_active=False)
-
                 queryset = Subscription.objects.filter(is_active=True).order_by('-created_at')
                 return queryset
             else:
@@ -2195,7 +2173,6 @@ class AdminCorporateDealDeleteAPIView(ListAPIView):
             if corporate_deal_obj:
                 corporate_deal_obj = CorporateDeal.objects.filter(id=id)
                 corporate_deal_obj.update(is_active=False)
-
                 queryset = CorporateDeal.objects.filter(is_active=True).order_by('-created_at')
                 return queryset
             else:
@@ -2253,7 +2230,6 @@ class AdminRequestQuoteDeleteAPIView(ListAPIView):
             request_quote_obj = RequestQuote.objects.filter(id=id).exists()
             if request_quote_obj:
                 RequestQuote.objects.filter(id=id).update(is_active=False)
-
                 queryset = RequestQuote.objects.filter(is_active=True).order_by('-created_at')
                 return queryset
             else:
@@ -2311,7 +2287,6 @@ class AdminContactUsDeleteAPIView(ListAPIView):
             corporate_deal_obj = ContactUs.objects.filter(id=id).exists()
             if corporate_deal_obj:
                 ContactUs.objects.filter(id=id).update(is_active=False)
-
                 queryset = ContactUs.objects.filter(is_active=True).order_by('-created_at')
                 return queryset
             else:
@@ -2521,7 +2496,6 @@ class AdminPosCustomerCreateAPIView(CreateAPIView):
         serializer.save(is_customer=is_customer)
 
     def post(self, request, *args, **kwargs):
-
         return super(AdminPosCustomerCreateAPIView, self).post(request, *args, **kwargs)
 
 
@@ -2556,8 +2530,6 @@ class AdminPosProductListAPI(ListAPIView):
                     queryset = queryset.filter(brand_id=brand)
 
             return queryset
-            # else:
-            #     raise ValidationError({"msg": "Product doesn't exist! " })
         else:
             raise ValidationError(
                 {"msg": 'You can not see product list, because you are not an Admin or a Staff!'})
@@ -2689,8 +2661,7 @@ class AdminVideoProviderDeleteAPI(ListAPIView):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             product_obj_exist = ProductVideoProvider.objects.filter(id=id).exists()
             if product_obj_exist:
-                product_obj = ProductVideoProvider.objects.filter(id=id).update(is_active=False)
-
+                ProductVideoProvider.objects.filter(id=id).update(is_active=False)
                 queryset = ProductVideoProvider.objects.filter(is_active=True).order_by('-created_at')
                 return queryset
             else:
@@ -2763,7 +2734,6 @@ class AdminVatTypeDeleteAPIView(ListAPIView):
             vat_type_obj_exist = VatType.objects.filter(id=id).exists()
             if vat_type_obj_exist:
                 VatType.objects.filter(id=id).update(is_active=False)
-
                 queryset = VatType.objects.filter(is_active=True).order_by('-created_at')
                 return queryset
             else:
@@ -2962,7 +2932,6 @@ class AdminFilterAttributeValueListAllAPIView(ListAPIView):
             request = self.request
             atid = self.kwargs['atid']
             if atid:
-                print(atid)
                 queryset = AttributeValues.objects.filter(attribute=atid, is_active=True).order_by('-created_at')
                 return queryset
             else:

@@ -28,7 +28,7 @@ class SalesReportSerializer(serializers.ModelSerializer):
             sellers_names = []
             order_items = OrderItem.objects.filter(order=obj, is_active=True)
             for order_item in order_items:
-                seller = order_item.product.seller.name
+                seller = str(order_item.product.seller.name) + ', '
                 sellers_names.append(seller)
             return sellers_names
         except:

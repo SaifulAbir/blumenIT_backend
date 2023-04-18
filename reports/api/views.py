@@ -65,10 +65,6 @@ class SalesReportSearchAPI(ListAPIView):
 
             # date
             if start_date:
-                # print(start_date)
-                # try:
-                #     check_dt = datetime.datetime.strptime(start_date, '%Y-%m-%d')
-                # print(dt)
                 queryset = queryset.filter(Q(order_date__range=(start_date,end_date)) | Q(order_date__icontains=start_date))
 
             if order_code:
@@ -110,14 +106,6 @@ class VendorProductReportSearchAPI(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True:
-            # work with dynamic pagination page_size
-            # try:
-            #     pagination = self.kwargs['pagination']
-            # except:
-            #     pagination = 10
-            # self.pagination_class.page_size = pagination
-
-
             request = self.request
             order_status = request.GET.get('order_status')
             start_date = request.GET.get('start_date')
@@ -207,14 +195,6 @@ class InHouseProductReportSearchAPI(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True:
-            # work with dynamic pagination page_size
-            # try:
-            #     pagination = self.kwargs['pagination']
-            # except:
-            #     pagination = 10
-            # self.pagination_class.page_size = pagination
-
-
             request = self.request
             search = request.GET.get('search')
 
@@ -237,9 +217,7 @@ class SellerProductsSaleReportAPI(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True:
-            # queryset = Seller.objects.all().order_by('-created_at')
             queryset = Seller.objects.all().annotate(number_of_product_sale=Count('product_seller')).order_by('-number_of_product_sale')
-
             if queryset:
                 return queryset
             else:
@@ -256,11 +234,9 @@ class SellerProductsSaleReportSearchAPI(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True:
-            
             request = self.request
             status = request.GET.get('status')
 
-            # queryset = Seller.objects.all().order_by('-created_at')
             queryset = Seller.objects.all().annotate(number_of_product_sale=Count('product_seller')).order_by('-number_of_product_sale')
 
             if status:
@@ -326,13 +302,6 @@ class ProductWishlistReportAPI(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True:
-            # work with dynamic pagination page_size
-            # try:
-            #     pagination = self.kwargs['pagination']
-            # except:
-            #     pagination = 10
-            # self.pagination_class.page_size = pagination
-
             queryset = Product.objects.all().order_by('-created_at')
 
             if queryset:

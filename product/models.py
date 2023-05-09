@@ -524,6 +524,22 @@ class ProductReview(AbstractTimeStamp):
             product_obj.update(total_average_rating_number=average_rating)
 
 
+class ProductReviewReply(AbstractTimeStamp):
+    review = models.ForeignKey(ProductReview, on_delete=models.CASCADE, null=True, blank=True, related_name='product_review_reply_review')
+    user = models.ForeignKey(User, on_delete=models.SET_NULL,
+                             related_name='product_review_reply_user', blank=True, null=True)
+    review_text = models.TextField(default='', blank=True, null=True)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'ProductReviewReply'
+        verbose_name_plural = 'ProductReviewsReply'
+        db_table = 'product_review_reply'
+
+    def __str__(self):
+        return 'Review Reply Text: '+ str(self.review_text)
+
+
 class ProductCombinationMedia(AbstractTimeStamp):
     CHOICES = [
         ('COMPLETE', 'Complete'),

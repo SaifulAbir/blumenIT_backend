@@ -1,7 +1,7 @@
 from django.contrib import admin
 from product.models import FlashDealProduct, Specification, SpecificationValue, TextColor, Attribute, AttributeValues, \
     Category, Inventory, ProductImages, ShippingClass, SubCategory, SubSubCategory, Brand, Tags, Units, \
-    DiscountTypes, Product, VariantType, ProductTags, ProductReview, ProductVideoProvider, VatType, SpecificationTitle, \
+    DiscountTypes, Product, VariantType, ProductTags, ProductReview, ProductVideoProvider, VatType, SpecificationTitle, ProductReviewReply, \
     FilterAttributes, ProductFilterAttributes, ProductCondition, Warranty, ProductWarranty, SavePc, SavePcItems, Offer, \
     OfferProduct, OfferCategory, ShippingCountry, ShippingState, ShippingCity
 
@@ -14,8 +14,9 @@ admin.site.register(Brand)
 admin.site.register(Units)
 admin.site.register(DiscountTypes)
 admin.site.register(VariantType)
-admin.site.register(ProductTags)
+admin.site.register(ProductTags) 
 admin.site.register(ProductReview)
+admin.site.register(ProductReviewReply)
 admin.site.register(ProductImages)
 admin.site.register(ProductVideoProvider)
 admin.site.register(Attribute)

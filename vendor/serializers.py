@@ -10,7 +10,7 @@ from product.models import Brand, Category, DiscountTypes, FlashDealInfo, FlashD
     Product, ProductImages, ProductReview, ProductTags, ProductVariation, ProductVideoProvider, \
     ShippingClass, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units, \
     VatType, Attribute, FilterAttributes, ProductFilterAttributes, AttributeValues, ProductWarranty, Warranty, \
-    SpecificationTitle, \
+    SpecificationTitle, ProductReviewReply, \
     Offer, OfferProduct, ShippingCountry, ShippingState, ShippingCity, OfferCategory
 from user.models import User, Subscription
 from cart.models import Order, Coupon, OrderItem, DeliveryAddress, PaymentType
@@ -36,27 +36,31 @@ class SellerCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Seller
-        fields = ['id', 'name', 'address', 'phone', 'email', 'logo', 'is_active', 'password']
+        fields = ['id', 'name', 'address', 'phone',
+                  'email', 'logo', 'is_active', 'password']
 
     def create(self, validated_data):
         try:
             email_get = validated_data.pop('email')
             email_get_data = email_get.lower()
             if email_get:
-                email_get_for_check = Seller.objects.filter(email=email_get.lower())
+                email_get_for_check = Seller.objects.filter(
+                    email=email_get.lower())
                 if email_get_for_check:
                     raise ValidationError('Email already exists')
             phone_get = validated_data.pop('phone')
             phone_get_data = phone_get.lower()
             if phone_get:
-                phone_get_for_check = Seller.objects.filter(phone=phone_get.lower())
+                phone_get_for_check = Seller.objects.filter(
+                    phone=phone_get.lower())
                 if phone_get_for_check:
                     raise ValidationError('Phone already exists')
             seller_instance = Seller.objects.create(**validated_data, phone=phone_get_data,
                                                     email=email_get_data)
 
             try:
-                user_obj = User.objects.get(Q(email=email_get_data) | Q(phone=phone_get_data))
+                user_obj = User.objects.get(
+                    Q(email=email_get_data) | Q(phone=phone_get_data))
             except User.DoesNotExist:
                 user_obj = None
 
@@ -80,7 +84,8 @@ class SellerCreateSerializer(serializers.ModelSerializer):
                 seller_instance.save()
 
                 subject = "New Vendor credential."
-                html_message = render_to_string('seller_email.html', {'username':name, 'email': email_get_data, 'password': password})
+                html_message = render_to_string('seller_email.html', {
+                                                'username': name, 'email': email_get_data, 'password': password})
 
                 send_mail(
                     subject=subject,
@@ -99,6 +104,7 @@ class SellerCreateSerializer(serializers.ModelSerializer):
         except:
             return Response({"details": "Something went wrong!"}, status=status.HTTP_400_BAD_REQUEST)
 
+
 class SellerUpdateSerializer(serializers.ModelSerializer):
     name = serializers.CharField(required=True)
     email = serializers.EmailField(required=True)
@@ -106,22 +112,26 @@ class SellerUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Seller
-        fields = ['id', 'name', 'address', 'phone', 'email', 'logo', 'is_active']
+        fields = ['id', 'name', 'address',
+                  'phone', 'email', 'logo', 'is_active']
 
     def update(self, instance, validated_data):
         email_get = validated_data.pop('email')
         email_get_data = email_get.lower()
         if email_get:
-            email_get_for_check = Seller.objects.filter(email=email_get.lower())
+            email_get_for_check = Seller.objects.filter(
+                email=email_get.lower())
             if email_get_for_check:
                 raise ValidationError('Email already exists')
         phone_get = validated_data.pop('phone')
         phone_get_data = phone_get.lower()
         if phone_get:
-            phone_get_for_check = Seller.objects.filter(phone=phone_get.lower())
+            phone_get_for_check = Seller.objects.filter(
+                phone=phone_get.lower())
             if phone_get_for_check:
                 raise ValidationError('Phone already exists')
-        validated_data.update({ "email": email_get_data, "phone": phone_get_data})
+        validated_data.update(
+            {"email": email_get_data, "phone": phone_get_data})
         return super().update(instance, validated_data)
 
 
@@ -134,10 +144,12 @@ class SellerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Seller
-        fields = ['id', 'name', 'address', 'phone', 'email', 'logo', 'is_active', 'total_product', 'password']
+        fields = ['id', 'name', 'address', 'phone', 'email',
+                  'logo', 'is_active', 'total_product', 'password']
 
     def get_total_product(self, obj):
-        total_product_count = Product.objects.filter(status='PUBLISH', seller=obj).count()
+        total_product_count = Product.objects.filter(
+            status='PUBLISH', seller=obj).count()
         return total_product_count
 
 
@@ -149,7 +161,9 @@ class SellerDetailSerializer(serializers.ModelSerializer):
 
 
 class FilteringAttributesSerializer(serializers.ModelSerializer):
-    attribute_title = serializers.CharField(source='attribute.title',read_only=True)
+    attribute_title = serializers.CharField(
+        source='attribute.title', read_only=True)
+
     class Meta:
         model = FilterAttributes
         fields = ['id', 'attribute', 'attribute_title']
@@ -160,22 +174,26 @@ class AdminCategoryListSerializer(serializers.ModelSerializer):
     class Meta:
         ref_name = "admin category list serializer"
         model = Category
-        fields = ['id', 'title', 'ordering_number', 'type', 'banner', 'icon', 'is_featured', 'pc_builder']
+        fields = ['id', 'title', 'ordering_number', 'type',
+                  'banner', 'icon', 'is_featured', 'pc_builder']
 
 
 class AddNewCategorySerializer(serializers.ModelSerializer):
-    title = serializers.CharField(required= True)
-    ordering_number = serializers.CharField(required= False)
-    category_filter_attributes = FilteringAttributesSerializer(many=True, required=False)
+    title = serializers.CharField(required=True)
+    ordering_number = serializers.CharField(required=False)
+    category_filter_attributes = FilteringAttributesSerializer(
+        many=True, required=False)
 
     class Meta:
         model = Category
-        fields = ['id', 'title', 'ordering_number', 'type', 'icon', 'banner', 'category_filter_attributes']
+        fields = ['id', 'title', 'ordering_number', 'type',
+                  'icon', 'banner', 'category_filter_attributes']
 
     def create(self, validated_data):
         # filtering_attributes
         try:
-            category_filter_attributes = validated_data.pop('category_filter_attributes')
+            category_filter_attributes = validated_data.pop(
+                'category_filter_attributes')
         except:
             category_filter_attributes = ''
 
@@ -185,35 +203,44 @@ class AddNewCategorySerializer(serializers.ModelSerializer):
             for f_attr in category_filter_attributes:
                 attribute = f_attr['attribute']
                 if attribute:
-                    FilterAttributes.objects.create(attribute=attribute, category=category_instance)
+                    FilterAttributes.objects.create(
+                        attribute=attribute, category=category_instance)
 
         return category_instance
 
 
 class UpdateCategoryDetailsSerializer(serializers.ModelSerializer):
-    title = serializers.CharField(required= False)
-    ordering_number = serializers.CharField(required= False)
-    filtering_attributes = serializers.SerializerMethodField('get_existing_filtering_attributes')
+    title = serializers.CharField(required=False)
+    ordering_number = serializers.CharField(required=False)
+    filtering_attributes = serializers.SerializerMethodField(
+        'get_existing_filtering_attributes')
+
     class Meta:
         model = Category
-        fields = ['id', 'title', 'ordering_number', 'type', 'icon', 'banner', 'subtitle', 'is_active', 'filtering_attributes']
+        fields = ['id', 'title', 'ordering_number', 'type', 'icon',
+                  'banner', 'subtitle', 'is_active', 'filtering_attributes']
 
     def get_existing_filtering_attributes(self, obj):
         try:
-            queryset = FilterAttributes.objects.filter(category=obj.id, is_active=True).distinct()
+            queryset = FilterAttributes.objects.filter(
+                category=obj.id, is_active=True).distinct()
             serializer = FilteringAttributesSerializer(instance=queryset, many=True, context={
-                                                'request': self.context['request']})
+                'request': self.context['request']})
             return serializer.data
         except:
             return []
 
+
 class UpdateCategorySerializer(serializers.ModelSerializer):
-    title = serializers.CharField(required= False)
-    ordering_number = serializers.CharField(required= False)
-    filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
+    title = serializers.CharField(required=False)
+    ordering_number = serializers.CharField(required=False)
+    filtering_attributes = FilteringAttributesSerializer(
+        many=True, required=False)
+
     class Meta:
         model = Category
-        fields = ['id', 'title', 'ordering_number', 'type', 'icon', 'banner', 'subtitle', 'is_active', 'filtering_attributes']
+        fields = ['id', 'title', 'ordering_number', 'type', 'icon',
+                  'banner', 'subtitle', 'is_active', 'filtering_attributes']
 
     def update(self, instance, validated_data):
         # filtering_attributes
@@ -231,7 +258,8 @@ class UpdateCategorySerializer(serializers.ModelSerializer):
             for f_attr in filtering_attributes:
                 attribute = f_attr['attribute']
                 if attribute:
-                    FilterAttributes.objects.create(attribute=attribute, category=instance)
+                    FilterAttributes.objects.create(
+                        attribute=attribute, category=instance)
         else:
             f_a = FilterAttributes.objects.filter(
                 category=instance).exists()
@@ -245,20 +273,25 @@ class UpdateCategorySerializer(serializers.ModelSerializer):
 class AdminSubCategoryListSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubCategory
-        fields = ['id', 'title', 'ordering_number', 'category', 'is_featured', 'pc_builder']
+        fields = ['id', 'title', 'ordering_number',
+                  'category', 'is_featured', 'pc_builder']
 
 
 class AddNewSubCategorySerializer(serializers.ModelSerializer):
-    title = serializers.CharField(required= True)
-    ordering_number = serializers.CharField(required= False)
-    sub_category_filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
+    title = serializers.CharField(required=True)
+    ordering_number = serializers.CharField(required=False)
+    sub_category_filtering_attributes = FilteringAttributesSerializer(
+        many=True, required=False)
+
     class Meta:
         model = SubCategory
-        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category_filtering_attributes', 'icon']
+        fields = ['id', 'title', 'ordering_number', 'category',
+                  'sub_category_filtering_attributes', 'icon']
 
     def create(self, validated_data):
         try:
-            sub_category_filtering_attributes = validated_data.pop('sub_category_filtering_attributes')
+            sub_category_filtering_attributes = validated_data.pop(
+                'sub_category_filtering_attributes')
         except:
             sub_category_filtering_attributes = ''
 
@@ -269,34 +302,43 @@ class AddNewSubCategorySerializer(serializers.ModelSerializer):
             for f_attr in sub_category_filtering_attributes:
                 attribute = f_attr['attribute']
                 if attribute:
-                    filtering_attribute_create_instance = FilterAttributes.objects.create(attribute=attribute, sub_category=sub_category_instance)
+                    filtering_attribute_create_instance = FilterAttributes.objects.create(
+                        attribute=attribute, sub_category=sub_category_instance)
         return sub_category_instance
 
 
 class UpdateSubCategoryDetailsSerializer(serializers.ModelSerializer):
-    title = serializers.CharField(required= False)
-    ordering_number = serializers.CharField(required= False)
-    filtering_attributes = serializers.SerializerMethodField('get_existing_filtering_attributes')
+    title = serializers.CharField(required=False)
+    ordering_number = serializers.CharField(required=False)
+    filtering_attributes = serializers.SerializerMethodField(
+        'get_existing_filtering_attributes')
+
     class Meta:
         model = SubCategory
-        fields = ['id', 'title', 'ordering_number', 'category', 'is_active','filtering_attributes', 'icon']
+        fields = ['id', 'title', 'ordering_number', 'category',
+                  'is_active', 'filtering_attributes', 'icon']
 
     def get_existing_filtering_attributes(self, obj):
         try:
-            queryset = FilterAttributes.objects.filter(sub_category=obj.id, is_active=True).distinct()
+            queryset = FilterAttributes.objects.filter(
+                sub_category=obj.id, is_active=True).distinct()
             serializer = FilteringAttributesSerializer(instance=queryset, many=True, context={
-                                                'request': self.context['request']})
+                'request': self.context['request']})
             return serializer.data
         except:
             return []
 
+
 class UpdateSubCategorySerializer(serializers.ModelSerializer):
-    title = serializers.CharField(required= False)
-    ordering_number = serializers.CharField(required= False)
-    filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
+    title = serializers.CharField(required=False)
+    ordering_number = serializers.CharField(required=False)
+    filtering_attributes = FilteringAttributesSerializer(
+        many=True, required=False)
+
     class Meta:
         model = SubCategory
-        fields = ['id', 'title', 'ordering_number', 'category', 'is_active', 'filtering_attributes', 'icon']
+        fields = ['id', 'title', 'ordering_number', 'category',
+                  'is_active', 'filtering_attributes', 'icon']
 
     def update(self, instance, validated_data):
         # filtering_attributes
@@ -314,7 +356,8 @@ class UpdateSubCategorySerializer(serializers.ModelSerializer):
             for f_attr in filtering_attributes:
                 attribute = f_attr['attribute']
                 if attribute:
-                    FilterAttributes.objects.create(attribute=attribute, sub_category=instance)
+                    FilterAttributes.objects.create(
+                        attribute=attribute, sub_category=instance)
         else:
             f_a = FilterAttributes.objects.filter(
                 sub_category=instance).exists()
@@ -328,59 +371,74 @@ class UpdateSubCategorySerializer(serializers.ModelSerializer):
 class AdminSubSubCategoryListSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubSubCategory
-        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category', 'is_active']
+        fields = ['id', 'title', 'ordering_number',
+                  'category', 'sub_category', 'is_active']
 
 
 class AddNewSubSubCategorySerializer(serializers.ModelSerializer):
-    title = serializers.CharField(required= True)
-    ordering_number = serializers.CharField(required= False)
-    sub_sub_category_filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
+    title = serializers.CharField(required=True)
+    ordering_number = serializers.CharField(required=False)
+    sub_sub_category_filtering_attributes = FilteringAttributesSerializer(
+        many=True, required=False)
+
     class Meta:
         model = SubSubCategory
-        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category', 'sub_sub_category_filtering_attributes', 'icon']
+        fields = ['id', 'title', 'ordering_number', 'category',
+                  'sub_category', 'sub_sub_category_filtering_attributes', 'icon']
 
     def create(self, validated_data):
         try:
-            sub_sub_category_filtering_attributes = validated_data.pop('sub_sub_category_filtering_attributes')
+            sub_sub_category_filtering_attributes = validated_data.pop(
+                'sub_sub_category_filtering_attributes')
         except:
             sub_sub_category_filtering_attributes = ''
 
-        sub_sub_category_instance = SubSubCategory.objects.create(**validated_data)
+        sub_sub_category_instance = SubSubCategory.objects.create(
+            **validated_data)
 
         # filtering_attributes
         if sub_sub_category_filtering_attributes:
             for f_attr in sub_sub_category_filtering_attributes:
                 attribute = f_attr['attribute']
                 if attribute:
-                    FilterAttributes.objects.create(attribute=attribute, sub_sub_category=sub_sub_category_instance)
+                    FilterAttributes.objects.create(
+                        attribute=attribute, sub_sub_category=sub_sub_category_instance)
 
         return sub_sub_category_instance
 
 
 class UpdateSubSubCategoryDetailsSerializer(serializers.ModelSerializer):
-    title = serializers.CharField(required= False)
-    ordering_number = serializers.CharField(required= False)
-    filtering_attributes = serializers.SerializerMethodField('get_existing_filtering_attributes')
+    title = serializers.CharField(required=False)
+    ordering_number = serializers.CharField(required=False)
+    filtering_attributes = serializers.SerializerMethodField(
+        'get_existing_filtering_attributes')
+
     class Meta:
         model = SubSubCategory
-        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category', 'is_active', 'filtering_attributes', 'icon']
+        fields = ['id', 'title', 'ordering_number', 'category',
+                  'sub_category', 'is_active', 'filtering_attributes', 'icon']
 
     def get_existing_filtering_attributes(self, obj):
         try:
-            queryset = FilterAttributes.objects.filter(sub_sub_category=obj.id, is_active=True).distinct()
+            queryset = FilterAttributes.objects.filter(
+                sub_sub_category=obj.id, is_active=True).distinct()
             serializer = FilteringAttributesSerializer(instance=queryset, many=True, context={
-                                                'request': self.context['request']})
+                'request': self.context['request']})
             return serializer.data
         except:
             return []
 
+
 class UpdateSubSubCategorySerializer(serializers.ModelSerializer):
-    title = serializers.CharField(required= False)
-    ordering_number = serializers.CharField(required= False)
-    filtering_attributes = FilteringAttributesSerializer(many=True, required=False)
+    title = serializers.CharField(required=False)
+    ordering_number = serializers.CharField(required=False)
+    filtering_attributes = FilteringAttributesSerializer(
+        many=True, required=False)
+
     class Meta:
         model = SubSubCategory
-        fields = ['id', 'title', 'ordering_number', 'category', 'sub_category', 'is_active', 'filtering_attributes', 'icon']
+        fields = ['id', 'title', 'ordering_number', 'category',
+                  'sub_category', 'is_active', 'filtering_attributes', 'icon']
 
     def update(self, instance, validated_data):
         # filtering_attributes
@@ -398,12 +456,14 @@ class UpdateSubSubCategorySerializer(serializers.ModelSerializer):
             for f_attr in filtering_attributes:
                 attribute = f_attr['attribute']
                 if attribute:
-                    FilterAttributes.objects.create(attribute=attribute, sub_sub_category=instance)
+                    FilterAttributes.objects.create(
+                        attribute=attribute, sub_sub_category=instance)
         else:
-            f_a = FilterAttributes.objects.filter(sub_sub_category=instance).exists()
+            f_a = FilterAttributes.objects.filter(
+                sub_sub_category=instance).exists()
             if f_a == True:
-                FilterAttributes.objects.filter(sub_sub_category=instance).delete()
-
+                FilterAttributes.objects.filter(
+                    sub_sub_category=instance).delete()
 
         validated_data.update({"updated_at": timezone.now()})
         return super().update(instance, validated_data)
@@ -412,7 +472,8 @@ class UpdateSubSubCategorySerializer(serializers.ModelSerializer):
 class VendorBrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
-        fields = ['id', 'title', 'logo', 'meta_title', 'meta_description', 'is_gaming']
+        fields = ['id', 'title', 'logo', 'meta_title',
+                  'meta_description', 'is_gaming']
 
 
 class VendorUnitSerializer(serializers.ModelSerializer):
@@ -423,8 +484,9 @@ class VendorUnitSerializer(serializers.ModelSerializer):
 
 class VendorProductListSerializer(serializers.ModelSerializer):
     avg_rating = serializers.SerializerMethodField()
-    vendor_organization_name = serializers.CharField(source="vendor.organization_name",read_only=True)
-    seller_title = serializers.CharField(source="seller.name",read_only=True)
+    vendor_organization_name = serializers.CharField(
+        source="vendor.organization_name", read_only=True)
+    seller_title = serializers.CharField(source="seller.name", read_only=True)
 
     class Meta:
         model = Product
@@ -474,6 +536,7 @@ class VatTypeSerializer(serializers.ModelSerializer):
 class ProductSpecificationSerializer(serializers.ModelSerializer):
     specification_values = ProductSpecificationValuesSerializer(
         many=True, required=False)
+
     class Meta:
         model = Specification
         fields = [
@@ -484,7 +547,9 @@ class ProductSpecificationSerializer(serializers.ModelSerializer):
 
 
 class ProductExistingSpecificationSerializer(serializers.ModelSerializer):
-    specification_values = serializers.SerializerMethodField('get_existing_specification_values')
+    specification_values = serializers.SerializerMethodField(
+        'get_existing_specification_values')
+
     class Meta:
         model = Specification
         fields = [
@@ -494,14 +559,19 @@ class ProductExistingSpecificationSerializer(serializers.ModelSerializer):
         ]
 
     def get_existing_specification_values(self, instense):
-        queryset = SpecificationValue.objects.filter(specification=instense.id, is_active = True)
-        serializer = ProductSpecificationValuesSerializer(instance=queryset, many=True)
+        queryset = SpecificationValue.objects.filter(
+            specification=instense.id, is_active=True)
+        serializer = ProductSpecificationValuesSerializer(
+            instance=queryset, many=True)
         return serializer.data
 
 
 class FlashDealSerializer(serializers.ModelSerializer):
-    flash_deal_info = serializers.PrimaryKeyRelatedField(queryset=FlashDealInfo.objects.all(), many=False, write_only=True, required= False)
-    discount_type = serializers.PrimaryKeyRelatedField(queryset=DiscountTypes.objects.all(), many=False, write_only=True, required= False)
+    flash_deal_info = serializers.PrimaryKeyRelatedField(
+        queryset=FlashDealInfo.objects.all(), many=False, write_only=True, required=False)
+    discount_type = serializers.PrimaryKeyRelatedField(
+        queryset=DiscountTypes.objects.all(), many=False, write_only=True, required=False)
+
     class Meta:
         model = FlashDealProduct
         fields = [
@@ -524,8 +594,11 @@ class FlashDealExistingSerializer(serializers.ModelSerializer):
 
 
 class ProductFilterAttributesSerializer(serializers.ModelSerializer):
-    filter_attribute = serializers.PrimaryKeyRelatedField(queryset=FilterAttributes.objects.all(), many=False, required= True)
-    attribute_value = serializers.PrimaryKeyRelatedField(queryset=AttributeValues.objects.all(), many=False, required= True)
+    filter_attribute = serializers.PrimaryKeyRelatedField(
+        queryset=FilterAttributes.objects.all(), many=False, required=True)
+    attribute_value = serializers.PrimaryKeyRelatedField(
+        queryset=AttributeValues.objects.all(), many=False, required=True)
+
     class Meta:
         model = ProductFilterAttributes
         fields = [
@@ -536,7 +609,9 @@ class ProductFilterAttributesSerializer(serializers.ModelSerializer):
 
 
 class ProductWarrantiesSerializer(serializers.ModelSerializer):
-    warranty = serializers.PrimaryKeyRelatedField(queryset=Warranty.objects.filter(is_active=True), many=False, required= True)
+    warranty = serializers.PrimaryKeyRelatedField(
+        queryset=Warranty.objects.filter(is_active=True), many=False, required=True)
+
     class Meta:
         model = ProductWarranty
         fields = [
@@ -548,7 +623,9 @@ class ProductWarrantiesSerializer(serializers.ModelSerializer):
 
 
 class OfferProductSerializer(serializers.ModelSerializer):
-    offer = serializers.PrimaryKeyRelatedField(queryset=Offer.objects.all(), many=False, required= False)
+    offer = serializers.PrimaryKeyRelatedField(
+        queryset=Offer.objects.all(), many=False, required=False)
+
     class Meta:
         model = OfferProduct
         fields = [
@@ -560,21 +637,31 @@ class OfferProductSerializer(serializers.ModelSerializer):
 # product create serializer start
 class ProductCreateSerializer(serializers.ModelSerializer):
     title = serializers.CharField(required=True)
-    category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=False, write_only=True, required= True)
-    sub_category = serializers.PrimaryKeyRelatedField(queryset=SubCategory.objects.all(), many=False, write_only=True, required= False)
-    sub_sub_category = serializers.PrimaryKeyRelatedField(queryset=SubSubCategory.objects.all(), many=False, write_only=True, required= False)
-    brand = serializers.PrimaryKeyRelatedField(queryset=Brand.objects.all(), many=False, write_only=True, required= False)
-    unit = serializers.PrimaryKeyRelatedField(queryset=Units.objects.all(), many=False, write_only=True, required= False)
+    category = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all(), many=False, write_only=True, required=True)
+    sub_category = serializers.PrimaryKeyRelatedField(
+        queryset=SubCategory.objects.all(), many=False, write_only=True, required=False)
+    sub_sub_category = serializers.PrimaryKeyRelatedField(
+        queryset=SubSubCategory.objects.all(), many=False, write_only=True, required=False)
+    brand = serializers.PrimaryKeyRelatedField(
+        queryset=Brand.objects.all(), many=False, write_only=True, required=False)
+    unit = serializers.PrimaryKeyRelatedField(
+        queryset=Units.objects.all(), many=False, write_only=True, required=False)
     minimum_purchase_quantity = serializers.IntegerField(required=True)
     price = serializers.FloatField(required=True)
     quantity = serializers.IntegerField(required=False, write_only=True)
-    product_tags = serializers.ListField(child=serializers.CharField(), write_only=True, required=True)
-    product_images = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
-    product_specification = ProductSpecificationSerializer(many=True, required=False)
+    product_tags = serializers.ListField(
+        child=serializers.CharField(), write_only=True, required=True)
+    product_images = serializers.ListField(
+        child=serializers.FileField(), write_only=True, required=False)
+    product_specification = ProductSpecificationSerializer(
+        many=True, required=False)
     offers = OfferProductSerializer(many=True, required=False)
-    product_filter_attributes = ProductFilterAttributesSerializer(many=True, required=False)
+    product_filter_attributes = ProductFilterAttributesSerializer(
+        many=True, required=False)
     product_warranties = ProductWarrantiesSerializer(many=True, required=False)
-    video_provider = serializers.PrimaryKeyRelatedField(queryset=ProductVideoProvider.objects.all(), many=False, write_only=True, required= False)
+    video_provider = serializers.PrimaryKeyRelatedField(
+        queryset=ProductVideoProvider.objects.all(), many=False, write_only=True, required=False)
 
     class Meta:
         model = Product
@@ -635,7 +722,8 @@ class ProductCreateSerializer(serializers.ModelSerializer):
                 raise ValidationError('This SKU already exist in product.')
             variation_check_sku = ProductVariation.objects.filter(sku=sku)
             if variation_check_sku:
-                raise ValidationError('This SKU already exist in product variation.')
+                raise ValidationError(
+                    'This SKU already exist in product variation.')
         # validation for sku end
 
         # validation for category sub category and sub sub category start
@@ -695,10 +783,10 @@ class ProductCreateSerializer(serializers.ModelSerializer):
 
         # product_filter_attributes
         try:
-            product_filter_attributes = validated_data.pop('product_filter_attributes')
+            product_filter_attributes = validated_data.pop(
+                'product_filter_attributes')
         except:
             product_filter_attributes = ''
-
 
         # product_warranties
         try:
@@ -741,9 +829,11 @@ class ProductCreateSerializer(serializers.ModelSerializer):
         if single_quantity:
             total_quan = 0
             total_quan += single_quantity
-            Product.objects.filter(id=product_instance.id).update(total_quantity=total_quan)
+            Product.objects.filter(id=product_instance.id).update(
+                total_quantity=total_quan)
             # inventory update
-            Inventory.objects.create(product=product_instance, initial_quantity=single_quantity, current_quantity=single_quantity)
+            Inventory.objects.create(
+                product=product_instance, initial_quantity=single_quantity, current_quantity=single_quantity)
 
         # product_specification
         try:
@@ -752,14 +842,16 @@ class ProductCreateSerializer(serializers.ModelSerializer):
                     s_title = p_specification['title']
                     if s_title:
                         specification_instance = Specification.objects.create(
-                        title=s_title, product=product_instance)
+                            title=s_title, product=product_instance)
                     specification_values = p_specification['specification_values']
                     for specification_value in specification_values:
                         key = specification_value['key']
                         value = specification_value['value']
-                        product_specification_instance = SpecificationValue.objects.create(specification = specification_instance, key=key, value=value, product=product_instance )
+                        product_specification_instance = SpecificationValue.objects.create(
+                            specification=specification_instance, key=key, value=value, product=product_instance)
         except:
-            raise ValidationError('Problem of Product Specification info insert.')
+            raise ValidationError(
+                'Problem of Product Specification info insert.')
 
         # offers
         try:
@@ -767,7 +859,8 @@ class ProductCreateSerializer(serializers.ModelSerializer):
                 for offer in offers:
                     offer = offer['offer']
                     if offer:
-                        OfferProduct.objects.create(product=product_instance, offer=offer)
+                        OfferProduct.objects.create(
+                            product=product_instance, offer=offer)
         except:
             raise ValidationError('Problem of Offer product info insert.')
 
@@ -777,9 +870,11 @@ class ProductCreateSerializer(serializers.ModelSerializer):
                 for product_filter_attribute in product_filter_attributes:
                     filter_attribute = product_filter_attribute['filter_attribute']
                     attribute_value = product_filter_attribute['attribute_value']
-                    ProductFilterAttributes.objects.create(filter_attribute=filter_attribute, attribute_value=attribute_value, product=product_instance)
+                    ProductFilterAttributes.objects.create(
+                        filter_attribute=filter_attribute, attribute_value=attribute_value, product=product_instance)
         except:
-            raise ValidationError('Problem of Product Filter Attributes info insert.')
+            raise ValidationError(
+                'Problem of Product Filter Attributes info insert.')
 
         # product_warranties
         try:
@@ -788,9 +883,11 @@ class ProductCreateSerializer(serializers.ModelSerializer):
                     warranty = product_warranty['warranty']
                     warranty_value = product_warranty['warranty_value']
                     warranty_value_type = product_warranty['warranty_value_type']
-                    product_warranty_instance = ProductWarranty.objects.create(product=product_instance, warranty=warranty, warranty_value=warranty_value, warranty_value_type=warranty_value_type)
+                    product_warranty_instance = ProductWarranty.objects.create(
+                        product=product_instance, warranty=warranty, warranty_value=warranty_value, warranty_value_type=warranty_value_type)
         except:
-            raise ValidationError('Problem of Product Product Warranties info insert.')
+            raise ValidationError(
+                'Problem of Product Product Warranties info insert.')
 
         return product_instance
 # product create serializer end
@@ -800,7 +897,8 @@ class VendorProductViewSerializer(serializers.ModelSerializer):
     product_images = serializers.SerializerMethodField()
     avg_rating = serializers.SerializerMethodField()
     review_count = serializers.SerializerMethodField()
-    product_specification = serializers.SerializerMethodField('get_product_specification')
+    product_specification = serializers.SerializerMethodField(
+        'get_product_specification')
     product_reviews = serializers.SerializerMethodField()
 
     class Meta:
@@ -841,8 +939,10 @@ class VendorProductViewSerializer(serializers.ModelSerializer):
         return re_count
 
     def get_product_specification(self, product):
-        queryset = Specification.objects.filter(product=product, is_active = True)
-        serializer = ProductSpecificationSerializer(instance=queryset, many=True)
+        queryset = Specification.objects.filter(
+            product=product, is_active=True)
+        serializer = ProductSpecificationSerializer(
+            instance=queryset, many=True)
         return serializer.data
 
     def get_product_reviews(self, obj):
@@ -853,60 +953,67 @@ class VendorProductViewSerializer(serializers.ModelSerializer):
 
 # product update serializer start
 class ProductUpdateSerializer(serializers.ModelSerializer):
-    sub_category = serializers.PrimaryKeyRelatedField(queryset=SubCategory.objects.all(), many=False, write_only=True, required= False)
-    sub_sub_category = serializers.PrimaryKeyRelatedField(queryset=SubSubCategory.objects.all(), many=False, write_only=True, required= False)
-    product_tags = serializers.ListField(child=serializers.CharField(), write_only=True, required=False)
-    product_images = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
-    product_specification = ProductSpecificationSerializer(many=True, required=False)
+    sub_category = serializers.PrimaryKeyRelatedField(
+        queryset=SubCategory.objects.all(), many=False, write_only=True, required=False)
+    sub_sub_category = serializers.PrimaryKeyRelatedField(
+        queryset=SubSubCategory.objects.all(), many=False, write_only=True, required=False)
+    product_tags = serializers.ListField(
+        child=serializers.CharField(), write_only=True, required=False)
+    product_images = serializers.ListField(
+        child=serializers.FileField(), write_only=True, required=False)
+    product_specification = ProductSpecificationSerializer(
+        many=True, required=False)
     offers = OfferProductSerializer(many=True, required=False)
     quantity = serializers.IntegerField(required=False, write_only=True)
-    product_filter_attributes = ProductFilterAttributesSerializer(many=True, required=False)
+    product_filter_attributes = ProductFilterAttributesSerializer(
+        many=True, required=False)
     product_warranties = ProductWarrantiesSerializer(many=True, required=False)
-    video_provider = serializers.PrimaryKeyRelatedField(queryset=ProductVideoProvider.objects.all(), many=False, write_only=True, required= False)
+    video_provider = serializers.PrimaryKeyRelatedField(
+        queryset=ProductVideoProvider.objects.all(), many=False, write_only=True, required=False)
 
     class Meta:
         model = Product
-        fields =[
-                    'id',
-                    'title',
-                    'category',
-                    'sub_category',
-                    'sub_sub_category',
-                    'brand',
-                    'unit',
-                    'seller',
-                    'minimum_purchase_quantity',
-                    'product_tags',
-                    'bar_code',
-                    'refundable',
-                    'video_provider',
-                    'video_link',
-                    'price',
-                    'pre_payment_amount',
-                    'quantity',
-                    'sku',
-                    'external_link',
-                    'external_link_button_text',
-                    'vat',
-                    'vat_type',
-                    'active_short_description',
-                    'show_stock_quantity',
-                    'in_house_product',
-                    'whole_sale_product',
-                    'cash_on_delivery',
-                    'is_featured',
-                    'todays_deal',
-                    'full_description',
-                    'short_description',
-                    'meta_title',
-                    'meta_description',
-                    'thumbnail',
-                    'product_images',
-                    'product_filter_attributes',
-                    'offers',
-                    'product_warranties',
-                    'product_specification',
-                ]
+        fields = [
+            'id',
+            'title',
+            'category',
+            'sub_category',
+            'sub_sub_category',
+            'brand',
+            'unit',
+            'seller',
+            'minimum_purchase_quantity',
+            'product_tags',
+            'bar_code',
+            'refundable',
+            'video_provider',
+            'video_link',
+            'price',
+            'pre_payment_amount',
+            'quantity',
+            'sku',
+            'external_link',
+            'external_link_button_text',
+            'vat',
+            'vat_type',
+            'active_short_description',
+            'show_stock_quantity',
+            'in_house_product',
+            'whole_sale_product',
+            'cash_on_delivery',
+            'is_featured',
+            'todays_deal',
+            'full_description',
+            'short_description',
+            'meta_title',
+            'meta_description',
+            'thumbnail',
+            'product_images',
+            'product_filter_attributes',
+            'offers',
+            'product_warranties',
+            'product_specification',
+        ]
 
     def update(self, instance, validated_data):
         # validation for sku start
@@ -916,12 +1023,14 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
             sku = ''
 
         if sku:
-            product_check_sku = Product.objects.filter(Q(sku=sku), ~Q(id = instance.id))
+            product_check_sku = Product.objects.filter(
+                Q(sku=sku), ~Q(id=instance.id))
             if product_check_sku:
                 raise ValidationError('This SKU already exist in product.')
             variation_check_sku = ProductVariation.objects.filter(sku=sku)
             if variation_check_sku:
-                raise ValidationError('This SKU already exist in product variation.')
+                raise ValidationError(
+                    'This SKU already exist in product variation.')
         # validation for sku end
 
         # validation for category sub category and sub sub category start
@@ -981,7 +1090,8 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
 
         # product_filter_attributes
         try:
-            product_filter_attributes = validated_data.pop('product_filter_attributes')
+            product_filter_attributes = validated_data.pop(
+                'product_filter_attributes')
         except:
             product_filter_attributes = ''
 
@@ -996,7 +1106,6 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
             price = validated_data.pop('price')
         except:
             price = ''
-
 
         # tags
         try:
@@ -1041,16 +1150,20 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
         try:
             single_quantity = int(single_quantity)
             if single_quantity >= 0:
-                latest_inventory_obj = Inventory.objects.filter(product=instance).latest('created_at')
+                latest_inventory_obj = Inventory.objects.filter(
+                    product=instance).latest('created_at')
                 latest_current_quantity = latest_inventory_obj.current_quantity
 
                 if single_quantity == 0 and latest_current_quantity == 0:
                     pass
                 else:
-                    initial_quantity =  single_quantity - latest_current_quantity
-                    Inventory.objects.create(product=instance, initial_quantity=initial_quantity, current_quantity=single_quantity)
-                    total_initial_quantity= Inventory.objects.filter(product=instance).order_by('created_at').aggregate(Sum('initial_quantity'))
-                    validated_data.update({"quantity" : single_quantity, "total_quantity": total_initial_quantity['initial_quantity__sum']})
+                    initial_quantity = single_quantity - latest_current_quantity
+                    Inventory.objects.create(
+                        product=instance, initial_quantity=initial_quantity, current_quantity=single_quantity)
+                    total_initial_quantity = Inventory.objects.filter(product=instance).order_by(
+                        'created_at').aggregate(Sum('initial_quantity'))
+                    validated_data.update(
+                        {"quantity": single_quantity, "total_quantity": total_initial_quantity['initial_quantity__sum']})
             else:
                 raise ValidationError("We can't accept Minus quantity value.")
         except:
@@ -1075,12 +1188,13 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
                     s_title = p_specification['title']
                     if s_title:
                         specification_instance = Specification.objects.create(
-                        title=s_title, product=instance)
+                            title=s_title, product=instance)
                     specification_values = p_specification['specification_values']
                     for specification_value in specification_values:
                         key = specification_value['key']
                         value = specification_value['value']
-                        SpecificationValue.objects.create(specification = specification_instance, key=key, value= value, product=instance)
+                        SpecificationValue.objects.create(
+                            specification=specification_instance, key=key, value=value, product=instance)
             else:
                 specification_value = SpecificationValue.objects.filter(
                     product=instance).exists()
@@ -1100,14 +1214,18 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
         try:
             if offers:
                 offer_ids = [offer['offer'].id for offer in offers]
-                OfferProduct.objects.filter(Q(product=instance), ~Q(offer__in=offer_ids)).update(is_active=False)
+                OfferProduct.objects.filter(Q(product=instance), ~Q(
+                    offer__in=offer_ids)).update(is_active=False)
                 for offer in offers:
                     offer = offer['offer']
-                    offer_product_exist = OfferProduct.objects.filter(product=instance, offer=offer).exists()
+                    offer_product_exist = OfferProduct.objects.filter(
+                        product=instance, offer=offer).exists()
                     if not offer_product_exist:
-                        OfferProduct.objects.create(product=instance, offer=offer)
+                        OfferProduct.objects.create(
+                            product=instance, offer=offer)
                     else:
-                        OfferProduct.objects.filter(product=instance, offer=offer).update(is_active=True)
+                        OfferProduct.objects.filter(
+                            product=instance, offer=offer).update(is_active=True)
 
         except:
             raise ValidationError('Problem of Product Offer product update.')
@@ -1124,7 +1242,8 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
                 for product_filter_attribute in product_filter_attributes:
                     filter_attribute = product_filter_attribute['filter_attribute']
                     attribute_value = product_filter_attribute['attribute_value']
-                    ProductFilterAttributes.objects.create(filter_attribute=filter_attribute, attribute_value=attribute_value, product=instance)
+                    ProductFilterAttributes.objects.create(
+                        filter_attribute=filter_attribute, attribute_value=attribute_value, product=instance)
             else:
                 p_f_a = ProductFilterAttributes.objects.filter(
                     product=instance).exists()
@@ -1137,19 +1256,24 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
         # product_warranties
         try:
             if product_warranties:
-                product_warranties_ids = [warranty['warranty'].id for warranty in product_warranties]
-                ProductWarranty.objects.filter(Q(product=instance), ~Q(warranty__in=product_warranties_ids)).update(is_active=False)
+                product_warranties_ids = [
+                    warranty['warranty'].id for warranty in product_warranties]
+                ProductWarranty.objects.filter(Q(product=instance), ~Q(
+                    warranty__in=product_warranties_ids)).update(is_active=False)
 
                 for product_warranty in product_warranties:
                     warranty = product_warranty['warranty']
                     warranty_value = product_warranty['warranty_value']
                     warranty_value_type = product_warranty['warranty_value_type']
 
-                    warranty_exist = ProductWarranty.objects.filter(product=instance, warranty=warranty).exists()
+                    warranty_exist = ProductWarranty.objects.filter(
+                        product=instance, warranty=warranty).exists()
                     if not warranty_exist:
-                            ProductWarranty.objects.create(product=instance, warranty=warranty, warranty_value=warranty_value, warranty_value_type=warranty_value_type)
+                        ProductWarranty.objects.create(
+                            product=instance, warranty=warranty, warranty_value=warranty_value, warranty_value_type=warranty_value_type)
                     else:
-                        ProductWarranty.objects.filter(product=instance, warranty=warranty).update(is_active=True)
+                        ProductWarranty.objects.filter(
+                            product=instance, warranty=warranty).update(is_active=True)
         except:
             raise ValidationError('Problem of Product warranties update.')
 
@@ -1158,7 +1282,8 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
             if price:
                 existing_price = Product.objects.get(id=instance.id).price
                 if price != existing_price:
-                    validated_data.update({"price" : price, "old_price" : existing_price})
+                    validated_data.update(
+                        {"price": price, "old_price": existing_price})
         except:
             raise ValidationError('Problem of Product price update.')
 
@@ -1168,61 +1293,63 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
 # product update serializer end
 
 
-
 # product update details serializer start
 class ProductUpdateDetailsSerializer(serializers.ModelSerializer):
     product_tags = serializers.SerializerMethodField()
     product_images = serializers.SerializerMethodField()
-    product_specification = serializers.SerializerMethodField('get_product_specification')
+    product_specification = serializers.SerializerMethodField(
+        'get_product_specification')
     offers = serializers.SerializerMethodField('get_offers')
-    product_filter_attributes = serializers.SerializerMethodField('get_product_filter_attributes')
-    product_warranties = serializers.SerializerMethodField('get_product_warranties')
-
+    product_filter_attributes = serializers.SerializerMethodField(
+        'get_product_filter_attributes')
+    product_warranties = serializers.SerializerMethodField(
+        'get_product_warranties')
 
     class Meta:
         model = Product
-        fields =[
-                    'id',
-                    'title',
-                    'category',
-                    'sub_category',
-                    'sub_sub_category',
-                    'brand',
-                    'unit',
-                    'seller',
-                    'minimum_purchase_quantity',
-                    'product_tags',
-                    'bar_code',
-                    'refundable',
-                    'video_provider',
-                    'video_link',
-                    'price',
-                    'pre_payment_amount',
-                    'quantity',
-                    'total_quantity',
-                    'sku',
-                    'external_link',
-                    'external_link_button_text',
-                    'vat',
-                    'vat_type',
-                    'meta_title',
-                    'meta_description',
-                    'active_short_description',
-                    'show_stock_quantity',
-                    'in_house_product',
-                    'whole_sale_product',
-                    'cash_on_delivery',
-                    'is_featured',
-                    'todays_deal',
-                    'full_description',
-                    'short_description',
-                    'thumbnail',
-                    'product_images',
-                    'product_filter_attributes',
-                    'offers',
-                    'product_warranties',
-                    'product_specification',
-                ]
+        fields = [
+            'id',
+            'title',
+            'category',
+            'sub_category',
+            'sub_sub_category',
+            'brand',
+            'unit',
+            'seller',
+            'minimum_purchase_quantity',
+            'product_tags',
+            'bar_code',
+            'refundable',
+            'video_provider',
+            'video_link',
+            'price',
+            'pre_payment_amount',
+            'quantity',
+            'total_quantity',
+            'sku',
+            'external_link',
+            'external_link_button_text',
+            'vat',
+            'vat_type',
+            'meta_title',
+            'meta_description',
+            'active_short_description',
+            'show_stock_quantity',
+            'in_house_product',
+            'whole_sale_product',
+            'cash_on_delivery',
+            'is_featured',
+            'todays_deal',
+            'full_description',
+            'short_description',
+            'thumbnail',
+            'product_images',
+            'product_filter_attributes',
+            'offers',
+            'product_warranties',
+            'product_specification',
+        ]
+
     def get_product_tags(self, obj):
         tags_list = []
         try:
@@ -1246,8 +1373,10 @@ class ProductUpdateDetailsSerializer(serializers.ModelSerializer):
             return []
 
     def get_product_specification(self, product):
-        queryset = Specification.objects.filter(product=product, is_active = True)
-        serializer = ProductExistingSpecificationSerializer(instance=queryset, many=True)
+        queryset = Specification.objects.filter(
+            product=product, is_active=True)
+        serializer = ProductExistingSpecificationSerializer(
+            instance=queryset, many=True)
         return serializer.data
 
     def get_offers(self, product):
@@ -1256,15 +1385,19 @@ class ProductUpdateDetailsSerializer(serializers.ModelSerializer):
         return serializer.data
 
     def get_product_filter_attributes(self, product):
-        queryset = ProductFilterAttributes.objects.filter(product=product, is_active = True)
-        serializer = ProductFilterAttributesSerializer(instance=queryset, many=True)
+        queryset = ProductFilterAttributes.objects.filter(
+            product=product, is_active=True)
+        serializer = ProductFilterAttributesSerializer(
+            instance=queryset, many=True)
         return serializer.data
 
     def get_product_warranties(self, product):
-        queryset = ProductWarranty.objects.filter(product=product, is_active = True)
+        queryset = ProductWarranty.objects.filter(
+            product=product, is_active=True)
         serializer = ProductWarrantiesSerializer(instance=queryset, many=True)
         return serializer.data
 # product update details serializer end
+
 
 class ProductVideoProviderSerializer(serializers.ModelSerializer):
     class Meta:
@@ -1281,39 +1414,44 @@ class ProductVatProviderSerializer(serializers.ModelSerializer):
 
 
 class FlashDealProductSerializer(serializers.ModelSerializer):
-    discount_type = serializers.PrimaryKeyRelatedField(queryset=DiscountTypes.objects.all(), many=False, write_only=True, required= True)
-    discount_amount = serializers.FloatField(required= True)
+    discount_type = serializers.PrimaryKeyRelatedField(
+        queryset=DiscountTypes.objects.all(), many=False, write_only=True, required=True)
+    discount_amount = serializers.FloatField(required=True)
+
     class Meta:
         model = FlashDealProduct
         fields = [
-                    'id',
-                    'product',
-                    'discount_type',
-                    'discount_amount',
-                ]
+            'id',
+            'product',
+            'discount_type',
+            'discount_amount',
+        ]
 
 
 class FlashDealInfoSerializer(serializers.ModelSerializer):
     flash_deal_products = FlashDealProductSerializer(many=True, required=False)
-    existing_flash_deal_products = serializers.SerializerMethodField('get_flash_deal_products')
+    existing_flash_deal_products = serializers.SerializerMethodField(
+        'get_flash_deal_products')
+
     class Meta:
         model = FlashDealInfo
         fields = [
-                    'id',
-                    'title',
-                    'background_color',
-                    'text_color',
-                    'banner',
-                    'start_date',
-                    'end_date',
-                    'is_active',
-                    'is_featured',
-                    'flash_deal_products',
-                    'existing_flash_deal_products'
-                ]
+            'id',
+            'title',
+            'background_color',
+            'text_color',
+            'banner',
+            'start_date',
+            'end_date',
+            'is_active',
+            'is_featured',
+            'flash_deal_products',
+            'existing_flash_deal_products'
+        ]
 
     def get_flash_deal_products(self, obj):
-        queryset = FlashDealProduct.objects.filter(flash_deal_info=obj, is_active = True)
+        queryset = FlashDealProduct.objects.filter(
+            flash_deal_info=obj, is_active=True)
         serializer = FlashDealProductSerializer(instance=queryset, many=True)
         return serializer.data
 
@@ -1333,7 +1471,8 @@ class FlashDealInfoSerializer(serializers.ModelSerializer):
                     product = flash_deal_product['product']
                     discount_type = flash_deal_product['discount_type']
                     discount_amount = flash_deal_product['discount_amount']
-                    FlashDealProduct.objects.create(flash_deal_info=flash_deal_instance, product=product, discount_type=discount_type, discount_amount=discount_amount)
+                    FlashDealProduct.objects.create(
+                        flash_deal_info=flash_deal_instance, product=product, discount_type=discount_type, discount_amount=discount_amount)
 
             return flash_deal_instance
         except:
@@ -1349,19 +1488,24 @@ class FlashDealInfoSerializer(serializers.ModelSerializer):
         try:
             # product_warranties
             if flash_deal_products:
-                f_d_p = FlashDealProduct.objects.filter(flash_deal_info=instance).exists()
+                f_d_p = FlashDealProduct.objects.filter(
+                    flash_deal_info=instance).exists()
                 if f_d_p == True:
-                    FlashDealProduct.objects.filter(flash_deal_info=instance).delete()
+                    FlashDealProduct.objects.filter(
+                        flash_deal_info=instance).delete()
 
                 for flash_deal_product in flash_deal_products:
                     product = flash_deal_product['product']
                     discount_type = flash_deal_product['discount_type']
                     discount_amount = flash_deal_product['discount_amount']
-                    FlashDealProduct.objects.create(flash_deal_info=instance, product=product, discount_type=discount_type, discount_amount=discount_amount)
+                    FlashDealProduct.objects.create(
+                        flash_deal_info=instance, product=product, discount_type=discount_type, discount_amount=discount_amount)
             else:
-                f_d_p = FlashDealProduct.objects.filter(flash_deal_info=instance).exists()
+                f_d_p = FlashDealProduct.objects.filter(
+                    flash_deal_info=instance).exists()
                 if f_d_p == True:
-                    FlashDealProduct.objects.filter(flash_deal_info=instance).delete()
+                    FlashDealProduct.objects.filter(
+                        flash_deal_info=instance).delete()
 
             validated_data.update({"updated_at": timezone.now()})
             return super().update(instance, validated_data)
@@ -1371,34 +1515,42 @@ class FlashDealInfoSerializer(serializers.ModelSerializer):
 
 
 class RolePermissionsDataSerializer(serializers.ModelSerializer):
-    permission_module_title = serializers.CharField(source='permission_module.title',read_only=True)
+    permission_module_title = serializers.CharField(
+        source='permission_module.title', read_only=True)
+
     class Meta:
         model = RolePermissions
         fields = ['id', 'permission_module', 'permission_module_title']
 
+
 class RoleDataSerializer(serializers.ModelSerializer):
     permissions = serializers.SerializerMethodField('get_permissions')
+
     class Meta:
         model = Role
         fields = ['id', 'title', 'permissions']
 
     def get_permissions(self, obj):
-        queryset = RolePermissions.objects.filter(role=obj, is_active = True)
-        serializer = RolePermissionsDataSerializer(instance=queryset, many=True)
+        queryset = RolePermissions.objects.filter(role=obj, is_active=True)
+        serializer = RolePermissionsDataSerializer(
+            instance=queryset, many=True)
         return serializer.data
+
 
 class AdminProfileSerializer(serializers.ModelSerializer):
     staff_role = serializers.SerializerMethodField('get_staff_role')
     seller_id = serializers.SerializerMethodField('get_seller_id')
     seller_logo = serializers.SerializerMethodField('get_seller_logo')
     name = serializers.SerializerMethodField('get_name')
+
     class Meta:
         model = User
-        fields = ['id', 'name', 'email', 'username', 'phone', 'date_joined', 'staff_role', 'is_seller', 'is_staff', 'is_superuser', 'seller_id', 'seller_logo']
+        fields = ['id', 'name', 'email', 'username', 'phone', 'date_joined', 'staff_role',
+                  'is_seller', 'is_staff', 'is_superuser', 'seller_id', 'seller_logo']
 
     def get_staff_role(self, obj):
         try:
-            queryset = Role.objects.filter(id=obj.role.id, is_active = True)
+            queryset = Role.objects.filter(id=obj.role.id, is_active=True)
             serializer = RoleDataSerializer(instance=queryset, many=True)
             return serializer.data
         except:
@@ -1406,31 +1558,37 @@ class AdminProfileSerializer(serializers.ModelSerializer):
 
     def get_seller_id(self, obj):
         try:
-            seller_id = Seller.objects.filter(seller_user=obj.id, is_active = True)
+            seller_id = Seller.objects.filter(
+                seller_user=obj.id, is_active=True)
             return seller_id[0].id
         except:
             return None
 
     def get_seller_logo(self, obj):
         try:
-            seller_id = Seller.objects.filter(seller_user=obj.id, is_active = True)
-            photo_url=seller_id[0].logo.url
+            seller_id = Seller.objects.filter(
+                seller_user=obj.id, is_active=True)
+            photo_url = seller_id[0].logo.url
             return self.context['request'].build_absolute_uri(photo_url)
         except:
             return None
 
     def get_name(self, obj):
         try:
-            seller_id = Seller.objects.filter(seller_user=obj.id, is_active = True)
-            name=seller_id[0].name
+            seller_id = Seller.objects.filter(
+                seller_user=obj.id, is_active=True)
+            name = seller_id[0].name
             return name
         except:
             return 'Super Admin'
 
 
 class ReviewListSerializer(serializers.ModelSerializer):
-    product_title = serializers.CharField(source='product.title',read_only=True)
-    customer_name = serializers.CharField(source='user.username',read_only=True)
+    product_title = serializers.CharField(
+        source='product.title', read_only=True)
+    customer_name = serializers.CharField(
+        source='user.username', read_only=True)
+
     class Meta:
         model = ProductReview
         fields = ['id', 'product', 'product_title', 'user', 'customer_name', 'rating_number', 'review_text',
@@ -1438,14 +1596,18 @@ class ReviewListSerializer(serializers.ModelSerializer):
 
 
 class AttributeValuesSerializer(serializers.ModelSerializer):
-    attribute_title = serializers.CharField(source='attribute.title',read_only=True)
+    attribute_title = serializers.CharField(
+        source='attribute.title', read_only=True)
+
     class Meta:
         model = AttributeValues
         fields = ['id', 'attribute', 'attribute_title', 'value', 'is_active']
 
 
 class AttributeSerializer(serializers.ModelSerializer):
-    attribute_values = serializers.SerializerMethodField('get_attribute_values')
+    attribute_values = serializers.SerializerMethodField(
+        'get_attribute_values')
+
     class Meta:
         model = Attribute
         fields = ['id', 'title', 'is_active', 'attribute_values']
@@ -1456,48 +1618,62 @@ class AttributeSerializer(serializers.ModelSerializer):
 
 
 class AdminFilterAttributeSerializer(serializers.ModelSerializer):
-    attribute_values = serializers.SerializerMethodField('get_attribute_values')
-    attribute_title = serializers.CharField(source='attribute.title',read_only=True)
-    category_title = serializers.CharField(source='category.title',read_only=True)
-    sub_category_title = serializers.CharField(source='sub_category.title',read_only=True)
-    sub_sub_category_title = serializers.CharField(source='sub_sub_category.title',read_only=True)
+    attribute_values = serializers.SerializerMethodField(
+        'get_attribute_values')
+    attribute_title = serializers.CharField(
+        source='attribute.title', read_only=True)
+    category_title = serializers.CharField(
+        source='category.title', read_only=True)
+    sub_category_title = serializers.CharField(
+        source='sub_category.title', read_only=True)
+    sub_sub_category_title = serializers.CharField(
+        source='sub_sub_category.title', read_only=True)
+
     class Meta:
         model = FilterAttributes
         fields = ['id', 'attribute', 'attribute_title', 'attribute_values', 'category', 'category_title', 'sub_category',
                   'sub_category_title', 'sub_sub_category', 'sub_sub_category_title', 'is_active']
+
     def get_attribute_values(self, obj):
-        values = AttributeValues.objects.filter(attribute=obj.attribute, is_active=True)
+        values = AttributeValues.objects.filter(
+            attribute=obj.attribute, is_active=True)
         return AttributeValuesSerializer(values, many=True, context={'request': self.context['request']}).data
 
 
 class AdminFilterAttributeValueSerializer(serializers.ModelSerializer):
-    attribute_title = serializers.CharField(source='attribute.title',read_only=True)
+    attribute_title = serializers.CharField(
+        source='attribute.title', read_only=True)
+
     class Meta:
         model = AttributeValues
         fields = ['id', 'attribute', 'attribute_title', 'value']
 
 
 class AdminOrderListSerializer(serializers.ModelSerializer):
-    user_email = serializers.CharField(source='user.email',read_only=True)
-    user_phone = serializers.CharField(source='user.phone',read_only=True)
-    seller = serializers.CharField(source='vendor.name',read_only=True)
+    user_email = serializers.CharField(source='user.email', read_only=True)
+    user_phone = serializers.CharField(source='user.phone', read_only=True)
+    seller = serializers.CharField(source='vendor.name', read_only=True)
 
     class Meta:
         model = Order
-        fields = ['id', 'delivery_address', 'order_id', 'product_count', 'order_date', 'order_status', 'total_price', 'created_at', 'payment_status', 'user_email', 'user_phone', 'vendor', 'seller', 'delivery_agent', 'refund', 'discount_amount']
+        fields = ['id', 'delivery_address', 'order_id', 'product_count', 'order_date', 'order_status', 'total_price', 'created_at',
+                  'payment_status', 'user_email', 'user_phone', 'vendor', 'seller', 'delivery_agent', 'refund', 'discount_amount']
 
 
 class AdminOrderViewSerializer(serializers.ModelSerializer):
-    order_item_order = serializers.SerializerMethodField('get_order_item_order')
+    order_item_order = serializers.SerializerMethodField(
+        'get_order_item_order')
     user = CustomerProfileSerializer(read_only=True)
     delivery_address = DeliveryAddressSerializer(read_only=True)
-    payment_method = serializers.CharField(source='payment_type.type_name',read_only=True)
+    payment_method = serializers.CharField(
+        source='payment_type.type_name', read_only=True)
     vat_amount = serializers.FloatField(read_only=True)
     warranty_price = serializers.SerializerMethodField('get_warranty_price')
 
     class Meta:
         model = Order
-        fields = ['user', 'delivery_address', 'order_id', 'product_count', 'order_date', 'order_status', 'order_date', 'total_price', 'payment_status', 'payment_method', 'order_item_order', 'sub_total', 'vat_amount', 'shipping_cost', 'coupon_discount_amount', 'comment', 'warranty_price', 'discount_amount']
+        fields = ['user', 'delivery_address', 'order_id', 'product_count', 'order_date', 'order_status', 'order_date', 'total_price', 'payment_status',
+                  'payment_method', 'order_item_order', 'sub_total', 'vat_amount', 'shipping_cost', 'coupon_discount_amount', 'comment', 'warranty_price', 'discount_amount']
 
     def get_warranty_price(self, obj):
         order_items = OrderItem.objects.filter(order=obj)
@@ -1536,6 +1712,7 @@ class AdminOrderViewSerializer(serializers.ModelSerializer):
 
 class AdminOrderUpdateSerializer(serializers.ModelSerializer):
     order_id = serializers.CharField(read_only=True)
+
     class Meta:
         model = Order
         fields = ['order_id', 'order_status', 'payment_status']
@@ -1549,18 +1726,23 @@ class AdminCustomerListSerializer(serializers.ModelSerializer):
 
 class AdminTicketListSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
-    user_name = serializers.CharField(source='ticket.user.username',read_only=True)
-    user_email = serializers.CharField(source='ticket.user.email',read_only=True)
+    user_name = serializers.CharField(
+        source='ticket.user.username', read_only=True)
+    user_email = serializers.CharField(
+        source='ticket.user.email', read_only=True)
     last_reply = serializers.SerializerMethodField()
+
     class Meta:
         model = Ticket
-        fields = ['id', 'ticket_id', 'created_at', 'ticket_subject', 'user_name', 'user_email', 'status', 'last_reply']
+        fields = ['id', 'ticket_id', 'created_at', 'ticket_subject',
+                  'user_name', 'user_email', 'status', 'last_reply']
 
     def get_last_reply(self, obj):
         try:
             selected_last_ticket_conversation = TicketConversation.objects.filter(
                 ticket=obj).order_by('-created_at').latest('id').created_at
-            data = selected_last_ticket_conversation.strftime("%Y-%m-%d, %H:%M:%S")
+            data = selected_last_ticket_conversation.strftime(
+                "%Y-%m-%d, %H:%M:%S")
             return data
         except:
             return ''
@@ -1568,27 +1750,34 @@ class AdminTicketListSerializer(serializers.ModelSerializer):
 
 class AdminTicketConversationSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(read_only=True)
-    creator_user_name = serializers.CharField(source='ticket.user.username',read_only=True)
-    replier_user_name = serializers.CharField(source='replier_user.username',read_only=True)
+    creator_user_name = serializers.CharField(
+        source='ticket.user.username', read_only=True)
+    replier_user_name = serializers.CharField(
+        source='replier_user.username', read_only=True)
+
     class Meta:
         model = TicketConversation
-        fields = ['id', 'conversation_text', 'conversation_photo', 'created_at', 'creator_user_name', 'replier_user_name', 'ticket' ]
+        fields = ['id', 'conversation_text', 'conversation_photo',
+                  'created_at', 'creator_user_name', 'replier_user_name', 'ticket']
 
     def create(self, validated_data):
-        ticket_conversation_instance = TicketConversation.objects.create(**validated_data, replier_user=self.context['request'].user)
+        ticket_conversation_instance = TicketConversation.objects.create(
+            **validated_data, replier_user=self.context['request'].user)
         return ticket_conversation_instance
 
 
 class AdminTicketDataSerializer(serializers.ModelSerializer):
-    user_name = serializers.CharField(source='user.username',read_only=True)
+    user_name = serializers.CharField(source='user.username', read_only=True)
     ticket_conversation = serializers.SerializerMethodField()
 
     class Meta:
         model = Ticket
-        fields = ['id', 'ticket_id', 'user_name', 'created_at', 'status', 'ticket_subject', 'ticket_conversation']
+        fields = ['id', 'ticket_id', 'user_name', 'created_at',
+                  'status', 'ticket_subject', 'ticket_conversation']
 
     def get_ticket_conversation(self, obj):
-        selected_ticket_conversation = TicketConversation.objects.filter(ticket=obj, is_active=True)
+        selected_ticket_conversation = TicketConversation.objects.filter(
+            ticket=obj, is_active=True)
         return AdminTicketConversationSerializer(selected_ticket_conversation, many=True).data
 
 
@@ -1600,6 +1789,7 @@ class TicketStatusSerializer(serializers.ModelSerializer):
 
 class CategoryWiseProductSaleSerializer(serializers.ModelSerializer):
     sale_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Category
         fields = ['id', 'title', 'sale_count']
@@ -1607,15 +1797,18 @@ class CategoryWiseProductSaleSerializer(serializers.ModelSerializer):
     def get_sale_count(self, obj):
         user = self.context.get("request").user
         if user.is_seller == True:
-            sell_count = Order.objects.filter(order_item_order__product__category = obj, order_item_order__product__seller=Seller.objects.get(seller_user=user.id)).count()
+            sell_count = Order.objects.filter(order_item_order__product__category=obj,
+                                              order_item_order__product__seller=Seller.objects.get(seller_user=user.id)).count()
         else:
-            sell_count = Order.objects.filter(order_item_order__product__category = obj).count()
+            sell_count = Order.objects.filter(
+                order_item_order__product__category=obj).count()
 
         return sell_count
 
 
 class CategoryWiseProductStockSerializer(serializers.ModelSerializer):
     stock_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Category
         fields = ['id', 'title', 'stock_count']
@@ -1623,9 +1816,10 @@ class CategoryWiseProductStockSerializer(serializers.ModelSerializer):
     def get_stock_count(self, obj):
         user = self.context.get("request").user
         if user.is_seller == True:
-            products = Product.objects.filter(category = obj, status='PUBLISH', seller=Seller.objects.get(seller_user=user.id))
+            products = Product.objects.filter(
+                category=obj, status='PUBLISH', seller=Seller.objects.get(seller_user=user.id))
         else:
-            products = Product.objects.filter(category = obj, status='PUBLISH')
+            products = Product.objects.filter(category=obj, status='PUBLISH')
 
         available_quantity = 0
         for product in products:
@@ -1650,7 +1844,9 @@ class AdminShippingCountrySerializer(serializers.ModelSerializer):
 
 
 class AdminShippingCitySerializer(serializers.ModelSerializer):
-    shipping_state_title = serializers.CharField(source='shipping_state.title',read_only=True)
+    shipping_state_title = serializers.CharField(
+        source='shipping_state.title', read_only=True)
+
     class Meta:
         model = ShippingCity
         fields = [
@@ -1662,7 +1858,9 @@ class AdminShippingCitySerializer(serializers.ModelSerializer):
 
 
 class AdminShippingStateSerializer(serializers.ModelSerializer):
-    shipping_country_title = serializers.CharField(source='shipping_country.title',read_only=True)
+    shipping_country_title = serializers.CharField(
+        source='shipping_country.title', read_only=True)
+
     class Meta:
         model = ShippingState
         fields = [
@@ -1674,9 +1872,13 @@ class AdminShippingStateSerializer(serializers.ModelSerializer):
 
 
 class AdminShippingClassSerializer(serializers.ModelSerializer):
-    shipping_country_title = serializers.CharField(source='shipping_country.title', read_only=True)
-    shipping_state_title = serializers.CharField(source='shipping_state.title', read_only=True)
-    shipping_city_title = serializers.CharField(source='shipping_city.title', read_only=True)
+    shipping_country_title = serializers.CharField(
+        source='shipping_country.title', read_only=True)
+    shipping_state_title = serializers.CharField(
+        source='shipping_state.title', read_only=True)
+    shipping_city_title = serializers.CharField(
+        source='shipping_city.title', read_only=True)
+
     class Meta:
         model = ShippingClass
         fields = ['id', 'description', 'shipping_country', 'shipping_state', 'shipping_city', 'delivery_days',
@@ -1698,13 +1900,15 @@ class AdminSubscribersListSerializer(serializers.ModelSerializer):
 class AdminCorporateDealSerializer(serializers.ModelSerializer):
     class Meta:
         model = CorporateDeal
-        fields = ['id', 'first_name', 'last_name', 'email', 'company_name', 'phone', 'region', 'details_text', 'attached_file']
+        fields = ['id', 'first_name', 'last_name', 'email', 'company_name',
+                  'phone', 'region', 'details_text', 'attached_file']
 
 
 class AdminRequestQuoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = RequestQuote
-        fields = ['id', 'name', 'email', 'phone', 'company_name', 'website', 'address', 'services', 'overview']
+        fields = ['id', 'name', 'email', 'phone', 'company_name',
+                  'website', 'address', 'services', 'overview']
 
 
 class AdminContactUsSerializer(serializers.ModelSerializer):
@@ -1718,24 +1922,25 @@ class AdminCouponSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Coupon
-        fields = [  'id',
-                    'code',
-                    'amount',
-                    'quantity',
-                    'start_time',
-                    'end_time',
-                    'min_shopping_amount',
-                    'is_active'
-                ]
+        fields = ['id',
+                  'code',
+                  'amount',
+                  'quantity',
+                  'start_time',
+                  'end_time',
+                  'min_shopping_amount',
+                  'is_active'
+                  ]
         read_only_fields = ['id', 'number_of_uses']
 
 
 class AdminOfferProductsSerializer(serializers.ModelSerializer):
     class Meta:
         model = OfferProduct
-        fields = [  'id',
-                    'product',
-        ]
+        fields = ['id',
+                  'product',
+                  ]
+
 
 class AdminOfferCategoryListSerializer(serializers.ModelSerializer):
 
@@ -1746,36 +1951,38 @@ class AdminOfferCategoryListSerializer(serializers.ModelSerializer):
         ]
 
 
-
 class AdminOfferSerializer(serializers.ModelSerializer):
     offer_products = AdminOfferProductsSerializer(many=True, required=False)
-    existing_offer_products = serializers.SerializerMethodField('get_existing_offer_products')
-    start_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", required=False)
-    end_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", required=False)
-    discount_price_title = serializers.CharField(source='discount_price_type.title', read_only=True)
+    existing_offer_products = serializers.SerializerMethodField(
+        'get_existing_offer_products')
+    start_date = serializers.DateTimeField(
+        format="%Y-%m-%d %H:%M:%S", required=False)
+    end_date = serializers.DateTimeField(
+        format="%Y-%m-%d %H:%M:%S", required=False)
+    discount_price_title = serializers.CharField(
+        source='discount_price_type.title', read_only=True)
 
     class Meta:
         model = Offer
         read_only_field = ['id']
-        fields = [  'id',
-                    'title',
-                    'start_date',
-                    'end_date',
-                    'thumbnail',
-                    'short_description',
-                    'full_description',
-                    'discount_price',
-                    'discount_price_type',
-                    'offer_products',
-                    'existing_offer_products',
-                    'discount_price_title'
-                ]
+        fields = ['id',
+                  'title',
+                  'start_date',
+                  'end_date',
+                  'thumbnail',
+                  'short_description',
+                  'full_description',
+                  'discount_price',
+                  'discount_price_type',
+                  'offer_products',
+                  'existing_offer_products',
+                  'discount_price_title'
+                  ]
 
     def get_existing_offer_products(self, obj):
-        queryset = OfferProduct.objects.filter(offer=obj, is_active = True)
+        queryset = OfferProduct.objects.filter(offer=obj, is_active=True)
         serializer = AdminOfferProductsSerializer(instance=queryset, many=True)
         return serializer.data
-
 
     def create(self, validated_data):
         # offer_products
@@ -1791,7 +1998,8 @@ class AdminOfferSerializer(serializers.ModelSerializer):
             if offer_products:
                 for offer_product in offer_products:
                     product = offer_product['product']
-                    OfferProduct.objects.create(offer=offer_instance, product=product)
+                    OfferProduct.objects.create(
+                        offer=offer_instance, product=product)
             return offer_instance
         except:
             return offer_instance
@@ -1812,7 +2020,8 @@ class AdminOfferSerializer(serializers.ModelSerializer):
 
                 for offer_product in offer_products:
                     product = offer_product['product']
-                    OfferProduct.objects.create(offer=instance, product=product)
+                    OfferProduct.objects.create(
+                        offer=instance, product=product)
             else:
                 o_p = OfferProduct.objects.filter(offer=instance).exists()
                 if o_p == True:
@@ -1826,33 +2035,37 @@ class AdminOfferSerializer(serializers.ModelSerializer):
 
 
 class AdminOfferDetailsSerializer(serializers.ModelSerializer):
-    offer_category_title = serializers.CharField(source='offer_category.title',read_only=True)
-    product_category_title = serializers.CharField(source='product_category.title',read_only=True)
+    offer_category_title = serializers.CharField(
+        source='offer_category.title', read_only=True)
+    product_category_title = serializers.CharField(
+        source='product_category.title', read_only=True)
     offer_products = serializers.SerializerMethodField('get_offer_products')
-    start_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", required=False)
-    end_date = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", required=False)
+    start_date = serializers.DateTimeField(
+        format="%Y-%m-%d %H:%M:%S", required=False)
+    end_date = serializers.DateTimeField(
+        format="%Y-%m-%d %H:%M:%S", required=False)
 
     class Meta:
         model = Offer
         read_only_field = ['id']
-        fields = [  'id',
-                    'title',
-                    'product_category',
-                    'product_category_title',
-                    'offer_category',
-                    'offer_category_title',
-                    'start_date',
-                    'end_date',
-                    'thumbnail',
-                    'short_description',
-                    'full_description',
-                    'discount_price',
-                    'discount_price_type',
-                    'offer_products'
-                ]
+        fields = ['id',
+                  'title',
+                  'product_category',
+                  'product_category_title',
+                  'offer_category',
+                  'offer_category_title',
+                  'start_date',
+                  'end_date',
+                  'thumbnail',
+                  'short_description',
+                  'full_description',
+                  'discount_price',
+                  'discount_price_type',
+                  'offer_products'
+                  ]
 
     def get_offer_products(self, obj):
-        queryset = OfferProduct.objects.filter(offer=obj, is_active = True)
+        queryset = OfferProduct.objects.filter(offer=obj, is_active=True)
         serializer = AdminOfferProductsSerializer(instance=queryset, many=True)
         return serializer.data
 
@@ -1888,8 +2101,10 @@ class AdminPosProductListSerializer(serializers.ModelSerializer):
             'vat_type'
         ]
 
+
 class AdminPosOrderItemSerializer(serializers.ModelSerializer):
-    product_warranty = serializers.PrimaryKeyRelatedField(queryset=ProductWarranty.objects.all(), many=False, write_only=True, required=False)
+    product_warranty = serializers.PrimaryKeyRelatedField(
+        queryset=ProductWarranty.objects.all(), many=False, write_only=True, required=False)
 
     class Meta:
         model = OrderItem
@@ -1900,10 +2115,11 @@ class AdminPosOrderItemSerializer(serializers.ModelSerializer):
                   'product_warranty',
                   ]
 
+
 class AdminPosOrderSerializer(serializers.ModelSerializer):
     order_items = AdminPosOrderItemSerializer(many=True, required=False)
     order_id = serializers.CharField(read_only=True)
-    vat_amount =  serializers.FloatField()
+    vat_amount = serializers.FloatField()
     product_count = serializers.IntegerField(required=True)
 
     class Meta:
@@ -1919,7 +2135,8 @@ class AdminPosOrderSerializer(serializers.ModelSerializer):
         payment_status = "UN-PAID"
 
         if payment_type:
-            type_name_org = PaymentType.objects.get(id=payment_type.id).type_name
+            type_name_org = PaymentType.objects.get(
+                id=payment_type.id).type_name
             type_name = type_name_org.lower()
             if type_name != 'cash on delivery':
                 order_status = "CONFIRMED"
@@ -1930,13 +2147,16 @@ class AdminPosOrderSerializer(serializers.ModelSerializer):
             for order_item in order_items:
                 product = order_item['product']
                 quantity = order_item['quantity']
-                inventory_obj = Inventory.objects.filter(product=product).latest('created_at')
-                new_update_quantity = int(inventory_obj.current_quantity) - int(quantity)
+                inventory_obj = Inventory.objects.filter(
+                    product=product).latest('created_at')
+                new_update_quantity = int(
+                    inventory_obj.current_quantity) - int(quantity)
                 if int(new_update_quantity) < 0:
-                    raise ValidationError("Order didn't create. One of product out of stock.")
+                    raise ValidationError(
+                        "Order didn't create. One of product out of stock.")
 
-        order_instance = Order.objects.create(**validated_data, order_status=order_status,payment_status=payment_status, user=validated_data.get('customer'))
-
+        order_instance = Order.objects.create(
+            **validated_data, order_status=order_status, payment_status=payment_status, user=validated_data.get('customer'))
 
         if order_items:
             count = 0
@@ -1957,27 +2177,32 @@ class AdminPosOrderSerializer(serializers.ModelSerializer):
                     warranty_value_type = product_warranty.warranty_value_type
 
                     if warranty_value_type == 'PERCENTAGE':
-                        unit_price_after_add_warranty = float((float(unit_price) / 100) * float(warranty_value))
+                        unit_price_after_add_warranty = float(
+                            (float(unit_price) / 100) * float(warranty_value))
                         unit_price_after_add_warranty = unit_price + unit_price_after_add_warranty
                     elif warranty_value_type == 'FIX':
-                        unit_price_after_add_warranty = float(float(unit_price) + float(warranty_value))
+                        unit_price_after_add_warranty = float(
+                            float(unit_price) + float(warranty_value))
                         unit_price_after_add_warranty = unit_price + unit_price_after_add_warranty
 
-                    total_price = float(unit_price_after_add_warranty) * float(quantity)
+                    total_price = float(
+                        unit_price_after_add_warranty) * float(quantity)
 
                     OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity),
-                                                unit_price=unit_price, total_price=total_price,
-                                                product_warranty=product_warranty,
-                                                unit_price_after_add_warranty=unit_price_after_add_warranty)
+                                             unit_price=unit_price, total_price=total_price,
+                                             product_warranty=product_warranty,
+                                             unit_price_after_add_warranty=unit_price_after_add_warranty)
                 else:
                     OrderItem.objects.create(order=order_instance, product=product, quantity=int(quantity),
-                                                unit_price=unit_price, total_price=total_price)
-
+                                             unit_price=unit_price, total_price=total_price)
 
                 # update inventory
-                inventory_obj = Inventory.objects.filter(product=product).latest('created_at')
-                new_update_quantity = int(inventory_obj.current_quantity) - int(quantity)
-                Product.objects.filter(id=product.id).update(quantity=new_update_quantity)
+                inventory_obj = Inventory.objects.filter(
+                    product=product).latest('created_at')
+                new_update_quantity = int(
+                    inventory_obj.current_quantity) - int(quantity)
+                Product.objects.filter(id=product.id).update(
+                    quantity=new_update_quantity)
                 inventory_obj.current_quantity = new_update_quantity
                 inventory_obj.save()
 
@@ -1990,6 +2215,7 @@ class AdminPosOrderSerializer(serializers.ModelSerializer):
                     sell_count=product_sell_quan)
 
         return order_instance
+
 
 class AdminCategoryToggleSerializer(serializers.ModelSerializer):
     class Meta:
@@ -2013,14 +2239,15 @@ class AdminBlogToggleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Blog
-        fields = ['id', 'is_active','status']
+        fields = ['id', 'is_active', 'status']
 
 
 class AdvertisementPosterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Advertisement
-        fields = ['id', 'image', 'bold_text', 'small_text', 'is_gaming', 'work_for']
+        fields = ['id', 'image', 'bold_text',
+                  'small_text', 'is_gaming', 'work_for']
 
 
 class AdminProductReviewSerializer(serializers.ModelSerializer):
@@ -2055,12 +2282,18 @@ class SliderSerializer(serializers.ModelSerializer):
 class WebsiteConfigurationSerializer(serializers.ModelSerializer):
     home_slider_images = SliderSerializer(many=True, required=False)
     gaming_slider_images = SliderSerializer(many=True, required=False)
-    small_banners_carousel = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
-    small_banners_static = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
-    popular_products_banners = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
-    feature_products_banners = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
-    gaming_popular_products_banners = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
-    gaming_feature_products_banners = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
+    small_banners_carousel = serializers.ListField(
+        child=serializers.FileField(), write_only=True, required=False)
+    small_banners_static = serializers.ListField(
+        child=serializers.FileField(), write_only=True, required=False)
+    popular_products_banners = serializers.ListField(
+        child=serializers.FileField(), write_only=True, required=False)
+    feature_products_banners = serializers.ListField(
+        child=serializers.FileField(), write_only=True, required=False)
+    gaming_popular_products_banners = serializers.ListField(
+        child=serializers.FileField(), write_only=True, required=False)
+    gaming_feature_products_banners = serializers.ListField(
+        child=serializers.FileField(), write_only=True, required=False)
 
     class Meta:
         model = HomeSingleRowData
@@ -2096,7 +2329,8 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
 
         # small_banners_carousel
         try:
-            small_banners_carousel = validated_data.pop('small_banners_carousel')
+            small_banners_carousel = validated_data.pop(
+                'small_banners_carousel')
         except:
             small_banners_carousel = ''
 
@@ -2106,32 +2340,36 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
         except:
             small_banners_static = ''
 
-
         # popular_products_banners
         try:
-            popular_products_banners = validated_data.pop('popular_products_banners')
+            popular_products_banners = validated_data.pop(
+                'popular_products_banners')
         except:
             popular_products_banners = ''
 
         # feature_products_banners
         try:
-            feature_products_banners = validated_data.pop('feature_products_banners')
+            feature_products_banners = validated_data.pop(
+                'feature_products_banners')
         except:
             feature_products_banners = ''
 
         # gaming_popular_products_banners
         try:
-            gaming_popular_products_banners = validated_data.pop('gaming_popular_products_banners')
+            gaming_popular_products_banners = validated_data.pop(
+                'gaming_popular_products_banners')
         except:
             gaming_popular_products_banners = ''
 
         # gaming_feature_products_banners
         try:
-            gaming_feature_products_banners = validated_data.pop('gaming_feature_products_banners')
+            gaming_feature_products_banners = validated_data.pop(
+                'gaming_feature_products_banners')
         except:
             gaming_feature_products_banners = ''
 
-        home_single_row_data_instance = HomeSingleRowData.objects.create(**validated_data)
+        home_single_row_data_instance = HomeSingleRowData.objects.create(
+            **validated_data)
 
         # home_slider_images
         try:
@@ -2140,7 +2378,8 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
                     try:
                         image = home_slider_image['image']
                     except:
-                        raise ValidationError('Home Slider Image field required.')
+                        raise ValidationError(
+                            'Home Slider Image field required.')
                     try:
                         bold_text = home_slider_image['bold_text']
                     except:
@@ -2149,7 +2388,8 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
                         small_text = home_slider_image['small_text']
                     except:
                         small_text = ''
-                    Advertisement.objects.create(image=image, bold_text=bold_text, small_text=small_text, is_gaming=False, work_for='SLIDER')
+                    Advertisement.objects.create(
+                        image=image, bold_text=bold_text, small_text=small_text, is_gaming=False, work_for='SLIDER')
         except:
             raise ValidationError('Problem of Home Slider Images insert.')
 
@@ -2160,7 +2400,8 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
                     try:
                         image = gaming_slider_image['image']
                     except:
-                        raise ValidationError('Gaming Slider Image field required.')
+                        raise ValidationError(
+                            'Gaming Slider Image field required.')
                     try:
                         bold_text = gaming_slider_image['bold_text']
                     except:
@@ -2169,39 +2410,46 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
                         small_text = gaming_slider_image['small_text']
                     except:
                         small_text = ''
-                    Advertisement.objects.create(image=image, bold_text=bold_text, small_text=small_text, is_gaming=True, work_for='SLIDER')
+                    Advertisement.objects.create(
+                        image=image, bold_text=bold_text, small_text=small_text, is_gaming=True, work_for='SLIDER')
         except:
             raise ValidationError('Problem of Home Gaming Images insert.')
 
         # small_banners_carousel
         if small_banners_carousel:
             for small_banner in small_banners_carousel:
-                Advertisement.objects.create(image=small_banner, work_for='SLIDER_SMALL_CAROUSEL', is_gaming=False)
+                Advertisement.objects.create(
+                    image=small_banner, work_for='SLIDER_SMALL_CAROUSEL', is_gaming=False)
 
         # small_banners_static
         if small_banners_static:
             for small_banner in small_banners_static:
-                Advertisement.objects.create(image=small_banner, work_for='SLIDER_SMALL_STATIC', is_gaming=False)
+                Advertisement.objects.create(
+                    image=small_banner, work_for='SLIDER_SMALL_STATIC', is_gaming=False)
 
         # popular_products_banners
         if popular_products_banners:
             for popular_products_banner in popular_products_banners:
-                Advertisement.objects.create(image=popular_products_banner, work_for='POPULAR_PRODUCT_POSTER', is_gaming=False)
+                Advertisement.objects.create(
+                    image=popular_products_banner, work_for='POPULAR_PRODUCT_POSTER', is_gaming=False)
 
         # feature_products_banners
         if feature_products_banners:
             for feature_products_banner in feature_products_banners:
-                Advertisement.objects.create(image=feature_products_banner, work_for='FEATURED_PRODUCT_POSTER', is_gaming=False)
+                Advertisement.objects.create(
+                    image=feature_products_banner, work_for='FEATURED_PRODUCT_POSTER', is_gaming=False)
 
         # gaming_popular_products_banners
         if gaming_popular_products_banners:
             for gaming_popular_products_banner in gaming_popular_products_banners:
-                Advertisement.objects.create(image=gaming_popular_products_banner, work_for='POPULAR_PRODUCT_POSTER', is_gaming=True)
+                Advertisement.objects.create(
+                    image=gaming_popular_products_banner, work_for='POPULAR_PRODUCT_POSTER', is_gaming=True)
 
         # gaming_feature_products_banners
         if gaming_feature_products_banners:
             for gaming_feature_products_banner in gaming_feature_products_banners:
-                Advertisement.objects.create(image=gaming_feature_products_banner, work_for='FEATURED_PRODUCT_POSTER', is_gaming=True)
+                Advertisement.objects.create(
+                    image=gaming_feature_products_banner, work_for='FEATURED_PRODUCT_POSTER', is_gaming=True)
 
         return home_single_row_data_instance
 
@@ -2209,12 +2457,18 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
 class WebsiteConfigurationUpdateSerializer(serializers.ModelSerializer):
     home_slider_images = SliderSerializer(many=True, required=False)
     gaming_slider_images = SliderSerializer(many=True, required=False)
-    small_banners_carousel = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
-    small_banners_static = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
-    popular_products_banners = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
-    feature_products_banners = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
-    gaming_popular_products_banners = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
-    gaming_feature_products_banners = serializers.ListField(child=serializers.FileField(), write_only=True, required=False)
+    small_banners_carousel = serializers.ListField(
+        child=serializers.FileField(), write_only=True, required=False)
+    small_banners_static = serializers.ListField(
+        child=serializers.FileField(), write_only=True, required=False)
+    popular_products_banners = serializers.ListField(
+        child=serializers.FileField(), write_only=True, required=False)
+    feature_products_banners = serializers.ListField(
+        child=serializers.FileField(), write_only=True, required=False)
+    gaming_popular_products_banners = serializers.ListField(
+        child=serializers.FileField(), write_only=True, required=False)
+    gaming_feature_products_banners = serializers.ListField(
+        child=serializers.FileField(), write_only=True, required=False)
 
     class Meta:
         model = HomeSingleRowData
@@ -2235,7 +2489,6 @@ class WebsiteConfigurationUpdateSerializer(serializers.ModelSerializer):
             'gaming_feature_products_banners'
         ]
 
-
     def update(self, instance, validated_data):
         # home_slider_images
         try:
@@ -2251,7 +2504,8 @@ class WebsiteConfigurationUpdateSerializer(serializers.ModelSerializer):
 
         # small_banners_carousel
         try:
-            small_banners_carousel = validated_data.pop('small_banners_carousel')
+            small_banners_carousel = validated_data.pop(
+                'small_banners_carousel')
         except:
             small_banners_carousel = ''
 
@@ -2263,28 +2517,31 @@ class WebsiteConfigurationUpdateSerializer(serializers.ModelSerializer):
 
         # popular_products_banners
         try:
-            popular_products_banners = validated_data.pop('popular_products_banners')
+            popular_products_banners = validated_data.pop(
+                'popular_products_banners')
         except:
             popular_products_banners = ''
 
         # feature_products_banners
         try:
-            feature_products_banners = validated_data.pop('feature_products_banners')
+            feature_products_banners = validated_data.pop(
+                'feature_products_banners')
         except:
             feature_products_banners = ''
 
         # gaming_popular_products_banners
         try:
-            gaming_popular_products_banners = validated_data.pop('gaming_popular_products_banners')
+            gaming_popular_products_banners = validated_data.pop(
+                'gaming_popular_products_banners')
         except:
             gaming_popular_products_banners = ''
 
         # gaming_feature_products_banners
         try:
-            gaming_feature_products_banners = validated_data.pop('gaming_feature_products_banners')
+            gaming_feature_products_banners = validated_data.pop(
+                'gaming_feature_products_banners')
         except:
             gaming_feature_products_banners = ''
-
 
         # home_slider_images
         try:
@@ -2293,7 +2550,8 @@ class WebsiteConfigurationUpdateSerializer(serializers.ModelSerializer):
                     try:
                         image = home_slider_image['image']
                     except:
-                        raise ValidationError('Home Slider Image field required.')
+                        raise ValidationError(
+                            'Home Slider Image field required.')
                     try:
                         bold_text = home_slider_image['bold_text']
                     except:
@@ -2302,7 +2560,8 @@ class WebsiteConfigurationUpdateSerializer(serializers.ModelSerializer):
                         small_text = home_slider_image['small_text']
                     except:
                         small_text = ''
-                    Advertisement.objects.create(image=image, bold_text=bold_text, small_text=small_text, is_gaming=False, work_for='SLIDER')
+                    Advertisement.objects.create(
+                        image=image, bold_text=bold_text, small_text=small_text, is_gaming=False, work_for='SLIDER')
         except:
             raise ValidationError('Problem of Home Slider Images update.')
 
@@ -2313,7 +2572,8 @@ class WebsiteConfigurationUpdateSerializer(serializers.ModelSerializer):
                     try:
                         image = gaming_slider_image['image']
                     except:
-                        raise ValidationError('Gaming Slider Image field required.')
+                        raise ValidationError(
+                            'Gaming Slider Image field required.')
                     try:
                         bold_text = gaming_slider_image['bold_text']
                     except:
@@ -2322,52 +2582,68 @@ class WebsiteConfigurationUpdateSerializer(serializers.ModelSerializer):
                         small_text = gaming_slider_image['small_text']
                     except:
                         small_text = ''
-                    Advertisement.objects.create(image=image, bold_text=bold_text, small_text=small_text, is_gaming=True, work_for='SLIDER')
+                    Advertisement.objects.create(
+                        image=image, bold_text=bold_text, small_text=small_text, is_gaming=True, work_for='SLIDER')
         except:
             raise ValidationError('Problem of Home Gaming Images insert.')
 
         # small_banners_carousel
         if small_banners_carousel:
             for small_banner in small_banners_carousel:
-                Advertisement.objects.create(image=small_banner, work_for='SLIDER_SMALL_CAROUSEL', is_gaming=False)
+                Advertisement.objects.create(
+                    image=small_banner, work_for='SLIDER_SMALL_CAROUSEL', is_gaming=False)
 
         # small_banners_static
         if small_banners_static:
             for small_banner in small_banners_static:
-                Advertisement.objects.create(image=small_banner, work_for='SLIDER_SMALL_STATIC', is_gaming=False)
+                Advertisement.objects.create(
+                    image=small_banner, work_for='SLIDER_SMALL_STATIC', is_gaming=False)
 
         # popular_products_banners
         if popular_products_banners:
             for popular_products_banner in popular_products_banners:
-                Advertisement.objects.create(image=popular_products_banner, work_for='POPULAR_PRODUCT_POSTER', is_gaming=False)
+                Advertisement.objects.create(
+                    image=popular_products_banner, work_for='POPULAR_PRODUCT_POSTER', is_gaming=False)
 
         # feature_products_banners
         if feature_products_banners:
             for feature_products_banner in feature_products_banners:
-                Advertisement.objects.create(image=feature_products_banner, work_for='FEATURED_PRODUCT_POSTER', is_gaming=False)
+                Advertisement.objects.create(
+                    image=feature_products_banner, work_for='FEATURED_PRODUCT_POSTER', is_gaming=False)
 
         # gaming_popular_products_banners
         if gaming_popular_products_banners:
             for gaming_popular_products_banner in gaming_popular_products_banners:
-                Advertisement.objects.create(image=gaming_popular_products_banner, work_for='POPULAR_PRODUCT_POSTER', is_gaming=True)
+                Advertisement.objects.create(
+                    image=gaming_popular_products_banner, work_for='POPULAR_PRODUCT_POSTER', is_gaming=True)
 
         # gaming_feature_products_banners
         if gaming_feature_products_banners:
             for gaming_feature_products_banner in gaming_feature_products_banners:
-                Advertisement.objects.create(image=gaming_feature_products_banner, work_for='FEATURED_PRODUCT_POSTER', is_gaming=True)
+                Advertisement.objects.create(
+                    image=gaming_feature_products_banner, work_for='FEATURED_PRODUCT_POSTER', is_gaming=True)
 
         validated_data.update({"updated_at": timezone.now()})
         return super().update(instance, validated_data)
 
+
 class WebsiteConfigurationViewSerializer(serializers.ModelSerializer):
-    home_slider_images = serializers.SerializerMethodField('get_home_slider_images')
-    gaming_slider_images = serializers.SerializerMethodField('get_gaming_slider_images')
-    popular_products_banners = serializers.SerializerMethodField('get_popular_products_banners')
-    small_banners_carousel = serializers.SerializerMethodField('get_small_banners_carousel')
-    small_banners_static = serializers.SerializerMethodField('get_small_banners_static')
-    feature_products_banners = serializers.SerializerMethodField('get_feature_products_banners')
-    gaming_popular_products_banners = serializers.SerializerMethodField('get_gaming_popular_products_banners')
-    gaming_feature_products_banners = serializers.SerializerMethodField('get_gaming_feature_products_banners')
+    home_slider_images = serializers.SerializerMethodField(
+        'get_home_slider_images')
+    gaming_slider_images = serializers.SerializerMethodField(
+        'get_gaming_slider_images')
+    popular_products_banners = serializers.SerializerMethodField(
+        'get_popular_products_banners')
+    small_banners_carousel = serializers.SerializerMethodField(
+        'get_small_banners_carousel')
+    small_banners_static = serializers.SerializerMethodField(
+        'get_small_banners_static')
+    feature_products_banners = serializers.SerializerMethodField(
+        'get_feature_products_banners')
+    gaming_popular_products_banners = serializers.SerializerMethodField(
+        'get_gaming_popular_products_banners')
+    gaming_feature_products_banners = serializers.SerializerMethodField(
+        'get_gaming_feature_products_banners')
 
     class Meta:
         model = HomeSingleRowData
@@ -2392,16 +2668,20 @@ class WebsiteConfigurationViewSerializer(serializers.ModelSerializer):
 
     def get_home_slider_images(self, obj):
         try:
-            queryset = Advertisement.objects.filter(work_for='SLIDER', is_active=True, is_gaming=False).order_by('-created_at')[:3]
-            serializer = SliderSerializer(instance=queryset, many=True, context={'request': self.context['request']})
+            queryset = Advertisement.objects.filter(
+                work_for='SLIDER', is_active=True, is_gaming=False).order_by('-created_at')[:3]
+            serializer = SliderSerializer(instance=queryset, many=True, context={
+                                          'request': self.context['request']})
             return serializer.data
         except:
             return []
 
     def get_gaming_slider_images(self, obj):
         try:
-            queryset = Advertisement.objects.filter(work_for='SLIDER', is_active=True, is_gaming=True).order_by('-created_at')[:3]
-            serializer = SliderSerializer(instance=queryset, many=True, context={'request': self.context['request']})
+            queryset = Advertisement.objects.filter(
+                work_for='SLIDER', is_active=True, is_gaming=True).order_by('-created_at')[:3]
+            serializer = SliderSerializer(instance=queryset, many=True, context={
+                                          'request': self.context['request']})
             return serializer.data
         except:
             return []
@@ -2409,10 +2689,11 @@ class WebsiteConfigurationViewSerializer(serializers.ModelSerializer):
     def get_popular_products_banners(self, obj):
         try:
             queryset = Advertisement.objects.filter(Q(work_for='POPULAR_PRODUCT_POSTER'),
-                                                                              Q(is_active=True),
-                                                                              Q(is_gaming=False)).order_by(
+                                                    Q(is_active=True),
+                                                    Q(is_gaming=False)).order_by(
                 '-created_at')[:3]
-            serializer = AdvertisementDataSerializer(instance=queryset, many=True, context={'request': self.context['request']})
+            serializer = AdvertisementDataSerializer(instance=queryset, many=True, context={
+                                                     'request': self.context['request']})
             return serializer.data
         except:
             return []
@@ -2420,9 +2701,10 @@ class WebsiteConfigurationViewSerializer(serializers.ModelSerializer):
     def get_small_banners_carousel(self, obj):
         try:
             queryset = Advertisement.objects.filter(Q(work_for='SLIDER_SMALL_CAROUSEL'),
-                                                                  Q(is_active=True), Q(is_gaming=False)).order_by(
-            '-created_at')
-            serializer = SliderAdvertisementDataSerializer(instance=queryset, many=True, context={'request': self.context['request']})
+                                                    Q(is_active=True), Q(is_gaming=False)).order_by(
+                '-created_at')
+            serializer = SliderAdvertisementDataSerializer(
+                instance=queryset, many=True, context={'request': self.context['request']})
             return serializer.data
         except:
             return []
@@ -2430,17 +2712,19 @@ class WebsiteConfigurationViewSerializer(serializers.ModelSerializer):
     def get_small_banners_static(self, obj):
         try:
             queryset = Advertisement.objects.filter(Q(work_for='SLIDER_SMALL_STATIC'), Q(is_active=True),
-                                                                Q(is_gaming=False)).order_by('-created_at')[:2]
-            serializer = SliderAdvertisementDataSerializer(instance=queryset, many=True, context={'request': self.context['request']})
+                                                    Q(is_gaming=False)).order_by('-created_at')[:2]
+            serializer = SliderAdvertisementDataSerializer(
+                instance=queryset, many=True, context={'request': self.context['request']})
             return serializer.data
         except:
             return []
 
-    def get_feature_products_banners(self,obj):
+    def get_feature_products_banners(self, obj):
         try:
             queryset = Advertisement.objects.filter(Q(work_for='FEATURED_PRODUCT_POSTER'),
                                                     Q(is_active=True), Q(is_gaming=False)).order_by('-created_at')[:3]
-            serializer = AdvertisementDataSerializer(instance=queryset, many=True, context={'request': self.context['request']})
+            serializer = AdvertisementDataSerializer(instance=queryset, many=True, context={
+                                                     'request': self.context['request']})
             return serializer.data
         except:
             return []
@@ -2448,19 +2732,21 @@ class WebsiteConfigurationViewSerializer(serializers.ModelSerializer):
     def get_gaming_popular_products_banners(self, obj):
         try:
             queryset = Advertisement.objects.filter(Q(work_for='POPULAR_PRODUCT_POSTER'),
-                                                                              Q(is_active=True),
-                                                                              Q(is_gaming=True)).order_by(
+                                                    Q(is_active=True),
+                                                    Q(is_gaming=True)).order_by(
                 '-created_at')[:3]
-            serializer = AdvertisementDataSerializer(instance=queryset, many=True, context={'request': self.context['request']})
+            serializer = AdvertisementDataSerializer(instance=queryset, many=True, context={
+                                                     'request': self.context['request']})
             return serializer.data
         except:
             return []
 
-    def get_gaming_feature_products_banners(self,obj):
+    def get_gaming_feature_products_banners(self, obj):
         try:
             queryset = Advertisement.objects.filter(Q(work_for='FEATURED_PRODUCT_POSTER'),
                                                     Q(is_active=True), Q(is_gaming=True)).order_by('-created_at')[:3]
-            serializer = AdvertisementDataSerializer(instance=queryset, many=True, context={'request': self.context['request']})
+            serializer = AdvertisementDataSerializer(instance=queryset, many=True, context={
+                                                     'request': self.context['request']})
             return serializer.data
         except:
             return []
@@ -2485,4 +2771,43 @@ class GeneralSettingsViewSerializer(serializers.ModelSerializer):
         ]
 
 
+class CommentsRepliesSerializer(serializers.ModelSerializer):
+    user_name = serializers.CharField(source='user.username', read_only=True)
 
+    class Meta:
+        model = ProductReviewReply
+        fields = [
+            'id',
+            'review',
+            'user',
+            'user_name',
+            'review_text',
+            'created_at'
+        ]
+
+
+class ProductCommentDataSerializer(serializers.ModelSerializer):
+    product_title = serializers.CharField(
+        source='product.title', read_only=True)
+    user_name = serializers.CharField(source='user.username', read_only=True)
+    replies = serializers.SerializerMethodField('get_replies')
+
+    class Meta:
+        model = ProductReview
+        fields = [
+            'id',
+            'product',
+            'product_title',
+            'seller',
+            'user',
+            'user_name',
+            'rating_number',
+            'review_text',
+            'replies',
+            'created_at'
+        ]
+
+    def get_replies(self, obj):
+        replies = ProductReviewReply.objects.filter(
+            review=obj, is_active=True).order_by('-created_at')
+        return CommentsRepliesSerializer(replies, many=True).data

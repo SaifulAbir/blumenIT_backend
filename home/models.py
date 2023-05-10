@@ -307,7 +307,23 @@ class Pages(AbstractTimeStamp):
         return f"{self.title}"
 
 
+class MediaChunk(AbstractTimeStamp):
+    title = models.CharField(max_length=800, default='', null=True, blank=True)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'MediaChunk'
+        verbose_name_plural = 'MediaChunks'
+        db_table = 'media_chunks'
+
+    def __str__(self):
+        return f"{self.pk}"
+
+
 class MediaFiles(AbstractTimeStamp):
+    title = models.CharField(max_length=800, default='', null=True, blank=True)
+    chunk = models.ForeignKey(
+        MediaChunk, on_delete=models.CASCADE, related_name='media_files_chunk', null=True, blank=True)
     file = models.FileField(upload_to='media_files', null=True, blank=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
 

@@ -417,8 +417,13 @@ class MediaListAPIView(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+            request = self.request
+            query = request.GET.get('search')
+
             queryset = MediaFiles.objects.filter(
                 is_active=True).order_by('-created_at')
+            if query:
+                queryset = queryset.filter(Q(title__icontains=query))
             if queryset:
                 return queryset
             else:

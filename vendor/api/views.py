@@ -41,7 +41,7 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     AdminCategoryIsPcBuilderSerializer, UpdateCategoryDetailsSerializer, UpdateSubCategoryDetailsSerializer, \
     UpdateSubSubCategoryDetailsSerializer, WebsiteConfigurationViewSerializer, WebsiteConfigurationUpdateSerializer, \
     GeneralSettingsViewSerializer, ProductCommentDataSerializer, BlogReviewListSerializer, BlogReviewDataSerializer, \
-    BlogCommentsRepliesSerializer
+    BlogCommentsRepliesSerializer, BlogReviewCreateSerializer
 
 from cart.models import Order, OrderItem, Coupon
 from cart.models import Order, OrderItem
@@ -3430,6 +3430,14 @@ class AdminProductCommentReplyCreateAPIView(CreateAPIView):
 
 
 # Blog Review related admin apies views............................ start
+class AdminBlogReviewCreateAPIView(CreateAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = BlogReviewCreateSerializer
+
+    def post(self, request, *args, **kwargs):
+        return super(AdminBlogReviewCreateAPIView, self).post(request, *args, **kwargs)
+
+
 class AdminBlogReviewListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = BlogReviewListSerializer

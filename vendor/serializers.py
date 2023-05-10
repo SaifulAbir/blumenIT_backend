@@ -2887,16 +2887,23 @@ class ProductCommentDataSerializer(serializers.ModelSerializer):
 
 
 # blog review related serializers
+class BlogReviewCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BlogReview
+        fields = ['id', 'blog', 'user', 'rating_number', 'review_text', 'reviewer_name',
+                  'is_active']
+
+
 class BlogReviewListSerializer(serializers.ModelSerializer):
     blog_title = serializers.CharField(
-        source='title.title', read_only=True)
+        source='blog.title', read_only=True)
     customer_name = serializers.CharField(
         source='user.username', read_only=True)
 
     class Meta:
         model = BlogReview
         fields = ['id', 'blog', 'blog_title', 'user', 'customer_name', 'rating_number', 'review_text',
-                  'is_active']
+                  'is_active', 'reviewer_name']
 
 
 class BlogCommentsRepliesSerializer(serializers.ModelSerializer):

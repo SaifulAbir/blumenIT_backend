@@ -1,7 +1,7 @@
 from django.contrib import admin
 from home.models import ProductView, FAQ, ContactUs, HomeSingleRowData, \
     CorporateDeal, RequestQuote, Advertisement, Pages, AboutUs, TermsAndCondition, OnlineServiceSupport, PaymentMethod, RefundAndReturnPolicy, \
-    Shipping, PrivacyPolicy, ServiceCenter, MediaFiles
+    Shipping, PrivacyPolicy, ServiceCenter, MediaFiles, MediaChunk
 
 admin.site.register(ProductView)
 admin.site.register(FAQ)
@@ -20,3 +20,4 @@ admin.site.register(PrivacyPolicy)
 admin.site.register(ServiceCenter)
 admin.site.register(Pages)
 admin.site.register(MediaFiles)
+admin.site.register(MediaChunk)

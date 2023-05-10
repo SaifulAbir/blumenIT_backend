@@ -2281,6 +2281,7 @@ class SliderSerializer(serializers.ModelSerializer):
 
 class WebsiteConfigurationSerializer(serializers.ModelSerializer):
     home_slider_images = SliderSerializer(many=True, required=False)
+    offer_slider_images = SliderSerializer(many=True, required=False)
     gaming_slider_images = SliderSerializer(many=True, required=False)
     small_banners_carousel = serializers.ListField(
         child=serializers.FileField(), write_only=True, required=False)
@@ -2305,6 +2306,7 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
             'bottom_banner',
             'shop_address',
             'home_slider_images',
+            'offer_slider_images',
             'small_banners_carousel',
             'small_banners_static',
             'popular_products_banners',
@@ -2320,6 +2322,12 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
             home_slider_images = validated_data.pop('home_slider_images')
         except:
             home_slider_images = ''
+
+        # offer_slider_images
+        try:
+            offer_slider_images = validated_data.pop('offer_slider_images')
+        except:
+            offer_slider_images = ''
 
         # gaming_slider_images
         try:
@@ -2392,6 +2400,28 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
                         image=image, bold_text=bold_text, small_text=small_text, is_gaming=False, work_for='SLIDER')
         except:
             raise ValidationError('Problem of Home Slider Images insert.')
+        
+        # offer_slider_images
+        try:
+            if offer_slider_images:
+                for offer_slider_image in offer_slider_images:
+                    try:
+                        image = offer_slider_image['image']
+                    except:
+                        raise ValidationError(
+                            'Offer Slider Image field required.')
+                    try:
+                        bold_text = offer_slider_image['bold_text']
+                    except:
+                        bold_text = ''
+                    try:
+                        small_text = offer_slider_image['small_text']
+                    except:
+                        small_text = ''
+                    Advertisement.objects.create(
+                        image=image, bold_text=bold_text, small_text=small_text, is_gaming=False, work_for='OFFER')
+        except:
+            raise ValidationError('Problem of offer Slider Images insert.')
 
         # gaming_slider_images
         try:
@@ -2456,6 +2486,7 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
 
 class WebsiteConfigurationUpdateSerializer(serializers.ModelSerializer):
     home_slider_images = SliderSerializer(many=True, required=False)
+    offer_slider_images = SliderSerializer(many=True, required=False)
     gaming_slider_images = SliderSerializer(many=True, required=False)
     small_banners_carousel = serializers.ListField(
         child=serializers.FileField(), write_only=True, required=False)
@@ -2480,6 +2511,7 @@ class WebsiteConfigurationUpdateSerializer(serializers.ModelSerializer):
             'bottom_banner',
             'shop_address',
             'home_slider_images',
+            'offer_slider_images',
             'small_banners_carousel',
             'small_banners_static',
             'popular_products_banners',
@@ -2495,6 +2527,12 @@ class WebsiteConfigurationUpdateSerializer(serializers.ModelSerializer):
             home_slider_images = validated_data.pop('home_slider_images')
         except:
             home_slider_images = ''
+
+        # offer_slider_images
+        try:
+            offer_slider_images = validated_data.pop('offer_slider_images')
+        except:
+            offer_slider_images = ''
 
         # gaming_slider_images
         try:
@@ -2564,6 +2602,29 @@ class WebsiteConfigurationUpdateSerializer(serializers.ModelSerializer):
                         image=image, bold_text=bold_text, small_text=small_text, is_gaming=False, work_for='SLIDER')
         except:
             raise ValidationError('Problem of Home Slider Images update.')
+        
+
+        # offer_slider_images
+        try:
+            if offer_slider_images:
+                for offer_slider_image in offer_slider_images:
+                    try:
+                        image = offer_slider_image['image']
+                    except:
+                        raise ValidationError(
+                            'Offer Slider Image field required.')
+                    try:
+                        bold_text = offer_slider_image['bold_text']
+                    except:
+                        bold_text = ''
+                    try:
+                        small_text = offer_slider_image['small_text']
+                    except:
+                        small_text = ''
+                    Advertisement.objects.create(
+                        image=image, bold_text=bold_text, small_text=small_text, is_gaming=False, work_for='OFFER')
+        except:
+            raise ValidationError('Problem of Offer Slider Images update.')
 
         # gaming_slider_images
         try:
@@ -2630,6 +2691,8 @@ class WebsiteConfigurationUpdateSerializer(serializers.ModelSerializer):
 class WebsiteConfigurationViewSerializer(serializers.ModelSerializer):
     home_slider_images = serializers.SerializerMethodField(
         'get_home_slider_images')
+    offer_slider_images = serializers.SerializerMethodField(
+        'get_offer_slider_images')
     gaming_slider_images = serializers.SerializerMethodField(
         'get_gaming_slider_images')
     popular_products_banners = serializers.SerializerMethodField(
@@ -2656,6 +2719,7 @@ class WebsiteConfigurationViewSerializer(serializers.ModelSerializer):
             'shop_address',
 
             'home_slider_images',
+            'offer_slider_images',
             'small_banners_carousel',
             'small_banners_static',
             'popular_products_banners',
@@ -2670,6 +2734,16 @@ class WebsiteConfigurationViewSerializer(serializers.ModelSerializer):
         try:
             queryset = Advertisement.objects.filter(
                 work_for='SLIDER', is_active=True, is_gaming=False).order_by('-created_at')[:3]
+            serializer = SliderSerializer(instance=queryset, many=True, context={
+                                          'request': self.context['request']})
+            return serializer.data
+        except:
+            return []
+        
+    def get_offer_slider_images(self, obj):
+        try:
+            queryset = Advertisement.objects.filter(
+                work_for='OFFER', is_active=True, is_gaming=False).order_by('-created_at')[:3]
             serializer = SliderSerializer(instance=queryset, many=True, context={
                                           'request': self.context['request']})
             return serializer.data

@@ -18,4 +18,9 @@ urlpatterns = [
     path('admin/pages-list/', PagesListAPIView.as_view()),
     path('admin/pages-create/', PagesCreateAPIView.as_view()),
     path('admin/pages-update/<int:id>/', PagesUpdateAPIView.as_view()),
+
+    # media
+    path('admin/media-list/', MediaListAPIView.as_view()),
+    path('admin/media-create/', MediaCreateAPIView.as_view()),
+    path('admin/media-update/<int:id>/', MediaUpdateAPIView.as_view()),
 ]

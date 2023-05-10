@@ -1,4 +1,4 @@
-from blog.models import Blog
+from blog.models import Blog, BlogReview, BlogReviewReply
 from cart.serializers import OrderItemSerializer
 from home.serializers import AdvertisementDataSerializer, SliderAdvertisementDataSerializer
 from product.serializers import ProductImageSerializer, ProductReviewSerializer, BrandSerializer, UnitSerializer
@@ -2400,7 +2400,7 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
                         image=image, bold_text=bold_text, small_text=small_text, is_gaming=False, work_for='SLIDER')
         except:
             raise ValidationError('Problem of Home Slider Images insert.')
-        
+
         # offer_slider_images
         try:
             if offer_slider_images:
@@ -2602,7 +2602,6 @@ class WebsiteConfigurationUpdateSerializer(serializers.ModelSerializer):
                         image=image, bold_text=bold_text, small_text=small_text, is_gaming=False, work_for='SLIDER')
         except:
             raise ValidationError('Problem of Home Slider Images update.')
-        
 
         # offer_slider_images
         try:
@@ -2739,7 +2738,7 @@ class WebsiteConfigurationViewSerializer(serializers.ModelSerializer):
             return serializer.data
         except:
             return []
-        
+
     def get_offer_slider_images(self, obj):
         try:
             queryset = Advertisement.objects.filter(
@@ -2885,3 +2884,57 @@ class ProductCommentDataSerializer(serializers.ModelSerializer):
         replies = ProductReviewReply.objects.filter(
             review=obj, is_active=True).order_by('-created_at')
         return CommentsRepliesSerializer(replies, many=True).data
+
+
+# blog review related serializers
+class BlogReviewListSerializer(serializers.ModelSerializer):
+    blog_title = serializers.CharField(
+        source='title.title', read_only=True)
+    customer_name = serializers.CharField(
+        source='user.username', read_only=True)
+
+    class Meta:
+        model = BlogReview
+        fields = ['id', 'blog', 'blog_title', 'user', 'customer_name', 'rating_number', 'review_text',
+                  'is_active']
+
+
+class BlogCommentsRepliesSerializer(serializers.ModelSerializer):
+    user_name = serializers.CharField(source='user.username', read_only=True)
+
+    class Meta:
+        model = BlogReviewReply
+        fields = [
+            'id',
+            'review',
+            'user',
+            'user_name',
+            'review_text',
+            'created_at'
+        ]
+
+
+class BlogReviewDataSerializer(serializers.ModelSerializer):
+    blog_title = serializers.CharField(
+        source='blog.title', read_only=True)
+    user_name = serializers.CharField(source='user.username', read_only=True)
+    replies = serializers.SerializerMethodField('get_replies')
+
+    class Meta:
+        model = BlogReview
+        fields = [
+            'id',
+            'blog',
+            'blog_title',
+            'user',
+            'user_name',
+            'rating_number',
+            'review_text',
+            'replies',
+            'created_at'
+        ]
+
+    def get_replies(self, obj):
+        replies = BlogReviewReply.objects.filter(
+            review=obj, is_active=True).order_by('-created_at')
+        return BlogCommentsRepliesSerializer(replies, many=True).data

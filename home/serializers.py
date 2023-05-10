@@ -179,3 +179,14 @@ class PagesSerializer(serializers.ModelSerializer):
             'is_active',
             'created_at'
         ]
+
+
+class MediaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MediaFiles
+        fields = [
+            'id',
+            'file',
+            'is_active',
+            'created_at'
+        ]

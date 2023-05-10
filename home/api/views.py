@@ -1,10 +1,9 @@
 from rest_framework.views import APIView
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView, RetrieveAPIView, UpdateAPIView
-from home.models import FAQ, ContactUs, HomeSingleRowData, Advertisement, RequestQuote, Pages, AboutUs, TermsAndCondition, OnlineServiceSupport, \
-    PaymentMethod, RefundAndReturnPolicy, Shipping, PrivacyPolicy, ServiceCenter
+from home.models import FAQ, ContactUs, HomeSingleRowData, Advertisement, Pages, MediaFiles
 from home.serializers import product_catListSerializer, PagesSerializer,\
     ContactUsSerializer, FaqSerializer, SingleRowDataSerializer, SliderAdvertisementDataSerializer, AdvertisementDataSerializer, \
-    StoreCategoryAPIViewListSerializer, product_sub_catListSerializer, \
+    StoreCategoryAPIViewListSerializer, product_sub_catListSerializer, MediaSerializer, \
     CorporateDealCreateSerializer, RequestQuoteSerializer
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -358,8 +357,7 @@ class SingleRowDataAPIView(APIView):
         })
 
 
-
-# pages views
+# pages
 class PagesListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = PagesSerializer
@@ -367,7 +365,8 @@ class PagesListAPIView(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True:
-            queryset = Pages.objects.all().order_by('-created_at')
+            queryset = Pages.objects.filter(
+                is_active=True).order_by('-created_at')
             if queryset:
                 return queryset
             else:
@@ -407,3 +406,55 @@ class PagesUpdateAPIView(RetrieveUpdateAPIView):
         else:
             raise ValidationError(
                 {"msg": 'You can not update  Page, because you are not an Admin, Staff or owner!'})
+
+# media
+
+
+class MediaListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = MediaSerializer
+    pagination_class = ProductCustomPagination
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+            queryset = MediaFiles.objects.filter(
+                is_active=True).order_by('-created_at')
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'Media Files does not exist!'})
+        else:
+            raise ValidationError(
+                {"msg": 'You can not view Media Files list, because you are not an Admin or a Staff!'})
+
+
+class MediaCreateAPIView(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = MediaSerializer
+
+    def post(self, request, *args, **kwargs):
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+            return super(MediaCreateAPIView, self).post(request, *args, **kwargs)
+        else:
+            raise ValidationError(
+                {"msg": 'You can not upload Media file, because you are not an Admin or a Staff!'})
+
+
+class MediaUpdateAPIView(RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = MediaSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        target_id = self.kwargs['id']
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
+            query = MediaFiles.objects.filter(id=target_id)
+            if query:
+                return query
+            else:
+                raise ValidationError({"msg": 'Media file data not found'})
+        else:
+            raise ValidationError(
+                {"msg": 'You can not update Media file, because you are not an Admin, Staff or owner!'})

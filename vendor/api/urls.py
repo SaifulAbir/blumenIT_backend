@@ -55,7 +55,9 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminContactUsDeleteAPIView, AdminPosCustomerCreateAPIView, AdminWebsiteConfigurationViewAPIView, \
     AdminOfferCategoryListAPIView, AdminBrandIsGamingToggleAPIView, AdminCategoryIsPcBuilderToggleAPIView, \
     SellerListAPIView, AdminWebsiteGeneralSettingsView, AdminWebsiteGeneralSettingsUpdateAPIView, \
-    AdminDeleteAttributeValueAPIView, CustomerShippingCountryListAllAPIView, ProductCommentDetailsAPIView
+    AdminDeleteAttributeValueAPIView, CustomerShippingCountryListAllAPIView, ProductCommentDetailsAPIView, \
+    AdminBlogReviewListAPIView, AdminBlogReviewInactiveAPIView, BlogReviewSearchAPI, BlogReviewDetailsAPIView,\
+    AdminBlogReviewReplyCreateAPIView
 
 urlpatterns = [
 
@@ -406,4 +408,15 @@ urlpatterns = [
          ProductCommentDetailsAPIView.as_view(), name='product_comment_details'),
     path('admin/product-comment-reply-create/',
          AdminProductCommentReplyCreateAPIView.as_view()),
+
+
+    # blog Review related apies
+    path('admin/blog-review-list/', AdminBlogReviewListAPIView.as_view()),
+    path('admin/blog-review-inactive/<int:id>/',
+         AdminBlogReviewInactiveAPIView.as_view()),
+    path('admin/blog-review-search/', BlogReviewSearchAPI.as_view()),
+    path('admin/blog-review-details/<int:id>/',
+         BlogReviewDetailsAPIView.as_view(), name='blog_review_details'),
+    path('admin/blog-review-reply-create/',
+         AdminBlogReviewReplyCreateAPIView.as_view()),
 ]

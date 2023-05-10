@@ -181,8 +181,20 @@ class PagesSerializer(serializers.ModelSerializer):
         ]
 
 
+class MediaDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MediaFiles
+        fields = [
+            'id',
+            'title',
+            'file',
+            'is_active',
+            'created_at'
+        ]
+
+
 class MediaSerializer(serializers.ModelSerializer):
-    media_list = serializers.ListField(
+    files = serializers.ListField(
         child=serializers.FileField(), write_only=True, required=False)
 
     class Meta:
@@ -190,26 +202,26 @@ class MediaSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'title',
-            'media_list',
+            'files',
             'is_active',
             'created_at'
         ]
 
     def create(self, validated_data):
 
-        # product_images
+        # files
         try:
-            media_list = validated_data.pop('media_list')
+            files = validated_data.pop('files')
         except:
-            media_list = ''
+            files = ''
 
-        media_chunk_instance = Product.objects.create(**validated_data)
+        media_chunk_instance = MediaChunk.objects.create(**validated_data)
 
-        # media_list
-        if media_list:
-            for media in media_list:
-                print(media)
+        # files
+        if files:
+            for file in files:
+                file_name = file.name.split('/')[-1]
                 MediaFiles.objects.create(
-                    chunk=media_chunk_instance, file=media)
+                    chunk=media_chunk_instance, file=file, title=file_name, is_active=True)
 
         return media_chunk_instance

@@ -3,7 +3,7 @@ from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAP
 from home.models import FAQ, ContactUs, HomeSingleRowData, Advertisement, Pages, MediaFiles
 from home.serializers import product_catListSerializer, PagesSerializer,\
     ContactUsSerializer, FaqSerializer, SingleRowDataSerializer, SliderAdvertisementDataSerializer, AdvertisementDataSerializer, \
-    StoreCategoryAPIViewListSerializer, product_sub_catListSerializer, MediaSerializer, \
+    StoreCategoryAPIViewListSerializer, product_sub_catListSerializer, MediaSerializer, MediaDataSerializer, \
     CorporateDealCreateSerializer, RequestQuoteSerializer
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -412,7 +412,7 @@ class PagesUpdateAPIView(RetrieveUpdateAPIView):
 
 class MediaListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = MediaSerializer
+    serializer_class = MediaDataSerializer
     pagination_class = ProductCustomPagination
 
     def get_queryset(self):
@@ -448,7 +448,7 @@ class MediaCreateAPIView(CreateAPIView):
 
 class MediaUpdateAPIView(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = MediaSerializer
+    serializer_class = MediaDataSerializer
     lookup_field = 'id'
     lookup_url_kwarg = "id"
 

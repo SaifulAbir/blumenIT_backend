@@ -286,3 +286,22 @@ class ServiceCenter(AbstractTimeStamp):
 
     def __str__(self):
         return f"{self.pk}"
+
+
+class Pages(AbstractTimeStamp):
+    TYPE = [
+        ('INFO', 'Info'),
+        ('CS', 'customer_service')
+    ]
+    title = models.CharField(max_length=800, default='')
+    content = models.TextField(null=True, blank=True)
+    type = models.CharField(max_length=30, choices=TYPE, default=TYPE[0][0])
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'Page'
+        verbose_name_plural = 'Pages'
+        db_table = 'pages'
+
+    def __str__(self):
+        return f"{self.title}"

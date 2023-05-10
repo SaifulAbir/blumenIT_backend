@@ -3493,8 +3493,8 @@ class AdminBlogReviewInactiveAPIView(ListAPIView):
 
 class BlogReviewSearchAPI(ListAPIView):
     permission_classes = [IsAuthenticated]
-    pagination_class = BlogReviewListSerializer
-    serializer_class = ReviewListSerializer
+    pagination_class = ProductCustomPagination
+    serializer_class = BlogReviewListSerializer
 
     def get_queryset(self):
         request = self.request

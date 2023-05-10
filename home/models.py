@@ -305,3 +305,16 @@ class Pages(AbstractTimeStamp):
 
     def __str__(self):
         return f"{self.title}"
+
+
+class MediaFiles(AbstractTimeStamp):
+    file = models.FileField(upload_to='media_files', null=True, blank=True)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'MediaFile'
+        verbose_name_plural = 'MediaFiles'
+        db_table = 'media_files'
+
+    def __str__(self):
+        return f"{self.pk}"

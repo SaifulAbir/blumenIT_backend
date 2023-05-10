@@ -2,7 +2,7 @@ from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework import status
 from django.utils import timezone
-from blog.models import Blog
+from blog.models import Blog, BlogReview, BlogReviewReply
 from product.pagination import ProductCustomPagination
 from product.serializers import DiscountTypeSerializer, TagsSerializer, ProductListBySerializer
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView, RetrieveAPIView, UpdateAPIView
@@ -40,7 +40,8 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     AdminBrandIsGamingSerializer, CommentsRepliesSerializer, \
     AdminCategoryIsPcBuilderSerializer, UpdateCategoryDetailsSerializer, UpdateSubCategoryDetailsSerializer, \
     UpdateSubSubCategoryDetailsSerializer, WebsiteConfigurationViewSerializer, WebsiteConfigurationUpdateSerializer, \
-    GeneralSettingsViewSerializer, ProductCommentDataSerializer
+    GeneralSettingsViewSerializer, ProductCommentDataSerializer, BlogReviewListSerializer, BlogReviewDataSerializer, \
+    BlogCommentsRepliesSerializer
 
 from cart.models import Order, OrderItem, Coupon
 from cart.models import Order, OrderItem
@@ -3426,3 +3427,106 @@ class AdminProductCommentReplyCreateAPIView(CreateAPIView):
         else:
             raise ValidationError(
                 {"msg": 'You can not create ticket reply, because you are not an Admin or a Staff!'})
+
+
+# Blog Review related admin apies views............................ start
+class AdminBlogReviewListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = BlogReviewListSerializer
+    pagination_class = ProductCustomPagination
+
+    def get_queryset(self):
+        request = self.request
+        rating_high_to_low = request.GET.get('rating_high_to_low')
+        rating_low_to_high = request.GET.get('rating_low_to_high')
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+            queryset = BlogReview.objects.filter(
+                is_active=True).order_by('-created_at')
+
+            if rating_high_to_low:
+                queryset = queryset.order_by('-rating_number').distinct()
+
+            if rating_low_to_high:
+                queryset = queryset.order_by('rating_number').distinct()
+
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'Blog Review data does not exist!'})
+        else:
+            raise ValidationError(
+                {"msg": 'You can not view blog review data list, because you are not an Admin or a Staff!'})
+
+
+class AdminBlogReviewInactiveAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = BlogReviewListSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+            review_obj_exist = BlogReview.objects.filter(id=id).exists()
+            if review_obj_exist:
+                review_obj = BlogReview.objects.filter(id=id)
+                review_obj.update(is_active=False)
+                queryset = BlogReview.objects.filter(
+                    is_active=True).order_by('-created_at')
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'Blog Review data does not exist!'})
+        else:
+            raise ValidationError(
+                {"msg": 'You can not update blog review data, because you are not an Admin or a Staff!'})
+
+
+class BlogReviewSearchAPI(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    pagination_class = BlogReviewListSerializer
+    serializer_class = ReviewListSerializer
+
+    def get_queryset(self):
+        request = self.request
+        query = request.GET.get('search')
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+            queryset = BlogReview.objects.filter(
+                is_active=True).order_by('-created_at')
+            if query:
+                queryset = queryset.filter(Q(blog__title__icontains=query) | Q(user__username__icontains=query) | Q(
+                    rating_number__icontains=query) | Q(review_text__icontains=query))
+
+            return queryset
+        else:
+            raise ValidationError(
+                {"msg": 'You can not search blog review data, because you are not an Admin or a Staff!'})
+
+
+class BlogReviewDetailsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+            review_id = self.kwargs['id']
+            review_details_data = BlogReview.objects.filter(id=review_id)
+            serializer = BlogReviewDataSerializer(
+                review_details_data, many=True)
+            return Response(serializer.data)
+        else:
+            raise ValidationError(
+                {"msg": 'You can not see blog details data, because you are not an Admin or a Staff!'})
+
+
+class AdminBlogReviewReplyCreateAPIView(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = BlogCommentsRepliesSerializer
+
+    def post(self, request, *args, **kwargs):
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+            return super(AdminBlogReviewReplyCreateAPIView, self).post(request, *args, **kwargs)
+        else:
+            raise ValidationError(
+                {"msg": 'You can not create blog reply, because you are not an Admin or a Staff!'})
+# Blog Review related admin apies views............................ end

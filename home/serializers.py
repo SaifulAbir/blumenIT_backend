@@ -168,89 +168,14 @@ class RequestQuoteSerializer(serializers.ModelSerializer):
         ]
 
 
-class AboutUsSerializer(serializers.ModelSerializer):
+class PagesSerializer(serializers.ModelSerializer):
     class Meta:
-        model = AboutUs
+        model = Pages
         fields = [
             'id',
+            'title',
             'content',
-            'is_active',
-            'created_at'
-        ]
-
-
-class TermsAndConditionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TermsAndCondition
-        fields = [
-            'id',
-            'content',
-            'is_active',
-            'created_at'
-        ]
-
-
-class OnlineServiceSupportSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = OnlineServiceSupport
-        fields = [
-            'id',
-            'content',
-            'is_active',
-            'created_at'
-        ]
-
-
-class PaymentMethodSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PaymentMethod
-        fields = [
-            'id',
-            'content',
-            'is_active',
-            'created_at'
-        ]
-
-
-class RefundAndReturnPolicySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = RefundAndReturnPolicy
-        fields = [
-            'id',
-            'content',
-            'is_active',
-            'created_at'
-        ]
-
-
-class ShippingSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Shipping
-        fields = [
-            'id',
-            'content',
-            'is_active',
-            'created_at'
-        ]
-
-
-class PrivacyPolicySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PrivacyPolicy
-        fields = [
-            'id',
-            'content',
-            'is_active',
-            'created_at'
-        ]
-
-
-class ServiceCenterSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ServiceCenter
-        fields = [
-            'id',
-            'content',
+            'type',
             'is_active',
             'created_at'
         ]

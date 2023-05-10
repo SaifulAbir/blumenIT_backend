@@ -175,6 +175,7 @@ class ProductReviewCreateSerializer(serializers.ModelSerializer):
 
 class CommentsRepliesSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(source='user.username', read_only=True)
+    created_at = serializers.DateTimeField(format="%d %B, %Y %I:%M %p")
 
     class Meta:
         model = ProductReviewReply

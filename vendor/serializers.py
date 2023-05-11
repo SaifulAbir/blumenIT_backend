@@ -2938,7 +2938,8 @@ class BlogReviewDataSerializer(serializers.ModelSerializer):
             'rating_number',
             'review_text',
             'replies',
-            'created_at'
+            'created_at',
+            'reviewer_name'
         ]
 
     def get_replies(self, obj):

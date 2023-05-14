@@ -46,18 +46,18 @@ from django.core.mail import send_mail
 from django.http import QueryDict
 
 
-
-
-
 class SetPasswordAPIView(CreateAPIView):
     queryset = User.objects.all()
     serializer_class = SetPasswordSerializer
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
-        email = check_dict_data_rise_error("email", request_data=request.data, arrise=True)
-        phone = check_dict_data_rise_error("phone", request_data=request.data, arrise=True)
-        password = check_dict_data_rise_error("password", request_data=request.data, arrise=True)
+        email = check_dict_data_rise_error(
+            "email", request_data=request.data, arrise=True)
+        phone = check_dict_data_rise_error(
+            "phone", request_data=request.data, arrise=True)
+        password = check_dict_data_rise_error(
+            "password", request_data=request.data, arrise=True)
         try:
             user = User.objects.get(phone=phone, email=email)
         except User.DoesNotExist:
@@ -67,11 +67,13 @@ class SetPasswordAPIView(CreateAPIView):
             user.is_active = True
             user.save()
             return Response(
-                data={"user_id": user.id if user else None, "details": "Password setup successful"},
+                data={"user_id": user.id if user else None,
+                      "details": "Password setup successful"},
                 status=status.HTTP_201_CREATED)
         else:
             return Response(
-                data={"user_id": user.id if user else None, "details": "Password setup not successful"},
+                data={"user_id": user.id if user else None,
+                      "details": "Password setup not successful"},
                 status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -81,11 +83,15 @@ class SendOTPAPIView(CreateAPIView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
-        is_login = check_dict_data_rise_error("is_login", request_data=request.data, arrise=True)
+        is_login = check_dict_data_rise_error(
+            "is_login", request_data=request.data, arrise=True)
         if is_login == "false":
-            email = check_dict_data_rise_error("email", request_data=request.data, arrise=True)
-        phone = check_dict_data_rise_error("phone", request_data=request.data, arrise=True)
-        name = check_dict_data_rise_error("full_name", request_data=request.data, arrise=False)
+            email = check_dict_data_rise_error(
+                "email", request_data=request.data, arrise=True)
+        phone = check_dict_data_rise_error(
+            "phone", request_data=request.data, arrise=True)
+        name = check_dict_data_rise_error(
+            "full_name", request_data=request.data, arrise=False)
 
         if is_login == "false":
             try:
@@ -93,7 +99,7 @@ class SendOTPAPIView(CreateAPIView):
             except User.DoesNotExist:
                 user_obj = None
             if user_obj and user_obj.is_active is True:
-            # for user_data in user_obj:
+                # for user_data in user_obj:
                 if user_obj.email == email:
                     return Response({"details": "Email already exists"}, status=status.HTTP_400_BAD_REQUEST)
                 if user_obj.phone == phone:
@@ -124,14 +130,15 @@ class SendOTPAPIView(CreateAPIView):
         )
         otp_model.save()
         try:
-            user = User.objects.get(phone = phone)
+            user = User.objects.get(phone=phone)
             return Response(
                 data={"user_id": user.id if user else None, "sent_otp": sent_otp},
                 status=status.HTTP_201_CREATED)
         except User.DoesNotExist:
             user = None
             return Response(
-                data={"user_id": user.id if user else None, "sent_otp": sent_otp if user else None},
+                data={"user_id": user.id if user else None,
+                      "sent_otp": sent_otp if user else None},
                 status=status.HTTP_404_NOT_FOUND)
 
 
@@ -141,11 +148,13 @@ class ReSendOTPAPIView(CreateAPIView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
-        contact_number = check_dict_data_rise_error("contact_number", request_data=request.data, arrise=True)
+        contact_number = check_dict_data_rise_error(
+            "contact_number", request_data=request.data, arrise=True)
         sent_otp = OTPManager().initialize_otp_and_sms_otp(contact_number)
         otp_sending_time = datetime.now(pytz.timezone('Asia/Dhaka'))
         try:
-            otp_obj = OTPModel.objects.filter(contact_number=contact_number).first()
+            otp_obj = OTPModel.objects.filter(
+                contact_number=contact_number).first()
         except OTPModel.DoesNotExist:
             otp_obj = None
         if not otp_obj:
@@ -172,15 +181,19 @@ class OTPVerifyAPIVIEW(CreateAPIView):
     permission_classes = [AllowAny, ]
 
     def post(self, request, *args, **kwargs):
-        contact_number = check_dict_data_rise_error("contact_number", request_data=request.data, arrise=True)
-        otp_number = check_dict_data_rise_error("otp_number", request_data=request.data, arrise=True)
+        contact_number = check_dict_data_rise_error(
+            "contact_number", request_data=request.data, arrise=True)
+        otp_number = check_dict_data_rise_error(
+            "otp_number", request_data=request.data, arrise=True)
         try:
-            otp_obj = OTPModel.objects.filter(contact_number=contact_number).last()
+            otp_obj = OTPModel.objects.filter(
+                contact_number=contact_number).last()
             if str(otp_obj.otp_number) == otp_number:
                 otp_obj.verified_phone = True
                 # OTP matched
                 otp_sent_time = otp_obj.expired_time
-                timediff = datetime.now(pytz.timezone('Asia/Dhaka')) - otp_sent_time
+                timediff = datetime.now(
+                    pytz.timezone('Asia/Dhaka')) - otp_sent_time
                 time_in_seconds = timediff.total_seconds()
 
                 if time_in_seconds > 120:
@@ -218,9 +231,10 @@ class LoginUser(mixins.CreateModelMixin,
             email = request.data["email"]
             password = request.data["password"]
             try:
-                check = user_models.User.objects.get(email=email)
+                user_name = User.objects.get(
+                    email=request.data["email"]).username
                 user = authenticate(
-                    request, username=request.data["email"], password=request.data["password"])
+                    request, username=user_name, password=request.data["password"])
             except (user_models.User.DoesNotExist, Exception):
                 return Response({"status": False, "data": {"message": "Invalid credentials"}}, status=status.HTTP_404_NOT_FOUND)
             if user:
@@ -240,19 +254,21 @@ class LoginUser(mixins.CreateModelMixin,
 
 
 class SuperUserLoginUser(mixins.CreateModelMixin,
-                viewsets.GenericViewSet):
+                         viewsets.GenericViewSet):
     serializer_class = user_serializers.SuperAdminLoginSerializer
     permission_classes = [AllowAny]
 
     @csrf_exempt
     def create(self, request):
-        serializer = user_serializers.SuperAdminLoginSerializer(data=request.data)
+        serializer = user_serializers.SuperAdminLoginSerializer(
+            data=request.data)
         if serializer.is_valid():
             try:
                 user = authenticate(
                     request, username=request.data["username"], password=request.data["password"])
             except (user_models.User.DoesNotExist, Exception):
                 return Response({"status": False, "data": {"message": "Invalid credentials for super user!"}}, status=status.HTTP_404_NOT_FOUND)
+
             if user:
                 user_is_super = user.is_superuser
                 user_is_staff = user.is_staff
@@ -330,7 +346,8 @@ class CustomerOrdersList(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_customer == True:
-            queryset = Order.objects.filter(user=self.request.user).order_by('-created_at')
+            queryset = Order.objects.filter(
+                user=self.request.user).order_by('-created_at')
 
             if queryset:
                 return queryset
@@ -354,7 +371,8 @@ class CustomerOrderDetails(RetrieveAPIView):
             if query:
                 return query
             else:
-                raise ValidationError({"msg": "This is not your order or Order not available! " })
+                raise ValidationError(
+                    {"msg": "This is not your order or Order not available! "})
         else:
             raise ValidationError(
                 {"msg": 'You can not show order details, because you are not an User!'})
@@ -376,7 +394,8 @@ class CustomerProfile(RetrieveUpdateAPIView):
                 raise ValidationError(
                     {"msg": 'User data does not exist!'})
         else:
-            raise ValidationError({"msg": 'You can not update show or update profile, because you are not an Customer!'})
+            raise ValidationError(
+                {"msg": 'You can not update show or update profile, because you are not an Customer!'})
 
 
 class CustomerAddressListAPIView(ListAPIView):
@@ -386,7 +405,8 @@ class CustomerAddressListAPIView(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_customer == True:
-            queryset = DeliveryAddress.objects.filter(user=self.request.user, is_active=True).order_by('-created_at')
+            queryset = DeliveryAddress.objects.filter(
+                user=self.request.user, is_active=True).order_by('-created_at')
 
             if queryset:
                 return queryset
@@ -425,7 +445,8 @@ class CustomerAddressUpdateAPIView(RetrieveUpdateAPIView):
                 raise ValidationError(
                     {"msg": 'Address data does not exist!'})
         else:
-            raise ValidationError({"msg": 'You can not update show or update address, because you are not an Customer!'})
+            raise ValidationError(
+                {"msg": 'You can not update show or update address, because you are not an Customer!'})
 
 
 class CustomerAddressDeleteAPIView(ListAPIView):
@@ -443,7 +464,8 @@ class CustomerAddressDeleteAPIView(ListAPIView):
                 address_obj = DeliveryAddress.objects.filter(id=id)
                 address_obj.update(is_active=False)
 
-                queryset = DeliveryAddress.objects.filter(user=self.request.user, is_active = True).order_by('-created_at')
+                queryset = DeliveryAddress.objects.filter(
+                    user=self.request.user, is_active=True).order_by('-created_at')
                 return queryset
             else:
                 raise ValidationError(
@@ -459,18 +481,23 @@ class DashboardDataAPIView(APIView):
     def get(self, request):
         if self.request.user.is_customer == True:
             customer_profile = User.objects.filter(id=self.request.user.id)
-            customer_profile_serializer = CustomerProfileSerializer(customer_profile, many=True, context={"request": request})
+            customer_profile_serializer = CustomerProfileSerializer(
+                customer_profile, many=True, context={"request": request})
 
-            all_orders_count = Order.objects.filter(user=self.request.user.id).count()
-            awaiting_payments_count = Order.objects.filter(Q(user=self.request.user.id), Q(payment_status='UN-PAID')).count()
-            awaiting_shipment_count = Order.objects.filter(Q(user=self.request.user.id), Q(order_status='PENDING') | Q(order_status='CONFIRMED')).count()
-            awaiting_delivery_count = Order.objects.filter(Q(user=self.request.user.id), Q(order_status='PICKED-UP')).count()
+            all_orders_count = Order.objects.filter(
+                user=self.request.user.id).count()
+            awaiting_payments_count = Order.objects.filter(
+                Q(user=self.request.user.id), Q(payment_status='UN-PAID')).count()
+            awaiting_shipment_count = Order.objects.filter(Q(user=self.request.user.id), Q(
+                order_status='PENDING') | Q(order_status='CONFIRMED')).count()
+            awaiting_delivery_count = Order.objects.filter(
+                Q(user=self.request.user.id), Q(order_status='PICKED-UP')).count()
 
             return Response({
                 "customer_profile": customer_profile_serializer.data,
                 "all_orders_count": all_orders_count,
                 "awaiting_payments_count": awaiting_payments_count,
-                'awaiting_shipment_count':awaiting_shipment_count,
+                'awaiting_shipment_count': awaiting_shipment_count,
                 "awaiting_delivery_count": awaiting_delivery_count
             })
 
@@ -485,11 +512,13 @@ class WishlistDataAPIView(ListAPIView):
     pagination_class = OrderCustomPagination
 
     def get_queryset(self):
-    # def get(self, request):
+        # def get(self, request):
         if self.request.user.is_customer == True:
-            wishlist_obj_exist = Wishlist.objects.filter(Q(user=self.request.user)).exists()
+            wishlist_obj_exist = Wishlist.objects.filter(
+                Q(user=self.request.user)).exists()
             if wishlist_obj_exist:
-                queryset = Wishlist.objects.filter(Q(user=self.request.user)).order_by('-created_at')
+                queryset = Wishlist.objects.filter(
+                    Q(user=self.request.user)).order_by('-created_at')
                 return queryset
             else:
                 raise ValidationError(
@@ -518,9 +547,11 @@ class SavePcListAPIView(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_customer == True:
-            save_pc_obj_exist = SavePc.objects.filter(Q(user=self.request.user), Q(is_active=True)).exists()
+            save_pc_obj_exist = SavePc.objects.filter(
+                Q(user=self.request.user), Q(is_active=True)).exists()
             if save_pc_obj_exist:
-                queryset = SavePc.objects.filter(Q(user=self.request.user), Q(is_active=True)).order_by('-created_at')
+                queryset = SavePc.objects.filter(Q(user=self.request.user), Q(
+                    is_active=True)).order_by('-created_at')
                 return queryset
             else:
                 raise ValidationError(
@@ -544,7 +575,8 @@ class SavePcViewAPIView(RetrieveAPIView):
                 query = SavePc.objects.get(id=id)
                 return query
             else:
-                raise ValidationError({"msg": 'Save Pc Items data does not exist!'})
+                raise ValidationError(
+                    {"msg": 'Save Pc Items data does not exist!'})
         else:
             raise ValidationError(
                 {"msg": 'You can not see Save Pc data, because you are not an Customer!'})
@@ -564,7 +596,8 @@ class SavePcDeleteAPIView(ListAPIView):
                 save_pc_obj = SavePc.objects.filter(id=id)
                 save_pc_obj.update(is_active=False)
 
-                queryset = SavePc.objects.filter(Q(user=self.request.user), Q(is_active=True)).order_by('-created_at')
+                queryset = SavePc.objects.filter(Q(user=self.request.user), Q(
+                    is_active=True)).order_by('-created_at')
                 return queryset
             else:
                 raise ValidationError(
@@ -592,6 +625,7 @@ class AdminAccountDeleteAPIView(RetrieveUpdateAPIView):
     serializer_class = AccountDeleteSerializer
     lookup_field = 'id'
     lookup_url_kwarg = "id"
+
     def get_queryset(self):
         id = self.kwargs['id']
         user = User.objects.filter(id=id)
@@ -605,7 +639,8 @@ class AdminAccountDeleteAPIView(RetrieveUpdateAPIView):
 
         email = user.email
         subject = "Confirmation of account deletion"
-        html_message = render_to_string('confirmation_of_account_delete.html', {'active' : active, 'user':user})
+        html_message = render_to_string('confirmation_of_account_delete.html', {
+                                        'active': active, 'user': user})
 
         send_mail(
             subject=subject,
@@ -634,7 +669,6 @@ class ForgotPasswordView(generics.GenericAPIView):
             # reset_url = request.build_absolute_uri(reverse('reset-password'))
             reset_url = f"https://blumen-it-admin.vercel.app/reset-password/?encoded_uid={encoded_uid}&token={token}"
 
-
             subject = "Reset Your Password"
             message = f"Click the following link to reset your password: {reset_url}"
 
@@ -661,6 +695,7 @@ class ForgotPasswordView(generics.GenericAPIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+
 class ResetPasswordView(generics.GenericAPIView):
     permission_classes = [AllowAny]
     serializer_class = ResetPasswordSerializer
@@ -669,14 +704,14 @@ class ResetPasswordView(generics.GenericAPIView):
         # query_params = QueryDict(request.META['QUERY_STRING'])
         # encoded_uid = query_params.get('encoded_uid')
         # token = query_params.get('token')
-        serializer = self.serializer_class(data=request.data, context={"request": request})
+        serializer = self.serializer_class(
+            data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
 
         return response.Response(
             {"message": "Password reset complete"},
             status=status.HTTP_200_OK,
         )
-
 
         #     email = serializer.validated_data['email']
         #     user = User.objects.filter(email=email).first()

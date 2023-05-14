@@ -1907,6 +1907,24 @@ class AdminShippingCityListAPIView(ListAPIView):
                 {"msg": 'You can not see Shipping City list, because you are not an Admin or a Staff!'})
 
 
+class AdminShippingCityListByStateAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminShippingCitySerializer
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+            queryset = ShippingCity.objects.filter(shipping_state=id,
+                is_active=True).order_by('-created_at')
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError({"msg": "Shipping City doesn't exist! "})
+        else:
+            raise ValidationError(
+                {"msg": 'You can not see Shipping City list, because you are not an Admin or a Staff!'})
+
+
 class AdminShippingCityListAllAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AdminShippingCitySerializer
@@ -1984,6 +2002,25 @@ class AdminShippingCityDeleteAPIView(ListAPIView):
         else:
             raise ValidationError(
                 {"msg": 'You can not delete Shipping City, because you are not an Admin or a Staff!'})
+
+
+class AdminShippingStateListByCountryAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AdminShippingStateSerializer
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+            queryset = ShippingState.objects.filter(shipping_country=id,
+                                                    is_active=True).order_by('-created_at')
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": "Shipping State doesn't exist! "})
+        else:
+            raise ValidationError(
+                {"msg": 'You can not see Shipping State list, because you are not an Admin or a Staff!'})
 
 
 class AdminShippingStateListAPIView(ListAPIView):

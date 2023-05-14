@@ -57,7 +57,8 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     SellerListAPIView, AdminWebsiteGeneralSettingsView, AdminWebsiteGeneralSettingsUpdateAPIView, \
     AdminDeleteAttributeValueAPIView, CustomerShippingCountryListAllAPIView, ProductCommentDetailsAPIView, \
     AdminBlogReviewListAPIView, AdminBlogReviewInactiveAPIView, BlogReviewSearchAPI, BlogReviewDetailsAPIView,\
-    AdminBlogReviewReplyCreateAPIView, AdminBlogReviewCreateAPIView
+    AdminBlogReviewReplyCreateAPIView, AdminBlogReviewCreateAPIView, AdminShippingStateListByCountryAPIView, \
+    AdminShippingCityListByStateAPIView
 
 urlpatterns = [
 
@@ -261,6 +262,8 @@ urlpatterns = [
          AdminShippingCountryUpdateAPIView.as_view()),
     path('admin/shipping-country-delete/<int:id>/',
          AdminShippingCountryDeleteAPIView.as_view()),
+    path('admin/shipping-city-list-by-state/<int:id>/',
+         AdminShippingCityListByStateAPIView.as_view()),
     path('admin/shipping-city-list/', AdminShippingCityListAPIView.as_view()),
     path('admin/shipping-city-list-all/',
          AdminShippingCityListAllAPIView.as_view()),
@@ -269,6 +272,8 @@ urlpatterns = [
          AdminShippingCityUpdateAPIView.as_view()),
     path('admin/shipping-city-delete/<int:id>/',
          AdminShippingCityDeleteAPIView.as_view()),
+    path('admin/shipping-state-list-by-country/<int:id>/',
+         AdminShippingStateListByCountryAPIView.as_view()),
     path('admin/shipping-state-list/', AdminShippingStateListAPIView.as_view()),
     path('admin/shipping-state-list-all/',
          AdminShippingStateListAllAPIView.as_view()),

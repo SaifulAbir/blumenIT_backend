@@ -5,7 +5,7 @@ from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView
 from rest_framework.views import APIView
 from home.models import ProductView
 from product.serializers import ProductDetailsSerializer, ProductReviewCreateSerializer, \
-StoreCategoryAPIViewListSerializer, ProductListBySerializer, FilterAttributeSerializer, PcBuilderCategoryListSerializer, PcBuilderSubCategoryListSerializer, PcBuilderSubSubCategoryListSerializer, BrandSerializer
+    StoreCategoryAPIViewListSerializer, ProductListBySerializer, FilterAttributeSerializer, PcBuilderCategoryListSerializer, PcBuilderSubCategoryListSerializer, PcBuilderSubSubCategoryListSerializer, BrandSerializer
 
 from vendor.serializers import AdminOfferSerializer
 
@@ -28,7 +28,8 @@ class StoreCategoryListAPIView(ListAPIView):
     serializer_class = StoreCategoryAPIViewListSerializer
 
     def get_queryset(self):
-        queryset = Category.objects.filter(is_active=True).order_by('-ordering_number')
+        queryset = Category.objects.filter(
+            is_active=True).order_by('-ordering_number')
         return queryset
 
 
@@ -70,11 +71,14 @@ class ProductListAPI(ListAPIView):
 
         # queryset = Product.objects.filter(Q(status='PUBLISH') | Q(is_active=True)).order_by('-created_at')
         if seller:
-            queryset = Product.objects.filter(status='PUBLISH' , is_active=True, seller__id=seller).order_by('-created_at')
+            queryset = Product.objects.filter(
+                status='PUBLISH', is_active=True, seller__id=seller).order_by('-created_at')
         else:
-            queryset = Product.objects.filter(status='PUBLISH', is_active=True).order_by('-created_at')
+            queryset = Product.objects.filter(
+                status='PUBLISH', is_active=True).order_by('-created_at')
 
         return queryset
+
 
 class ProductListForOfferCreateAPI(ListAPIView):
     permission_classes = [AllowAny]
@@ -82,7 +86,8 @@ class ProductListForOfferCreateAPI(ListAPIView):
 
     def get_queryset(self):
         offer_id = self.request.GET.get('offer_id')
-        product_list = [p.id for p in Product.objects.filter(is_active=True, status='PUBLISH').order_by('-created_at')]
+        product_list = [p.id for p in Product.objects.filter(
+            is_active=True, status='PUBLISH').order_by('-created_at')]
 
         active_offers_products_list = [p.product.id for p in OfferProduct.objects.filter(
             is_active=True, offer__is_active=True, offer__end_date__gte=datetime.today()
@@ -93,7 +98,7 @@ class ProductListForOfferCreateAPI(ListAPIView):
 
         list_joined = [i for i in product_list if
                        i not in active_offers_products_list] + (
-                          offers_products_list if offers_products_list else list())
+            offers_products_list if offers_products_list else list())
 
         return Product.objects.filter(id__in=list_joined).order_by(
             '-created_at') if list_joined else Product.objects.filter(is_active=True, status='PUBLISH').order_by('-created_at')
@@ -118,6 +123,7 @@ class ProductListForOfferCreateAPI(ListAPIView):
     #         raise ValidationError(
     #             {"msg": 'You cannot view the offers list because you are not an admin or a staff member!'})
 
+
 class ProductListByCategoryForOfferCreateAPI(ListAPIView):
     permission_classes = (AllowAny,)
     serializer_class = ProductListBySerializer
@@ -137,10 +143,10 @@ class ProductListByCategoryForOfferCreateAPI(ListAPIView):
         request = self.request
         offer_id = request.GET.get('offer_id')
 
-
         cid = self.kwargs['cid']
         if cid:
-            all_products = Product.objects.filter(category=cid, status='PUBLISH').order_by('-created_at')
+            all_products = Product.objects.filter(
+                category=cid, status='PUBLISH').order_by('-created_at')
 
         product_list = []
         for q in all_products:
@@ -149,7 +155,8 @@ class ProductListByCategoryForOfferCreateAPI(ListAPIView):
 
         active_offers_products_list = []
         today_date = datetime.today()
-        active_offers_products = OfferProduct.objects.filter(is_active=True, offer__is_active=True, offer__end_date__gte = today_date)
+        active_offers_products = OfferProduct.objects.filter(
+            is_active=True, offer__is_active=True, offer__end_date__gte=today_date)
         for q_a in active_offers_products:
             p_id = q_a.product.id
             active_offers_products_list.append(p_id)
@@ -157,20 +164,25 @@ class ProductListByCategoryForOfferCreateAPI(ListAPIView):
         # if offer_id id exist
         offers_products_list = []
         if offer_id:
-            offers_products = OfferProduct.objects.filter(offer=offer_id, is_active=True)
+            offers_products = OfferProduct.objects.filter(
+                offer=offer_id, is_active=True)
             for a_p in offers_products:
                 p_id = a_p.product.id
                 offers_products_list.append(p_id)
 
         if offers_products_list:
-            list_joined = [i for i in product_list if i not in active_offers_products_list] + offers_products_list
+            list_joined = [
+                i for i in product_list if i not in active_offers_products_list] + offers_products_list
         else:
-            list_joined = [i for i in product_list if i not in active_offers_products_list]
+            list_joined = [
+                i for i in product_list if i not in active_offers_products_list]
 
         if list_joined:
-            queryset = Product.objects.filter(id__in=list_joined).order_by('-created_at')
+            queryset = Product.objects.filter(
+                id__in=list_joined).order_by('-created_at')
         else:
-            queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
+            queryset = Product.objects.filter(
+                status='PUBLISH').order_by('-created_at')
 
         return queryset
 
@@ -261,12 +273,13 @@ class ProductListByCategoryAPI(ListAPIView):
             pagination = 10
         self.pagination_class.page_size = pagination
 
-
         cid = self.kwargs['cid']
         if cid:
-            queryset = Product.objects.filter(category=cid, status='PUBLISH').order_by('-created_at')
+            queryset = Product.objects.filter(
+                category=cid, status='PUBLISH').order_by('-created_at')
         else:
-            queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
+            queryset = Product.objects.filter(
+                status='PUBLISH').order_by('-created_at')
 
         # filtering start
         request = self.request
@@ -283,8 +296,8 @@ class ProductListByCategoryAPI(ListAPIView):
 
             min_price = price_list[0]
             max_price = price_list[1]
-            queryset = queryset.filter(price__range=(min_price, max_price)).order_by('-created_at')
-
+            queryset = queryset.filter(price__range=(
+                min_price, max_price)).order_by('-created_at')
 
         new_attr_value_ids = []
         if attr_value_ids:
@@ -294,7 +307,8 @@ class ProductListByCategoryAPI(ListAPIView):
                 new_attr_value_ids.append(attr_value_id)
 
         if new_attr_value_ids:
-            queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id__in = new_attr_value_ids)).order_by('-id').distinct("id")
+            queryset = queryset.filter(
+                Q(product_filter_attributes_product__attribute_value__id__in=new_attr_value_ids)).order_by('-id').distinct("id")
 
         if price_low_to_high:
             queryset = queryset.order_by('price').distinct('price')
@@ -323,7 +337,7 @@ class GamingProductListByCategoryPopularProductsAPI(ListAPIView):
         type = self.kwargs['type']
 
         queryset = Product.objects.filter(category__is_gaming__icontains=True, status='PUBLISH').\
-                                            annotate(count=Count('product_review_product')).order_by('-count')
+            annotate(count=Count('product_review_product')).order_by('-count')
 
         if id and type:
             if type == 'category':
@@ -336,9 +350,8 @@ class GamingProductListByCategoryPopularProductsAPI(ListAPIView):
                 queryset = queryset.filter(Q(sub_sub_category=id))
 
         else:
-            queryset = Product.objects.filter(category__is_gaming__icontains=True, status='PUBLISH').annotate(count=Count('product_review_product')).order_by('-count')
-
-
+            queryset = Product.objects.filter(category__is_gaming__icontains=True, status='PUBLISH').annotate(
+                count=Count('product_review_product')).order_by('-count')
 
         return queryset
 
@@ -361,7 +374,8 @@ class ProductListByCategoryPopularProductsAPI(ListAPIView):
         id = self.kwargs['id']
         type = self.kwargs['type']
 
-        queryset = Product.objects.filter(status='PUBLISH').annotate(count=Count('product_review_product')).order_by('-count')
+        queryset = Product.objects.filter(status='PUBLISH').annotate(
+            count=Count('product_review_product')).order_by('-count')
 
         if id and type:
             if type == 'category':
@@ -374,9 +388,8 @@ class ProductListByCategoryPopularProductsAPI(ListAPIView):
                 queryset = queryset.filter(Q(sub_sub_category=id))
 
         else:
-            queryset = Product.objects.filter(status='PUBLISH').annotate(count=Count('product_review_product')).order_by('-count')
-
-
+            queryset = Product.objects.filter(status='PUBLISH').annotate(
+                count=Count('product_review_product')).order_by('-count')
 
         return queryset
 
@@ -391,11 +404,14 @@ class FilterAttributesAPI(ListAPIView):
 
         if id and type:
             if type == 'category':
-                queryset = FilterAttributes.objects.filter(Q(category__id=id) & Q(is_active=True)).order_by('-created_at')
+                queryset = FilterAttributes.objects.filter(
+                    Q(category__id=id) & Q(is_active=True)).order_by('-created_at')
             if type == 'sub_category':
-                queryset = FilterAttributes.objects.filter(Q(sub_category__id=id) & Q(is_active=True)).order_by('-created_at')
+                queryset = FilterAttributes.objects.filter(
+                    Q(sub_category__id=id) & Q(is_active=True)).order_by('-created_at')
             if type == 'sub_sub_category':
-                queryset = FilterAttributes.objects.filter(Q(sub_sub_category__id=id) & Q(is_active=True)).order_by('-created_at')
+                queryset = FilterAttributes.objects.filter(
+                    Q(sub_sub_category__id=id) & Q(is_active=True)).order_by('-created_at')
 
         if queryset:
             return queryset
@@ -417,7 +433,6 @@ class ProductListBySubCategoryAPI(ListAPIView):
         except:
             pagination = 10
         self.pagination_class.page_size = pagination
-
 
         subcid = self.kwargs['subcid']
         if subcid:
@@ -442,7 +457,8 @@ class ProductListBySubCategoryAPI(ListAPIView):
 
             min_price = price_list[0]
             max_price = price_list[1]
-            queryset = queryset.filter(price__range=(min_price, max_price)).order_by('-created_at')
+            queryset = queryset.filter(price__range=(
+                min_price, max_price)).order_by('-created_at')
 
         new_attr_value_ids = []
         if attr_value_ids:
@@ -452,7 +468,8 @@ class ProductListBySubCategoryAPI(ListAPIView):
                 new_attr_value_ids.append(attr_value_id)
 
         if new_attr_value_ids:
-            queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id__in = new_attr_value_ids)).order_by('-id').distinct("id")
+            queryset = queryset.filter(
+                Q(product_filter_attributes_product__attribute_value__id__in=new_attr_value_ids)).order_by('-id').distinct("id")
 
         if price_low_to_high:
             queryset = queryset.order_by('price').distinct('price')
@@ -478,7 +495,6 @@ class ProductListBySubSubCategoryAPI(ListAPIView):
             pagination = 10
         self.pagination_class.page_size = pagination
 
-
         subsubcid = self.kwargs['subsubcid']
         if subsubcid:
             queryset = Product.objects.filter(
@@ -502,7 +518,8 @@ class ProductListBySubSubCategoryAPI(ListAPIView):
 
             min_price = price_list[0]
             max_price = price_list[1]
-            queryset = queryset.filter(price__range=(min_price, max_price)).order_by('-created_at')
+            queryset = queryset.filter(price__range=(
+                min_price, max_price)).order_by('-created_at')
 
         new_attr_value_ids = []
         if attr_value_ids:
@@ -512,7 +529,8 @@ class ProductListBySubSubCategoryAPI(ListAPIView):
                 new_attr_value_ids.append(attr_value_id)
 
         if new_attr_value_ids:
-            queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id__in = new_attr_value_ids)).order_by('-id').distinct("id")
+            queryset = queryset.filter(
+                Q(product_filter_attributes_product__attribute_value__id__in=new_attr_value_ids)).order_by('-id').distinct("id")
 
         if price_low_to_high:
             queryset = queryset.order_by('price').distinct('price')
@@ -595,15 +613,19 @@ class PcBuilderChooseAPIView(ListAPIView):
         price_low_to_high = request.GET.get('price_low_to_high')
         price_high_to_low = request.GET.get('price_high_to_low')
 
-        queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
+        queryset = Product.objects.filter(
+            status='PUBLISH').order_by('-created_at')
 
         if component_id and type:
             if type == 'category':
-                queryset = queryset.filter(Q(category__id=component_id)).order_by('-created_at')
+                queryset = queryset.filter(
+                    Q(category__id=component_id)).order_by('-created_at')
             if type == 'sub_category':
-                queryset = queryset.filter(Q(sub_category__id=component_id)).order_by('-created_at')
+                queryset = queryset.filter(
+                    Q(sub_category__id=component_id)).order_by('-created_at')
             if type == 'sub_sub_category':
-                queryset = queryset.filter(Q(sub_sub_category__id=component_id)).order_by('-created_at')
+                queryset = queryset.filter(
+                    Q(sub_sub_category__id=component_id)).order_by('-created_at')
 
         if filter_price:
             price_list = []
@@ -613,7 +635,8 @@ class PcBuilderChooseAPIView(ListAPIView):
 
             min_price = price_list[0]
             max_price = price_list[1]
-            queryset = queryset.filter(price__range=(min_price, max_price)).order_by('-created_at')
+            queryset = queryset.filter(price__range=(
+                min_price, max_price)).order_by('-created_at')
 
         new_attr_value_ids = []
         if attr_value_ids:
@@ -637,7 +660,8 @@ class PcBuilderChooseAPIView(ListAPIView):
         if active_offers:
             queryset = queryset.annotate(
                 discount_price=Case(
-                    When(id__in=active_offers, then=F('price') - F('discount_amount')),
+                    When(id__in=active_offers, then=F(
+                        'price') - F('discount_amount')),
                     default=F('price'),
                     output_field=DecimalField(max_digits=10, decimal_places=2)
                 )
@@ -711,20 +735,26 @@ class PcBuilderCategoryAPIView(APIView):
 
     def get(self, request):
         data_list = []
-        category_queryset = Category.objects.filter(is_active=True, pc_builder=True).order_by('id')
-        category_serializer = PcBuilderCategoryListSerializer(category_queryset, many=True, context={"request": request})
+        category_queryset = Category.objects.filter(
+            is_active=True, pc_builder=True).order_by('id')
+        category_serializer = PcBuilderCategoryListSerializer(
+            category_queryset, many=True, context={"request": request})
 
         for cat_data_l in category_serializer.data:
             data_list.append(cat_data_l)
 
-        sub_category_queryset = SubCategory.objects.filter(is_active=True, pc_builder=True).order_by('id')
-        sub_category_serializer = PcBuilderSubCategoryListSerializer(sub_category_queryset, many=True, context={"request": request})
+        sub_category_queryset = SubCategory.objects.filter(
+            is_active=True, pc_builder=True).order_by('id')
+        sub_category_serializer = PcBuilderSubCategoryListSerializer(
+            sub_category_queryset, many=True, context={"request": request})
 
         for sub_cat_data_l in sub_category_serializer.data:
             data_list.append(sub_cat_data_l)
 
-        sub_sub_category_queryset = SubSubCategory.objects.filter(is_active=True, pc_builder=True).order_by('id')
-        sub_sub_category_serializer = PcBuilderSubSubCategoryListSerializer(sub_sub_category_queryset, many=True, context={"request": request})
+        sub_sub_category_queryset = SubSubCategory.objects.filter(
+            is_active=True, pc_builder=True).order_by('id')
+        sub_sub_category_serializer = PcBuilderSubSubCategoryListSerializer(
+            sub_sub_category_queryset, many=True, context={"request": request})
 
         for sub_sub_cat_data_l in sub_sub_category_serializer.data:
             data_list.append(sub_sub_cat_data_l)
@@ -756,9 +786,9 @@ class OnlyTitleAPIView(APIView):
                     title = SubSubCategory.objects.get(id=id).title
                 else:
                     title = ''
-            return Response({"id": id, "title": title, "type": type }, status=status.HTTP_200_OK)
+            return Response({"id": id, "title": title, "type": type}, status=status.HTTP_200_OK)
         else:
-            raise ValidationError({"msg":'id or type missing!'})
+            raise ValidationError({"msg": 'id or type missing!'})
 
 
 class BrandListAPIView(ListAPIView):
@@ -787,7 +817,7 @@ class BrandListAPIView(ListAPIView):
         if queryset:
             return queryset
         else:
-            raise ValidationError({"msg": "No brand available! " })
+            raise ValidationError({"msg": "No brand available! "})
 
 
 class ProductListByBrandAPI(ListAPIView):
@@ -805,12 +835,13 @@ class ProductListByBrandAPI(ListAPIView):
             pagination = 10
         self.pagination_class.page_size = pagination
 
-
         bid = self.kwargs['bid']
         if bid:
-            queryset = Product.objects.filter(brand=bid, status='PUBLISH').order_by('-created_at')
+            queryset = Product.objects.filter(
+                brand=bid, status='PUBLISH').order_by('-created_at')
         else:
-            queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
+            queryset = Product.objects.filter(
+                status='PUBLISH').order_by('-created_at')
 
         # filtering start
         request = self.request
@@ -838,7 +869,7 @@ class ProductListByBrandAPI(ListAPIView):
         if queryset:
             return queryset
         else:
-            raise ValidationError({"msg": "No products available! " })
+            raise ValidationError({"msg": "No products available! "})
 
 
 class OffersListAPIView(ListAPIView):
@@ -847,11 +878,12 @@ class OffersListAPIView(ListAPIView):
 
     def get_queryset(self):
         today_date = datetime.today()
-        queryset = Offer.objects.filter(end_date__gte = today_date, is_active=True).order_by('-created_at')
+        queryset = Offer.objects.filter(
+            end_date__gte=today_date, is_active=True).order_by('-created_at')
         if queryset:
             return queryset
         else:
-            raise ValidationError({"msg": "No offers available! " })
+            raise ValidationError({"msg": "No offers available! "})
 
 
 class OfferDetailsAPIView(RetrieveAPIView):
@@ -884,7 +916,6 @@ class OfferProductsListAPIView(ListAPIView):
             pagination = 10
         self.pagination_class.page_size = pagination
 
-
         id = self.kwargs['id']
 
         products = []
@@ -894,10 +925,11 @@ class OfferProductsListAPIView(ListAPIView):
             products.append(offer_product.product.id)
 
         if products:
-            queryset = Product.objects.filter(id__in=products, status='PUBLISH').order_by('-created_at')
+            queryset = Product.objects.filter(
+                id__in=products, status='PUBLISH').order_by('-created_at')
         else:
-            queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
-
+            queryset = Product.objects.filter(
+                status='PUBLISH').order_by('-created_at')
 
         # filtering start
         request = self.request
@@ -914,8 +946,8 @@ class OfferProductsListAPIView(ListAPIView):
 
             min_price = price_list[0]
             max_price = price_list[1]
-            queryset = queryset.filter(price__range=(min_price, max_price)).order_by('-created_at')
-
+            queryset = queryset.filter(price__range=(
+                min_price, max_price)).order_by('-created_at')
 
         new_attr_value_ids = []
         if attr_value_ids:
@@ -925,7 +957,8 @@ class OfferProductsListAPIView(ListAPIView):
                 new_attr_value_ids.append(attr_value_id)
 
         if new_attr_value_ids:
-            queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id__in = new_attr_value_ids)).order_by('-id').distinct("id")
+            queryset = queryset.filter(
+                Q(product_filter_attributes_product__attribute_value__id__in=new_attr_value_ids)).order_by('-id').distinct("id")
 
         if price_low_to_high:
             queryset = queryset.order_by('price')
@@ -955,8 +988,10 @@ class ProductListForProductCompareAPIView(ListAPIView):
                 new_product_ids.append(product_id)
 
         if new_product_ids:
-            queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
-            queryset = queryset.filter(Q(id__in = new_product_ids)).order_by('-created_at')
+            queryset = Product.objects.filter(
+                status='PUBLISH').order_by('-created_at')
+            queryset = queryset.filter(
+                Q(id__in=new_product_ids)).order_by('-created_at')
         else:
             queryset = []
 

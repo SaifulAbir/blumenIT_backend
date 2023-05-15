@@ -194,77 +194,6 @@ class ProductListByCategoryAPI(ListAPIView):
     lookup_field = 'cid'
     lookup_url_kwarg = "cid"
 
-    # def get_queryset(self):
-    #     # work with dynamic pagination page_size
-    #     try:
-    #         pagination = self.kwargs['pagination']
-    #     except:
-    #         pagination = 10
-    #     self.pagination_class.page_size = pagination
-    #
-    #     cid = self.kwargs['cid']
-    #     if cid:
-    #         queryset = Product.objects.filter(category=cid, status='PUBLISH').order_by('-created_at')
-    #     else:
-    #         queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
-    #
-    #     # filtering start
-    #     request = self.request
-    #     filter_price = request.GET.get('filter_price')
-    #     attr_value_ids = request.GET.get('attr_value_ids')
-    #     price_low_to_high = request.GET.get('price_low_to_high')
-    #     price_high_to_low = request.GET.get('price_high_to_low')
-    #
-    #     if filter_price:
-    #         price_list = []
-    #         filter_prices = filter_price.split("-")
-    #         for filter_price in filter_prices:
-    #             price_list.append(int(filter_price))
-    #
-    #         min_price = price_list[0]
-    #         max_price = price_list[1]
-    #         queryset = queryset.filter(price__range=(min_price, max_price)).order_by('-created_at')
-    #
-    #     new_attr_value_ids = []
-    #     if attr_value_ids:
-    #         attr_value_ids_list = attr_value_ids.split(",")
-    #         for attr_value_id in attr_value_ids_list:
-    #             attr_value_id = int(attr_value_id)
-    #             new_attr_value_ids.append(attr_value_id)
-    #
-    #     if new_attr_value_ids:
-    #         queryset = queryset.filter(
-    #             Q(product_filter_attributes_product__attribute_value__id__in=new_attr_value_ids)).order_by(
-    #             '-id').distinct("id")
-    #
-    #     if price_low_to_high:
-    #         queryset = queryset.annotate(discount_price=Case(
-    #             When(discount_type='percentage', then=F('price') * (1 - (F('discount_amount') / 100))),
-    #             When(discount_type='fixed', then=F('price') - F('discount_amount')),
-    #             default=F('price'),
-    #             output_field=DecimalField(max_digits=10, decimal_places=2))
-    #         ).order_by('price_after_offer_discount').distinct('discount_price')
-    #
-    #     if price_high_to_low:
-    #         queryset = queryset.annotate(discount_price=Case(
-    #             When(discount_type='percentage', then=F('price') * (1 - (F('discount_amount') / 100))),
-    #             When(discount_type='fixed', then=F('price') - F('discount_amount')),
-    #             default=F('price'),
-    #             output_field=DecimalField(max_digits=10, decimal_places=2))
-    #         ).order_by('-price_after_offer_discount').distinct('-discount_price')
-    #
-    #     # filtering based on active offers
-    #     today = timezone.now()
-    #     active_offers = OfferProduct.objects.filter(
-    #         offer__is_active=True,
-    #         offer__start_date__lte=today,
-    #         offer__end_date__gte=today,
-    #         offer__product_category__id=cid).values_list('offer_id', flat=True)
-    #
-    #     queryset = queryset.filter(Q(id__in=active_offers) | Q(id__in=queryset)).distinct()
-    #
-    #     return queryset
-
     def get_queryset(self):
         # work with dynamic pagination page_size
         try:
@@ -311,10 +240,22 @@ class ProductListByCategoryAPI(ListAPIView):
                 Q(product_filter_attributes_product__attribute_value__id__in=new_attr_value_ids)).order_by('-id').distinct("id")
 
         if price_low_to_high:
-            queryset = queryset.order_by('price').distinct('price')
+            # queryset = queryset.order_by('price').distinct('price')
+            today_date = timezone.now().date()
+            queryset = queryset.annotate(d_price=ExpressionWrapper((
+                F('price') - Subquery(
+                    Offer.objects.filter(offer_product_offer__product=OuterRef(
+                        'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
+                )), output_field=DecimalField())).order_by('d_price')
 
         if price_high_to_low:
-            queryset = queryset.order_by('-price').distinct('-price')
+            # queryset = queryset.order_by('-price').distinct('-price')
+            today_date = timezone.now().date()
+            queryset = queryset.annotate(d_price=ExpressionWrapper((
+                F('price') - Subquery(
+                    Offer.objects.filter(offer_product_offer__product=OuterRef(
+                        'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
+                )), output_field=DecimalField())).order_by('-d_price')
 
         return queryset
 
@@ -472,10 +413,22 @@ class ProductListBySubCategoryAPI(ListAPIView):
                 Q(product_filter_attributes_product__attribute_value__id__in=new_attr_value_ids)).order_by('-id').distinct("id")
 
         if price_low_to_high:
-            queryset = queryset.order_by('price').distinct('price')
+            # queryset = queryset.order_by('price').distinct('price')
+            today_date = timezone.now().date()
+            queryset = queryset.annotate(d_price=ExpressionWrapper((
+                F('price') - Subquery(
+                    Offer.objects.filter(offer_product_offer__product=OuterRef(
+                        'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
+                )), output_field=DecimalField())).order_by('d_price')
 
         if price_high_to_low:
-            queryset = queryset.order_by('-price').distinct('-price')
+            # queryset = queryset.order_by('-price').distinct('-price')
+            today_date = timezone.now().date()
+            queryset = queryset.annotate(d_price=ExpressionWrapper((
+                F('price') - Subquery(
+                    Offer.objects.filter(offer_product_offer__product=OuterRef(
+                        'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
+                )), output_field=DecimalField())).order_by('-d_price')
 
         return queryset
 
@@ -533,10 +486,22 @@ class ProductListBySubSubCategoryAPI(ListAPIView):
                 Q(product_filter_attributes_product__attribute_value__id__in=new_attr_value_ids)).order_by('-id').distinct("id")
 
         if price_low_to_high:
-            queryset = queryset.order_by('price').distinct('price')
+            # queryset = queryset.order_by('price').distinct('price')
+            today_date = timezone.now().date()
+            queryset = queryset.annotate(d_price=ExpressionWrapper((
+                F('price') - Subquery(
+                    Offer.objects.filter(offer_product_offer__product=OuterRef(
+                        'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
+                )), output_field=DecimalField())).order_by('d_price')
 
         if price_high_to_low:
-            queryset = queryset.order_by('-price').distinct('-price')
+            # queryset = queryset.order_by('-price').distinct('-price')
+            today_date = timezone.now().date()
+            queryset = queryset.annotate(d_price=ExpressionWrapper((
+                F('price') - Subquery(
+                    Offer.objects.filter(offer_product_offer__product=OuterRef(
+                        'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
+                )), output_field=DecimalField())).order_by('-d_price')
 
         return queryset
 
@@ -668,66 +633,40 @@ class PcBuilderChooseAPIView(ListAPIView):
             )
 
             if price_low_to_high:
-                queryset = queryset.order_by('discount_price').distinct()
+                # queryset = queryset.order_by('discount_price').distinct()
+                today_date = timezone.now().date()
+                queryset = queryset.annotate(d_price=ExpressionWrapper((
+                    F('price') - Subquery(
+                        Offer.objects.filter(offer_product_offer__product=OuterRef(
+                            'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
+                    )), output_field=DecimalField())).order_by('d_price')
             elif price_high_to_low:
-                queryset = queryset.order_by('-discount_price').distinct()
+                # queryset = queryset.order_by('-discount_price').distinct()
+                today_date = timezone.now().date()
+                queryset = queryset.annotate(d_price=ExpressionWrapper((
+                    F('price') - Subquery(
+                        Offer.objects.filter(offer_product_offer__product=OuterRef(
+                            'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
+                    )), output_field=DecimalField())).order_by('-d_price')
         else:
             if price_low_to_high:
-                queryset = queryset.order_by('price').distinct()
+                # queryset = queryset.order_by('price').distinct()
+                today_date = timezone.now().date()
+                queryset = queryset.annotate(d_price=ExpressionWrapper((
+                    F('price') - Subquery(
+                        Offer.objects.filter(offer_product_offer__product=OuterRef(
+                            'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
+                    )), output_field=DecimalField())).order_by('d_price')
             elif price_high_to_low:
-                queryset = queryset.order_by('-price').distinct()
+                # queryset = queryset.order_by('-price').distinct()
+                today_date = timezone.now().date()
+                queryset = queryset.annotate(d_price=ExpressionWrapper((
+                    F('price') - Subquery(
+                        Offer.objects.filter(offer_product_offer__product=OuterRef(
+                            'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
+                    )), output_field=DecimalField())).order_by('-d_price')
 
         return queryset
-
-    # def get_queryset(self):
-    #     request = self.request
-    #     component_id = request.GET.get('component_id')
-    #     type = request.GET.get('type')
-    #     filter_price = request.GET.get('filter_price')
-    #     attr_value_ids = request.GET.get('attr_value_ids')
-    #     price_low_to_high = request.GET.get('price_low_to_high')
-    #     price_high_to_low = request.GET.get('price_high_to_low')
-    #
-    #     queryset = Product.objects.filter(
-    #         status='PUBLISH').order_by('-created_at')
-    #
-    #     if component_id and type:
-    #         if type == 'category':
-    #             queryset = queryset.filter(Q(category__id=component_id)).order_by('-created_at')
-    #         if type == 'sub_category':
-    #             queryset = queryset.filter(Q(sub_category__id=component_id)).order_by('-created_at')
-    #         if type == 'sub_sub_category':
-    #             queryset = queryset.filter(Q(sub_sub_category__id=component_id)).order_by('-created_at')
-    #
-    #     if filter_price:
-    #         price_list = []
-    #         filter_prices = filter_price.split("-")
-    #         for filter_price in filter_prices:
-    #             price_list.append(int(filter_price))
-    #
-    #         min_price = price_list[0]
-    #         max_price = price_list[1]
-    #         queryset = queryset.filter(price__range=(min_price, max_price)).order_by('-created_at')
-    #
-    #
-    #     new_attr_value_ids = []
-    #     if attr_value_ids:
-    #         attr_value_ids_list = attr_value_ids.split(",")
-    #         for attr_value_id in attr_value_ids_list:
-    #             attr_value_id = int(attr_value_id)
-    #             new_attr_value_ids.append(attr_value_id)
-    #
-    #     if new_attr_value_ids:
-    #         queryset = queryset.filter(Q(product_filter_attributes_product__attribute_value__id__in = new_attr_value_ids)).order_by('-id').distinct("id")
-    #
-    #
-    #     if price_low_to_high:
-    #         queryset = queryset.order_by('price').distinct()
-    #     if price_high_to_low:
-    #         queryset = queryset.order_by('-price').distinct()
-    #
-    #
-    #     return queryset
 
 
 class PcBuilderCategoryAPIView(APIView):
@@ -858,10 +797,22 @@ class ProductListByBrandAPI(ListAPIView):
             queryset = queryset.order_by('-created_at')
 
         if price_high_to_low:
-            queryset = queryset.order_by('-price')
+            # queryset = queryset.order_by('-price')
+            today_date = timezone.now().date()
+            queryset = queryset.annotate(d_price=ExpressionWrapper((
+                F('price') - Subquery(
+                    Offer.objects.filter(offer_product_offer__product=OuterRef(
+                        'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
+                )), output_field=DecimalField())).order_by('-d_price')
 
         if price_low_to_high:
-            queryset = queryset.order_by('price')
+            # queryset = queryset.order_by('price')
+            today_date = timezone.now().date()
+            queryset = queryset.annotate(d_price=ExpressionWrapper((
+                F('price') - Subquery(
+                    Offer.objects.filter(offer_product_offer__product=OuterRef(
+                        'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
+                )), output_field=DecimalField())).order_by('d_price')
 
         if name:
             queryset = queryset.order_by('title')
@@ -961,10 +912,21 @@ class OfferProductsListAPIView(ListAPIView):
                 Q(product_filter_attributes_product__attribute_value__id__in=new_attr_value_ids)).order_by('-id').distinct("id")
 
         if price_low_to_high:
-            queryset = queryset.order_by('price')
-
+            # queryset = queryset.order_by('price')
+            today_date = timezone.now().date()
+            queryset = queryset.annotate(d_price=ExpressionWrapper((
+                F('price') - Subquery(
+                    Offer.objects.filter(offer_product_offer__product=OuterRef(
+                        'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
+                )), output_field=DecimalField())).order_by('d_price')
         if price_high_to_low:
-            queryset = queryset.order_by('-price')
+            # queryset = queryset.order_by('-price')
+            today_date = timezone.now().date()
+            queryset = queryset.annotate(d_price=ExpressionWrapper((
+                F('price') - Subquery(
+                    Offer.objects.filter(offer_product_offer__product=OuterRef(
+                        'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
+                )), output_field=DecimalField())).order_by('-d_price')
 
         return queryset
 

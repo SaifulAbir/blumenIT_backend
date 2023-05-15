@@ -1363,7 +1363,7 @@ class AdminOrderUpdateAPI(RetrieveUpdateAPIView):
                 if order_status:
                     order_obj.update(order_status=order_status)
                     # update inventory
-                    if order_status == 'RETURN':
+                    if order_status == 'RETURN' or order_status == 'CANCEL':
                         order_obj_get = Order.objects.get(id=order_id)
                         order_items_obj_exist = OrderItem.objects.filter(
                             order=order_obj_get.id).exists()
@@ -1915,7 +1915,7 @@ class AdminShippingCityListByStateAPIView(ListAPIView):
         id = self.kwargs['id']
         if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             queryset = ShippingCity.objects.filter(shipping_state=id,
-                is_active=True).order_by('-created_at')
+                                                   is_active=True).order_by('-created_at')
             if queryset:
                 return queryset
             else:

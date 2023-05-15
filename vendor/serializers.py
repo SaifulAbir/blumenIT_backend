@@ -1213,40 +1213,23 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
         # offers
         try:
             if offers:
-                offer_ids = [offer['offer'].id for offer in offers]
-                OfferProduct.objects.filter(Q(product=instance), ~Q(
-                    offer__in=offer_ids)).update(is_active=False)
                 for offer in offers:
                     offer = offer['offer']
                     offer_product_exist = OfferProduct.objects.filter(
-                        product=instance, offer=offer).exists()
+                        product=instance).exists()
+                    if offer_product_exist == True:
+                        OfferProduct.objects.filter(
+                            product=instance).delete()
                     if not offer_product_exist:
                         OfferProduct.objects.create(
                             product=instance, offer=offer)
-                    else:
-                        OfferProduct.objects.filter(
-                            product=instance, offer=offer).update(is_active=True)
-
+            else:
+                offer_product_exist = OfferProduct.objects.filter(
+                    product=instance).exists()
+                if offer_product_exist == True:
+                    OfferProduct.objects.filter(product=instance).delete()
         except:
             raise ValidationError('Problem of Product Offer product update.')
-
-        # if offers:
-        #     offer_ids = [offer['offer'].id for offer in offers]
-        #     # OfferProduct.objects.filter(Q(product=instance), ~Q(
-        #     #     offer__in=offer_ids)).update(is_active=False)
-        #     o_p = OfferProduct.objects.filter(offer=instance).exists()
-        #     if o_p == True:
-        #         OfferProduct.objects.filter(offer=instance).delete()
-        #         for offer in offers:
-        #             offer = offer['offer']
-        #             offer_product_exist = OfferProduct.objects.filter(
-        #                 product=instance, offer=offer).exists()
-        #             if not offer_product_exist:
-        #                 OfferProduct.objects.create(
-        #                     product=instance, offer=offer)
-        #             else:
-        #                 OfferProduct.objects.filter(
-        #                     product=instance, offer=offer).update(is_active=True)
 
         # try:
         #     # offer_products

@@ -1230,6 +1230,46 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
         except:
             raise ValidationError('Problem of Product Offer product update.')
 
+        # if offers:
+        #     offer_ids = [offer['offer'].id for offer in offers]
+        #     # OfferProduct.objects.filter(Q(product=instance), ~Q(
+        #     #     offer__in=offer_ids)).update(is_active=False)
+        #     o_p = OfferProduct.objects.filter(offer=instance).exists()
+        #     if o_p == True:
+        #         OfferProduct.objects.filter(offer=instance).delete()
+        #         for offer in offers:
+        #             offer = offer['offer']
+        #             offer_product_exist = OfferProduct.objects.filter(
+        #                 product=instance, offer=offer).exists()
+        #             if not offer_product_exist:
+        #                 OfferProduct.objects.create(
+        #                     product=instance, offer=offer)
+        #             else:
+        #                 OfferProduct.objects.filter(
+        #                     product=instance, offer=offer).update(is_active=True)
+
+        # try:
+        #     # offer_products
+        #     if offer_products:
+        #         o_p = OfferProduct.objects.filter(offer=instance).exists()
+        #         if o_p == True:
+        #             OfferProduct.objects.filter(offer=instance).delete()
+
+        #         for offer_product in offer_products:
+        #             product = offer_product['product']
+        #             OfferProduct.objects.create(
+        #                 offer=instance, product=product)
+        #     else:
+        #         o_p = OfferProduct.objects.filter(offer=instance).exists()
+        #         if o_p == True:
+        #             OfferProduct.objects.filter(offer=instance).delete()
+
+        #     validated_data.update({"updated_at": timezone.now()})
+        #     return super().update(instance, validated_data)
+        # except:
+        #     validated_data.update({"updated_at": timezone.now()})
+        #     return super().update(instance, validated_data)
+
         # product_filter_attributes
         try:
             if product_filter_attributes:

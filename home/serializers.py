@@ -67,6 +67,7 @@ class SingleRowDataSerializer(serializers.ModelSerializer):
             'id',
             'phone',
             'whats_app_number',
+            'shop_address',
             'email',
             'bottom_banner',
             'is_active',

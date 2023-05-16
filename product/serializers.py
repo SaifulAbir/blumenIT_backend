@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from product.models import Category, ProductImages, SubCategory, SubSubCategory, Product, ProductTags, ProductReview, \
     Brand, DiscountTypes, Tags, Units, Specification, SpecificationValue, AttributeValues, Seller, FilterAttributes, \
-    ProductWarranty, Offer, ProductReviewReply
+    ProductWarranty, Offer, ProductReviewReply, ProductFilterAttributes
 
 from user.models import User
 from vendor.models import StoreSettings
@@ -528,6 +528,8 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
         'get_offer_discount_price')
     offer_discount_price_type = serializers.SerializerMethodField(
         'get_offer_discount_price_type')
+    availibility_upcoming_status = serializers.SerializerMethodField(
+        'get_availibility_upcoming_status')
 
     class Meta:
         model = Product
@@ -574,7 +576,18 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             'offer_discount_id',
             'offer_discount_price',
             'offer_discount_price_type',
+            'availibility_upcoming_status'
         ]
+
+    def get_availibility_upcoming_status(self, obj):
+        status = False
+        query = ProductFilterAttributes.objects.filter(
+            product=obj.id, attribute_value__value__contains='Up Coming')
+        if query:
+            status = True
+        else:
+            status = False
+        return status
 
     def get_offer_discount_id(self, obj):
         today_date = timezone.now().date()

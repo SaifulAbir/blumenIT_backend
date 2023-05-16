@@ -1,5 +1,6 @@
 from datetime import datetime
 from django.db.models import Q, Count, F, FloatField, ExpressionWrapper, Prefetch, Subquery, OuterRef, DecimalField
+from django.db.models.functions import Coalesce
 from ecommerce.settings import MEDIA_URL
 from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView
 from rest_framework.views import APIView
@@ -243,19 +244,19 @@ class ProductListByCategoryAPI(ListAPIView):
             # queryset = queryset.order_by('price').distinct('price')
             today_date = timezone.now().date()
             queryset = queryset.annotate(d_price=ExpressionWrapper((
-                F('price') - Subquery(
-                    Offer.objects.filter(offer_product_offer__product=OuterRef(
-                        'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
-                )), output_field=DecimalField())).order_by('d_price')
+                    F('price') - Coalesce(Subquery(
+                        Offer.objects.filter(offer_product_offer__product=OuterRef(
+                            'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
+                    ), 0)), output_field=DecimalField())).order_by('d_price')
 
         if price_high_to_low:
             # queryset = queryset.order_by('-price').distinct('-price')
             today_date = timezone.now().date()
             queryset = queryset.annotate(d_price=ExpressionWrapper((
-                F('price') - Subquery(
-                    Offer.objects.filter(offer_product_offer__product=OuterRef(
-                        'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
-                )), output_field=DecimalField())).order_by('-d_price')
+                    F('price') - Coalesce(Subquery(
+                        Offer.objects.filter(offer_product_offer__product=OuterRef(
+                            'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
+                    ), 0)), output_field=DecimalField())).order_by('-d_price')
 
         return queryset
 
@@ -416,19 +417,19 @@ class ProductListBySubCategoryAPI(ListAPIView):
             # queryset = queryset.order_by('price').distinct('price')
             today_date = timezone.now().date()
             queryset = queryset.annotate(d_price=ExpressionWrapper((
-                F('price') - Subquery(
-                    Offer.objects.filter(offer_product_offer__product=OuterRef(
-                        'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
-                )), output_field=DecimalField())).order_by('d_price')
+                    F('price') - Coalesce(Subquery(
+                        Offer.objects.filter(offer_product_offer__product=OuterRef(
+                            'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
+                    ), 0)), output_field=DecimalField())).order_by('d_price')
 
         if price_high_to_low:
             # queryset = queryset.order_by('-price').distinct('-price')
             today_date = timezone.now().date()
             queryset = queryset.annotate(d_price=ExpressionWrapper((
-                F('price') - Subquery(
-                    Offer.objects.filter(offer_product_offer__product=OuterRef(
-                        'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
-                )), output_field=DecimalField())).order_by('-d_price')
+                    F('price') - Coalesce(Subquery(
+                        Offer.objects.filter(offer_product_offer__product=OuterRef(
+                            'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
+                    ), 0)), output_field=DecimalField())).order_by('-d_price')
 
         return queryset
 
@@ -489,19 +490,19 @@ class ProductListBySubSubCategoryAPI(ListAPIView):
             # queryset = queryset.order_by('price').distinct('price')
             today_date = timezone.now().date()
             queryset = queryset.annotate(d_price=ExpressionWrapper((
-                F('price') - Subquery(
-                    Offer.objects.filter(offer_product_offer__product=OuterRef(
-                        'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
-                )), output_field=DecimalField())).order_by('d_price')
+                    F('price') - Coalesce(Subquery(
+                        Offer.objects.filter(offer_product_offer__product=OuterRef(
+                            'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
+                    ), 0)), output_field=DecimalField())).order_by('d_price')
 
         if price_high_to_low:
             # queryset = queryset.order_by('-price').distinct('-price')
             today_date = timezone.now().date()
             queryset = queryset.annotate(d_price=ExpressionWrapper((
-                F('price') - Subquery(
-                    Offer.objects.filter(offer_product_offer__product=OuterRef(
-                        'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
-                )), output_field=DecimalField())).order_by('-d_price')
+                    F('price') - Coalesce(Subquery(
+                        Offer.objects.filter(offer_product_offer__product=OuterRef(
+                            'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
+                    ), 0)), output_field=DecimalField())).order_by('-d_price')
 
         return queryset
 
@@ -636,35 +637,36 @@ class PcBuilderChooseAPIView(ListAPIView):
                 # queryset = queryset.order_by('discount_price').distinct()
                 today_date = timezone.now().date()
                 queryset = queryset.annotate(d_price=ExpressionWrapper((
-                    F('price') - Subquery(
+                    F('price') - Coalesce(Subquery(
                         Offer.objects.filter(offer_product_offer__product=OuterRef(
                             'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
-                    )), output_field=DecimalField())).order_by('d_price').distinct()
+                    ), 0)), output_field=DecimalField())).order_by('d_price').distinct()
             elif price_high_to_low:
                 # queryset = queryset.order_by('-discount_price').distinct()
                 today_date = timezone.now().date()
                 queryset = queryset.annotate(d_price=ExpressionWrapper((
-                    F('price') - Subquery(
+                    F('price') - Coalesce(Subquery(
                         Offer.objects.filter(offer_product_offer__product=OuterRef(
                             'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
-                    )), output_field=DecimalField())).order_by('-d_price').distinct()
+                    ), 0)), output_field=DecimalField())).order_by('-d_price').distinct()
+
         else:
             if price_low_to_high:
                 # queryset = queryset.order_by('price').distinct()
                 today_date = timezone.now().date()
                 queryset = queryset.annotate(d_price=ExpressionWrapper((
-                    F('price') - Subquery(
+                    F('price') - Coalesce(Subquery(
                         Offer.objects.filter(offer_product_offer__product=OuterRef(
                             'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
-                    )), output_field=DecimalField())).order_by('d_price').distinct()
+                    ), 0)), output_field=DecimalField())).order_by('d_price').distinct()
             elif price_high_to_low:
                 # queryset = queryset.order_by('-price').distinct()
                 today_date = timezone.now().date()
                 queryset = queryset.annotate(d_price=ExpressionWrapper((
-                    F('price') - Subquery(
+                    F('price') - Coalesce(Subquery(
                         Offer.objects.filter(offer_product_offer__product=OuterRef(
                             'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
-                    )), output_field=DecimalField())).order_by('-d_price').distinct()
+                    ), 0)), output_field=DecimalField())).order_by('-d_price').distinct()
 
         return queryset
 
@@ -800,19 +802,19 @@ class ProductListByBrandAPI(ListAPIView):
             # queryset = queryset.order_by('-price')
             today_date = timezone.now().date()
             queryset = queryset.annotate(d_price=ExpressionWrapper((
-                F('price') - Subquery(
-                    Offer.objects.filter(offer_product_offer__product=OuterRef(
-                        'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
-                )), output_field=DecimalField())).order_by('-d_price')
+                    F('price') - Coalesce(Subquery(
+                        Offer.objects.filter(offer_product_offer__product=OuterRef(
+                            'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
+                    ), 0)), output_field=DecimalField())).order_by('-d_price')
 
         if price_low_to_high:
             # queryset = queryset.order_by('price')
             today_date = timezone.now().date()
             queryset = queryset.annotate(d_price=ExpressionWrapper((
-                F('price') - Subquery(
-                    Offer.objects.filter(offer_product_offer__product=OuterRef(
-                        'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
-                )), output_field=DecimalField())).order_by('d_price')
+                    F('price') - Coalesce(Subquery(
+                        Offer.objects.filter(offer_product_offer__product=OuterRef(
+                            'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
+                    ), 0)), output_field=DecimalField())).order_by('d_price')
 
         if name:
             queryset = queryset.order_by('title')
@@ -915,18 +917,18 @@ class OfferProductsListAPIView(ListAPIView):
             # queryset = queryset.order_by('price')
             today_date = timezone.now().date()
             queryset = queryset.annotate(d_price=ExpressionWrapper((
-                F('price') - Subquery(
-                    Offer.objects.filter(offer_product_offer__product=OuterRef(
-                        'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
-                )), output_field=DecimalField())).order_by('d_price')
+                    F('price') - Coalesce(Subquery(
+                        Offer.objects.filter(offer_product_offer__product=OuterRef(
+                            'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
+                    ), 0)), output_field=DecimalField())).order_by('d_price')
         if price_high_to_low:
             # queryset = queryset.order_by('-price')
             today_date = timezone.now().date()
             queryset = queryset.annotate(d_price=ExpressionWrapper((
-                F('price') - Subquery(
-                    Offer.objects.filter(offer_product_offer__product=OuterRef(
-                        'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
-                )), output_field=DecimalField())).order_by('-d_price')
+                    F('price') - Coalesce(Subquery(
+                        Offer.objects.filter(offer_product_offer__product=OuterRef(
+                            'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
+                    ), 0)), output_field=DecimalField())).order_by('-d_price')
 
         return queryset
 

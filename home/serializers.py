@@ -5,28 +5,33 @@ from product.models import Category, SubCategory, SubSubCategory
 
 class product_catListSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField('get_type')
+
     class Meta:
         model = Category
         fields = [
-                'id',
-                'title',
-                'icon',
-                'banner',
-                'type'
-                ]
+            'id',
+            'title',
+            'icon',
+            'banner',
+            'type'
+        ]
+
     def get_type(self, obj):
         return 'cate'
 
+
 class product_sub_catListSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField('get_type')
+
     class Meta:
         model = SubCategory
         fields = [
-                'id',
-                'title',
-                'icon',
-                'type'
-                ]
+            'id',
+            'title',
+            'icon',
+            'type'
+        ]
+
     def get_type(self, obj):
         return 'sub'
 
@@ -35,69 +40,69 @@ class FaqSerializer(serializers.ModelSerializer):
     class Meta:
         model = FAQ
         fields = [
-                'id',
-                'question',
-                'answer',
-                'is_active',
-                ]
+            'id',
+            'question',
+            'answer',
+            'is_active',
+        ]
 
 
 class ContactUsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ContactUs
         fields = [
-                'id',
-                'name',
-                'email',
-                'phone',
-                'message',
-                'is_active',
-                ]
+            'id',
+            'name',
+            'email',
+            'phone',
+            'message',
+            'is_active',
+        ]
 
 
 class SingleRowDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = HomeSingleRowData
         fields = [
-                'id',
-                'phone',
-                'whats_app_number',
-                'email',
-                'bottom_banner',
-                'is_active',
-                'header_logo',
-                'footer_logo',
-                'footer_description',
-                'facebook',
-                'twitter',
-                'instagram',
-                'whatsapp',
-                'messenger',
-                'linkedin',
-                'youtube',
-                ]
+            'id',
+            'phone',
+            'whats_app_number',
+            'email',
+            'bottom_banner',
+            'is_active',
+            'header_logo',
+            'footer_logo',
+            'footer_description',
+            'facebook',
+            'twitter',
+            'instagram',
+            'whatsapp',
+            'messenger',
+            'linkedin',
+            'youtube',
+        ]
 
 
 class SliderAdvertisementDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = Advertisement
         fields = [
-                'id',
-                'image',
-                'is_active',
-                ]
+            'id',
+            'image',
+            'is_active',
+        ]
 
 
 class AdvertisementDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = Advertisement
         fields = [
-                'id',
-                'image',
-                'bold_text',
-                'small_text',
-                'is_active',
-                ]
+            'id',
+            'image',
+            'bold_text',
+            'small_text',
+            'is_active',
+        ]
 
 
 class GamingSubSubCategorySerializer(serializers.ModelSerializer):
@@ -108,6 +113,7 @@ class GamingSubSubCategorySerializer(serializers.ModelSerializer):
 
 class SubCategorySerializerForMegaMenu(serializers.ModelSerializer):
     sub_sub_category = serializers.SerializerMethodField()
+
     class Meta:
         model = SubCategory
         fields = [
@@ -131,8 +137,10 @@ class StoreCategoryAPIViewListSerializer(serializers.ModelSerializer):
 
     def get_sub_category(self, obj):
         try:
-            queryset = SubCategory.objects.filter(category=obj.id, is_active=True).distinct()
-            serializer = SubCategorySerializerForMegaMenu(instance=queryset, many=True)
+            queryset = SubCategory.objects.filter(
+                category=obj.id, is_active=True).distinct()
+            serializer = SubCategorySerializerForMegaMenu(
+                instance=queryset, many=True)
             return serializer.data
         except:
             return []
@@ -141,7 +149,8 @@ class StoreCategoryAPIViewListSerializer(serializers.ModelSerializer):
 class CorporateDealCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = CorporateDeal
-        fields = ['id', 'first_name', 'last_name', 'email', 'company_name', 'phone', 'region', 'details_text', 'attached_file']
+        fields = ['id', 'first_name', 'last_name', 'email', 'company_name',
+                  'phone', 'region', 'details_text', 'attached_file']
 
 
 class RequestQuoteSerializer(serializers.ModelSerializer):
@@ -157,3 +166,62 @@ class RequestQuoteSerializer(serializers.ModelSerializer):
             'services',
             'overview'
         ]
+
+
+class PagesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Pages
+        fields = [
+            'id',
+            'title',
+            'content',
+            'type',
+            'is_active',
+            'created_at'
+        ]
+
+
+class MediaDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MediaFiles
+        fields = [
+            'id',
+            'title',
+            'file',
+            'is_active',
+            'created_at'
+        ]
+
+
+class MediaSerializer(serializers.ModelSerializer):
+    files = serializers.ListField(
+        child=serializers.FileField(), write_only=True, required=False)
+
+    class Meta:
+        model = MediaChunk
+        fields = [
+            'id',
+            'title',
+            'files',
+            'is_active',
+            'created_at'
+        ]
+
+    def create(self, validated_data):
+
+        # files
+        try:
+            files = validated_data.pop('files')
+        except:
+            files = ''
+
+        media_chunk_instance = MediaChunk.objects.create(**validated_data)
+
+        # files
+        if files:
+            for file in files:
+                file_name = file.name.split('/')[-1]
+                MediaFiles.objects.create(
+                    chunk=media_chunk_instance, file=file, title=file_name, is_active=True)
+
+        return media_chunk_instance

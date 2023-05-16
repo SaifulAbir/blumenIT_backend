@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from product.models import Category, ProductImages, SubCategory, SubSubCategory, Product, ProductTags, ProductReview, \
     Brand, DiscountTypes, Tags, Units, Specification, SpecificationValue, AttributeValues, Seller, FilterAttributes, \
-    ProductWarranty, Offer
+    ProductWarranty, Offer, ProductReviewReply
 
 from user.models import User
 from vendor.models import StoreSettings
@@ -10,16 +10,20 @@ from rest_framework.exceptions import ValidationError
 from datetime import datetime
 from django.utils import timezone
 
+
 class SellerDataSerializer(serializers.ModelSerializer):
     logo = serializers.ImageField(allow_null=True)
 
     class Meta:
         model = Seller
-        fields = ['id', 'name', 'address', 'phone', 'email', 'logo', 'is_active']
+        fields = ['id', 'name', 'address',
+                  'phone', 'email', 'logo', 'is_active']
 
 
 class UserDataSerializer(serializers.ModelSerializer):
-    avatar = serializers.ImageField(source="user_customer_profile.avatar",read_only=True)
+    avatar = serializers.ImageField(
+        source="user_customer_profile.avatar", read_only=True)
+
     class Meta:
         model = User
         fields = [
@@ -53,6 +57,7 @@ class SubCategorySerializer(serializers.ModelSerializer):
 
 class SubCategorySerializerForMegaMenu(serializers.ModelSerializer):
     sub_sub_category = serializers.SerializerMethodField()
+
     class Meta:
         model = SubCategory
         fields = [
@@ -77,8 +82,10 @@ class StoreCategoryAPIViewListSerializer(serializers.ModelSerializer):
 
     def get_sub_category(self, obj):
         try:
-            queryset = SubCategory.objects.filter(category=obj.id, is_active=True).distinct().order_by('-ordering_number')
-            serializer = SubCategorySerializerForMegaMenu(instance=queryset, many=True, context={'request': self.context['request']})
+            queryset = SubCategory.objects.filter(
+                category=obj.id, is_active=True).distinct()
+            serializer = SubCategorySerializerForMegaMenu(
+                instance=queryset, many=True, context={'request': self.context['request']})
             return serializer.data
         except:
             return []
@@ -99,7 +106,8 @@ class BrandSerializer(serializers.ModelSerializer):
             if title_get_for_check:
                 raise ValidationError('This Brand already exist.')
 
-        brand_instance = Brand.objects.create(**validated_data, title=title_get_data)
+        brand_instance = Brand.objects.create(
+            **validated_data, title=title_get_data)
 
         return brand_instance
 
@@ -107,7 +115,8 @@ class BrandSerializer(serializers.ModelSerializer):
 class BrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
-        fields = ['id', 'title', 'logo', 'meta_title', 'meta_description', 'is_gaming', 'rating_number', 'created_at']
+        fields = ['id', 'title', 'logo', 'meta_title',
+                  'meta_description', 'is_gaming', 'rating_number', 'created_at']
 
 
 class UnitSerializer(serializers.ModelSerializer):
@@ -145,6 +154,7 @@ class ProductTagsSerializer(serializers.ModelSerializer):
 
 class ProductReviewCreateSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
+
     class Meta:
         model = ProductReview
         fields = ['id', 'user', 'product', 'rating_number', 'review_text']
@@ -152,23 +162,46 @@ class ProductReviewCreateSerializer(serializers.ModelSerializer):
     def get_user(self, obj):
         try:
             serializer = UserDataSerializer(instance=obj.user, many=False, context={
-                                                'request': self.context['request']})
+                'request': self.context['request']})
             return serializer.data
         except:
             return []
 
     def create(self, validated_data):
-        product_review_instance = ProductReview.objects.create(**validated_data, user=self.context['request'].user )
+        product_review_instance = ProductReview.objects.create(
+            **validated_data, user=self.context['request'].user)
         return product_review_instance
+
+
+class CommentsRepliesSerializer(serializers.ModelSerializer):
+    user_name = serializers.CharField(source='user.username', read_only=True)
+    created_at = serializers.DateTimeField(format="%d %B, %Y %I:%M %p")
+
+    class Meta:
+        model = ProductReviewReply
+        fields = [
+            'id',
+            'review',
+            'user',
+            'user_name',
+            'review_text',
+            'created_at'
+        ]
 
 
 class ProductReviewSerializer(serializers.ModelSerializer):
     user = UserDataSerializer()
     created_at = serializers.DateTimeField(format="%d %B, %Y %I:%M %p")
+    replies = serializers.SerializerMethodField('get_replies')
 
     class Meta:
         model = ProductReview
-        fields = ['id', 'user', 'rating_number', 'review_text', 'created_at']
+        fields = ['id', 'user', 'rating_number',
+                  'review_text', 'replies', 'created_at']
+
+    def get_replies(self, obj):
+        replies = ProductReviewReply.objects.filter(review=obj, is_active=True)
+        return CommentsRepliesSerializer(replies, many=True).data
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
@@ -188,8 +221,10 @@ class SpecificationValuesSerializer(serializers.ModelSerializer):
 
 
 class SpecificationSerializer(serializers.ModelSerializer):
-    specification_values = serializers.SerializerMethodField('get_existing_specification_values')
+    specification_values = serializers.SerializerMethodField(
+        'get_existing_specification_values')
     title_name = serializers.CharField(source="title.title", read_only=True)
+
     class Meta:
         model = Specification
         fields = [
@@ -200,18 +235,22 @@ class SpecificationSerializer(serializers.ModelSerializer):
         ]
 
     def get_existing_specification_values(self, instense):
-        queryset = SpecificationValue.objects.filter(specification=instense.id, is_active = True)
-        serializer = SpecificationValuesSerializer(instance=queryset, many=True)
+        queryset = SpecificationValue.objects.filter(
+            specification=instense.id, is_active=True)
+        serializer = SpecificationValuesSerializer(
+            instance=queryset, many=True)
         return serializer.data
 
 
 class ProductListBySerializer(serializers.ModelSerializer):
-    product_specification = serializers.SerializerMethodField('get_product_specification')
+    product_specification = serializers.SerializerMethodField(
+        'get_product_specification')
     product_tags = serializers.SerializerMethodField()
     discount_type = DiscountTypeSerializer()
     avg_rating = serializers.SerializerMethodField()
-    brand_title= serializers.CharField(source="brand.title",read_only=True)
-    product_condition_title= serializers.CharField(source="product_condition.title",read_only=True)
+    brand_title = serializers.CharField(source="brand.title", read_only=True)
+    product_condition_title = serializers.CharField(
+        source="product_condition.title", read_only=True)
     review_count = serializers.SerializerMethodField('get_review_count')
     product_reviews = serializers.SerializerMethodField()
     seller = SellerDataSerializer()
@@ -223,10 +262,14 @@ class ProductListBySerializer(serializers.ModelSerializer):
     total_quantity = serializers.SerializerMethodField()
     is_new = serializers.SerializerMethodField('get_is_new')
 
-    offer_discount_id = serializers.SerializerMethodField('get_offer_discount_id')
-    offer_discount_price = serializers.SerializerMethodField('get_offer_discount_price')
-    offer_discount_price_type = serializers.SerializerMethodField('get_offer_discount_price_type')
-    price_after_offer_discount = serializers.SerializerMethodField('get_price_after_offer_discount')
+    offer_discount_id = serializers.SerializerMethodField(
+        'get_offer_discount_id')
+    offer_discount_price = serializers.SerializerMethodField(
+        'get_offer_discount_price')
+    offer_discount_price_type = serializers.SerializerMethodField(
+        'get_offer_discount_price_type')
+    price_after_offer_discount = serializers.SerializerMethodField(
+        'get_price_after_offer_discount')
 
     # def to_representation(self, instance):
     #     # get the serialized data as a dictionary
@@ -234,8 +277,8 @@ class ProductListBySerializer(serializers.ModelSerializer):
     #     # update the price field with the discounted price
     #     if data['offer_discount_price']:
     #         data['price'] = data['offer_discount_price']
-        # return the updated data
-        # return data
+    # return the updated data
+    # return data
     class Meta:
         model = Product
         fields = [
@@ -283,7 +326,8 @@ class ProductListBySerializer(serializers.ModelSerializer):
 
     def get_offer_discount_id(self, obj):
         today_date = timezone.now().date()
-        offers = Offer.objects.filter(offer_product_offer__product = obj.id, is_active=True, end_date__gte = today_date)
+        offers = Offer.objects.filter(
+            offer_product_offer__product=obj.id, is_active=True, end_date__gte=today_date)
         if offers:
             offer_id = offers[0].id
         else:
@@ -292,7 +336,8 @@ class ProductListBySerializer(serializers.ModelSerializer):
 
     def get_offer_discount_price_type(self, obj):
         today_date = timezone.now().date()
-        offers = Offer.objects.filter(offer_product_offer__product = obj.id, is_active=True, end_date__gte = today_date)
+        offers = Offer.objects.filter(
+            offer_product_offer__product=obj.id, is_active=True, end_date__gte=today_date)
         if offers:
             price_type = offers[0].discount_price_type.title
         else:
@@ -301,7 +346,8 @@ class ProductListBySerializer(serializers.ModelSerializer):
 
     def get_offer_discount_price(self, obj):
         today_date = timezone.now().date()
-        offers = Offer.objects.filter(offer_product_offer__product = obj.id, is_active=True, end_date__gte = today_date)
+        offers = Offer.objects.filter(
+            offer_product_offer__product=obj.id, is_active=True, end_date__gte=today_date)
         if offers:
             price = offers[0].discount_price
         else:
@@ -331,12 +377,14 @@ class ProductListBySerializer(serializers.ModelSerializer):
         return ProductTagsSerializer(selected_product_tags, many=True).data
 
     def get_product_specification(self, product):
-        queryset = Specification.objects.filter(product=product, is_active = True)
+        queryset = Specification.objects.filter(
+            product=product, is_active=True)
         serializer = SpecificationSerializer(instance=queryset, many=True)
         return serializer.data
 
     def get_review_count(self, product):
-        review_count = ProductReview.objects.filter(product=product, is_active = True).count()
+        review_count = ProductReview.objects.filter(
+            product=product, is_active=True).count()
         return review_count
 
     def get_product_reviews(self, obj):
@@ -347,10 +395,11 @@ class ProductListBySerializer(serializers.ModelSerializer):
     def get_total_quantity(self, obj):
         quantity = Product.objects.get(id=obj.id).quantity
         return quantity
-    
+
     def get_price_after_offer_discount(self, obj):
         today_date = timezone.now().date()
-        offers = Offer.objects.filter(offer_product_offer__product = obj.id, is_active=True, end_date__gte = today_date)
+        offers = Offer.objects.filter(
+            offer_product_offer__product=obj.id, is_active=True, end_date__gte=today_date)
         if offers:
             offer_price = offers[0].discount_price
         else:
@@ -363,9 +412,12 @@ class ProductListBySerializerForHomeData(serializers.ModelSerializer):
     discount_type = DiscountTypeSerializer()
     total_quantity = serializers.SerializerMethodField()
     is_new = serializers.SerializerMethodField('get_is_new')
-    offer_discount_id = serializers.SerializerMethodField('get_offer_discount_id')
-    offer_discount_price = serializers.SerializerMethodField('get_offer_discount_price')
-    offer_discount_price_type = serializers.SerializerMethodField('get_offer_discount_price_type')
+    offer_discount_id = serializers.SerializerMethodField(
+        'get_offer_discount_id')
+    offer_discount_price = serializers.SerializerMethodField(
+        'get_offer_discount_price')
+    offer_discount_price_type = serializers.SerializerMethodField(
+        'get_offer_discount_price_type')
 
     class Meta:
         model = Product
@@ -391,7 +443,8 @@ class ProductListBySerializerForHomeData(serializers.ModelSerializer):
 
     def get_offer_discount_id(self, obj):
         today_date = timezone.now().date()
-        offers = Offer.objects.filter(offer_product_offer__product = obj.id, is_active=True, end_date__gte = today_date)
+        offers = Offer.objects.filter(
+            offer_product_offer__product=obj.id, is_active=True, end_date__gte=today_date)
         if offers:
             offer_id = offers[0].id
         else:
@@ -400,7 +453,8 @@ class ProductListBySerializerForHomeData(serializers.ModelSerializer):
 
     def get_offer_discount_price_type(self, obj):
         today_date = timezone.now().date()
-        offers = Offer.objects.filter(offer_product_offer__product = obj.id, is_active=True, end_date__gte = today_date)
+        offers = Offer.objects.filter(
+            offer_product_offer__product=obj.id, is_active=True, end_date__gte=today_date)
         if offers:
             price_type = offers[0].discount_price_type.title
         else:
@@ -409,7 +463,8 @@ class ProductListBySerializerForHomeData(serializers.ModelSerializer):
 
     def get_offer_discount_price(self, obj):
         today_date = timezone.now().date()
-        offers = Offer.objects.filter(offer_product_offer__product = obj.id, is_active=True, end_date__gte = today_date)
+        offers = Offer.objects.filter(
+            offer_product_offer__product=obj.id, is_active=True, end_date__gte=today_date)
         if offers:
             price = offers[0].discount_price
         else:
@@ -436,7 +491,9 @@ class ProductListBySerializerForHomeData(serializers.ModelSerializer):
 
 
 class ProductWarrantySerializer(serializers.ModelSerializer):
-    warranty_title = serializers.CharField(source="warranty.title", read_only=True)
+    warranty_title = serializers.CharField(
+        source="warranty.title", read_only=True)
+
     class Meta:
         model = ProductWarranty
         fields = [
@@ -458,13 +515,19 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
     discount_type = DiscountTypeSerializer()
     avg_rating = serializers.SerializerMethodField()
     product_images = serializers.SerializerMethodField()
-    product_specification = serializers.SerializerMethodField('get_product_specification')
-    vat_type_title = serializers.CharField(source="vat_type.title",read_only=True)
+    product_specification = serializers.SerializerMethodField(
+        'get_product_specification')
+    vat_type_title = serializers.CharField(
+        source="vat_type.title", read_only=True)
     related_products = serializers.SerializerMethodField()
-    product_warranties = serializers.SerializerMethodField('get_product_warranties')
-    offer_discount_id = serializers.SerializerMethodField('get_offer_discount_id')
-    offer_discount_price = serializers.SerializerMethodField('get_offer_discount_price')
-    offer_discount_price_type = serializers.SerializerMethodField('get_offer_discount_price_type')
+    product_warranties = serializers.SerializerMethodField(
+        'get_product_warranties')
+    offer_discount_id = serializers.SerializerMethodField(
+        'get_offer_discount_id')
+    offer_discount_price = serializers.SerializerMethodField(
+        'get_offer_discount_price')
+    offer_discount_price_type = serializers.SerializerMethodField(
+        'get_offer_discount_price_type')
 
     class Meta:
         model = Product
@@ -515,7 +578,8 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
 
     def get_offer_discount_id(self, obj):
         today_date = timezone.now().date()
-        offers = Offer.objects.filter(offer_product_offer__product = obj.id, is_active=True, end_date__gte = today_date)
+        offers = Offer.objects.filter(
+            offer_product_offer__product=obj.id, is_active=True, end_date__gte=today_date)
         if offers:
             offer_id = offers[0].id
         else:
@@ -524,7 +588,8 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
 
     def get_offer_discount_price_type(self, obj):
         today_date = timezone.now().date()
-        offers = Offer.objects.filter(offer_product_offer__product = obj.id, is_active=True, end_date__gte = today_date)
+        offers = Offer.objects.filter(
+            offer_product_offer__product=obj.id, is_active=True, end_date__gte=today_date)
         if offers:
             price_type = offers[0].discount_price_type.title
         else:
@@ -533,7 +598,8 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
 
     def get_offer_discount_price(self, obj):
         today_date = timezone.now().date()
-        offers = Offer.objects.filter(offer_product_offer__product = obj.id, is_active=True, end_date__gte = today_date)
+        offers = Offer.objects.filter(
+            offer_product_offer__product=obj.id, is_active=True, end_date__gte=today_date)
         if offers:
             price = offers[0].discount_price
         else:
@@ -549,7 +615,8 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
         return ProductTagsSerializer(selected_product_tags, many=True).data
 
     def get_product_specification(self, product):
-        queryset = Specification.objects.filter(product=product, is_active = True)
+        queryset = Specification.objects.filter(
+            product=product, is_active=True)
         serializer = SpecificationSerializer(instance=queryset, many=True)
         return serializer.data
 
@@ -557,7 +624,8 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
         try:
             queryset = ProductImages.objects.filter(
                 product=obj, is_active=True).distinct()
-            serializer = ProductImageSerializer(instance=queryset, many=True, context={'request': self.context['request']})
+            serializer = ProductImageSerializer(instance=queryset, many=True, context={
+                                                'request': self.context['request']})
             return serializer.data
         except:
             return []
@@ -573,7 +641,8 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
         return ProductListBySerializer(selected_related_products, many=True, context={'request': self.context['request']}).data
 
     def get_product_warranties(self, obj):
-        selected_warranties = ProductWarranty.objects.filter(product=obj, is_active=True)
+        selected_warranties = ProductWarranty.objects.filter(
+            product=obj, is_active=True)
         return ProductWarrantySerializer(selected_warranties, many=True, context={'request': self.context['request']}).data
 
 
@@ -588,8 +657,10 @@ class PcBuilderSpecificationValuesSerializer(serializers.ModelSerializer):
 
 
 class PcBuilderSpecificationSerializer(serializers.ModelSerializer):
-    specification_values = serializers.SerializerMethodField('get_existing_specification_values')
-    title_name = serializers.CharField(source="title.title",read_only=True)
+    specification_values = serializers.SerializerMethodField(
+        'get_existing_specification_values')
+    title_name = serializers.CharField(source="title.title", read_only=True)
+
     class Meta:
         model = Specification
         fields = [
@@ -600,8 +671,10 @@ class PcBuilderSpecificationSerializer(serializers.ModelSerializer):
         ]
 
     def get_existing_specification_values(self, instance):
-        queryset = SpecificationValue.objects.filter(specification=instance.id, is_active = True)
-        serializer = PcBuilderSpecificationValuesSerializer(instance=queryset, many=True)
+        queryset = SpecificationValue.objects.filter(
+            specification=instance.id, is_active=True)
+        serializer = PcBuilderSpecificationValuesSerializer(
+            instance=queryset, many=True)
         return serializer.data
 
 
@@ -615,8 +688,11 @@ class AttributeValuesSerializer(serializers.ModelSerializer):
 
 
 class FilterAttributeSerializer(serializers.ModelSerializer):
-    attribute_values = serializers.SerializerMethodField('get_attribute_values')
-    attribute_title = serializers.CharField(source="attribute.title", read_only=True)
+    attribute_values = serializers.SerializerMethodField(
+        'get_attribute_values')
+    attribute_title = serializers.CharField(
+        source="attribute.title", read_only=True)
+
     class Meta:
         model = FilterAttributes
         fields = [
@@ -627,14 +703,17 @@ class FilterAttributeSerializer(serializers.ModelSerializer):
         ]
 
     def get_attribute_values(self, instance):
-        queryset = AttributeValues.objects.filter(attribute=instance.attribute.id, is_active = True)
+        queryset = AttributeValues.objects.filter(
+            attribute=instance.attribute.id, is_active=True)
         serializer = AttributeValuesSerializer(instance=queryset, many=True)
         return serializer.data
 
     def get_specification(self, obj):
         try:
-            queryset = Specification.objects.filter(product=obj, is_active = True)
-            serializer = PcBuilderSpecificationSerializer(instance=queryset, many=True)
+            queryset = Specification.objects.filter(
+                product=obj, is_active=True)
+            serializer = PcBuilderSpecificationSerializer(
+                instance=queryset, many=True)
             return serializer.data
         except:
             return []
@@ -650,6 +729,7 @@ class FilterAttributeSerializer(serializers.ModelSerializer):
 
 class PcBuilderCategoryListSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
+
     class Meta:
         model = Category
         fields = ['id', 'title', 'icon', 'type']
@@ -660,6 +740,7 @@ class PcBuilderCategoryListSerializer(serializers.ModelSerializer):
 
 class PcBuilderSubCategoryListSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
+
     class Meta:
         model = SubCategory
         fields = ['id', 'title', 'icon', 'type']
@@ -670,11 +751,10 @@ class PcBuilderSubCategoryListSerializer(serializers.ModelSerializer):
 
 class PcBuilderSubSubCategoryListSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
+
     class Meta:
         model = SubSubCategory
         fields = ['id', 'title', 'icon', 'type']
 
     def get_type(self, obj):
         return 'sub_sub_category'
-
-

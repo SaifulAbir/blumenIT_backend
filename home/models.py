@@ -13,7 +13,8 @@ class SliderImage(AbstractTimeStamp):
         valid_extensions = ['.jpg', '.png', '.jpeg']
         if not ext.lower() in valid_extensions:
             raise ValidationError('Unsupported file extension.')
-    image = models.ImageField(upload_to='sliderImage', validators=[validate_file_extension], default="")
+    image = models.ImageField(upload_to='sliderImage', validators=[
+                              validate_file_extension], default="")
     bold_text = models.TextField(null=True, blank=True)
     small_text = models.TextField(null=True, blank=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
@@ -30,9 +31,12 @@ class SliderImage(AbstractTimeStamp):
 
 class ProductView(AbstractTimeStamp):
 
-    product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='product_view_count')
-    user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='user_product_view')
-    customer = models.ForeignKey(CustomerProfile, on_delete=models.PROTECT, related_name='customer_product_view')
+    product = models.ForeignKey(
+        Product, on_delete=models.PROTECT, related_name='product_view_count')
+    user = models.ForeignKey(
+        User, on_delete=models.PROTECT, related_name='user_product_view')
+    customer = models.ForeignKey(
+        CustomerProfile, on_delete=models.PROTECT, related_name='customer_product_view')
     view_date = models.DateTimeField(default=datetime.now)
     view_count = models.IntegerField(default=1)
 
@@ -82,8 +86,10 @@ class HomeSingleRowData(AbstractTimeStamp):
     bottom_banner = models.ImageField(upload_to='HomeImage', default="")
     shop_address = models.TextField(default='', null=True, blank=True)
     is_active = models.BooleanField(default=True)
-    header_logo = models.ImageField(upload_to='HomeImage', null=True, blank=True)
-    footer_logo = models.ImageField(upload_to='HomeImage', null=True, blank=True)
+    header_logo = models.ImageField(
+        upload_to='HomeImage', null=True, blank=True)
+    footer_logo = models.ImageField(
+        upload_to='HomeImage', null=True, blank=True)
     footer_description = models.TextField(null=True, blank=True)
     facebook = models.URLField(null=True, blank=True)
     twitter = models.URLField(null=True, blank=True)
@@ -110,7 +116,8 @@ class CorporateDeal(AbstractTimeStamp):
     phone = models.CharField(max_length=255, null=True, blank=True)
     region = models.CharField(max_length=255, null=True, blank=True)
     details_text = models.TextField(null=True, blank=True)
-    attached_file = models.FileField(upload_to='corporate', blank=True, null=True)
+    attached_file = models.FileField(
+        upload_to='corporate', blank=True, null=True)
     is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:
@@ -157,12 +164,14 @@ class Advertisement(AbstractTimeStamp):
         ('SLIDER_SMALL_STATIC', 'slider_small_static'),
         ('POPULAR_PRODUCT_POSTER', 'popular_product_poster'),
         ('FEATURED_PRODUCT_POSTER', 'featured_product_poster'),
+        ('OFFER', 'offer'),
     ]
 
     image = models.ImageField(upload_to='HomeImage', default="")
     bold_text = models.TextField(null=True, blank=True)
     small_text = models.TextField(null=True, blank=True)
-    work_for = models.CharField(max_length=30, choices=WORK_FOR, default=WORK_FOR[0][0])
+    work_for = models.CharField(
+        max_length=30, choices=WORK_FOR, default=WORK_FOR[0][0])
     is_active = models.BooleanField(null=False, blank=False, default=True)
     is_gaming = models.BooleanField(null=False, blank=False, default=False)
 
@@ -173,3 +182,155 @@ class Advertisement(AbstractTimeStamp):
 
     def __str__(self):
         return self.work_for
+
+
+class AboutUs(AbstractTimeStamp):
+    content = models.TextField(null=True, blank=True)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'AboutUs'
+        verbose_name_plural = 'AboutUs'
+        db_table = 'about_us'
+
+    def __str__(self):
+        return f"{self.pk}"
+
+
+class TermsAndCondition(AbstractTimeStamp):
+    content = models.TextField(null=True, blank=True)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'TermsAndCondition'
+        verbose_name_plural = 'TermsAndConditions'
+        db_table = 'terms_and_condition'
+
+    def __str__(self):
+        return f"{self.pk}"
+
+
+class OnlineServiceSupport(AbstractTimeStamp):
+    content = models.TextField(null=True, blank=True)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'OnlineServiceSupport'
+        verbose_name_plural = 'OnlineServiceSupports'
+        db_table = 'online_service_support'
+
+    def __str__(self):
+        return f"{self.pk}"
+
+
+class PaymentMethod(AbstractTimeStamp):
+    content = models.TextField(null=True, blank=True)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'PaymentMethod'
+        verbose_name_plural = 'PaymentMethods'
+        db_table = 'payment_method'
+
+    def __str__(self):
+        return f"{self.pk}"
+
+
+class RefundAndReturnPolicy(AbstractTimeStamp):
+    content = models.TextField(null=True, blank=True)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'RefundAndReturnPolicy'
+        verbose_name_plural = 'RefundAndReturnPolicies'
+        db_table = 'refund_and_return_policy'
+
+    def __str__(self):
+        return f"{self.pk}"
+
+
+class Shipping(AbstractTimeStamp):
+    content = models.TextField(null=True, blank=True)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'Shipping'
+        verbose_name_plural = 'Shippings'
+        db_table = 'shipping'
+
+    def __str__(self):
+        return f"{self.pk}"
+
+
+class PrivacyPolicy(AbstractTimeStamp):
+    content = models.TextField(null=True, blank=True)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'PrivacyPolicy'
+        verbose_name_plural = 'PrivacyPolicies'
+        db_table = 'privacy_policy'
+
+    def __str__(self):
+        return f"{self.pk}"
+
+
+class ServiceCenter(AbstractTimeStamp):
+    content = models.TextField(null=True, blank=True)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'ServiceCenter'
+        verbose_name_plural = 'ServiceCenters'
+        db_table = 'service_center'
+
+    def __str__(self):
+        return f"{self.pk}"
+
+
+class Pages(AbstractTimeStamp):
+    TYPE = [
+        ('INFO', 'Info'),
+        ('CS', 'customer_service')
+    ]
+    title = models.CharField(max_length=800, default='')
+    content = models.TextField(null=True, blank=True)
+    type = models.CharField(max_length=30, choices=TYPE, default=TYPE[0][0])
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'Page'
+        verbose_name_plural = 'Pages'
+        db_table = 'pages'
+
+    def __str__(self):
+        return f"{self.title}"
+
+
+class MediaChunk(AbstractTimeStamp):
+    title = models.CharField(max_length=800, default='', null=True, blank=True)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'MediaChunk'
+        verbose_name_plural = 'MediaChunks'
+        db_table = 'media_chunks'
+
+    def __str__(self):
+        return f"{self.pk}"
+
+
+class MediaFiles(AbstractTimeStamp):
+    title = models.CharField(max_length=800, default='', null=True, blank=True)
+    chunk = models.ForeignKey(
+        MediaChunk, on_delete=models.CASCADE, related_name='media_files_chunk', null=True, blank=True)
+    file = models.FileField(upload_to='media_files', null=True, blank=True)
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'MediaFile'
+        verbose_name_plural = 'MediaFiles'
+        db_table = 'media_files'
+
+    def __str__(self):
+        return f"{self.pk}"

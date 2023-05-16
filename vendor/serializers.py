@@ -598,6 +598,8 @@ class ProductFilterAttributesSerializer(serializers.ModelSerializer):
         queryset=FilterAttributes.objects.all(), many=False, required=True)
     attribute_value = serializers.PrimaryKeyRelatedField(
         queryset=AttributeValues.objects.all(), many=False, required=True)
+    value = serializers.CharField(
+        source='attribute_value.value', read_only=True)
 
     class Meta:
         model = ProductFilterAttributes
@@ -605,6 +607,7 @@ class ProductFilterAttributesSerializer(serializers.ModelSerializer):
             'id',
             'filter_attribute',
             'attribute_value',
+            'value'
         ]
 
 

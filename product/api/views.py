@@ -639,7 +639,7 @@ class PcBuilderChooseAPIView(ListAPIView):
                     F('price') - Subquery(
                         Offer.objects.filter(offer_product_offer__product=OuterRef(
                             'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
-                    )), output_field=DecimalField())).order_by('d_price')
+                    )), output_field=DecimalField())).order_by('d_price').distinct()
             elif price_high_to_low:
                 # queryset = queryset.order_by('-discount_price').distinct()
                 today_date = timezone.now().date()
@@ -647,7 +647,7 @@ class PcBuilderChooseAPIView(ListAPIView):
                     F('price') - Subquery(
                         Offer.objects.filter(offer_product_offer__product=OuterRef(
                             'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
-                    )), output_field=DecimalField())).order_by('-d_price')
+                    )), output_field=DecimalField())).order_by('-d_price').distinct()
         else:
             if price_low_to_high:
                 # queryset = queryset.order_by('price').distinct()
@@ -656,7 +656,7 @@ class PcBuilderChooseAPIView(ListAPIView):
                     F('price') - Subquery(
                         Offer.objects.filter(offer_product_offer__product=OuterRef(
                             'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
-                    )), output_field=DecimalField())).order_by('d_price')
+                    )), output_field=DecimalField())).order_by('d_price').distinct()
             elif price_high_to_low:
                 # queryset = queryset.order_by('-price').distinct()
                 today_date = timezone.now().date()
@@ -664,7 +664,7 @@ class PcBuilderChooseAPIView(ListAPIView):
                     F('price') - Subquery(
                         Offer.objects.filter(offer_product_offer__product=OuterRef(
                             'pk'), is_active=True, end_date__gte=today_date).values('discount_price')[:1]
-                    )), output_field=DecimalField())).order_by('-d_price')
+                    )), output_field=DecimalField())).order_by('-d_price').distinct()
 
         return queryset
 

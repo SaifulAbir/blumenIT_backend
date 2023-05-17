@@ -219,6 +219,8 @@ class OTPVerifyAPIVIEW(CreateAPIView):
             )
 
 
+# class SignUpAPIView(CreateAPIView):
+
 class LoginUser(mixins.CreateModelMixin,
                 viewsets.GenericViewSet):
     serializer_class = user_serializers.LoginSerializer

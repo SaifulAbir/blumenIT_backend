@@ -2272,7 +2272,7 @@ class AdvertisementPosterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Advertisement
-        fields = ['id', 'image', 'bold_text',
+        fields = ['id', 'image', 'image_url', 'bold_text',
                   'small_text', 'is_gaming', 'work_for']
 
 
@@ -2313,14 +2313,14 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
         child=serializers.FileField(), write_only=True, required=False)
     small_banners_static = serializers.ListField(
         child=serializers.FileField(), write_only=True, required=False)
-    popular_products_banners = serializers.ListField(
-        child=serializers.FileField(), write_only=True, required=False)
-    feature_products_banners = serializers.ListField(
-        child=serializers.FileField(), write_only=True, required=False)
-    gaming_popular_products_banners = serializers.ListField(
-        child=serializers.FileField(), write_only=True, required=False)
-    gaming_feature_products_banners = serializers.ListField(
-        child=serializers.FileField(), write_only=True, required=False)
+    popular_products_banners = AdvertisementPosterSerializer(
+        many=True, required=False)
+    feature_products_banners = AdvertisementPosterSerializer(
+        many=True, required=False)
+    gaming_popular_products_banners = AdvertisementPosterSerializer(
+        many=True, required=False)
+    gaming_feature_products_banners = AdvertisementPosterSerializer(
+        many=True, required=False)
 
     class Meta:
         model = HomeSingleRowData
@@ -2484,28 +2484,40 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
                     image=small_banner, work_for='SLIDER_SMALL_STATIC', is_gaming=False)
 
         # popular_products_banners
+        # if popular_products_banners:
+        #     for popular_products_banner in popular_products_banners:
+        #         Advertisement.objects.create(
+        #             image=popular_products_banner, work_for='POPULAR_PRODUCT_POSTER', is_gaming=False)
         if popular_products_banners:
             for popular_products_banner in popular_products_banners:
+                image = popular_products_banner['image']
+                image_url = popular_products_banner['image_url'] or ''
                 Advertisement.objects.create(
-                    image=popular_products_banner, work_for='POPULAR_PRODUCT_POSTER', is_gaming=False)
+                    image=image, image_url=image_url, work_for='POPULAR_PRODUCT_POSTER', is_gaming=False)
 
         # feature_products_banners
         if feature_products_banners:
             for feature_products_banner in feature_products_banners:
+                image = feature_products_banners['image']
+                image_url = feature_products_banners['image_url'] or ''
                 Advertisement.objects.create(
-                    image=feature_products_banner, work_for='FEATURED_PRODUCT_POSTER', is_gaming=False)
+                    image=image, image_url=image_url, work_for='FEATURED_PRODUCT_POSTER', is_gaming=False)
 
         # gaming_popular_products_banners
         if gaming_popular_products_banners:
             for gaming_popular_products_banner in gaming_popular_products_banners:
+                image = gaming_popular_products_banner['image']
+                image_url = gaming_popular_products_banner['image_url'] or ''
                 Advertisement.objects.create(
-                    image=gaming_popular_products_banner, work_for='POPULAR_PRODUCT_POSTER', is_gaming=True)
+                    image=image, image_url=image_url, work_for='POPULAR_PRODUCT_POSTER', is_gaming=True)
 
         # gaming_feature_products_banners
         if gaming_feature_products_banners:
             for gaming_feature_products_banner in gaming_feature_products_banners:
+                image = gaming_feature_products_banner['image']
+                image_url = gaming_feature_products_banner['image_url'] or ''
                 Advertisement.objects.create(
-                    image=gaming_feature_products_banner, work_for='FEATURED_PRODUCT_POSTER', is_gaming=True)
+                    image=image, image_url=image_url, work_for='FEATURED_PRODUCT_POSTER', is_gaming=True)
 
         return home_single_row_data_instance
 
@@ -2518,14 +2530,14 @@ class WebsiteConfigurationUpdateSerializer(serializers.ModelSerializer):
         child=serializers.FileField(), write_only=True, required=False)
     small_banners_static = serializers.ListField(
         child=serializers.FileField(), write_only=True, required=False)
-    popular_products_banners = serializers.ListField(
-        child=serializers.FileField(), write_only=True, required=False)
-    feature_products_banners = serializers.ListField(
-        child=serializers.FileField(), write_only=True, required=False)
-    gaming_popular_products_banners = serializers.ListField(
-        child=serializers.FileField(), write_only=True, required=False)
-    gaming_feature_products_banners = serializers.ListField(
-        child=serializers.FileField(), write_only=True, required=False)
+    popular_products_banners = AdvertisementPosterSerializer(
+        many=True, required=False)
+    feature_products_banners = AdvertisementPosterSerializer(
+        many=True, required=False)
+    gaming_popular_products_banners = AdvertisementPosterSerializer(
+        many=True, required=False)
+    gaming_feature_products_banners = AdvertisementPosterSerializer(
+        many=True, required=False)
 
     class Meta:
         model = HomeSingleRowData
@@ -2686,28 +2698,40 @@ class WebsiteConfigurationUpdateSerializer(serializers.ModelSerializer):
                     image=small_banner, work_for='SLIDER_SMALL_STATIC', is_gaming=False)
 
         # popular_products_banners
+        # if popular_products_banners:
+        #     for popular_products_banner in popular_products_banners:
+        #         Advertisement.objects.create(
+        #             image=popular_products_banner, work_for='POPULAR_PRODUCT_POSTER', is_gaming=False)
         if popular_products_banners:
             for popular_products_banner in popular_products_banners:
+                image = popular_products_banner['image']
+                image_url = popular_products_banner['image_url'] or ''
                 Advertisement.objects.create(
-                    image=popular_products_banner, work_for='POPULAR_PRODUCT_POSTER', is_gaming=False)
+                    image=image, image_url=image_url, work_for='POPULAR_PRODUCT_POSTER', is_gaming=False)
 
         # feature_products_banners
         if feature_products_banners:
             for feature_products_banner in feature_products_banners:
+                image = feature_products_banner['image']
+                image_url = feature_products_banner['image_url'] or ''
                 Advertisement.objects.create(
-                    image=feature_products_banner, work_for='FEATURED_PRODUCT_POSTER', is_gaming=False)
+                    image=image, image_url=image_url, work_for='FEATURED_PRODUCT_POSTER', is_gaming=False)
 
         # gaming_popular_products_banners
         if gaming_popular_products_banners:
             for gaming_popular_products_banner in gaming_popular_products_banners:
+                image = gaming_popular_products_banner['image']
+                image_url = gaming_popular_products_banner['image_url'] or ''
                 Advertisement.objects.create(
-                    image=gaming_popular_products_banner, work_for='POPULAR_PRODUCT_POSTER', is_gaming=True)
+                    image=image, image_url=image_url, work_for='POPULAR_PRODUCT_POSTER', is_gaming=True)
 
         # gaming_feature_products_banners
         if gaming_feature_products_banners:
             for gaming_feature_products_banner in gaming_feature_products_banners:
+                image = gaming_feature_products_banner['image']
+                image_url = gaming_feature_products_banner['image_url'] or ''
                 Advertisement.objects.create(
-                    image=gaming_feature_products_banner, work_for='FEATURED_PRODUCT_POSTER', is_gaming=True)
+                    image=image, image_url=image_url, work_for='FEATURED_PRODUCT_POSTER', is_gaming=True)
 
         validated_data.update({"updated_at": timezone.now()})
         return super().update(instance, validated_data)
@@ -2720,12 +2744,12 @@ class WebsiteConfigurationViewSerializer(serializers.ModelSerializer):
         'get_offer_slider_images')
     gaming_slider_images = serializers.SerializerMethodField(
         'get_gaming_slider_images')
-    popular_products_banners = serializers.SerializerMethodField(
-        'get_popular_products_banners')
     small_banners_carousel = serializers.SerializerMethodField(
         'get_small_banners_carousel')
     small_banners_static = serializers.SerializerMethodField(
         'get_small_banners_static')
+    popular_products_banners = serializers.SerializerMethodField(
+        'get_popular_products_banners')
     feature_products_banners = serializers.SerializerMethodField(
         'get_feature_products_banners')
     gaming_popular_products_banners = serializers.SerializerMethodField(

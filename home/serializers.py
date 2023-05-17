@@ -100,6 +100,7 @@ class AdvertisementDataSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'image',
+            'image_url',
             'bold_text',
             'small_text',
             'is_active',

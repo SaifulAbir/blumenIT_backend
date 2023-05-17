@@ -2269,7 +2269,6 @@ class AdminBlogToggleSerializer(serializers.ModelSerializer):
 
 
 class AdvertisementPosterSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Advertisement
         fields = ['id', 'image', 'image_url', 'bold_text',
@@ -2491,7 +2490,10 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
         if popular_products_banners:
             for popular_products_banner in popular_products_banners:
                 image = popular_products_banner['image']
-                image_url = popular_products_banner['image_url'] or ''
+                try:
+                    image_url = popular_products_banner['image_url']
+                except:
+                    image_url = ''
                 Advertisement.objects.create(
                     image=image, image_url=image_url, work_for='POPULAR_PRODUCT_POSTER', is_gaming=False)
 
@@ -2499,7 +2501,10 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
         if feature_products_banners:
             for feature_products_banner in feature_products_banners:
                 image = feature_products_banners['image']
-                image_url = feature_products_banners['image_url'] or ''
+                try:
+                    image_url = popular_products_banner['image_url']
+                except:
+                    image_url = ''
                 Advertisement.objects.create(
                     image=image, image_url=image_url, work_for='FEATURED_PRODUCT_POSTER', is_gaming=False)
 
@@ -2507,7 +2512,10 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
         if gaming_popular_products_banners:
             for gaming_popular_products_banner in gaming_popular_products_banners:
                 image = gaming_popular_products_banner['image']
-                image_url = gaming_popular_products_banner['image_url'] or ''
+                try:
+                    image_url = popular_products_banner['image_url']
+                except:
+                    image_url = ''
                 Advertisement.objects.create(
                     image=image, image_url=image_url, work_for='POPULAR_PRODUCT_POSTER', is_gaming=True)
 
@@ -2515,7 +2523,10 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
         if gaming_feature_products_banners:
             for gaming_feature_products_banner in gaming_feature_products_banners:
                 image = gaming_feature_products_banner['image']
-                image_url = gaming_feature_products_banner['image_url'] or ''
+                try:
+                    image_url = popular_products_banner['image_url']
+                except:
+                    image_url = ''
                 Advertisement.objects.create(
                     image=image, image_url=image_url, work_for='FEATURED_PRODUCT_POSTER', is_gaming=True)
 
@@ -2705,7 +2716,10 @@ class WebsiteConfigurationUpdateSerializer(serializers.ModelSerializer):
         if popular_products_banners:
             for popular_products_banner in popular_products_banners:
                 image = popular_products_banner['image']
-                image_url = popular_products_banner['image_url'] or ''
+                try:
+                    image_url = popular_products_banner['image_url']
+                except:
+                    image_url = ''
                 Advertisement.objects.create(
                     image=image, image_url=image_url, work_for='POPULAR_PRODUCT_POSTER', is_gaming=False)
 
@@ -2713,7 +2727,10 @@ class WebsiteConfigurationUpdateSerializer(serializers.ModelSerializer):
         if feature_products_banners:
             for feature_products_banner in feature_products_banners:
                 image = feature_products_banner['image']
-                image_url = feature_products_banner['image_url'] or ''
+                try:
+                    image_url = popular_products_banner['image_url']
+                except:
+                    image_url = ''
                 Advertisement.objects.create(
                     image=image, image_url=image_url, work_for='FEATURED_PRODUCT_POSTER', is_gaming=False)
 
@@ -2721,7 +2738,10 @@ class WebsiteConfigurationUpdateSerializer(serializers.ModelSerializer):
         if gaming_popular_products_banners:
             for gaming_popular_products_banner in gaming_popular_products_banners:
                 image = gaming_popular_products_banner['image']
-                image_url = gaming_popular_products_banner['image_url'] or ''
+                try:
+                    image_url = popular_products_banner['image_url']
+                except:
+                    image_url = ''
                 Advertisement.objects.create(
                     image=image, image_url=image_url, work_for='POPULAR_PRODUCT_POSTER', is_gaming=True)
 
@@ -2729,7 +2749,10 @@ class WebsiteConfigurationUpdateSerializer(serializers.ModelSerializer):
         if gaming_feature_products_banners:
             for gaming_feature_products_banner in gaming_feature_products_banners:
                 image = gaming_feature_products_banner['image']
-                image_url = gaming_feature_products_banner['image_url'] or ''
+                try:
+                    image_url = popular_products_banner['image_url']
+                except:
+                    image_url = ''
                 Advertisement.objects.create(
                     image=image, image_url=image_url, work_for='FEATURED_PRODUCT_POSTER', is_gaming=True)
 

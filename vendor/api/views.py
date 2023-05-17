@@ -218,6 +218,7 @@ class AdminProductUpdateDetailsAPIView(RetrieveAPIView):
 
 class AdminDeleteProductImageAPIView(UpdateAPIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = ProductUpdateDetailsSerializer
     lookup_field = 'id'
     lookup_url_kwarg = "id"
 

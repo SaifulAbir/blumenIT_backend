@@ -13,6 +13,7 @@ from product.models import Product, Category, SubCategory, Brand
 from product.serializers import ProductListBySerializer, BrandSerializer, ProductListBySerializerForHomeData
 from rest_framework.exceptions import ValidationError
 from product.pagination import ProductCustomPagination
+from vendor.pagination import OrderCustomPagination
 
 
 class HomeDataAPIView(APIView):
@@ -113,6 +114,11 @@ class HomeDataAPIView(APIView):
         customer_service_pages_serializer = PagesSerializer(
             customer_service_pages, many=True, context={"request": request})
 
+        # faqs datas
+        faqs = FAQ.objects.filter(is_active=True).order_by('-created_at')
+        faqs_serializer = FaqSerializer(
+            faqs, many=True, context={"request": request})
+
         return Response({
             "slider_images": slider_images_serializer.data,
             "offer_slider_images": offer_slider_images_serializer.data,
@@ -128,6 +134,7 @@ class HomeDataAPIView(APIView):
             "poster_under_featured_products_data_serializer": poster_under_featured_products_data_serializer.data,
             "info_pages": info_pages_serializer.data,
             "customer_service": customer_service_pages_serializer.data,
+            "faqs_serializer": faqs_serializer.data
         })
 
 
@@ -224,26 +231,6 @@ class ContactUsAPIView(APIView):
         contact = ContactUs.objects.all()
         contact_serializer = ContactUsSerializer(contact, many=True)
         return Response(contact_serializer.data)
-
-
-class CreateGetFaqAPIView(APIView):
-    permission_classes = (AllowAny,)
-    serializer_class = FaqSerializer
-
-    def post(self, request):
-        try:
-            question = request.data.get('question')
-            answer = request.data.get('answer')
-            faq = FAQ(question=question, answer=answer)
-            faq.save()
-            return Response({"message": "Faq has been created successfully."})
-        except:
-            return Response({"message": "Fill up all the fields."})
-
-    def get(self, request):
-        faq = FAQ.objects.all()
-        faq_serializer = FaqSerializer(faq, many=True)
-        return Response(faq_serializer.data)
 
 
 class ProductListHomeCompareAPIView(ListAPIView):
@@ -463,3 +450,81 @@ class MediaUpdateAPIView(RetrieveUpdateAPIView):
         else:
             raise ValidationError(
                 {"msg": 'You can not update Media file, because you are not an Admin, Staff or owner!'})
+
+
+# faq
+class AdminFaqListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = FaqSerializer
+    pagination_class = OrderCustomPagination
+
+    def get_queryset(self):
+        request = self.request
+        search = request.GET.get('search')
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+            queryset = FAQ.objects.filter(
+                is_active=True).order_by('-created_at')
+            if search:
+                queryset = queryset.filter(Q(question__icontains=search))
+            if queryset:
+                return queryset
+            else:
+                raise ValidationError({"msg": "No faq data available! "})
+        else:
+            raise ValidationError(
+                {"msg": 'You can not see faq list, because you are not an Admin or a Staff!'})
+
+
+class AdminFaqCreateAPIView(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = FaqSerializer
+
+    def post(self, request, *args, **kwargs):
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+            return super(AdminFaqCreateAPIView, self).post(request, *args, **kwargs)
+        else:
+            raise ValidationError(
+                {"msg": 'You can not create faq, because you are not an Admin or a Staff!'})
+
+
+class AdminFaqUpdateAPIView(RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = FaqSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+            query = FAQ.objects.filter(id=id)
+            if query:
+                return query
+            else:
+                raise ValidationError(
+                    {"msg": 'FAQ does not found!'})
+        else:
+            raise ValidationError(
+                {"msg": 'You can not update FAQ, because you are not an Admin or a Staff!'})
+
+
+class AdminFaqDeleteAPIView(ListAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = FaqSerializer
+    queryset = Brand.objects.all()
+    lookup_field = 'id'
+    lookup_url_kwarg = 'id'
+
+    def get_queryset(self):
+        brand_id = self.kwargs['id']
+        brand_obj = Brand.objects.filter(id=brand_id).exists()
+        if brand_obj:
+            brand_obj = Brand.objects.filter(id=brand_id)
+            brand_obj.update(is_active=False)
+
+            queryset = Brand.objects.filter(
+                is_active=True).order_by('-created_at')
+            return queryset
+        else:
+            raise ValidationError(
+                {"msg": 'Brand Does not exist!'}
+            )

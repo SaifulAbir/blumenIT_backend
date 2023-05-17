@@ -4,7 +4,6 @@ from .views import *
 urlpatterns = [
     path('home-data/', HomeDataAPIView.as_view()),
     path('contact-us/', ContactUsAPIView.as_view()),
-    path('faq/', CreateGetFaqAPIView.as_view()),
     path('product-list-for-home-compare/',
          ProductListHomeCompareAPIView.as_view()),
     path('request-quote/', RequestQuoteAPIView.as_view()),
@@ -23,4 +22,10 @@ urlpatterns = [
     path('admin/media-list/', MediaListAPIView.as_view()),
     path('admin/media-create/', MediaCreateAPIView.as_view()),
     path('admin/media-update/<int:id>/', MediaUpdateAPIView.as_view()),
+
+    # faq
+    path('admin/faq-list/', AdminFaqListAPIView.as_view()),
+    path('admin/faq-create/', AdminFaqCreateAPIView.as_view()),
+    path('admin/faq-update/<int:id>/', AdminFaqUpdateAPIView.as_view()),
+    path('admin/faq-delete/<int:id>/', AdminFaqDeleteAPIView.as_view()),
 ]

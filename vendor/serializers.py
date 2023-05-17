@@ -11,7 +11,7 @@ from product.models import Brand, Category, DiscountTypes, FlashDealInfo, FlashD
     ShippingClass, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units, \
     VatType, Attribute, FilterAttributes, ProductFilterAttributes, AttributeValues, ProductWarranty, Warranty, \
     SpecificationTitle, ProductReviewReply, \
-    Offer, OfferProduct, ShippingCountry, ShippingState, ShippingCity, OfferCategory
+    Offer, OfferProduct, ShippingCountry, ShippingState, ShippingCity, OfferCategory, CategoryImages
 from user.models import User, Subscription
 from cart.models import Order, Coupon, OrderItem, DeliveryAddress, PaymentType
 from user.serializers import CustomerProfileSerializer
@@ -183,11 +183,13 @@ class AddNewCategorySerializer(serializers.ModelSerializer):
     ordering_number = serializers.CharField(required=False)
     category_filter_attributes = FilteringAttributesSerializer(
         many=True, required=False)
+    banner_images = serializers.ListField(
+        child=serializers.FileField(), write_only=True, required=False)
 
     class Meta:
         model = Category
         fields = ['id', 'title', 'ordering_number', 'type',
-                  'icon', 'banner', 'category_filter_attributes']
+                  'icon', 'category_filter_attributes', 'banner_images']
 
     def create(self, validated_data):
         # filtering_attributes
@@ -197,7 +199,19 @@ class AddNewCategorySerializer(serializers.ModelSerializer):
         except:
             category_filter_attributes = ''
 
+        # banner_images
+        try:
+            banner_images = validated_data.pop('banner_images')
+        except:
+            banner_images = ''
+
         category_instance = Category.objects.create(**validated_data)
+
+        # product_images
+        if banner_images:
+            for image in banner_images:
+                CategoryImages.objects.create(
+                    category=category_instance, file=image)
 
         if category_filter_attributes:
             for f_attr in category_filter_attributes:

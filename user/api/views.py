@@ -219,7 +219,57 @@ class OTPVerifyAPIVIEW(CreateAPIView):
             )
 
 
-# class SignUpAPIView(CreateAPIView):
+class SignUpAPIView(CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = OTPSendSerializer
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        is_login = check_dict_data_rise_error(
+            "is_login", request_data=request.data, arrise=True)
+        if is_login == "false":
+            email = check_dict_data_rise_error(
+                "email", request_data=request.data, arrise=True)
+        phone = check_dict_data_rise_error(
+            "phone", request_data=request.data, arrise=True)
+
+        if is_login == "false":
+            try:
+                user_obj = User.objects.get(Q(email=email) | Q(phone=phone))
+            except User.DoesNotExist:
+                user_obj = None
+            if user_obj and user_obj.is_active is True:
+                # for user_data in user_obj:
+                if user_obj.email == email:
+                    return Response({"details": "Email already exists"}, status=status.HTTP_400_BAD_REQUEST)
+                if user_obj.phone == phone:
+                    return Response({"details": "Phone number already exists"}, status=status.HTTP_400_BAD_REQUEST)
+
+            if not user_obj:
+                user = User.objects.create(
+                    email=email,
+                    phone=phone,
+                    username=email,
+                    is_customer=True
+                )
+
+                user.is_active = False
+                user.set_password(phone)
+                user.save()
+            if user_obj:
+                user_obj.set_password(phone)
+                user_obj.save()
+        try:
+            user = User.objects.get(phone=phone)
+            return Response(
+                data={"user_id": user.id if user else None},
+                status=status.HTTP_201_CREATED)
+        except User.DoesNotExist:
+            user = None
+            return Response(
+                data={"user_id": user.id if user else None},
+                status=status.HTTP_404_NOT_FOUND)
+
 
 class LoginUser(mixins.CreateModelMixin,
                 viewsets.GenericViewSet):

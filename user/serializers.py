@@ -31,6 +31,7 @@ class OTPSendSerializer(serializers.ModelSerializer):
         model = user_models.User
 
 
+
 class OTPReSendSerializer(serializers.ModelSerializer):
     class Meta:
         extra_kwargs = {'contact_number': {'required': True}}

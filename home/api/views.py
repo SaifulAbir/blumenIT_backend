@@ -453,26 +453,6 @@ class MediaUpdateAPIView(RetrieveUpdateAPIView):
 
 
 # faq
-class CreateGetFaqAPIView(APIView):
-    permission_classes = (AllowAny,)
-    serializer_class = FaqSerializer
-
-    def post(self, request):
-        try:
-            question = request.data.get('question')
-            answer = request.data.get('answer')
-            faq = FAQ(question=question, answer=answer)
-            faq.save()
-            return Response({"message": "Faq has been created successfully."})
-        except:
-            return Response({"message": "Fill up all the fields."})
-
-    def get(self, request):
-        faq = FAQ.objects.all()
-        faq_serializer = FaqSerializer(faq, many=True)
-        return Response(faq_serializer.data)
-
-
 class AdminFaqListAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = FaqSerializer

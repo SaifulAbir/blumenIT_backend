@@ -24,7 +24,6 @@ urlpatterns = [
     path('admin/media-update/<int:id>/', MediaUpdateAPIView.as_view()),
 
     # faq
-    path('admin/faq-create/', CreateGetFaqAPIView.as_view()),
     path('admin/faq-list/', AdminFaqListAPIView.as_view()),
     path('admin/faq-create/', AdminFaqCreateAPIView.as_view()),
     path('admin/faq-update/<int:id>/', AdminFaqUpdateAPIView.as_view()),

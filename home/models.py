@@ -168,6 +168,7 @@ class Advertisement(AbstractTimeStamp):
     ]
 
     image = models.ImageField(upload_to='HomeImage', default="")
+    image_url = models.TextField(null=True, blank=True)
     bold_text = models.TextField(null=True, blank=True)
     small_text = models.TextField(null=True, blank=True)
     work_for = models.CharField(

@@ -271,14 +271,13 @@ class ProductListBySerializer(serializers.ModelSerializer):
     price_after_offer_discount = serializers.SerializerMethodField(
         'get_price_after_offer_discount')
 
-    # def to_representation(self, instance):
-    #     # get the serialized data as a dictionary
-    #     data = super().to_representation(instance)
-    #     # update the price field with the discounted price
-    #     if data['offer_discount_price']:
-    #         data['price'] = data['offer_discount_price']
-    # return the updated data
-    # return data
+    availibility_upcoming_status = serializers.SerializerMethodField(
+        'get_availibility_upcoming_status')
+    availibility_pre_order_status = serializers.SerializerMethodField(
+        'get_availibility_pre_order_status')
+    availibility_in_stock_status = serializers.SerializerMethodField(
+        'get_availibility_in_stock_status')
+
     class Meta:
         model = Product
         fields = [
@@ -319,10 +318,43 @@ class ProductListBySerializer(serializers.ModelSerializer):
             'offer_discount_id',
             'offer_discount_price',
             'offer_discount_price_type',
-            'price_after_offer_discount'
+            'price_after_offer_discount',
+            'availibility_upcoming_status',
+            'availibility_pre_order_status',
+            'availibility_in_stock_status'
         ]
         # ordering_fields = ('price', 'price_after_offer_discount')
         # ordering = ('-price_after_offer_discount',)
+
+    def get_availibility_upcoming_status(self, obj):
+        status = False
+        query = ProductFilterAttributes.objects.filter(
+            product=obj.id, attribute_value__value__contains='Up Coming')
+        if query:
+            status = True
+        else:
+            status = False
+        return status
+
+    def get_availibility_pre_order_status(self, obj):
+        status = False
+        query = ProductFilterAttributes.objects.filter(
+            product=obj.id, attribute_value__value__contains='Pre-Order')
+        if query:
+            status = True
+        else:
+            status = False
+        return status
+
+    def get_availibility_in_stock_status(self, obj):
+        status = False
+        query = ProductFilterAttributes.objects.filter(
+            product=obj.id, attribute_value__value__contains='In Stock')
+        if query:
+            status = True
+        else:
+            status = False
+        return status
 
     def get_offer_discount_id(self, obj):
         today_date = timezone.now().date()
@@ -418,6 +450,12 @@ class ProductListBySerializerForHomeData(serializers.ModelSerializer):
         'get_offer_discount_price')
     offer_discount_price_type = serializers.SerializerMethodField(
         'get_offer_discount_price_type')
+    availibility_upcoming_status = serializers.SerializerMethodField(
+        'get_availibility_upcoming_status')
+    availibility_pre_order_status = serializers.SerializerMethodField(
+        'get_availibility_pre_order_status')
+    availibility_in_stock_status = serializers.SerializerMethodField(
+        'get_availibility_in_stock_status')
 
     class Meta:
         model = Product
@@ -439,7 +477,40 @@ class ProductListBySerializerForHomeData(serializers.ModelSerializer):
             'offer_discount_id',
             'offer_discount_price',
             'offer_discount_price_type',
+            'availibility_upcoming_status',
+            'availibility_pre_order_status',
+            'availibility_in_stock_status'
         ]
+
+    def get_availibility_upcoming_status(self, obj):
+        status = False
+        query = ProductFilterAttributes.objects.filter(
+            product=obj.id, attribute_value__value__contains='Up Coming')
+        if query:
+            status = True
+        else:
+            status = False
+        return status
+
+    def get_availibility_pre_order_status(self, obj):
+        status = False
+        query = ProductFilterAttributes.objects.filter(
+            product=obj.id, attribute_value__value__contains='Pre-Order')
+        if query:
+            status = True
+        else:
+            status = False
+        return status
+
+    def get_availibility_in_stock_status(self, obj):
+        status = False
+        query = ProductFilterAttributes.objects.filter(
+            product=obj.id, attribute_value__value__contains='In Stock')
+        if query:
+            status = True
+        else:
+            status = False
+        return status
 
     def get_offer_discount_id(self, obj):
         today_date = timezone.now().date()
@@ -530,6 +601,10 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
         'get_offer_discount_price_type')
     availibility_upcoming_status = serializers.SerializerMethodField(
         'get_availibility_upcoming_status')
+    availibility_pre_order_status = serializers.SerializerMethodField(
+        'get_availibility_pre_order_status')
+    availibility_in_stock_status = serializers.SerializerMethodField(
+        'get_availibility_in_stock_status')
 
     class Meta:
         model = Product
@@ -576,13 +651,35 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             'offer_discount_id',
             'offer_discount_price',
             'offer_discount_price_type',
-            'availibility_upcoming_status'
+            'availibility_upcoming_status',
+            'availibility_pre_order_status',
+            'availibility_in_stock_status'
         ]
 
     def get_availibility_upcoming_status(self, obj):
         status = False
         query = ProductFilterAttributes.objects.filter(
             product=obj.id, attribute_value__value__contains='Up Coming')
+        if query:
+            status = True
+        else:
+            status = False
+        return status
+
+    def get_availibility_pre_order_status(self, obj):
+        status = False
+        query = ProductFilterAttributes.objects.filter(
+            product=obj.id, attribute_value__value__contains='Pre-Order')
+        if query:
+            status = True
+        else:
+            status = False
+        return status
+
+    def get_availibility_in_stock_status(self, obj):
+        status = False
+        query = ProductFilterAttributes.objects.filter(
+            product=obj.id, attribute_value__value__contains='In Stock')
         if query:
             status = True
         else:

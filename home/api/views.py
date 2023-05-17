@@ -510,21 +510,21 @@ class AdminFaqUpdateAPIView(RetrieveUpdateAPIView):
 class AdminFaqDeleteAPIView(ListAPIView):
     permission_classes = [AllowAny]
     serializer_class = FaqSerializer
-    queryset = Brand.objects.all()
+    queryset = FAQ.objects.all()
     lookup_field = 'id'
     lookup_url_kwarg = 'id'
 
     def get_queryset(self):
-        brand_id = self.kwargs['id']
-        brand_obj = Brand.objects.filter(id=brand_id).exists()
-        if brand_obj:
-            brand_obj = Brand.objects.filter(id=brand_id)
-            brand_obj.update(is_active=False)
+        faq_id = self.kwargs['id']
+        faq_obj = FAQ.objects.filter(id=faq_id).exists()
+        if faq_obj:
+            faq_obj = FAQ.objects.filter(id=faq_id)
+            faq_obj.update(is_active=False)
 
-            queryset = Brand.objects.filter(
+            queryset = FAQ.objects.filter(
                 is_active=True).order_by('-created_at')
             return queryset
         else:
             raise ValidationError(
-                {"msg": 'Brand Does not exist!'}
+                {"msg": 'FAQ Does not exist!'}
             )

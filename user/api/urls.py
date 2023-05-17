@@ -7,7 +7,7 @@ from user.api.views import LoginUser, \
     WishlistDataAPIView, \
     SavePcAPIView, SavePcListAPIView, SavePcViewAPIView, SavePcDeleteAPIView, AccountDeleteRequestAPIView, \
     AdminAccountDeleteRequestListAPIView, \
-    AdminAccountDeleteAPIView, ForgotPasswordView, ResetPasswordView
+    AdminAccountDeleteAPIView, ForgotPasswordView, ResetPasswordView, SignUpAPIView
 
 urlpatterns = [
     path('login/', LoginUser.as_view({'post': 'create'}), name='login_user'),
@@ -16,7 +16,7 @@ urlpatterns = [
     path('send-otp/', SendOTPAPIView.as_view(), name='send_otp'),
     path('otp-verify/', OTPVerifyAPIVIEW.as_view(), name='verify_otp'),
     path('resend-otp/', ReSendOTPAPIView.as_view(), name='resend_otp'),
-    # path('sign-up/', SignUpAPIView.as_view(), name='sign_up'),
+    path('sign-up/', SignUpAPIView.as_view(), name='sign_up'),
     path('set-password/', SetPasswordAPIView.as_view(), name='set_password'),
     path('subscription/', SubscriptionAPIView.as_view()),
     path('change_password/', ChangePasswordView.as_view(),

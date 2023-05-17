@@ -3,10 +3,10 @@ from product.models import FlashDealProduct, Specification, SpecificationValue, 
     Category, Inventory, ProductImages, ShippingClass, SubCategory, SubSubCategory, Brand, Tags, Units, \
     DiscountTypes, Product, VariantType, ProductTags, ProductReview, ProductVideoProvider, VatType, SpecificationTitle, ProductReviewReply, \
     FilterAttributes, ProductFilterAttributes, ProductCondition, Warranty, ProductWarranty, SavePc, SavePcItems, Offer, \
-    OfferProduct, OfferCategory, ShippingCountry, ShippingState, ShippingCity
+    OfferProduct, OfferCategory, ShippingCountry, ShippingState, ShippingCity, CategoryImages
 
 
-admin.site.register(Category)
+# admin.site.register(Category)
 admin.site.register(SubCategory)
 admin.site.register(SubSubCategory)
 admin.site.register(Tags)
@@ -14,7 +14,7 @@ admin.site.register(Brand)
 admin.site.register(Units)
 admin.site.register(DiscountTypes)
 admin.site.register(VariantType)
-admin.site.register(ProductTags) 
+admin.site.register(ProductTags)
 admin.site.register(ProductReview)
 admin.site.register(ProductReviewReply)
 admin.site.register(ProductImages)
@@ -36,6 +36,7 @@ admin.site.register(ProductCondition)
 admin.site.register(Warranty)
 # admin.site.register(OfferCategory)
 
+
 class ProductImageInline(admin.TabularInline):
     model = ProductImages
     fields = ['file']
@@ -44,6 +45,7 @@ class ProductImageInline(admin.TabularInline):
 class ProductTagsInline(admin.TabularInline):
     model = ProductTags
     fields = ['tag']
+
 
 class SpecificationInline(admin.TabularInline):
     model = Specification
@@ -64,10 +66,23 @@ class ProductOfferProductInline(admin.TabularInline):
     model = OfferProduct
     fields = ['offer', 'is_active']
 
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     inlines = [
         ProductImageInline, ProductTagsInline, SpecificationInline, ProductFilterAttributesInline, ProductWarrantyInline, ProductOfferProductInline
+    ]
+
+
+class CategoryImageInline(admin.TabularInline):
+    model = CategoryImages
+    fields = ['file']
+
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    inlines = [
+        CategoryImageInline
     ]
 
 
@@ -83,7 +98,6 @@ class OfferAdmin(admin.ModelAdmin):
     ]
 
 
-
 class SavePcItemsInline(admin.TabularInline):
     model = SavePcItems
     fields = ['sub_category', 'product']
@@ -94,7 +108,3 @@ class SavePcAdmin(admin.ModelAdmin):
     inlines = [
         SavePcItemsInline
     ]
-
-
-
-

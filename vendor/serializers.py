@@ -11,7 +11,7 @@ from product.models import Brand, Category, DiscountTypes, FlashDealInfo, FlashD
     ShippingClass, Specification, SpecificationValue, SubCategory, SubSubCategory, Tags, Units, \
     VatType, Attribute, FilterAttributes, ProductFilterAttributes, AttributeValues, ProductWarranty, Warranty, \
     SpecificationTitle, ProductReviewReply, \
-    Offer, OfferProduct, ShippingCountry, ShippingState, ShippingCity, OfferCategory, CategoryImages
+    Offer, OfferProduct, ShippingCountry, ShippingState, ShippingCity, OfferCategory, CategoryBannerImages
 from user.models import User, Subscription
 from cart.models import Order, Coupon, OrderItem, DeliveryAddress, PaymentType
 from user.serializers import CustomerProfileSerializer
@@ -170,12 +170,30 @@ class FilteringAttributesSerializer(serializers.ModelSerializer):
         read_only_fields = ['category', 'sub_category', 'sub_sub_category']
 
 
+class CategoryBannerImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CategoryBannerImages
+        fields = ['id', 'file']
+
+
 class AdminCategoryListSerializer(serializers.ModelSerializer):
+    banner_images = serializers.SerializerMethodField()
+
     class Meta:
         ref_name = "admin category list serializer"
         model = Category
         fields = ['id', 'title', 'ordering_number', 'type',
-                  'banner', 'icon', 'is_featured', 'pc_builder']
+                  'icon', 'is_featured', 'pc_builder', 'banner_images']
+
+    def get_banner_images(self, obj):
+        try:
+            queryset = CategoryBannerImages.objects.filter(
+                category=obj, is_active=True).distinct()
+            serializer = CategoryBannerImageSerializer(instance=queryset, many=True, context={
+                'request': self.context['request']})
+            return serializer.data
+        except:
+            return []
 
 
 class AddNewCategorySerializer(serializers.ModelSerializer):
@@ -207,10 +225,10 @@ class AddNewCategorySerializer(serializers.ModelSerializer):
 
         category_instance = Category.objects.create(**validated_data)
 
-        # product_images
+        # banner_images
         if banner_images:
             for image in banner_images:
-                CategoryImages.objects.create(
+                CategoryBannerImages.objects.create(
                     category=category_instance, file=image)
 
         if category_filter_attributes:
@@ -228,11 +246,12 @@ class UpdateCategoryDetailsSerializer(serializers.ModelSerializer):
     ordering_number = serializers.CharField(required=False)
     filtering_attributes = serializers.SerializerMethodField(
         'get_existing_filtering_attributes')
+    banner_images = serializers.SerializerMethodField()
 
     class Meta:
         model = Category
         fields = ['id', 'title', 'ordering_number', 'type', 'icon',
-                  'banner', 'subtitle', 'is_active', 'filtering_attributes']
+                  'subtitle', 'is_active', 'filtering_attributes', 'banner_images']
 
     def get_existing_filtering_attributes(self, obj):
         try:
@@ -244,17 +263,29 @@ class UpdateCategoryDetailsSerializer(serializers.ModelSerializer):
         except:
             return []
 
+    def get_banner_images(self, obj):
+        try:
+            queryset = CategoryBannerImages.objects.filter(
+                category=obj, is_active=True).distinct()
+            serializer = CategoryBannerImageSerializer(instance=queryset, many=True, context={
+                'request': self.context['request']})
+            return serializer.data
+        except:
+            return []
+
 
 class UpdateCategorySerializer(serializers.ModelSerializer):
     title = serializers.CharField(required=False)
     ordering_number = serializers.CharField(required=False)
     filtering_attributes = FilteringAttributesSerializer(
         many=True, required=False)
+    banner_images = serializers.ListField(
+        child=serializers.FileField(), write_only=True, required=False)
 
     class Meta:
         model = Category
         fields = ['id', 'title', 'ordering_number', 'type', 'icon',
-                  'banner', 'subtitle', 'is_active', 'filtering_attributes']
+                  'subtitle', 'is_active', 'filtering_attributes', 'banner_images']
 
     def update(self, instance, validated_data):
         # filtering_attributes
@@ -262,6 +293,13 @@ class UpdateCategorySerializer(serializers.ModelSerializer):
             filtering_attributes = validated_data.pop('filtering_attributes')
         except:
             filtering_attributes = ''
+
+        # banner_images
+        try:
+            banner_images = validated_data.pop('banner_images')
+        except:
+            banner_images = ''
+
         if filtering_attributes:
             f_a = FilterAttributes.objects.filter(
                 category=instance).exists()
@@ -279,6 +317,15 @@ class UpdateCategorySerializer(serializers.ModelSerializer):
                 category=instance).exists()
             if f_a == True:
                 FilterAttributes.objects.filter(category=instance).delete()
+
+        # banner_images
+        try:
+            if banner_images:
+                for image in banner_images:
+                    CategoryBannerImages.objects.create(
+                        category=instance, file=image)
+        except:
+            raise ValidationError('Problem of Category Image update.')
 
         validated_data.update({"updated_at": timezone.now()})
         return super().update(instance, validated_data)
@@ -1247,28 +1294,6 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
                     OfferProduct.objects.filter(product=instance).delete()
         except:
             raise ValidationError('Problem of Product Offer product update.')
-
-        # try:
-        #     # offer_products
-        #     if offer_products:
-        #         o_p = OfferProduct.objects.filter(offer=instance).exists()
-        #         if o_p == True:
-        #             OfferProduct.objects.filter(offer=instance).delete()
-
-        #         for offer_product in offer_products:
-        #             product = offer_product['product']
-        #             OfferProduct.objects.create(
-        #                 offer=instance, product=product)
-        #     else:
-        #         o_p = OfferProduct.objects.filter(offer=instance).exists()
-        #         if o_p == True:
-        #             OfferProduct.objects.filter(offer=instance).delete()
-
-        #     validated_data.update({"updated_at": timezone.now()})
-        #     return super().update(instance, validated_data)
-        # except:
-        #     validated_data.update({"updated_at": timezone.now()})
-        #     return super().update(instance, validated_data)
 
         # product_filter_attributes
         try:

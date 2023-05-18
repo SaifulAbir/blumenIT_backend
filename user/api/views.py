@@ -705,6 +705,49 @@ class AdminAccountDeleteAPIView(RetrieveUpdateAPIView):
         return self.update(request, *args, **kwargs)
 
 
+class ForgotPasswordCustomerView(generics.GenericAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = ForgotPasswordSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.data['email']
+        user = User.objects.filter(email=email).first()
+        if user:
+            encoded_uid = urlsafe_base64_encode(force_bytes(user.id))
+            token = PasswordResetTokenGenerator().make_token(user)
+
+            # reset_url = request.build_absolute_uri(reverse('reset-password'))
+            reset_url = f"https://blumanit.vercel.app/reset-password/?encoded_uid={encoded_uid}&token={token}"
+
+            subject = "Reset Your Password"
+            message = f"Click the following link to reset your password: {reset_url}"
+
+            recipient_list = [email]
+            send_mail(
+                subject=subject,
+                message=message,
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[email]
+            )
+            # send email
+            # email_message.send()
+            return response.Response(
+                {
+                    "message": "Password reset email sent",
+                    # "message":
+                    #     f"Your Password reset link: {reset_url}"
+                },
+                status=status.HTTP_200_OK,
+            )
+        else:
+            return response.Response(
+                {"message": "User doesn't exists"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+
 class ForgotPasswordView(generics.GenericAPIView):
     permission_classes = [AllowAny]
     serializer_class = ForgotPasswordSerializer

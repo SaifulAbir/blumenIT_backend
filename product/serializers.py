@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from product.models import Category, ProductImages, SubCategory, SubSubCategory, Product, ProductTags, ProductReview, \
     Brand, DiscountTypes, Tags, Units, Specification, SpecificationValue, AttributeValues, Seller, FilterAttributes, \
-    ProductWarranty, Offer, ProductReviewReply, ProductFilterAttributes
+    ProductWarranty, Offer, ProductReviewReply, ProductFilterAttributes, CategoryBannerImages
 
 from user.models import User
 from vendor.models import StoreSettings
@@ -73,12 +73,19 @@ class SubCategorySerializerForMegaMenu(serializers.ModelSerializer):
         return SubSubCategorySerializer(selected_sub_sub_category, many=True).data
 
 
+class CategoryBannerImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CategoryBannerImages
+        fields = ['id', 'file']
+
+
 class StoreCategoryAPIViewListSerializer(serializers.ModelSerializer):
     sub_category = serializers.SerializerMethodField()
+    banner_images = serializers.SerializerMethodField()
 
     class Meta:
         model = Category
-        fields = ['id', 'title', 'icon', 'banner', 'sub_category']
+        fields = ['id', 'title', 'icon', 'banner_images', 'sub_category']
 
     def get_sub_category(self, obj):
         try:
@@ -86,6 +93,16 @@ class StoreCategoryAPIViewListSerializer(serializers.ModelSerializer):
                 category=obj.id, is_active=True).distinct().order_by('-ordering_number')
             serializer = SubCategorySerializerForMegaMenu(
                 instance=queryset, many=True, context={'request': self.context['request']})
+            return serializer.data
+        except:
+            return []
+
+    def get_banner_images(self, obj):
+        try:
+            queryset = CategoryBannerImages.objects.filter(
+                category=obj, is_active=True).distinct()
+            serializer = CategoryBannerImageSerializer(instance=queryset, many=True, context={
+                'request': self.context['request']})
             return serializer.data
         except:
             return []

@@ -186,7 +186,23 @@ class Advertisement(AbstractTimeStamp):
 
 
 class AboutUs(AbstractTimeStamp):
-    content = models.TextField(null=True, blank=True)
+    our_values = models.TextField(null=True, blank=True, default="")
+    our_vision = models.TextField(null=True, blank=True, default="")
+    our_mission = models.TextField(null=True, blank=True, default="")
+    our_goals = models.TextField(null=True, blank=True, default="")
+    our_goals = models.TextField(null=True, blank=True, default="")
+    customer_relationship = models.TextField(null=True, blank=True, default="")
+    our_target_market = models.TextField(null=True, blank=True, default="")
+    retail_wholesale_trade = models.TextField(
+        null=True, blank=True, default="")
+    footer_text = models.TextField(null=True, blank=True, default="")
+    our_values_image = models.ImageField(upload_to='About_us', default="")
+    customer_relationship_image = models.ImageField(
+        upload_to='About_us', default="")
+    our_target_market_image = models.ImageField(
+        upload_to='About_us', default="")
+    retail_wholesale_trade_image = models.ImageField(
+        upload_to='About_us', default="")
     is_active = models.BooleanField(null=False, blank=False, default=True)
 
     class Meta:

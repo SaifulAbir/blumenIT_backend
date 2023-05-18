@@ -3,7 +3,7 @@ from product.models import FlashDealProduct, Specification, SpecificationValue, 
     Category, Inventory, ProductImages, ShippingClass, SubCategory, SubSubCategory, Brand, Tags, Units, \
     DiscountTypes, Product, VariantType, ProductTags, ProductReview, ProductVideoProvider, VatType, SpecificationTitle, ProductReviewReply, \
     FilterAttributes, ProductFilterAttributes, ProductCondition, Warranty, ProductWarranty, SavePc, SavePcItems, Offer, \
-    OfferProduct, OfferCategory, ShippingCountry, ShippingState, ShippingCity, CategoryImages
+    OfferProduct, OfferCategory, ShippingCountry, ShippingState, ShippingCity, CategoryBannerImages
 
 
 # admin.site.register(Category)
@@ -74,15 +74,15 @@ class ProductAdmin(admin.ModelAdmin):
     ]
 
 
-class CategoryImageInline(admin.TabularInline):
-    model = CategoryImages
+class CategoryBannerImageInline(admin.TabularInline):
+    model = CategoryBannerImages
     fields = ['file']
 
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     inlines = [
-        CategoryImageInline
+        CategoryBannerImageInline
     ]
 
 

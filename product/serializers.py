@@ -294,11 +294,13 @@ class ProductListBySerializer(serializers.ModelSerializer):
         'get_availibility_pre_order_status')
     availibility_in_stock_status = serializers.SerializerMethodField(
         'get_availibility_in_stock_status')
+    banner_images = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
         fields = [
             'id',
+            'banner_images',
             'title',
             'slug',
             'sku',
@@ -342,6 +344,16 @@ class ProductListBySerializer(serializers.ModelSerializer):
         ]
         # ordering_fields = ('price', 'price_after_offer_discount')
         # ordering = ('-price_after_offer_discount',)
+
+    def get_banner_images(self, obj):
+        try:
+            queryset = CategoryBannerImages.objects.filter(
+                category=obj.category, is_active=True).distinct()
+            serializer = CategoryBannerImageSerializer(instance=queryset, many=True, context={
+                'request': self.context['request']})
+            return serializer.data
+        except:
+            return []
 
     def get_availibility_upcoming_status(self, obj):
         status = False

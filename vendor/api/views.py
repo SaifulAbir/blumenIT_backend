@@ -11,7 +11,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from product.models import Brand, Category, DiscountTypes, Product, ProductReview, SubCategory, SubSubCategory, Tags, \
     Units, ProductImages, \
     ProductVideoProvider, VatType, FilterAttributes, Attribute, AttributeValues, Inventory, FlashDealInfo, Warranty, \
-    ShippingClass, SpecificationTitle, Offer, ShippingCountry, ShippingState, ShippingCity, OfferCategory
+    ShippingClass, SpecificationTitle, Offer, ShippingCountry, ShippingState, ShippingCity, OfferCategory, CategoryBannerImages
 from user.models import User
 from user.serializers import CustomerProfileSerializer
 from vendor.models import Seller
@@ -3415,6 +3415,26 @@ class AdminWebsiteGeneralSettingsUpdateAPIView(UpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = GeneralSettingsViewSerializer
     queryset = HomeSingleRowData.objects.all()
+
+
+class AdminDeleteCategoryBannerImageAPIView(UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = WebsiteConfigurationViewSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def put(self, request, *args, **kwargs):
+        try:
+            image_id = self.kwargs['id']
+            obj_exist = CategoryBannerImages.objects.filter(
+                id=image_id).exists()
+            if obj_exist:
+                obj = CategoryBannerImages.objects.filter(id=image_id)
+                if obj:
+                    obj.update(is_active=False)
+            return Response({"msg": "Successfully deleted!"})
+        except KeyError:
+            raise ValidationError({"msg": 'Image delete failed!'})
 
 
 class AdminDeleteWebsiteConfigurationImageAPIView(UpdateAPIView):

@@ -64,6 +64,30 @@ class Category(AbstractTimeStamp):
         return 'id: ' + str(self.id) + ' Title: ' + self.title + ' pc_builder:' + str(self.pc_builder)
 
 
+class CategoryBannerImages(AbstractTimeStamp):
+    def validate_file_extension(value):
+        import os
+        from django.core.exceptions import ValidationError
+        ext = os.path.splitext(value.name)[1]
+        valid_extensions = ['.jpg', '.png', '.jpeg']
+        if not ext.lower() in valid_extensions:
+            raise ValidationError('Unsupported file extension.')
+
+    category = models.ForeignKey(
+        Category, on_delete=models.PROTECT, related_name='category_banner_image_category', null=True, blank=True)
+    file = models.FileField(upload_to='category_banner_images', validators=[
+                            validate_file_extension])
+    is_active = models.BooleanField(null=False, blank=False, default=True)
+
+    class Meta:
+        verbose_name = 'CategoryBannerImage'
+        verbose_name_plural = 'CategoryBannerImages'
+        db_table = 'category_banner_images'
+
+    def __str__(self):
+        return self.category.title
+
+
 class CategoryImages(AbstractTimeStamp):
     def validate_file_extension(value):
         import os
@@ -75,7 +99,7 @@ class CategoryImages(AbstractTimeStamp):
 
     category = models.ForeignKey(
         Category, on_delete=models.PROTECT, related_name='category_image_category', null=True, blank=True)
-    file = models.FileField(upload_to='products', validators=[
+    file = models.FileField(upload_to='category_images', validators=[
                             validate_file_extension])
     is_active = models.BooleanField(null=False, blank=False, default=True)
 

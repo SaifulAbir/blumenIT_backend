@@ -32,7 +32,7 @@ from user.serializers import SubscriptionSerializer, \
     CustomerOrderListSerializer, \
     CustomerOrderDetailsSerializer, CustomerProfileSerializer, CustomerAddressListSerializer, CustomerAddressSerializer, \
     WishlistDataSerializer, SavePcCreateSerializer, SavaPcDataSerializer, SavePcDetailsSerializer, \
-    AccountDeleteRequestSerializer, AccountDeleteSerializer, ForgotPasswordSerializer, ResetPasswordSerializer
+    AccountDeleteRequestSerializer, AccountDeleteSerializer, ForgotPasswordSerializer, ResetPasswordSerializer, SignUpSerializer
 
 from vendor.pagination import OrderCustomPagination
 from cart.models import Order, DeliveryAddress, Wishlist
@@ -221,7 +221,7 @@ class OTPVerifyAPIVIEW(CreateAPIView):
 
 class SignUpAPIView(CreateAPIView):
     queryset = User.objects.all()
-    serializer_class = OTPSendSerializer
+    serializer_class = SignUpSerializer
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
@@ -232,6 +232,8 @@ class SignUpAPIView(CreateAPIView):
                 "email", request_data=request.data, arrise=True)
         phone = check_dict_data_rise_error(
             "phone", request_data=request.data, arrise=True)
+        password = check_dict_data_rise_error(
+            "password", request_data=request.data, arrise=True)
 
         if is_login == "false":
             try:
@@ -253,11 +255,11 @@ class SignUpAPIView(CreateAPIView):
                     is_customer=True
                 )
 
-                user.is_active = False
-                user.set_password(phone)
+                user.is_active = True
+                user.set_password(password)
                 user.save()
             if user_obj:
-                user_obj.set_password(phone)
+                user_obj.set_password(password)
                 user_obj.save()
         try:
             user = User.objects.get(phone=phone)

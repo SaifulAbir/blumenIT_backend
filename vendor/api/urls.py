@@ -58,7 +58,7 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminDeleteAttributeValueAPIView, CustomerShippingCountryListAllAPIView, ProductCommentDetailsAPIView, \
     AdminBlogReviewListAPIView, AdminBlogReviewInactiveAPIView, BlogReviewSearchAPI, BlogReviewDetailsAPIView,\
     AdminBlogReviewReplyCreateAPIView, AdminBlogReviewCreateAPIView, AdminShippingStateListByCountryAPIView, \
-    AdminShippingCityListByStateAPIView
+    AdminShippingCityListByStateAPIView, AdminDeleteCategoryBannerImageAPIView
 
 urlpatterns = [
 
@@ -398,6 +398,9 @@ urlpatterns = [
          AdminWebsiteConfigurationViewAPIView.as_view()),
     path('admin/website-configuration-update/<int:pk>/',
          AdminWebsiteConfigurationUpdateAPIView.as_view()),
+
+    path('admin/delete-category-banner-image/<int:id>/',
+         AdminDeleteCategoryBannerImageAPIView.as_view()),
 
     path('admin/delete-website-configuration-image/<int:id>/',
          AdminDeleteWebsiteConfigurationImageAPIView.as_view()),

@@ -59,7 +59,7 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminBlogReviewListAPIView, AdminBlogReviewInactiveAPIView, BlogReviewSearchAPI, BlogReviewDetailsAPIView,\
     AdminBlogReviewReplyCreateAPIView, AdminBlogReviewCreateAPIView, AdminShippingStateListByCountryAPIView, \
     AdminShippingCityListByStateAPIView, AdminDeleteCategoryBannerImageAPIView, AdminAboutUsListAPIView, \
-    AdminAboutUsCreateAPIView, AdminAboutUsUpdateAPIView, AdminAboutUsDeleteAPIView
+    AdminAboutUsCreateAPIView, AdminAboutUsUpdateAPIView, AdminAboutUsDeleteAPIView, AdminAboutUsUpdateDetailsAPIView
 
 urlpatterns = [
 
@@ -437,6 +437,8 @@ urlpatterns = [
          AdminAboutUsCreateAPIView.as_view()),
     path('admin/about-us-update/<int:id>/',
          AdminAboutUsUpdateAPIView.as_view()),
+    path('admin/about-us-update-details/<int:id>/',
+         AdminAboutUsUpdateDetailsAPIView.as_view()),
     path('admin/about-us-delete/<int:id>/',
          AdminAboutUsDeleteAPIView.as_view()),
 ]

@@ -20,7 +20,7 @@ from django.db.models import Avg
 from django.utils import timezone
 from support_ticket.models import Ticket, TicketConversation
 from stuff.models import Role, RolePermissions
-from home.models import CorporateDeal, Advertisement, HomeSingleRowData, SliderImage, RequestQuote, ContactUs
+from home.models import CorporateDeal, Advertisement, HomeSingleRowData, SliderImage, RequestQuote, ContactUs, AboutUs
 from django.db.models import Q
 from django.db.models import Sum
 from rest_framework.response import Response
@@ -3058,3 +3058,11 @@ class BlogReviewDataSerializer(serializers.ModelSerializer):
         replies = BlogReviewReply.objects.filter(
             review=obj, is_active=True).order_by('-created_at')
         return BlogCommentsRepliesSerializer(replies, many=True).data
+
+
+class AboutUsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AboutUs
+        fields = ['id', 'our_values', 'our_vision', 'our_mission',
+                  'our_goals', 'customer_relationship', 'our_target_market', 'retail_wholesale_trade', 'footer_text', 'our_values_image', 'customer_relationship_image', 'our_target_market_image', 'retail_wholesale_trade_image', 'is_active']
+

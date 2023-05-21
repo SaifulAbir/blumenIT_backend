@@ -15,7 +15,7 @@ from product.models import Brand, Category, DiscountTypes, Product, ProductRevie
 from user.models import User
 from user.serializers import CustomerProfileSerializer
 from vendor.models import Seller
-from home.models import CorporateDeal, Advertisement, HomeSingleRowData, RequestQuote, ContactUs
+from home.models import CorporateDeal, Advertisement, HomeSingleRowData, RequestQuote, ContactUs, AboutUs
 from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategorySerializer, \
     VendorBrandSerializer, AdminCategoryListSerializer, VendorProductListSerializer, \
     ProductUpdateSerializer, VendorProductViewSerializer, AdminSubCategoryListSerializer, \
@@ -41,10 +41,9 @@ from vendor.serializers import AddNewSubCategorySerializer, AddNewSubSubCategory
     AdminCategoryIsPcBuilderSerializer, UpdateCategoryDetailsSerializer, UpdateSubCategoryDetailsSerializer, \
     UpdateSubSubCategoryDetailsSerializer, WebsiteConfigurationViewSerializer, WebsiteConfigurationUpdateSerializer, \
     GeneralSettingsViewSerializer, ProductCommentDataSerializer, BlogReviewListSerializer, BlogReviewDataSerializer, \
-    BlogCommentsRepliesSerializer, BlogReviewCreateSerializer
+    BlogCommentsRepliesSerializer, BlogReviewCreateSerializer, AboutUsSerializer
 
 from cart.models import Order, OrderItem, Coupon
-from cart.models import Order, OrderItem
 from user.models import User, Subscription
 from rest_framework.exceptions import ValidationError
 from vendor.pagination import OrderCustomPagination
@@ -3596,3 +3595,63 @@ class AdminBlogReviewReplyCreateAPIView(CreateAPIView):
             raise ValidationError(
                 {"msg": 'You can not create blog reply, because you are not an Admin or a Staff!'})
 # Blog Review related admin apies views............................ end
+
+
+# ABout US related apies
+class AdminAboutUsListAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AboutUsSerializer
+    pagination_class = ProductCustomPagination
+
+    def get_queryset(self):
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+            queryset = AboutUs.objects.filter(
+                is_active=True).order_by('-created_at')
+            return queryset
+        else:
+            raise ValidationError(
+                {"msg": 'You can not see About us list data, because you are not an Admin or a Staff!'})
+
+
+class AdminAboutUsCreateAPIView(CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AboutUsSerializer
+
+    def post(self, request, *args, **kwargs):
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+            return super(AdminAboutUsCreateAPIView, self).post(request, *args, **kwargs)
+        else:
+            raise ValidationError(
+                {"msg": 'You can not create About us Poster, because you are not an Admin or a Staff!'})
+
+
+class AdminAboutUsUpdateAPIView(UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AboutUsSerializer
+    queryset = AboutUs.objects.all()
+
+
+class AdminAboutUsDeleteAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AboutUsSerializer
+    pagination_class = ProductCustomPagination
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+            about_us_obj_exist = AboutUs.objects.filter(
+                id=id).exists()
+            if about_us_obj_exist:
+                AboutUs.objects.filter(id=id).update(is_active=False)
+
+                queryset = AboutUs.objects.filter(
+                    is_active=True).order_by('-created_at')
+                return queryset
+            else:
+                raise ValidationError(
+                    {"msg": 'About Us Does not exist!'})
+        else:
+            raise ValidationError(
+                {"msg": 'You can not delete About Us, because you are not an Admin or a Staff!'})

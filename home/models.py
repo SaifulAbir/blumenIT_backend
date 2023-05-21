@@ -190,7 +190,6 @@ class AboutUs(AbstractTimeStamp):
     our_vision = models.TextField(null=True, blank=True, default="")
     our_mission = models.TextField(null=True, blank=True, default="")
     our_goals = models.TextField(null=True, blank=True, default="")
-    our_goals = models.TextField(null=True, blank=True, default="")
     customer_relationship = models.TextField(null=True, blank=True, default="")
     our_target_market = models.TextField(null=True, blank=True, default="")
     retail_wholesale_trade = models.TextField(

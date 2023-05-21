@@ -3657,3 +3657,23 @@ class AdminAboutUsDeleteAPIView(ListAPIView):
         else:
             raise ValidationError(
                 {"msg": 'You can not delete About Us, because you are not an Admin or a Staff!'})
+
+
+class AdminAboutUsUpdateDetailsAPIView(RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = AboutUsSerializer
+    lookup_field = 'id'
+    lookup_url_kwarg = "id"
+
+    def get_queryset(self):
+        id = self.kwargs['id']
+        if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
+            query = AboutUs.objects.filter(id=id)
+            if query:
+                return query
+            else:
+                raise ValidationError(
+                    {"msg": 'About Us does not exist!'})
+        else:
+            raise ValidationError(
+                {"msg": 'You can not About Us this product, because you are not an Admin or a Staff or a vendor!'})

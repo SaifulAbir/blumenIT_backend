@@ -2137,7 +2137,8 @@ class AdminShippingClassListAPIView(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True:
-            queryset = ShippingClass.objects.filter(is_active=True)
+            queryset = ShippingClass.objects.filter(
+                is_active=True).order_by('-created_at')
             if queryset:
                 return queryset
             else:
@@ -2154,7 +2155,8 @@ class AdminShippingClassListAllAPIView(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True:
-            queryset = ShippingClass.objects.filter(is_active=True)
+            queryset = ShippingClass.objects.filter(
+                is_active=True).order_by('-created_at')
             if queryset:
                 return queryset
             else:

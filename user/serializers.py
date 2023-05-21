@@ -40,7 +40,7 @@ class SignUpSerializer(serializers.ModelSerializer):
                         'phone': {'required': True},
                         'password': {'write_only': True}
                         }
-        fields = ('email', 'phone', 'password', 'is_login')
+        fields = ('name', 'email', 'phone', 'password', 'is_login')
         model = user_models.User
 
 

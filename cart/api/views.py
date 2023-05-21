@@ -5,16 +5,15 @@ from rest_framework import status
 from rest_framework import serializers
 from product.serializers import DiscountTypeSerializer
 from cart.serializers import CheckoutDetailsSerializer, CheckoutSerializer, \
-     PaymentTypesListSerializer, ApplyCouponSerializer, DeliveryAddressSerializer, ShippingClassDataSerializer
+    PaymentTypesListSerializer, ApplyCouponSerializer, DeliveryAddressSerializer, ShippingClassDataSerializer, ShippingCountrySerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from product.models import Product, DiscountTypes, ShippingClass
+from product.models import Product, DiscountTypes, ShippingClass, ShippingCountry
 from cart.models import BillingAddress, Order, PaymentType, Coupon, UseRecordOfCoupon, Wishlist, \
     DeliveryAddress
 from user.models import User
 from django.db.models import Q
-
 
 
 class DiscountTypeCreateAPIView(CreateAPIView):
@@ -59,7 +58,8 @@ class ApplyCouponAPIView(APIView):
             code = self.kwargs['code']
             uid = self.kwargs['uid']
 
-            code_exist = Coupon.objects.filter(code=code, is_active=True).exists()
+            code_exist = Coupon.objects.filter(
+                code=code, is_active=True).exists()
             if code_exist:
                 coupon_obj = Coupon.objects.filter(code=code)
                 start_date_time = coupon_obj[0].start_time
@@ -129,12 +129,15 @@ class WishlistAddRemoveAPIView(APIView):
             user_id = self.request.user
             product_id = self.kwargs['product_id']
             product = Product.objects.get(id=product_id)
-            wishlist_data_exist = Wishlist.objects.filter(Q(user=user_id), Q(product=product_id)).exists()
+            wishlist_data_exist = Wishlist.objects.filter(
+                Q(user=user_id), Q(product=product_id)).exists()
             if wishlist_data_exist:
-                Wishlist.objects.filter(Q(user=user_id), Q(product=product_id)).delete()
+                Wishlist.objects.filter(
+                    Q(user=user_id), Q(product=product_id)).delete()
                 return Response({"msg": "wishlist updated!"})
             else:
-                Wishlist.objects.create(user=user_id, product=product, is_active=True)
+                Wishlist.objects.create(
+                    user=user_id, product=product, is_active=True)
                 return Response({"msg": "wishlist created!"})
         else:
             raise ValidationError(
@@ -165,7 +168,8 @@ class DeliveryAddressListAPIView(ListAPIView):
     serializer_class = DeliveryAddressSerializer
 
     def get_queryset(self):
-        queryset = DeliveryAddress.objects.filter(user=self.request.user, is_active=True).order_by('-created_at')
+        queryset = DeliveryAddress.objects.filter(
+            user=self.request.user, is_active=True).order_by('-created_at')
         return queryset
 
 
@@ -178,6 +182,7 @@ class DeliveryAddressDeleteAPIView(DestroyAPIView):
 
     def delete(self, request, *args, **kwargs):
         return super(DeliveryAddressDeleteAPIView, self).delete(request, *args, **kwargs)
+
 
 class BillingAddressDeleteAPIView(DestroyAPIView):
     permission_classes = [IsAuthenticated]
@@ -195,5 +200,20 @@ class ShippingClassDataAPIView(ListAPIView):
     serializer_class = ShippingClassDataSerializer
 
     def get_queryset(self):
-        queryset = ShippingClass.objects.filter(is_active=True).order_by('-created_at')
+        queryset = ShippingClass.objects.filter(
+            is_active=True).order_by('-created_at')
         return queryset
+
+
+class ShippingCountryListAPIView(ListAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = ShippingCountrySerializer
+
+    def get_queryset(self):
+        queryset = ShippingCountry.objects.filter(
+            is_active=True).order_by('-created_at')
+        if queryset:
+            return queryset
+        else:
+            raise ValidationError(
+                {"msg": "Shipping Country doesn't exist! "})

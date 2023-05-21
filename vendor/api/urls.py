@@ -435,7 +435,7 @@ urlpatterns = [
          AdminAboutUsListAPIView.as_view()),
     path('admin/about-us-create/',
          AdminAboutUsCreateAPIView.as_view()),
-    path('admin/about-us-update/<int:id>/',
+    path('admin/about-us-update/<int:pk>/',
          AdminAboutUsUpdateAPIView.as_view()),
     path('admin/about-us-update-details/<int:id>/',
          AdminAboutUsUpdateDetailsAPIView.as_view()),

@@ -64,7 +64,7 @@ class AboutUsSerializer(serializers.ModelSerializer):
     class Meta:
         model = AboutUs
         fields = ['id', 'our_values', 'our_vision', 'our_mission',
-                  'our_goals', 'customer_relationship', 'our_target_market', 'retail_wholesale_trade', 'footer_text', 'our_values_image', 'customer_relationship_image', 'our_target_market_image', 'retail_wholesale_trade_image', 'is_active']
+                  'our_goals', 'customer_relationship', 'our_target_market', 'retail_wholesale_trade', 'footer_text', 'promise_text', 'our_values_image', 'customer_relationship_image', 'our_target_market_image', 'retail_wholesale_trade_image', 'is_active']
 
 
 class SingleRowDataSerializer(serializers.ModelSerializer):

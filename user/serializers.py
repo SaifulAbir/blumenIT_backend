@@ -7,10 +7,14 @@ from product.models import Product, SavePc, SavePcItems, SubCategory, ShippingCl
 from cart.models import Wishlist
 from product.serializers import ProductListBySerializer
 import datetime
+from rest_framework.exceptions import ValidationError
+from django.db.models import Q
 
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.encoding import smart_str, force_str, smart_bytes, DjangoUnicodeDecodeError
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from rest_framework.response import Response
+from rest_framework import serializers, status
 
 
 class SetPasswordSerializer(serializers.ModelSerializer):
@@ -40,8 +44,61 @@ class SignUpSerializer(serializers.ModelSerializer):
                         'phone': {'required': True},
                         'password': {'write_only': True}
                         }
-        fields = ('name', 'email', 'phone', 'password', 'is_login')
+        fields = ['name', 'email', 'phone', 'password', 'is_login']
         model = user_models.User
+
+    # def create(self, validated_data):
+    #     try:
+    #         email_get = validated_data.pop('email')
+    #         email_get_data = email_get.lower()
+    #         if email_get:
+    #             email_get_for_check = User.objects.filter(
+    #                 email=email_get.lower())
+    #             if email_get_for_check:
+    #                 raise ValidationError('Email already exists')
+    #         phone_get = validated_data.pop('phone')
+    #         phone_get_data = phone_get.lower()
+    #         if phone_get:
+    #             phone_get_for_check = User.objects.filter(
+    #                 phone=phone_get.lower())
+    #             if phone_get_for_check:
+    #                 raise ValidationError('Phone already exists')
+    #         customer_instance = User.objects.create(**validated_data, phone=phone_get_data,
+    #                                                 email=email_get_data)
+
+    #         try:
+    #             user_obj = User.objects.get(
+    #                 Q(email=email_get_data) | Q(phone=phone_get_data))
+    #         except User.DoesNotExist:
+    #             user_obj = None
+
+    #         if not user_obj:
+    #             # create seller user
+    #             name = validated_data.pop('name')
+    #             print('name')
+    #             print(name)
+    #             password = validated_data.pop('password')
+    #             user = User.objects.create(
+    #                 name=name,
+    #                 email=email_get_data,
+    #                 phone=phone_get_data,
+    #                 username=email_get_data,
+    #                 is_customer=True
+    #             )
+
+    #             user.is_active = True
+    #             user.set_password(password)
+    #             user.save()
+
+    #         else:
+    #             if user_obj.email == email_get_data:
+    #                 return Response({"details": "Email already exists"}, status=status.HTTP_400_BAD_REQUEST)
+    #             if user_obj.phone == phone_get_data:
+    #                 return Response({"details": "Phone number already exists"}, status=status.HTTP_400_BAD_REQUEST)
+
+    #         return customer_instance
+    #     except:
+    #         return Response({"details": "Something went wrong!"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class OTPReSendSerializer(serializers.ModelSerializer):

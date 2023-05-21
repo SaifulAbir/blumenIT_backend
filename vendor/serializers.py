@@ -2308,11 +2308,10 @@ class AdminBlogToggleSerializer(serializers.ModelSerializer):
 
 
 class AdvertisementPosterSerializer(serializers.ModelSerializer):
-    obj_id = serializers.CharField(required=False)
 
     class Meta:
         model = Advertisement
-        fields = ['id', 'obj_id', 'image', 'image_url', 'bold_text',
+        fields = ['id', 'image', 'image_url', 'bold_text',
                   'small_text', 'is_gaming', 'work_for']
 
 
@@ -2754,92 +2753,101 @@ class WebsiteConfigurationUpdateSerializer(serializers.ModelSerializer):
         #     for popular_products_banner in popular_products_banners:
         #         Advertisement.objects.create(
         #             image=popular_products_banner, work_for='POPULAR_PRODUCT_POSTER', is_gaming=False)
-        if popular_products_banners:
-            for popular_products_banner in popular_products_banners:
-                try:
-                    obj_id = popular_products_banner['obj_id']
-                except:
-                    obj_id = None
-                try:
-                    image = popular_products_banner['image']
-                    if obj_id:
-                        Advertisement.objects.filter(
-                            id=obj_id).update(image=image)
-                except:
-                    image = None
-                try:
-                    image_url = popular_products_banner['image_url']
-                    if obj_id:
-                        Advertisement.objects.filter(
-                            id=obj_id).update(image_url=image_url)
-                except:
-                    image_url = None
+
+        # if popular_products_banners:
+        #     for popular_products_banner in popular_products_banners:
+        #         try:
+        #             obj_id = popular_products_banner['obj_id']
+        #         except:
+        #             obj_id = None
+        #         try:
+        #             image = popular_products_banner['image']
+        #             if obj_id:
+        #                 Advertisement.objects.filter(
+        #                     id=obj_id).update(image=image)
+        #         except:
+        #             image = None
+        #         try:
+        #             image_url = popular_products_banner['image_url']
+        #             if obj_id:
+        #                 Advertisement.objects.filter(
+        #                     id=obj_id).update(image_url=image_url)
+        #         except:
+        #             image_url = None
+        try:
+            if popular_products_banners:
+                for popular_products_banner in popular_products_banners:
+                    try:
+                        image = popular_products_banner['image']
+                    except:
+                        raise ValidationError(
+                            'Image field required.')
+                    try:
+                        image_url = popular_products_banner['image_url']
+                    except:
+                        image_url = None
+                    Advertisement.objects.create(
+                        image=image, image_url=image_url, is_gaming=False, work_for='POPULAR_PRODUCT_POSTER')
+        except:
+            raise ValidationError(
+                'Problem of Popular Products Banners update.')
 
         # feature_products_banners
-        if feature_products_banners:
-            for feature_products_banner in feature_products_banners:
-                try:
-                    obj_id = feature_products_banner['obj_id']
-                except:
-                    obj_id = None
-                try:
-                    image = feature_products_banner['image']
-                    if obj_id:
-                        Advertisement.objects.filter(
-                            id=obj_id).update(image=image)
-                except:
-                    image = None
-                try:
-                    image_url = feature_products_banner['image_url']
-                    if obj_id:
-                        Advertisement.objects.filter(
-                            id=obj_id).update(image_url=image_url)
-                except:
-                    image_url = None
+        try:
+            if feature_products_banners:
+                for feature_products_banner in feature_products_banners:
+                    try:
+                        image = feature_products_banner['image']
+                    except:
+                        raise ValidationError(
+                            'Image field required.')
+                    try:
+                        image_url = feature_products_banner['image_url']
+                    except:
+                        image_url = None
+                    Advertisement.objects.create(
+                        image=image, image_url=image_url, is_gaming=False, work_for='FEATURED_PRODUCT_POSTER')
+        except:
+            raise ValidationError(
+                'Problem of Feature Products Banners update.')
 
         # gaming_popular_products_banners
-        if gaming_popular_products_banners:
-            for gaming_popular_products_banner in gaming_popular_products_banners:
-                try:
-                    obj_id = gaming_popular_products_banner['obj_id']
-                except:
-                    obj_id = None
-                try:
-                    image = gaming_popular_products_banner['image']
-                    if obj_id:
-                        Advertisement.objects.filter(
-                            id=obj_id).update(image=image)
-                except:
-                    image = None
-                try:
-                    image_url = gaming_popular_products_banner['image_url']
-                    if obj_id:
-                        Advertisement.objects.filter(
-                            id=obj_id).update(image_url=image_url)
-                except:
-                    image_url = None
+        try:
+            if gaming_popular_products_banners:
+                for gaming_popular_products_banner in gaming_popular_products_banners:
+                    try:
+                        image = gaming_popular_products_banner['image']
+                    except:
+                        raise ValidationError(
+                            'Image field required.')
+                    try:
+                        image_url = gaming_popular_products_banner['image_url']
+                    except:
+                        image_url = None
+                    Advertisement.objects.create(
+                        image=image, image_url=image_url, is_gaming=True, work_for='POPULAR_PRODUCT_POSTER')
+        except:
+            raise ValidationError(
+                'Problem of Gaming Popular Products Banners update.')
 
         # gaming_feature_products_banners
-        if gaming_feature_products_banners:
-            for gaming_feature_products_banner in gaming_feature_products_banners:
-                try:
-                    obj_id = gaming_feature_products_banner['obj_id']
-                except:
-                    obj_id = None
-                try:
-                    image = gaming_feature_products_banner['image']
-                    if obj_id:
-                        Advertisement.objects.filter(
-                            id=obj_id).update(image=image)
-                except:
-                    image = None
-                try:
-                    image_url = gaming_feature_products_banner['image_url']
-                    if obj_id:
-                        Advertisement.objects.filter(
-                            id=obj_id).update(image_url=image_url)
-                except:
-                    image_url = None
+        try:
+            if gaming_feature_products_banners:
+                for gaming_feature_products_banner in gaming_feature_products_banners:
+                    try:
+                        image = gaming_feature_products_banner['image']
+                    except:
+                        raise ValidationError(
+                            'Image field required.')
+                    try:
+                        image_url = gaming_feature_products_banner['image_url']
+                    except:
+                        image_url = None
+                    Advertisement.objects.create(
+                        image=image, image_url=image_url, is_gaming=True, work_for='FEATURED_PRODUCT_POSTER')
+        except:
+            raise ValidationError(
+                'Problem of Gaming Feature Products Banners update.')
 
         validated_data.update({"updated_at": timezone.now()})
         return super().update(instance, validated_data)

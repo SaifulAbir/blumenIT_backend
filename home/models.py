@@ -194,6 +194,7 @@ class AboutUs(AbstractTimeStamp):
     our_target_market = models.TextField(null=True, blank=True, default="")
     retail_wholesale_trade = models.TextField(
         null=True, blank=True, default="")
+    promise_text = models.TextField(null=True, blank=True, default="")
     footer_text = models.TextField(null=True, blank=True, default="")
     our_values_image = models.ImageField(upload_to='About_us', default="")
     customer_relationship_image = models.ImageField(

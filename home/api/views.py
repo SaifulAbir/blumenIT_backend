@@ -1,10 +1,10 @@
 from rest_framework.views import APIView
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateAPIView, RetrieveAPIView, UpdateAPIView
-from home.models import FAQ, ContactUs, HomeSingleRowData, Advertisement, Pages, MediaFiles
+from home.models import FAQ, ContactUs, HomeSingleRowData, Advertisement, Pages, MediaFiles, AboutUs
 from home.serializers import product_catListSerializer, PagesSerializer,\
     ContactUsSerializer, FaqSerializer, SingleRowDataSerializer, SliderAdvertisementDataSerializer, AdvertisementDataSerializer, \
     StoreCategoryAPIViewListSerializer, product_sub_catListSerializer, MediaSerializer, MediaDataSerializer, \
-    CorporateDealCreateSerializer, RequestQuoteSerializer
+    CorporateDealCreateSerializer, RequestQuoteSerializer, AboutUsSerializer
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.db.models import Q, Count
@@ -230,6 +230,18 @@ class ContactUsAPIView(APIView):
     def get(self, request):
         contact = ContactUs.objects.all()
         contact_serializer = ContactUsSerializer(contact, many=True)
+        return Response(contact_serializer.data)
+
+
+class AboutUsAPIView(APIView):
+    permission_classes = (AllowAny,)
+    serializer_class = AboutUsSerializer
+
+    def get(self, request):
+        contact = AboutUs.objects.filter(
+            is_active=True).order_by('-created_at')[:1]
+        contact_serializer = AboutUsSerializer(
+            contact, many=True, context={"request": request})
         return Response(contact_serializer.data)
 
 

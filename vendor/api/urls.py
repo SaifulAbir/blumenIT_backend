@@ -58,7 +58,8 @@ from vendor.api.views import AdminAddNewSubCategoryAPIView, AdminAddNewSubSubCat
     AdminDeleteAttributeValueAPIView, CustomerShippingCountryListAllAPIView, ProductCommentDetailsAPIView, \
     AdminBlogReviewListAPIView, AdminBlogReviewInactiveAPIView, BlogReviewSearchAPI, BlogReviewDetailsAPIView,\
     AdminBlogReviewReplyCreateAPIView, AdminBlogReviewCreateAPIView, AdminShippingStateListByCountryAPIView, \
-    AdminShippingCityListByStateAPIView, AdminDeleteCategoryBannerImageAPIView
+    AdminShippingCityListByStateAPIView, AdminDeleteCategoryBannerImageAPIView, AdminAboutUsListAPIView, \
+    AdminAboutUsCreateAPIView, AdminAboutUsUpdateAPIView, AdminAboutUsDeleteAPIView
 
 urlpatterns = [
 
@@ -428,4 +429,14 @@ urlpatterns = [
          BlogReviewDetailsAPIView.as_view(), name='blog_review_details'),
     path('admin/blog-review-reply-create/',
          AdminBlogReviewReplyCreateAPIView.as_view()),
+
+    # about us related apies
+    path('admin/about-us-list/',
+         AdminAboutUsListAPIView.as_view()),
+    path('admin/about-us-create/',
+         AdminAboutUsCreateAPIView.as_view()),
+    path('admin/about-us-update/<int:id>/',
+         AdminAboutUsUpdateAPIView.as_view()),
+    path('admin/about-us-delete/<int:id>/',
+         AdminAboutUsDeleteAPIView.as_view()),
 ]

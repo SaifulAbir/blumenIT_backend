@@ -2308,9 +2308,11 @@ class AdminBlogToggleSerializer(serializers.ModelSerializer):
 
 
 class AdvertisementPosterSerializer(serializers.ModelSerializer):
+    obj_id = serializers.CharField(required=False)
+
     class Meta:
         model = Advertisement
-        fields = ['id', 'image', 'image_url', 'bold_text',
+        fields = ['id', 'obj_id', 'image', 'image_url', 'bold_text',
                   'small_text', 'is_gaming', 'work_for']
 
 
@@ -2593,6 +2595,11 @@ class WebsiteConfigurationUpdateSerializer(serializers.ModelSerializer):
         model = HomeSingleRowData
         fields = [
             'id',
+            'popular_products_banners',
+            'feature_products_banners',
+            'gaming_slider_images',
+            'gaming_popular_products_banners',
+            'gaming_feature_products_banners',
             'phone',
             'whats_app_number',
             'email',
@@ -2601,12 +2608,7 @@ class WebsiteConfigurationUpdateSerializer(serializers.ModelSerializer):
             'home_slider_images',
             'offer_slider_images',
             'small_banners_carousel',
-            'small_banners_static',
-            'popular_products_banners',
-            'feature_products_banners',
-            'gaming_slider_images',
-            'gaming_popular_products_banners',
-            'gaming_feature_products_banners'
+            'small_banners_static'
         ]
 
     def update(self, instance, validated_data):
@@ -2754,46 +2756,90 @@ class WebsiteConfigurationUpdateSerializer(serializers.ModelSerializer):
         #             image=popular_products_banner, work_for='POPULAR_PRODUCT_POSTER', is_gaming=False)
         if popular_products_banners:
             for popular_products_banner in popular_products_banners:
-                image = popular_products_banner['image']
+                try:
+                    obj_id = popular_products_banner['obj_id']
+                except:
+                    obj_id = None
+                try:
+                    image = popular_products_banner['image']
+                    if obj_id:
+                        Advertisement.objects.filter(
+                            id=obj_id).update(image=image)
+                except:
+                    image = None
                 try:
                     image_url = popular_products_banner['image_url']
+                    if obj_id:
+                        Advertisement.objects.filter(
+                            id=obj_id).update(image_url=image_url)
                 except:
-                    image_url = ''
-                Advertisement.objects.create(
-                    image=image, image_url=image_url, work_for='POPULAR_PRODUCT_POSTER', is_gaming=False)
+                    image_url = None
 
         # feature_products_banners
         if feature_products_banners:
             for feature_products_banner in feature_products_banners:
-                image = feature_products_banner['image']
                 try:
-                    image_url = popular_products_banner['image_url']
+                    obj_id = feature_products_banner['obj_id']
                 except:
-                    image_url = ''
-                Advertisement.objects.create(
-                    image=image, image_url=image_url, work_for='FEATURED_PRODUCT_POSTER', is_gaming=False)
+                    obj_id = None
+                try:
+                    image = feature_products_banner['image']
+                    if obj_id:
+                        Advertisement.objects.filter(
+                            id=obj_id).update(image=image)
+                except:
+                    image = None
+                try:
+                    image_url = feature_products_banner['image_url']
+                    if obj_id:
+                        Advertisement.objects.filter(
+                            id=obj_id).update(image_url=image_url)
+                except:
+                    image_url = None
 
         # gaming_popular_products_banners
         if gaming_popular_products_banners:
             for gaming_popular_products_banner in gaming_popular_products_banners:
-                image = gaming_popular_products_banner['image']
                 try:
-                    image_url = popular_products_banner['image_url']
+                    obj_id = gaming_popular_products_banner['obj_id']
                 except:
-                    image_url = ''
-                Advertisement.objects.create(
-                    image=image, image_url=image_url, work_for='POPULAR_PRODUCT_POSTER', is_gaming=True)
+                    obj_id = None
+                try:
+                    image = gaming_popular_products_banner['image']
+                    if obj_id:
+                        Advertisement.objects.filter(
+                            id=obj_id).update(image=image)
+                except:
+                    image = None
+                try:
+                    image_url = gaming_popular_products_banner['image_url']
+                    if obj_id:
+                        Advertisement.objects.filter(
+                            id=obj_id).update(image_url=image_url)
+                except:
+                    image_url = None
 
         # gaming_feature_products_banners
         if gaming_feature_products_banners:
             for gaming_feature_products_banner in gaming_feature_products_banners:
-                image = gaming_feature_products_banner['image']
                 try:
-                    image_url = popular_products_banner['image_url']
+                    obj_id = gaming_feature_products_banner['obj_id']
                 except:
-                    image_url = ''
-                Advertisement.objects.create(
-                    image=image, image_url=image_url, work_for='FEATURED_PRODUCT_POSTER', is_gaming=True)
+                    obj_id = None
+                try:
+                    image = gaming_feature_products_banner['image']
+                    if obj_id:
+                        Advertisement.objects.filter(
+                            id=obj_id).update(image=image)
+                except:
+                    image = None
+                try:
+                    image_url = gaming_feature_products_banner['image_url']
+                    if obj_id:
+                        Advertisement.objects.filter(
+                            id=obj_id).update(image_url=image_url)
+                except:
+                    image_url = None
 
         validated_data.update({"updated_at": timezone.now()})
         return super().update(instance, validated_data)
@@ -2823,6 +2869,11 @@ class WebsiteConfigurationViewSerializer(serializers.ModelSerializer):
         model = HomeSingleRowData
         fields = [
             'id',
+            'popular_products_banners',
+            'feature_products_banners',
+            'gaming_popular_products_banners',
+            'gaming_feature_products_banners',
+
             'phone',
             'whats_app_number',
             'email',
@@ -2833,12 +2884,7 @@ class WebsiteConfigurationViewSerializer(serializers.ModelSerializer):
             'offer_slider_images',
             'small_banners_carousel',
             'small_banners_static',
-            'popular_products_banners',
-            'feature_products_banners',
-
             'gaming_slider_images',
-            'gaming_popular_products_banners',
-            'gaming_feature_products_banners'
         ]
 
     def get_home_slider_images(self, obj):
@@ -3065,4 +3111,3 @@ class AboutUsSerializer(serializers.ModelSerializer):
         model = AboutUs
         fields = ['id', 'our_values', 'our_vision', 'our_mission',
                   'our_goals', 'customer_relationship', 'our_target_market', 'retail_wholesale_trade', 'footer_text', 'our_values_image', 'customer_relationship_image', 'our_target_market_image', 'retail_wholesale_trade_image', 'is_active']
-

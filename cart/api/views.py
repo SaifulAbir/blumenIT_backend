@@ -200,9 +200,14 @@ class ShippingClassDataAPIView(ListAPIView):
     serializer_class = ShippingClassDataSerializer
 
     def get_queryset(self):
-        queryset = ShippingClass.objects.filter(
-            is_active=True).order_by('-created_at')
-        return queryset
+        country_id = self.kwargs['country_id']
+        queryset = ShippingClass.objects.filter(shipping_country=country_id,
+                                                is_active=True).order_by('-created_at')
+        if queryset:
+            return queryset
+        else:
+            raise ValidationError(
+                {"msg": "Shipping class data doesn't exist! "})
 
 
 class ShippingCountryListAPIView(ListAPIView):

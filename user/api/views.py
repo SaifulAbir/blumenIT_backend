@@ -235,6 +235,9 @@ class SignUpAPIView(CreateAPIView):
         password = check_dict_data_rise_error(
             "password", request_data=request.data, arrise=True)
 
+        name = check_dict_data_rise_error(
+            "name", request_data=request.data, arrise=True)
+
         if is_login == "false":
             try:
                 user_obj = User.objects.get(Q(email=email) | Q(phone=phone))
@@ -252,7 +255,8 @@ class SignUpAPIView(CreateAPIView):
                     email=email,
                     phone=phone,
                     username=email,
-                    is_customer=True
+                    is_customer=True,
+                    name=name
                 )
 
                 user.is_active = True

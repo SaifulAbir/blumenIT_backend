@@ -1786,7 +1786,7 @@ class AdminOrderUpdateSerializer(serializers.ModelSerializer):
 class AdminCustomerListSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'name', 'email', 'phone', 'is_active']
+        fields = ['id', 'name', 'email', 'phone', 'date_joined', 'is_active']
 
 
 class AdminTicketListSerializer(serializers.ModelSerializer):

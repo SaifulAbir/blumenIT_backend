@@ -1405,7 +1405,8 @@ class AdminCustomerListAPIView(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
-            queryset = User.objects.filter(is_customer=True)
+            queryset = User.objects.filter(
+                is_customer=True, is_active=True).order_by('-date_joined')
             return queryset
         else:
             raise ValidationError(

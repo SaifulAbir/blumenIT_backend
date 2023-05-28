@@ -102,7 +102,7 @@ class AdminSellerListAPIView(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True:
-            queryset = Seller.objects.filter(is_active=True)
+            queryset = Seller.objects.filter(is_active=True).order_by('-id')
             if queryset:
                 return queryset
             else:

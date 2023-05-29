@@ -102,7 +102,7 @@ class BlogReviewSerializer(serializers.ModelSerializer):
                   'created_at', 'replies', 'review_text', 'rating_number']
 
     def get_replies(self, obj):
-        replies = BlogReviewReply.objects.filter(review=obj, is_active=True)
+        replies = BlogReviewReply.objects.filter(review=obj, is_active=True).order_by('-created_at')
         return BlogCommentsRepliesSerializer(replies, many=True).data
 
 

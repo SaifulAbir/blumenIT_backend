@@ -84,6 +84,7 @@ class HomeSingleRowData(AbstractTimeStamp):
     whats_app_number = models.CharField(max_length=20, null=True, blank=True)
     email = models.EmailField(null=True, blank=True)
     bottom_banner = models.ImageField(upload_to='HomeImage', default="")
+    bottom_banner_url = models.URLField(null=True, blank=True)
     shop_address = models.TextField(default='', null=True, blank=True)
     is_active = models.BooleanField(default=True)
     header_logo = models.ImageField(

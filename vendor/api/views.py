@@ -102,8 +102,11 @@ class AdminSellerListAPIView(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True:
+            name = self.request.GET.get('name')
             queryset = Seller.objects.filter(is_active=True).order_by('-id')
             if queryset:
+                if name:
+                    queryset = queryset.filter(Q(name__icontains=name))
                 return queryset
             else:
                 raise ValidationError({"msg": "No seller available! "})

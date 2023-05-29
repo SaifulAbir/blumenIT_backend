@@ -77,6 +77,7 @@ class SingleRowDataSerializer(serializers.ModelSerializer):
             'shop_address',
             'email',
             'bottom_banner',
+            'bottom_banner_url',
             'is_active',
             'header_logo',
             'footer_logo',

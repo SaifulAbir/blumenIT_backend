@@ -195,7 +195,14 @@ class ApplyCouponSerializer(serializers.ModelSerializer):
                   'quantity', 'number_of_uses', 'start_time', 'is_active']
 
 
+class CountrySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ShippingCountry
+        fields = ['id', 'title']
+
+
 class DeliveryAddressSerializer(serializers.ModelSerializer):
+    country = CountrySerializer(read_only=True)
     class Meta:
         model = DeliveryAddress
         fields = ['id', 'user', 'name', 'address', 'phone',

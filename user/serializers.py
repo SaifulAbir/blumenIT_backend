@@ -1,5 +1,7 @@
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
+
+from cart.serializers import CountrySerializer
 from user import models as user_models
 from user.models import CustomerProfile, Subscription, User, OTPModel
 from cart.models import Order, OrderItem, DeliveryAddress
@@ -240,6 +242,7 @@ class CustomerOrderItemsSerializer(serializers.ModelSerializer):
 
 
 class CustomerDeliveryAddressSerializer(serializers.ModelSerializer):
+    country = CountrySerializer(read_only=True)
     class Meta:
         model = DeliveryAddress
         fields = ['id', 'user', 'name', 'address', 'phone',

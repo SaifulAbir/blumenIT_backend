@@ -5,7 +5,7 @@ from .utils import unique_order_id_generator_for_order, unique_sub_order_id_gene
 from django.db.models.signals import pre_save
 from user.models import User, CustomerProfile
 from django.utils.translation import gettext as _
-from product.models import Product, ShippingClass, DiscountTypes, ProductWarranty, Offer, OfferProduct
+from product.models import Product, ShippingClass, DiscountTypes, ProductWarranty, Offer, OfferProduct, ShippingCountry
 from django.utils import timezone
 
 '''
@@ -105,8 +105,8 @@ class DeliveryAddress(AbstractTimeStamp):
         max_length=100, null=False, blank=False, default='')
     phone = models.CharField(max_length=255, null=True, blank=True, default='')
     email = models.CharField(max_length=255, null=True, blank=True, default='')
-    country = models.CharField(
-        max_length=100, blank=True, null=True, default='')
+    country = models.ForeignKey(
+        ShippingCountry, on_delete=models.CASCADE, blank=True, null=True)
     city = models.CharField(max_length=100, blank=True, null=True, default='')
     state = models.CharField(max_length=100, blank=True, null=True, default='')
     zip_code = models.CharField(

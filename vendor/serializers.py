@@ -2369,6 +2369,7 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
             'whats_app_number',
             'email',
             'bottom_banner',
+            'bottom_banner_url',
             'shop_address',
             'home_slider_images',
             'offer_slider_images',
@@ -2603,6 +2604,7 @@ class WebsiteConfigurationUpdateSerializer(serializers.ModelSerializer):
             'whats_app_number',
             'email',
             'bottom_banner',
+            'bottom_banner_url',
             'shop_address',
             'home_slider_images',
             'offer_slider_images',
@@ -2886,6 +2888,7 @@ class WebsiteConfigurationViewSerializer(serializers.ModelSerializer):
             'whats_app_number',
             'email',
             'bottom_banner',
+            'bottom_banner_url',
             'shop_address',
 
             'home_slider_images',

@@ -88,7 +88,7 @@ class VendorProductReportAPI(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True:
-            queryset = OrderItem.objects.all().order_by('-created_at')
+            queryset = OrderItem.objects.all().order_by('-quantity')
 
             if queryset:
                 return queryset

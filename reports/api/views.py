@@ -122,8 +122,7 @@ class VendorProductReportSearchAPI(ListAPIView):
                 queryset = queryset.filter(Q(order__order_date__range=(start_date,end_date)) | Q(order__order_date__icontains=start_date))
 
             if seller_name:
-                #search by seller name
-                queryset = queryset.filter(Q(product__seller__seller_name__icontains=seller_name))
+                queryset = queryset.filter(Q(product__seller__name__icontains=seller_name))
 
             return queryset
 
@@ -220,7 +219,7 @@ class SellerProductsSaleReportAPI(ListAPIView):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             seller_name = self.request.GET.get('seller_name')
             if seller_name:
-                queryset = Seller.objects.filter(seller_name=seller_name).annotate(number_of_product_sale=Count('product_seller')).order_by('-number_of_product_sale')
+                queryset = Seller.objects.filter(name__icontains=seller_name).annotate(number_of_product_sale=Count('product_seller')).order_by('-number_of_product_sale')  
             else:
                 queryset = Seller.objects.all().annotate(number_of_product_sale=Count('product_seller')).order_by('-number_of_product_sale')
             if queryset:

@@ -110,7 +110,7 @@ class VendorProductReportSearchAPI(ListAPIView):
             order_status = request.GET.get('order_status')
             start_date = request.GET.get('start_date')
             end_date = request.GET.get('end_date')
-            seller_id = request.GET.get('seller_id')
+            seller_name = request.GET.get('seller_name')
 
             queryset = OrderItem.objects.all().order_by('-created_at')
 
@@ -121,8 +121,9 @@ class VendorProductReportSearchAPI(ListAPIView):
             if start_date:
                 queryset = queryset.filter(Q(order__order_date__range=(start_date,end_date)) | Q(order__order_date__icontains=start_date))
 
-            if seller_id:
-                queryset = queryset.filter(Q(order__vendor__exact=seller_id))
+            if seller_name:
+                #search by seller name
+                queryset = queryset.filter(Q(product__seller__seller_name__icontains=seller_name))
 
             return queryset
 
@@ -217,7 +218,11 @@ class SellerProductsSaleReportAPI(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True:
-            queryset = Seller.objects.all().annotate(number_of_product_sale=Count('product_seller')).order_by('-number_of_product_sale')
+            seller_name = self.request.GET.get('seller_name')
+            if seller_name:
+                queryset = Seller.objects.filter(seller_name=seller_name).annotate(number_of_product_sale=Count('product_seller')).order_by('-number_of_product_sale')
+            else:
+                queryset = Seller.objects.all().annotate(number_of_product_sale=Count('product_seller')).order_by('-number_of_product_sale')
             if queryset:
                 return queryset
             else:

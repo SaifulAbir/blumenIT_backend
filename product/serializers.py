@@ -612,6 +612,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
         'get_availibility_pre_order_status')
     availibility_in_stock_status = serializers.SerializerMethodField(
         'get_availibility_in_stock_status')
+    is_new = serializers.SerializerMethodField('get_is_new')
 
     class Meta:
         model = Product
@@ -650,6 +651,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             'product_specification',
             'product_reviews',
             'warranty',
+            'is_new',
             'product_condition',
             'video_link',
             'related_products',
@@ -663,6 +665,20 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
             'availibility_in_stock_status'
         ]
 
+    def get_is_new(self, obj):
+        create_date = obj.created_at
+        created_month_number = create_date.month
+        created_year_number = create_date.year
+
+        today = timezone.now().date()
+        today_month = today.month
+        today_year = today.year
+
+        if created_month_number == today_month and created_year_number == today_year:
+            return True
+        else:
+            return False
+        
     def get_availibility_upcoming_status(self, obj):
         status = False
         query = ProductFilterAttributes.objects.filter(

@@ -5,7 +5,8 @@ from rest_framework import status
 from rest_framework import serializers
 from product.serializers import DiscountTypeSerializer
 from cart.serializers import CheckoutDetailsSerializer, CheckoutSerializer, \
-    PaymentTypesListSerializer, ApplyCouponSerializer, DeliveryAddressSerializer, ShippingClassDataSerializer, ShippingCountrySerializer
+    PaymentTypesListSerializer, ApplyCouponSerializer, DeliveryAddressSerializer, ShippingClassDataSerializer, \
+    ShippingCountrySerializer, DeliveryAddressCreateSerializer
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -146,7 +147,7 @@ class WishlistAddRemoveAPIView(APIView):
 
 class DeliveryAddressCreateAPIView(CreateAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = DeliveryAddressSerializer
+    serializer_class = DeliveryAddressCreateSerializer
 
     def post(self, request, *args, **kwargs):
         return super(DeliveryAddressCreateAPIView, self).post(request, *args, **kwargs)
@@ -154,7 +155,7 @@ class DeliveryAddressCreateAPIView(CreateAPIView):
 
 class DeliveryAddressUpdateAPIView(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = DeliveryAddressSerializer
+    serializer_class = DeliveryAddressCreateSerializer
     queryset = DeliveryAddress.objects.all()
     lookup_field = 'id'
     lookup_url_kwarg = "id"

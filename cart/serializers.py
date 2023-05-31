@@ -201,8 +201,7 @@ class CountrySerializer(serializers.ModelSerializer):
         fields = ['id', 'title']
 
 
-class DeliveryAddressSerializer(serializers.ModelSerializer):
-    country = CountrySerializer(read_only=True)
+class DeliveryAddressCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeliveryAddress
         fields = ['id', 'user', 'name', 'address', 'phone',
@@ -212,6 +211,14 @@ class DeliveryAddressSerializer(serializers.ModelSerializer):
         address_instance = DeliveryAddress.objects.create(
             **validated_data, user=self.context['request'].user)
         return address_instance
+
+
+class DeliveryAddressSerializer(serializers.ModelSerializer):
+    country = CountrySerializer(read_only=True)
+    class Meta:
+        model = DeliveryAddress
+        fields = ['id', 'user', 'name', 'address', 'phone',
+                  'email', 'zip_code', 'country', 'city', 'state', 'shipping_cost', 'shipping_class']
 
 
 class OrderSerializer(serializers.ModelSerializer):

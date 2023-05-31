@@ -3088,7 +3088,7 @@ class AdminSellerListAllAPIView(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
-            queryset = Seller.objects.filter(is_active=True)
+            queryset = Seller.objects.filter(is_active=True).order_by('-created_at')
             if queryset:
                 return queryset
             else:

@@ -3544,7 +3544,7 @@ class AdminBlogReviewInactiveAPIView(ListAPIView):
                 review_obj = BlogReview.objects.filter(id=id)
                 review_obj.update(is_active=False)
                 queryset = BlogReview.objects.filter(
-                    is_active=True).order_by('-created_at')
+                    is_active=True).order_by('created_at')
                 return queryset
             else:
                 raise ValidationError(

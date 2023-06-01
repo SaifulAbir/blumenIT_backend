@@ -81,7 +81,8 @@ class InHouseSaleSerializer(serializers.ModelSerializer):
 
 
 class SellerProductSaleSerializer(serializers.ModelSerializer):
-    number_of_product_sale = serializers.SerializerMethodField()
+    # number_of_product_sale = serializers.SerializerMethodField()
+    number_of_product_sale = serializers.IntegerField()
     order_amount = serializers.SerializerMethodField()
 
     class Meta:
@@ -89,16 +90,16 @@ class SellerProductSaleSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'phone',
                   'number_of_product_sale', 'order_amount']
 
-    def get_number_of_product_sale(self, obj):
-        order_item_obj = OrderItem.objects.filter(
-            Q(product__seller=obj.id)).exists()
-        if order_item_obj:
-            order_item_ob = OrderItem.objects.filter(
-                Q(product__seller=obj.id)).count()
-        else:
-            order_item_ob = 0
+    # def get_number_of_product_sale(self, obj):
+    #     order_item_obj = OrderItem.objects.filter(
+    #         Q(product__seller=obj.id)).exists()
+    #     if order_item_obj:
+    #         order_item_ob = OrderItem.objects.filter(
+    #             Q(product__seller=obj.id)).count()
+    #     else:
+    #         order_item_ob = 0
 
-        return order_item_ob
+    #     return order_item_ob
 
     def get_order_amount(self, obj):
         order_item_obj = OrderItem.objects.filter(

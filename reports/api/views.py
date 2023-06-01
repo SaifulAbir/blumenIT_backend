@@ -7,8 +7,9 @@ from product.pagination import ProductCustomPagination
 from reports.serializers import SalesReportSerializer, VendorProductReportSerializer, InHouseProductSerializer, SellerProductSaleSerializer, \
     ProductStockSerializer, ProductWishlistSerializer, InHouseSaleSerializer
 from rest_framework.exceptions import ValidationError
-from django.db.models import Q
-from django.db.models import Q, Count, Sum
+from django.db.models import Q, Count, Sum, Subquery, OuterRef, Prefetch
+from django.db.models.functions import Coalesce
+
 
 class SalesReportAPI(ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -19,14 +20,16 @@ class SalesReportAPI(ListAPIView):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
 
             if self.request.user.is_seller == True:
-                queryset = Order.objects.filter(order_item_order__product__seller=Seller.objects.get(seller_user=self.request.user.id)).order_by('-created_at').distinct()
+                queryset = Order.objects.filter(order_item_order__product__seller=Seller.objects.get(
+                    seller_user=self.request.user.id)).order_by('-created_at').distinct()
             else:
                 queryset = Order.objects.all().order_by('-created_at')
 
             if queryset:
                 return queryset
             else:
-                raise ValidationError({"msg": "There is no data in order list."})
+                raise ValidationError(
+                    {"msg": "There is no data in order list."})
         else:
             raise ValidationError(
                 {"msg": 'You can not see order report list, because you are not an Admin or a staff or a vendor!'})
@@ -46,7 +49,6 @@ class SalesReportSearchAPI(ListAPIView):
                 pagination = 10
             self.pagination_class.page_size = pagination
 
-
             request = self.request
             order_status = request.GET.get('order_status')
             start_date = request.GET.get('start_date')
@@ -55,24 +57,25 @@ class SalesReportSearchAPI(ListAPIView):
             phone = request.GET.get('phone')
 
             if self.request.user.is_seller == True:
-                queryset = Order.objects.filter(order_item_order__product__seller=Seller.objects.get(seller_user=self.request.user.id)).order_by('-created_at').distinct()
+                queryset = Order.objects.filter(order_item_order__product__seller=Seller.objects.get(
+                    seller_user=self.request.user.id)).order_by('-created_at').distinct()
             else:
                 queryset = Order.objects.all().order_by('-created_at')
 
-
             if order_status:
-                queryset = queryset.filter(Q(order_status__icontains=order_status))
+                queryset = queryset.filter(
+                    Q(order_status__icontains=order_status))
 
             # date
             if start_date:
-                queryset = queryset.filter(Q(order_date__range=(start_date,end_date)) | Q(order_date__icontains=start_date))
+                queryset = queryset.filter(Q(order_date__range=(
+                    start_date, end_date)) | Q(order_date__icontains=start_date))
 
             if order_code:
                 queryset = queryset.filter(Q(order_id__icontains=order_code))
 
             if phone:
                 queryset = queryset.filter(Q(user__phone__icontains=phone))
-
 
             return queryset
 
@@ -93,7 +96,8 @@ class VendorProductReportAPI(ListAPIView):
             if queryset:
                 return queryset
             else:
-                raise ValidationError({"msg": "There is no product in order items."})
+                raise ValidationError(
+                    {"msg": "There is no product in order items."})
         else:
             raise ValidationError(
                 {"msg": 'You can not see vendor product list, because you are not an Admin or a staff!'})
@@ -115,14 +119,17 @@ class VendorProductReportSearchAPI(ListAPIView):
             queryset = OrderItem.objects.all().order_by('-created_at')
 
             if order_status:
-                queryset = queryset.filter(Q(order__order_status__icontains=order_status))
+                queryset = queryset.filter(
+                    Q(order__order_status__icontains=order_status))
 
             # date
             if start_date:
-                queryset = queryset.filter(Q(order__order_date__range=(start_date,end_date)) | Q(order__order_date__icontains=start_date))
+                queryset = queryset.filter(Q(order__order_date__range=(
+                    start_date, end_date)) | Q(order__order_date__icontains=start_date))
 
             if seller_name:
-                queryset = queryset.filter(Q(product__seller__name__icontains=seller_name))
+                queryset = queryset.filter(
+                    Q(product__seller__name__icontains=seller_name))
 
             return queryset
 
@@ -138,12 +145,14 @@ class InHouseProductReportAPI(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True:
-            queryset = Product.objects.filter(in_house_product=True).order_by('-created_at')
+            queryset = Product.objects.filter(
+                in_house_product=True).order_by('-created_at')
 
             if queryset:
                 return queryset
             else:
-                raise ValidationError({"msg": "There is no in-house product available."})
+                raise ValidationError(
+                    {"msg": "There is no in-house product available."})
         else:
             raise ValidationError(
                 {"msg": 'You can not see in-house product list, because you are not an Admin or a staff!'})
@@ -156,11 +165,13 @@ class InHouseProductSaleReportAPI(ListAPIView):
 
     def get_queryset(self):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True:
-            queryset = Product.objects.filter(order_item_product__order__in_house_order=True).order_by('-created_at').distinct()
+            queryset = Product.objects.filter(
+                order_item_product__order__in_house_order=True).order_by('-created_at').distinct()
             if queryset:
                 return queryset
             else:
-                raise ValidationError({"msg": "There is no in-house order available."})
+                raise ValidationError(
+                    {"msg": "There is no in-house order available."})
         else:
             raise ValidationError(
                 {"msg": 'You can not see in-house product sale report list, because you are not an Admin or a staff!'})
@@ -176,7 +187,8 @@ class InHouseProductSaleReportSearchAPI(ListAPIView):
             request = self.request
             search = request.GET.get('search')
 
-            queryset = Product.objects.filter(order_item_product__order__in_house_order=True).order_by('-created_at').distinct()
+            queryset = Product.objects.filter(
+                order_item_product__order__in_house_order=True).order_by('-created_at').distinct()
 
             if search:
                 queryset = queryset.filter(Q(title__icontains=search))
@@ -219,13 +231,24 @@ class SellerProductsSaleReportAPI(ListAPIView):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             seller_name = self.request.GET.get('seller_name')
             if seller_name:
-                queryset = Seller.objects.filter(name__icontains=seller_name).annotate(number_of_product_sale=Count('product_seller')).order_by('-number_of_product_sale')  
+                # queryset = Seller.objects.filter(name__icontains=seller_name).annotate(number_of_product_sale=Count('product_seller')).order_by('-number_of_product_sale')
+
+                queryset = Seller.objects.filter(name__icontains=seller_name).annotate(number_of_product_sale=Coalesce(Sum(
+                    'product_seller__sell_count'
+                ), 0)).order_by('-number_of_product_sale')
             else:
-                queryset = Seller.objects.all().annotate(number_of_product_sale=Count('product_seller')).order_by('-number_of_product_sale')
+                # queryset = Seller.objects.all().annotate(number_of_product_sale=Count(
+                #     'order_vendor__product_count')).order_by('-number_of_product_sale')
+
+                queryset = Seller.objects.all().annotate(number_of_product_sale=Coalesce(Sum(
+                    'product_seller__sell_count'
+                ), 0)).order_by('-number_of_product_sale')
+
             if queryset:
                 return queryset
             else:
-                raise ValidationError({"msg": "There is no seller product sale available."})
+                raise ValidationError(
+                    {"msg": "There is no seller product sale available."})
         else:
             raise ValidationError(
                 {"msg": 'You can not see seller product sale list, because you are not an Admin or a staff!'})
@@ -241,7 +264,9 @@ class SellerProductsSaleReportSearchAPI(ListAPIView):
             request = self.request
             status = request.GET.get('status')
 
-            queryset = Seller.objects.all().annotate(number_of_product_sale=Count('product_seller')).order_by('-number_of_product_sale')
+            queryset = Seller.objects.all().annotate(number_of_product_sale=Coalesce(Sum(
+                'product_seller__sell_count'
+            ), 0)).order_by('-number_of_product_sale')
 
             if status:
                 queryset = queryset.filter(Q(status__exact=status))
@@ -261,14 +286,17 @@ class ProductStockReportAPI(ListAPIView):
     def get_queryset(self):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True or self.request.user.is_seller == True:
             if self.request.user.is_seller == True:
-                queryset = Product.objects.filter(status='PUBLISH',  seller=Seller.objects.get(seller_user=self.request.user.id)).order_by('-created_at')
+                queryset = Product.objects.filter(status='PUBLISH',  seller=Seller.objects.get(
+                    seller_user=self.request.user.id)).order_by('-created_at')
             else:
-                queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
+                queryset = Product.objects.filter(
+                    status='PUBLISH').order_by('-created_at')
 
             if queryset:
                 return queryset
             else:
-                raise ValidationError({"msg": "There is no product list available."})
+                raise ValidationError(
+                    {"msg": "There is no product list available."})
         else:
             raise ValidationError(
                 {"msg": 'You can not see product list, because you are not an Admin or a staff!'})
@@ -285,9 +313,11 @@ class ProductStockReportSearchAPI(ListAPIView):
             search = request.GET.get('search')
 
             if self.request.user.is_seller == True:
-                queryset = Product.objects.filter(status='PUBLISH',  seller=Seller.objects.get(seller_user=self.request.user.id)).order_by('-created_at')
+                queryset = Product.objects.filter(status='PUBLISH',  seller=Seller.objects.get(
+                    seller_user=self.request.user.id)).order_by('-created_at')
             else:
-                queryset = Product.objects.filter(status='PUBLISH').order_by('-created_at')
+                queryset = Product.objects.filter(
+                    status='PUBLISH').order_by('-created_at')
 
             if search:
                 queryset = queryset.filter(Q(title__icontains=search))
@@ -311,7 +341,8 @@ class ProductWishlistReportAPI(ListAPIView):
             if queryset:
                 return queryset
             else:
-                raise ValidationError({"msg": "There is no product list available."})
+                raise ValidationError(
+                    {"msg": "There is no product list available."})
         else:
             raise ValidationError(
                 {"msg": 'You can not see product list, because you are not an Admin or a staff!'})

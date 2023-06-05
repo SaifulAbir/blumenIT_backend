@@ -3581,7 +3581,7 @@ class BlogReviewDetailsAPIView(APIView):
     def get(self, request, *args, **kwargs):
         if self.request.user.is_superuser == True or self.request.user.is_staff == True:
             review_id = self.kwargs['id']
-            review_details_data = BlogReview.objects.filter(id=review_id).order_by('-created_at')
+            review_details_data = BlogReview.objects.filter(id=review_id)
             serializer = BlogReviewDataSerializer(
                 review_details_data, many=True)
             return Response(serializer.data)

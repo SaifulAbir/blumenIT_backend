@@ -3113,7 +3113,7 @@ class BlogReviewDataSerializer(serializers.ModelSerializer):
 
     def get_replies(self, obj):
         replies = BlogReviewReply.objects.filter(
-            review=obj, is_active=True).order_by('-created_at')
+            review=obj, is_active=True)
         return BlogCommentsRepliesSerializer(replies, many=True).data
 
 

@@ -98,6 +98,7 @@ class SliderAdvertisementDataSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'image',
+            'image_url',
             'is_active',
         ]
 

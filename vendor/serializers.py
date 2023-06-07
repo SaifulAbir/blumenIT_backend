@@ -2348,10 +2348,14 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
     home_slider_images = SliderSerializer(many=True, required=False)
     offer_slider_images = SliderSerializer(many=True, required=False)
     gaming_slider_images = SliderSerializer(many=True, required=False)
-    small_banners_carousel = serializers.ListField(
-        child=serializers.FileField(), write_only=True, required=False)
-    small_banners_static = serializers.ListField(
-        child=serializers.FileField(), write_only=True, required=False)
+    # small_banners_carousel = serializers.ListField(
+    #     child=serializers.FileField(), write_only=True, required=False)
+    # small_banners_static = serializers.ListField(
+    #     child=serializers.FileField(), write_only=True, required=False)
+    small_banners_carousel = AdvertisementPosterSerializer(
+        many=True, required=False)
+    small_banners_static = AdvertisementPosterSerializer(
+        many=True, required=False)
     popular_products_banners = AdvertisementPosterSerializer(
         many=True, required=False)
     feature_products_banners = AdvertisementPosterSerializer(
@@ -2512,22 +2516,32 @@ class WebsiteConfigurationSerializer(serializers.ModelSerializer):
             raise ValidationError('Problem of Home Gaming Images insert.')
 
         # small_banners_carousel
+        # if small_banners_carousel:
+        #     for small_banner in small_banners_carousel:
+        #         Advertisement.objects.create(
+        #             image=small_banner, work_for='SLIDER_SMALL_CAROUSEL', is_gaming=False)
         if small_banners_carousel:
-            for small_banner in small_banners_carousel:
+            for small_banners_c in small_banners_carousel:
+                image = small_banners_c['image']
+                try:
+                    image_url = small_banners_c['image_url']
+                except:
+                    image_url = ''
                 Advertisement.objects.create(
-                    image=small_banner, work_for='SLIDER_SMALL_CAROUSEL', is_gaming=False)
+                    image=image, image_url=image_url, work_for='SLIDER_SMALL_CAROUSEL', is_gaming=False)
 
         # small_banners_static
         if small_banners_static:
-            for small_banner in small_banners_static:
+            for small_banners_s in small_banners_static:
+                image = small_banners_s['image']
+                try:
+                    image_url = small_banners_s['image_url']
+                except:
+                    image_url = ''
                 Advertisement.objects.create(
-                    image=small_banner, work_for='SLIDER_SMALL_STATIC', is_gaming=False)
+                    image=image, image_url=image_url, work_for='SLIDER_SMALL_STATIC', is_gaming=False)
 
         # popular_products_banners
-        # if popular_products_banners:
-        #     for popular_products_banner in popular_products_banners:
-        #         Advertisement.objects.create(
-        #             image=popular_products_banner, work_for='POPULAR_PRODUCT_POSTER', is_gaming=False)
         if popular_products_banners:
             for popular_products_banner in popular_products_banners:
                 image = popular_products_banner['image']
@@ -2578,10 +2592,10 @@ class WebsiteConfigurationUpdateSerializer(serializers.ModelSerializer):
     home_slider_images = SliderSerializer(many=True, required=False)
     offer_slider_images = SliderSerializer(many=True, required=False)
     gaming_slider_images = SliderSerializer(many=True, required=False)
-    small_banners_carousel = serializers.ListField(
-        child=serializers.FileField(), write_only=True, required=False)
-    small_banners_static = serializers.ListField(
-        child=serializers.FileField(), write_only=True, required=False)
+    small_banners_carousel = AdvertisementPosterSerializer(
+        many=True, required=False)
+    small_banners_static = AdvertisementPosterSerializer(
+        many=True, required=False)
     popular_products_banners = AdvertisementPosterSerializer(
         many=True, required=False)
     feature_products_banners = AdvertisementPosterSerializer(
@@ -2739,16 +2753,42 @@ class WebsiteConfigurationUpdateSerializer(serializers.ModelSerializer):
             raise ValidationError('Problem of Home Gaming Images insert.')
 
         # small_banners_carousel
-        if small_banners_carousel:
-            for small_banner in small_banners_carousel:
-                Advertisement.objects.create(
-                    image=small_banner, work_for='SLIDER_SMALL_CAROUSEL', is_gaming=False)
+        try:
+            if small_banners_carousel:
+                for small_banners_c in small_banners_carousel:
+                    try:
+                        image = small_banners_c['image']
+                    except:
+                        raise ValidationError(
+                            'Image field required.')
+                    try:
+                        image_url = small_banners_c['image_url']
+                    except:
+                        image_url = None
+                    Advertisement.objects.create(
+                        image=image, image_url=image_url, is_gaming=False, work_for='SLIDER_SMALL_CAROUSEL')
+        except:
+            raise ValidationError(
+                'Problem of Small Banners Carousel update.')
 
         # small_banners_static
-        if small_banners_static:
-            for small_banner in small_banners_static:
-                Advertisement.objects.create(
-                    image=small_banner, work_for='SLIDER_SMALL_STATIC', is_gaming=False)
+        try:
+            if small_banners_static:
+                for small_banners_s in small_banners_static:
+                    try:
+                        image = small_banners_s['image']
+                    except:
+                        raise ValidationError(
+                            'Image field required.')
+                    try:
+                        image_url = small_banners_s['image_url']
+                    except:
+                        image_url = None
+                    Advertisement.objects.create(
+                        image=image, image_url=image_url, is_gaming=False, work_for='SLIDER_SMALL_STATIC')
+        except:
+            raise ValidationError(
+                'Problem of Small Banners Carousel update.')
 
         # popular_products_banners
         # if popular_products_banners:

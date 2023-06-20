@@ -50,25 +50,25 @@ class HomeDataAPIView(APIView):
 
         # featured
         featured = Product.objects.filter(
-            status='PUBLISH', is_featured=True, is_active=True).order_by('-created_at')
+            status='PUBLISH', is_featured=True, is_active=True).order_by('-created_at')[:20]
         featured_serializer = ProductListBySerializerForHomeData(
             featured, many=True, context={"request": request})
 
         # most popular
         popular = Product.objects.filter(status="PUBLISH").annotate(
-            count=Count('product_review_product')).order_by('-count')
+            count=Count('product_review_product')).order_by('-count')[:10]
         popular_serializer = ProductListBySerializerForHomeData(
             popular, many=True, context={"request": request})
 
         # gaming product
-        gaming_product = Product.objects.filter(
-            status="PUBLISH").order_by('-created_at')
-        gaming_serializer = ProductListBySerializerForHomeData(
-            gaming_product, many=True, context={"request": request})
+        # gaming_product = Product.objects.filter(
+        #     status="PUBLISH").order_by('-created_at')
+        # gaming_serializer = ProductListBySerializerForHomeData(
+        #     gaming_product, many=True, context={"request": request})
 
         # brand list
         brand_list = Brand.objects.filter(
-            is_active=True).order_by('-created_at')
+            is_active=True).order_by('-created_at')[:20]
         brand_list_serializer = BrandSerializer(
             brand_list, many=True, context={"request": request})
 
@@ -115,9 +115,9 @@ class HomeDataAPIView(APIView):
             customer_service_pages, many=True, context={"request": request})
 
         # faqs datas
-        faqs = FAQ.objects.filter(is_active=True).order_by('-created_at')
-        faqs_serializer = FaqSerializer(
-            faqs, many=True, context={"request": request})
+        # faqs = FAQ.objects.filter(is_active=True).order_by('-created_at')
+        # faqs_serializer = FaqSerializer(
+        #     faqs, many=True, context={"request": request})
 
         return Response({
             "slider_images": slider_images_serializer.data,
@@ -125,7 +125,7 @@ class HomeDataAPIView(APIView):
             "featured_categories": featured_categories_serializer,
             "featured_products": featured_serializer.data,
             "popular_product": popular_serializer.data,
-            "gaming_product": gaming_serializer.data,
+            # "gaming_product": gaming_serializer.data,
             "brand_list": brand_list_serializer.data,
             "single_row_data_serializer": single_row_data_serializer.data,
             "poster_under_carousel_data_serializer": poster_under_carousel_data_serializer.data,
@@ -134,7 +134,7 @@ class HomeDataAPIView(APIView):
             "poster_under_featured_products_data_serializer": poster_under_featured_products_data_serializer.data,
             "info_pages": info_pages_serializer.data,
             "customer_service": customer_service_pages_serializer.data,
-            "faqs_serializer": faqs_serializer.data
+            # "faqs_serializer": faqs_serializer.data
         })
 
 

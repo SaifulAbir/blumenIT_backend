@@ -136,7 +136,53 @@ class HomeDataAPIView(APIView):
             "customer_service": customer_service_pages_serializer.data,
             # "faqs_serializer": faqs_serializer.data
         })
+    
 
+class NavbarDataAPIView(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, request):
+        # single row data
+        single_row_data = HomeSingleRowData.objects.filter(
+            Q(is_active=True)).order_by('-created_at')[:1]
+        single_row_data_serializer = SingleRowDataSerializer(
+            single_row_data, many=True, context={"request": request})
+
+        # info pages
+        info_pages = Pages.objects.filter(
+            Q(type='INFO'), Q(is_active=True)).order_by('-created_at')
+        info_pages_serializer = PagesSerializer(
+            info_pages, many=True, context={"request": request})
+
+        # Customer Service pages
+        customer_service_pages = Pages.objects.filter(
+            Q(type='CS'), Q(is_active=True)).order_by('-created_at')
+        customer_service_pages_serializer = PagesSerializer(
+            customer_service_pages, many=True, context={"request": request})
+
+        # faqs datas
+        # faqs = FAQ.objects.filter(is_active=True).order_by('-created_at')
+        # faqs_serializer = FaqSerializer(
+        #     faqs, many=True, context={"request": request})
+
+        return Response({
+            "single_row_data_serializer": single_row_data_serializer.data,
+            "info_pages": info_pages_serializer.data,
+            "customer_service": customer_service_pages_serializer.data,
+            # "faqs_serializer": faqs_serializer.data
+        })
+    
+class FaqDataAPIView(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, request):
+        faqs = FAQ.objects.filter(is_active=True).order_by('-created_at')
+        faqs_serializer = FaqSerializer(
+            faqs, many=True, context={"request": request})
+
+        return Response({
+            "faqs_serializer": faqs_serializer.data
+        })
 
 class GamingDataAPIView(APIView):
     permission_classes = (AllowAny,)

@@ -148,6 +148,14 @@ class NavbarDataAPIView(APIView):
         single_row_data_serializer = SingleRowDataSerializer(
             single_row_data, many=True, context={"request": request})
 
+        return Response({
+            "single_row_data_serializer": single_row_data_serializer.data,
+        })
+    
+class FooterDataAPIView(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, request):
         # info pages
         info_pages = Pages.objects.filter(
             Q(type='INFO'), Q(is_active=True)).order_by('-created_at')
@@ -166,7 +174,6 @@ class NavbarDataAPIView(APIView):
         #     faqs, many=True, context={"request": request})
 
         return Response({
-            "single_row_data_serializer": single_row_data_serializer.data,
             "info_pages": info_pages_serializer.data,
             "customer_service": customer_service_pages_serializer.data,
             # "faqs_serializer": faqs_serializer.data

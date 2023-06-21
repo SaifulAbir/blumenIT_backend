@@ -3,6 +3,8 @@ from .views import *
 
 urlpatterns = [
     path('home-data/', HomeDataAPIView.as_view()),
+    path('navbar-data/', NavbarDataAPIView.as_view()),
+    path('faq-data/', FaqDataAPIView.as_view()),
     path('contact-us/', ContactUsAPIView.as_view()),
     path('about-us/', AboutUsAPIView.as_view()),
     path('product-list-for-home-compare/',

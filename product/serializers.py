@@ -770,7 +770,7 @@ class ProductDetailsSerializer(serializers.ModelSerializer):
 
     def get_related_products(self, obj):
         selected_related_products = Product.objects.filter(
-            category=obj.category.id, status='PUBLISH').exclude(id=obj.id).order_by('-sell_count')
+            category=obj.category.id, status='PUBLISH').exclude(id=obj.id).order_by('-sell_count')[:8]
         return ProductListBySerializer(selected_related_products, many=True, context={'request': self.context['request']}).data
 
     def get_product_warranties(self, obj):

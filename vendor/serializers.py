@@ -40,69 +40,128 @@ class SellerCreateSerializer(serializers.ModelSerializer):
                   'email', 'logo', 'is_active', 'password']
 
     def create(self, validated_data):
-        try:
-            email_get = validated_data.pop('email')
-            email_get_data = email_get.lower()
-            if email_get:
-                email_get_for_check = Seller.objects.filter(
-                    email=email_get.lower())
-                if email_get_for_check:
-                    raise ValidationError('Email already exists')
-            phone_get = validated_data.pop('phone')
-            phone_get_data = phone_get.lower()
-            if phone_get:
-                phone_get_for_check = Seller.objects.filter(
-                    phone=phone_get.lower())
-                if phone_get_for_check:
-                    raise ValidationError('Phone already exists')
-            seller_instance = Seller.objects.create(**validated_data, phone=phone_get_data,
-                                                    email=email_get_data)
+        email_get = validated_data.get('email')
+        phone_get = validated_data.get('phone')
 
-            try:
-                user_obj = User.objects.get(
-                    Q(email=email_get_data) | Q(phone=phone_get_data))
-            except User.DoesNotExist:
-                user_obj = None
+        email_exists = Seller.objects.filter(email=email_get.lower()).exists()
+        phone_exists = Seller.objects.filter(phone=phone_get.lower()).exists()
 
-            if not user_obj:
-                # create seller user
-                name = validated_data.pop('name')
-                password = validated_data.pop('password')
-                user = User.objects.create(
-                    name=name,
-                    email=email_get_data,
-                    phone=phone_get_data,
-                    username=email_get_data,
-                    is_seller=True
-                )
+        if email_exists and phone_exists:
+            raise serializers.ValidationError("Email and phone must be unique.")
+        elif email_exists:
+            raise serializers.ValidationError("Email already exists.")
+        elif phone_exists:
+            raise serializers.ValidationError("Phone number already exists.")
 
-                user.is_active = True
-                user.set_password(password)
-                user.save()
+        name = validated_data.get('name')
+        password = validated_data.get('password')
 
-                seller_instance.seller_user = user
-                seller_instance.save()
+        # Create the seller instance
+        seller_instance = Seller.objects.create(
+            name=name,
+            address=validated_data.get('address'),
+            phone=phone_get,
+            email=email_get,
+            password=password,
+            logo=validated_data.get('logo'),
+            is_active=validated_data.get('is_active')
+        )
 
-                subject = "New Vendor credential."
-                html_message = render_to_string('seller_email.html', {
-                                                'username': name, 'email': email_get_data, 'password': password})
+        # Create the seller user
+        user = User.objects.create(
+            name=name,
+            email=email_get,
+            phone=phone_get,
+            username=email_get,
+            is_seller=True
+        )
 
-                send_mail(
-                    subject=subject,
-                    message=None,
-                    from_email=settings.EMAIL_HOST_USER,
-                    recipient_list=[email_get_data],
-                    html_message=html_message
-                )
-            else:
-                if user_obj.email == email_get_data:
-                    return Response({"details": "Email already exists"}, status=status.HTTP_400_BAD_REQUEST)
-                if user_obj.phone == phone_get_data:
-                    return Response({"details": "Phone number already exists"}, status=status.HTTP_400_BAD_REQUEST)
+        user.is_active = True
+        user.set_password(password)
+        user.save()
 
-            return seller_instance
-        except:
-            return Response({"details": "Something went wrong!"}, status=status.HTTP_400_BAD_REQUEST)
+        seller_instance.seller_user = user
+        seller_instance.save()
+
+        subject = "New Vendor credential."
+        html_message = render_to_string('seller_email.html', {
+            'username': name, 'email': email_get, 'password': password
+        })
+
+        send_mail(
+            subject=subject,
+            message=None,
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[email_get],
+            html_message=html_message
+        )
+
+        return seller_instance
+
+    # def create(self, validated_data):
+    #     try:
+    #         email_get = validated_data.pop('email')
+    #         email_get_data = email_get.lower()
+    #         if email_get:
+    #             email_get_for_check = Seller.objects.filter(
+    #                 email=email_get.lower())
+    #             if email_get_for_check:
+    #                 raise ValidationError('Email already exists')
+    #         phone_get = validated_data.pop('phone')
+    #         phone_get_data = phone_get.lower()
+    #         if phone_get:
+    #             phone_get_for_check = Seller.objects.filter(
+    #                 phone=phone_get.lower())
+    #             if phone_get_for_check:
+    #                 raise ValidationError('Phone already exists')
+    #         seller_instance = Seller.objects.create(**validated_data, phone=phone_get_data,
+    #                                                 email=email_get_data)
+    #
+    #         try:
+    #             user_obj = User.objects.get(
+    #                 Q(email=email_get_data) | Q(phone=phone_get_data))
+    #         except User.DoesNotExist:
+    #             user_obj = None
+    #
+    #         if not user_obj:
+    #             # create seller user
+    #             name = validated_data.pop('name')
+    #             password = validated_data.pop('password')
+    #             user = User.objects.create(
+    #                 name=name,
+    #                 email=email_get_data,
+    #                 phone=phone_get_data,
+    #                 username=email_get_data,
+    #                 is_seller=True
+    #             )
+    #
+    #             user.is_active = True
+    #             user.set_password(password)
+    #             user.save()
+    #
+    #             seller_instance.seller_user = user
+    #             seller_instance.save()
+    #
+    #             subject = "New Vendor credential."
+    #             html_message = render_to_string('seller_email.html', {
+    #                                             'username': name, 'email': email_get_data, 'password': password})
+    #
+    #             send_mail(
+    #                 subject=subject,
+    #                 message=None,
+    #                 from_email=settings.EMAIL_HOST_USER,
+    #                 recipient_list=[email_get_data],
+    #                 html_message=html_message
+    #             )
+    #         else:
+    #             if user_obj.email == email_get_data:
+    #                 return Response({"details": "Email already exists"}, status=status.HTTP_400_BAD_REQUEST)
+    #             if user_obj.phone == phone_get_data:
+    #                 return Response({"details": "Phone number already exists"}, status=status.HTTP_400_BAD_REQUEST)
+    #
+    #         return seller_instance
+    #     except:
+    #         return Response({"details": "Something went wrong!"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SellerUpdateSerializer(serializers.ModelSerializer):

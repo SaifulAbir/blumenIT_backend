@@ -519,7 +519,7 @@ class ProductSearchAPI(ListAPIView):
         category = request.GET.get('category_id')
 
         queryset = Product.objects.filter(
-            status='PUBLISH').order_by('-created_at')
+            status='PUBLISH', is_active=True).order_by('-created_at')
 
         if query:
             queryset = queryset.filter(Q(title__icontains=query))

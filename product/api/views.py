@@ -528,9 +528,11 @@ class ProductSearchAPI(ListAPIView):
                 title_matches = [(product, fuzz.ratio(query, product.title))
                                  for product in queryset]
                 title_matches.sort(key=lambda x: x[1], reverse=True)
-                top_match = title_matches[0][0]
-                queryset = queryset.filter(
-                    title__icontains=top_match.title)
+                if title_matches:
+                    top_match = title_matches[0][0]
+                    queryset = queryset.filter(title__icontains=top_match.title)
+                else:
+                    queryset = queryset.none()
 
         if category:
             queryset = queryset.filter(category__id=category)
